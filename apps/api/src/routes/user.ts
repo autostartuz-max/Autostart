@@ -36,17 +36,29 @@ function shuffle<T>(arr: T[]): T[] {
 userRouter.post(
   '/auth/telegram',
   ah(async (req, res) => {
-    let tgId = 'dev-user';
-    let firstName = 'Demo foydalanuvchi';
+    let tgId: string | null = null;
+    let firstName = 'Foydalanuvchi';
     let avatarUrl: string | null = null;
 
     const initData: string = req.body?.initData || '';
-    if (!DEV_AUTH && BOT_TOKEN) {
+
+    // 1) initData bo'lsa — Telegram imzosini tekshiramiz (haqiqiy foydalanuvchi)
+    if (initData && BOT_TOKEN) {
       const { ok, user } = verifyTelegramInitData(initData, BOT_TOKEN);
-      if (!ok || !user) return res.status(401).json({ error: 'Telegram imzosi yaroqsiz' });
-      tgId = String(user.id);
-      firstName = user.first_name || 'Foydalanuvchi';
-      avatarUrl = user.photo_url || null;
+      if (ok && user) {
+        tgId = String(user.id);
+        firstName = user.first_name || 'Foydalanuvchi';
+        avatarUrl = user.photo_url || null;
+      } else if (!DEV_AUTH) {
+        return res.status(401).json({ error: 'Telegram imzosi yaroqsiz' });
+      }
+    }
+
+    // 2) Telegram foydalanuvchisi aniqlanmadi — DEV rejimda demo, aks holda rad etamiz
+    if (!tgId) {
+      if (!DEV_AUTH) return res.status(401).json({ error: 'Telegram maʼlumoti yoʻq' });
+      tgId = 'dev-user';
+      firstName = 'Demo foydalanuvchi';
     }
 
     const user = await prisma.user.upsert({

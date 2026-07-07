@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  code      String     @unique // "B", "C", "D"...
+  name      String
+  questions Question[]
+  tickets   Ticket[]
+}
+
+model Topic {
+  id        Int        @id @default(autoincrement())
+  name      String
+  order     Int        @default(0)
+  questions Question[]
+}
+
+model Ticket {
+  id         Int        @id @default(autoincrement())
+  name       String
+  order      Int        @default(0)
+  categoryId Int?
+  category   Category?  @relation(fields: [categoryId], references: [id])
+  questions  Question[]
+}
+
+model Question {
+  id          Int          @id @default(autoincrement())
+  categoryId  Int?
+  category    Category?    @relation(fields: [categoryId], references: [id])
+  topicId     Int?
+  topic       Topic?       @relation(fields: [topicId], references: [id])
+  ticketId    Int?
+  ticket      Ticket?      @relation(fields: [ticketId], references: [id])
+  textLat     String
+  textCyr     String       @default("")
+  imageUrl    String?
+  explanation String       @default("")
+  ruleRef     String?
+  difficulty  Int          @default(1)
+  isNumeric   Boolean      @default(false)
+  isTricky    Boolean      @default(false)
+  status      String       @default("published") // draft | published
+  createdAt   DateTime     @default(now())
+  options     Option[]
+  answers     UserAnswer[]
+  bookmarks   Bookmark[]
+  complaints  Complaint[]
+}
+
+model Option {
+  id          Int      @id @default(autoincrement())
+  questionId  Int
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  textLat     String
+  textCyr     String   @default("")
+  isCorrect   Boolean  @default(false)
+  wrongReason String?
+  order       Int      @default(0)
+}
+
+model User {
+  id         Int          @id @default(autoincrement())
+  tgId       String       @unique
+  firstName  String       @default("Foydalanuvchi")
+  avatarUrl  String?
+  lang       String       @default("uz")
+  alphabet   String       @default("lat") // lat | cyr
+  category   String       @default("B")
+  examDate   DateTime?
+  createdAt  DateTime     @default(now())
+  answers    UserAnswer[]
+  bookmarks  Bookmark[]
+  complaints Complaint[]
+}
+
+model UserAnswer {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  isCorrect  Boolean
+  chosen     String   @default("[]") // JSON array of option ids
+  timeMs     Int      @default(0)
+  answeredAt DateTime @default(now())
+}
+
+model Bookmark {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, questionId])
+}
+
+model Complaint {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  reason     String
+  status     String   @default("new") // new | reviewing | resolved
+  createdAt  DateTime @default(now())
+}
+
+model RoadSign {
+  id          Int     @id @default(autoincrement())
+  category    String
+  name        String
+  imageUrl    String?
+  description String  @default("")
+}
+
+model AdminUser {
+  id           Int    @id @default(autoincrement())
+  login        String @unique
+  passwordHash String
+  role         String @default("admin")
+}

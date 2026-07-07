@@ -1,0 +1,21 @@
+# Render Blueprint — YHQ Test (bitta web xizmat: API + Mini App + Admin)
+# Ma'lumotlar bazasi: Neon PostgreSQL (tashqarida, DATABASE_URL qo'lda beriladi)
+services:
+  - type: web
+    name: yhq-test
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL # Neon PostgreSQL ulanish satri (qo'lda kiritiladi)
+        sync: false
+      - key: BOT_TOKEN # Telegram bot tokeni (real auth uchun)
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DEV_AUTH # 1 = demo (hamma kiradi), 0 = real Telegram auth
+        value: "1"
+      - key: NODE_VERSION
+        value: "22"

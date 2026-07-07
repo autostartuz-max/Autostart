@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 import { haptic } from '../telegram';
-import { speak, stopSpeak } from '../tts';
 import type { Question, Option } from '../types';
 
 interface Answered {
@@ -29,6 +28,70 @@ export default function TestPlayer() {
   const [elapsed, setElapsed] = useState(0);
   const startRef = useRef<number>(Date.now());
   const curRef = useRef<HTMLButtonElement | null>(null);
+
+  // ---- Ovozli pleyer ----
+  const voiceRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [showPlayer, setShowPlayer] = useState(false);
+  const [aprog, setAprog] = useState(0);
+
+  const stopVoice = () => {
+    const a = voiceRef.current;
+    if (a) {
+      try {
+        a.pause();
+      } catch {
+        /* ignore */
+      }
+    }
+    voiceRef.current = null;
+    setPlaying(false);
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const playVoice = (text: string) => {
+    if (!text) return;
+    stopVoice();
+    setAprog(0);
+    setShowPlayer(true);
+    const a = new Audio(`/api/tts?text=${encodeURIComponent(text.slice(0, 1200))}`);
+    voiceRef.current = a;
+    a.addEventListener('timeupdate', () => setAprog(a.duration ? a.currentTime / a.duration : 0));
+    a.addEventListener('play', () => setPlaying(true));
+    a.addEventListener('pause', () => setPlaying(false));
+    a.addEventListener('ended', () => {
+      setPlaying(false);
+      setAprog(1);
+    });
+    a.play().catch(() => {
+      // Fallback: brauzer nutq sintezi
+      try {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'uz-UZ';
+        u.rate = 0.95;
+        window.speechSynthesis?.speak(u);
+        setPlaying(true);
+      } catch {
+        /* ignore */
+      }
+    });
+  };
+
+  const togglePlay = () => {
+    const a = voiceRef.current;
+    if (!a) return;
+    if (a.paused) a.play();
+    else a.pause();
+  };
+
+  const closePlayer = () => {
+    stopVoice();
+    setShowPlayer(false);
+  };
 
   useEffect(() => {
     const params: Record<string, string> = { mode };
@@ -65,11 +128,13 @@ export default function TestPlayer() {
 
   useEffect(() => {
     startRef.current = Date.now();
-    stopSpeak(); // savol almashganda o'qishni to'xtatadi
+    stopVoice(); // savol almashganda ovozni to'xtatadi
+    setShowPlayer(false);
     curRef.current?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx]);
 
-  useEffect(() => () => stopSpeak(), []); // ekrandan chiqqanda to'xtatadi
+  useEffect(() => () => stopVoice(), []); // ekrandan chiqqanda to'xtatadi
 
   if (!questions)
     return (
@@ -158,16 +223,13 @@ export default function TestPlayer() {
     return (correct ? `To‘g‘ri javob: ${correct.textLat}. ` : '') + explainText();
   };
 
+  // Tushuncha — javobni OVOZ bilan tushuntiradi (ko'rinadigan pleyer bilan)
   const learn = () => {
     if (!answered) setLearned((s) => new Set(s).add(q.id));
-    setShowRule(true);
-    speak(spokenExplain()); // Tushuncha — javobni ovoz bilan tushuntiradi
+    playVoice(spokenExplain());
   };
 
-  const closeRule = () => {
-    stopSpeak();
-    setShowRule(false);
-  };
+  const closeRule = () => setShowRule(false);
 
   const toggleBm = async () => {
     try {
@@ -244,7 +306,7 @@ export default function TestPlayer() {
 
       <div className="qtitle">{q.textLat}</div>
       <div className="qcenter">
-        <button className="qspeak" onClick={() => speak(q.textLat)}>🔊 Savolni tinglash</button>
+        <button className="qspeak" onClick={() => playVoice(q.textLat)}>🔊 Savolni tinglash</button>
       </div>
       {q.imageUrl && (
         <div className="qimgwrap">
@@ -262,17 +324,32 @@ export default function TestPlayer() {
         ))}
       </div>
 
+      {showPlayer && (
+        <div className="aplayer">
+          <button className="pp" onClick={togglePlay}>{playing ? '❚❚' : '▶'}</button>
+          <div className={'wave' + (playing ? ' playing' : '')}>
+            {Array.from({ length: 22 }).map((_, i) => (
+              <i
+                key={i}
+                className={i / 22 <= aprog ? 'on' : ''}
+                style={{ animationDelay: `${(i % 11) * 0.06}s` }}
+              />
+            ))}
+          </div>
+          <button className="pp x" onClick={closePlayer}>✕</button>
+        </div>
+      )}
+
       <div className="qbar">
         <button className="pill" onClick={() => setShowRule(true)}>ⓘ Qoidasi</button>
-        <button className="pill learn" onClick={learn}>▶ Tushuncha</button>
+        <button className="pill learn" onClick={learn}>🔊 Tushuncha</button>
       </div>
 
       {showRule && (
         <div className="modal" onClick={closeRule}>
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-head">
-              <h3>📘 Tushuncha / Qoida</h3>
-              <button className="listen" onClick={() => speak(spokenExplain())}>🔊 Tinglash</button>
+              <h3>ⓘ Izoh</h3>
             </div>
             <p>{explainText()}</p>
             {q.ruleRef && <div className="ref">Manba: {q.ruleRef}</div>}

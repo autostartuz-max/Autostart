@@ -293,7 +293,6 @@ export default function TestPlayer() {
         <div className="grp">
           <button className={'sq' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm}>🔖</button>
           <button className="sq" onClick={share}>↗</button>
-          <button className="sq" onClick={() => playVoice(q.textLat)} title="Savolni tinglash">🔊</button>
         </div>
         <div className="ttime">🕐 {mm}:{ss}</div>
         <div className="grp">

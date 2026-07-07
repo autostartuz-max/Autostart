@@ -1,0 +1,16 @@
+name: keep-alive
+
+# Serverni "uxlab qolmasligi" uchun har 10 daqiqada ping yuboradi
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # qo'lda ham ishga tushirish mumkin
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Serverni tirik ushlash (health ping)
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 https://autostart-3x6v.onrender.com/api/health || echo "000")
+          echo "Health ping natijasi: HTTP $code"

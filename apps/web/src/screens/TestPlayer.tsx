@@ -9,6 +9,29 @@ interface Answered {
   isCorrect: boolean;
 }
 
+const SET_KEY = 'yhq_test_settings';
+const SET_DEFAULTS = {
+  autoNextCorrect: true,
+  autoNextWrong: false,
+  noAnim: false,
+  shuffle: true,
+  fontSize: 'md', // sm | md | lg
+  fontStyle: 'soft', // soft | classic
+  lang: 'uz',
+};
+function loadSettings() {
+  try {
+    return { ...SET_DEFAULTS, ...JSON.parse(localStorage.getItem(SET_KEY) || '{}') };
+  } catch {
+    return { ...SET_DEFAULTS };
+  }
+}
+function stableShuffle<T extends { id: number }>(arr: T[], seed: number): T[] {
+  return [...arr].sort((a, b) => (((a.id * 97 + seed) % 100) - ((b.id * 97 + seed) % 100)));
+}
+const FS_LABEL: Record<string, string> = { sm: 'Kichik', md: "O'rtacha", lg: 'Katta' };
+const FF_LABEL: Record<string, string> = { soft: 'Yumshoq', classic: 'Klassik' };
+
 export default function TestPlayer() {
   const nav = useNavigate();
   const [sp] = useSearchParams();
@@ -34,6 +57,19 @@ export default function TestPlayer() {
   const [playing, setPlaying] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
   const [aprog, setAprog] = useState(0);
+  const [settings, setSettings] = useState<any>(() => loadSettings());
+  const [showSettings, setShowSettings] = useState(false);
+  const setS = (k: string, v: any) => setSettings((s: any) => ({ ...s, [k]: v }));
+  const saveSettings = () => {
+    try {
+      localStorage.setItem(SET_KEY, JSON.stringify(settings));
+    } catch {
+      /* ignore */
+    }
+    setShowSettings(false);
+  };
+  const cycleFont = () => setS('fontSize', settings.fontSize === 'sm' ? 'md' : settings.fontSize === 'md' ? 'lg' : 'sm');
+  const cycleStyle = () => setS('fontStyle', settings.fontStyle === 'soft' ? 'classic' : 'soft');
 
   const stopVoice = () => {
     const a = voiceRef.current;
@@ -201,6 +237,7 @@ export default function TestPlayer() {
   const isLearned = learned.has(q.id);
   const reveal = answered || isLearned;
   const locked = answered || isLearned;
+  const displayOpts = settings.shuffle ? stableShuffle(q.options, q.id) : q.options;
 
   const shown = examMode ? seconds : elapsed;
   const mm = String(Math.floor(shown / 60)).padStart(2, '0');
@@ -214,6 +251,13 @@ export default function TestPlayer() {
       const r = await api.answer({ questionId: q.id, chosen: [optId], timeMs });
       haptic(r.isCorrect ? 'success' : 'error');
       setAnswers((a) => ({ ...a, [q.id]: { chosen: [optId], isCorrect: r.isCorrect } }));
+      // Sozlamaga qarab keyingi savolga avtomatik o'tish
+      const auto = r.isCorrect ? settings.autoNextCorrect : settings.autoNextWrong;
+      if (auto) {
+        const go = () => setIdx((cur) => (cur < questions.length - 1 ? cur + 1 : cur));
+        if (settings.noAnim) go();
+        else setTimeout(go, 850);
+      }
     } catch {
       /* ignore */
     }
@@ -283,7 +327,7 @@ export default function TestPlayer() {
   };
 
   return (
-    <div className="tplayer">
+    <div className={`tplayer fs-${settings.fontSize} ff-${settings.fontStyle}`}>
       <div className="tbar">
         <button className="tbtn" onClick={() => nav('/')}>← Orqaga</button>
         <button className="tbtn fin" onClick={() => setFinished(true)}>Yakunlash</button>
@@ -296,7 +340,7 @@ export default function TestPlayer() {
         </div>
         <div className="ttime">🕐 {mm}:{ss}</div>
         <div className="grp">
-          <button className="sq" onClick={() => nav('/profil')}>⚙</button>
+          <button className="sq" onClick={() => setShowSettings(true)}>⚙</button>
           <button className="sq" onClick={report}>⚑</button>
         </div>
       </div>
@@ -318,7 +362,7 @@ export default function TestPlayer() {
       )}
 
       <div className="fopts">
-        {q.options.map((o, i) => (
+        {displayOpts.map((o, i) => (
           <button key={o.id} className={foptClass(o)} disabled={locked} onClick={() => choose(o.id)}>
             <span className="fb">F{i + 1}</span>
             <span className="ftext">{o.textLat}</span>
@@ -359,6 +403,54 @@ export default function TestPlayer() {
             <button className="btn" style={{ marginTop: 16 }} onClick={closeRule}>
               Yopish
             </button>
+          </div>
+        </div>
+      )}
+
+      {showSettings && (
+        <div className="modal" onClick={() => setShowSettings(false)}>
+          <div className="sheet settings-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="grip" />
+            <div className="set-row">
+              <span className="set-ic green">⏭️</span>
+              <span className="set-label">To‘g‘ri javobda avtomatik o‘tish</span>
+              <button className={'tog' + (settings.autoNextCorrect ? ' on' : '')} onClick={() => setS('autoNextCorrect', !settings.autoNextCorrect)} />
+            </div>
+            <div className="set-row">
+              <span className="set-ic red">⏭️</span>
+              <span className="set-label">Xato javobda avtomatik o‘tish</span>
+              <button className={'tog' + (settings.autoNextWrong ? ' on' : '')} onClick={() => setS('autoNextWrong', !settings.autoNextWrong)} />
+            </div>
+            <div className="set-row">
+              <span className="set-ic purple">⚡</span>
+              <span className="set-label">Animatsiyasiz o‘tish</span>
+              <button className={'tog' + (settings.noAnim ? ' on' : '')} onClick={() => setS('noAnim', !settings.noAnim)} />
+            </div>
+            <div className="set-row">
+              <span className="set-ic amber">🔀</span>
+              <span className="set-label">Variantlarni aralashtirish</span>
+              <button className={'tog' + (settings.shuffle ? ' on' : '')} onClick={() => setS('shuffle', !settings.shuffle)} />
+            </div>
+            <div className="set-row" onClick={cycleFont}>
+              <span className="set-ic purple set-t">T</span>
+              <span className="set-label">Shrift o‘lchami</span>
+              <span className="set-val">{FS_LABEL[settings.fontSize]}</span>
+            </div>
+            <div className="set-row" onClick={cycleStyle}>
+              <span className="set-ic blue set-t"><b>T</b></span>
+              <span className="set-label">Shrift uslubi</span>
+              <span className="set-val">{FF_LABEL[settings.fontStyle]}</span>
+            </div>
+            <div className="set-row">
+              <span className="set-ic blue">🌐</span>
+              <span className="set-label">Ilova tili</span>
+              <span className="set-val">O‘zbekcha</span>
+            </div>
+            <div className="set-row" onClick={() => { setShowSettings(false); report(); }}>
+              <span className="set-ic red">🚩</span>
+              <span className="set-label">Xatolik haqida xabar berish</span>
+            </div>
+            <button className="save-btn" onClick={saveSettings}>Saqlash</button>
           </div>
         </div>
       )}

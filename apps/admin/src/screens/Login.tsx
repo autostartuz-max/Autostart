@@ -25,7 +25,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="login-wrap">
       <form className="login" onSubmit={submit}>
-        <h1>YHQ Admin</h1>
+        <h1>Autostart Admin</h1>
         <p>Boshqaruv paneliga kirish</p>
         <div className="field">
           <label>Login</label>

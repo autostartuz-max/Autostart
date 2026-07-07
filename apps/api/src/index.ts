@@ -41,6 +41,6 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ YHQ API ishga tushdi: http://localhost:${PORT}  (DEV_AUTH=${DEV_AUTH})`);
+  console.log(`✅ Autostart API ishga tushdi: http://localhost:${PORT}  (DEV_AUTH=${DEV_AUTH})`);
   if (fs.existsSync(webDist)) console.log('   Frontend (web + admin) shu serverdan xizmat qilinmoqda.');
 });

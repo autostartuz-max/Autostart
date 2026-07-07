@@ -17,7 +17,7 @@ export default function App() {
     <div className="layout">
       <aside className="side">
         <div className="logo">
-          YHQ <span>Admin</span>
+          Autostart <span>Admin</span>
         </div>
         <nav className="nav">
           <NavLink to="/" end>Boshqaruv</NavLink>

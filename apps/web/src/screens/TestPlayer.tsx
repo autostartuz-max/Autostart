@@ -186,7 +186,7 @@ export default function TestPlayer() {
 
   const share = () => {
     const text = q.textLat;
-    if ((navigator as any).share) (navigator as any).share({ title: 'YHQ Test', text }).catch(() => {});
+    if ((navigator as any).share) (navigator as any).share({ title: 'Autostart test', text }).catch(() => {});
     else window.alert('Ulashish: ' + text);
   };
 

@@ -198,38 +198,22 @@ export default function TestPlayer() {
       </div>
     );
 
-  if (finished) {
-    const total = questions.length;
-    const correct = questions.filter((qq) => answers[qq.id]?.isCorrect).length;
-    const answeredCount = questions.filter((qq) => answers[qq.id]).length;
-    const pct = total ? Math.round((correct / total) * 100) : 0;
-    return (
-      <div className="result">
-        <div className="big">{pct}%</div>
-        <div className="sub">
-          {total} tadan {correct} ta to‘g‘ri
-          <br />
-          ({answeredCount} ta javob berildi)
-        </div>
-        <button
-          className="btn"
-          onClick={() => {
-            setFinished(false);
-            setIdx(0);
-            setAnswers({});
-            setLearned(new Set());
-            startRef.current = Date.now();
-            if (examMode) setSeconds(Math.max(total, 10) * 60);
-            else setElapsed(0);
-          }}
-        >
-          Qaytadan yechish
-        </button>
-        <div style={{ height: 10 }} />
-        <button className="btn sec" onClick={() => nav('/')}>Bosh sahifa</button>
-      </div>
-    );
-  }
+  const retry = () => {
+    setFinished(false);
+    setIdx(0);
+    setAnswers({});
+    setLearned(new Set());
+    startRef.current = Date.now();
+    if (examMode) setSeconds(Math.max(questions.length, 10) * 60);
+    else setElapsed(0);
+  };
+  const rTotal = questions.length;
+  const rCorrect = questions.filter((qq) => answers[qq.id]?.isCorrect).length;
+  const rWrong = questions.filter((qq) => answers[qq.id] && !answers[qq.id].isCorrect).length;
+  const rSkip = rTotal - rCorrect - rWrong;
+  const rPct = rTotal ? Math.round((rCorrect / rTotal) * 100) : 0;
+  const rPass = rPct >= 90;
+  const RING_C = 2 * Math.PI * 52;
 
   const q = questions[idx];
   const ans = answers[q.id];
@@ -455,6 +439,72 @@ export default function TestPlayer() {
               <span className="set-label">Xatolik haqida xabar berish</span>
             </div>
             <button className="save-btn" onClick={saveSettings}>Saqlash</button>
+          </div>
+        </div>
+      )}
+
+      {finished && (
+        <div className="modal" onClick={() => setFinished(false)}>
+          <div className="sheet result-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="grip" />
+            <h3 className="rtitle">Natijalar</h3>
+            <div className="ring-wrap">
+              <svg viewBox="0 0 120 120" className="ring">
+                <circle cx="60" cy="60" r="52" className="ring-bg" />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  className={'ring-fg ' + (rPass ? 'pass' : 'fail')}
+                  strokeDasharray={RING_C}
+                  strokeDashoffset={RING_C * (1 - rPct / 100)}
+                />
+              </svg>
+              <div className="ring-txt">
+                <div className={'ring-pct ' + (rPass ? 'pass' : 'fail')}>{rPct}%</div>
+                <div className="ring-st">{rPass ? "O‘tdi" : "O‘tmadi"}</div>
+              </div>
+            </div>
+            <div className="rstats">
+              <div className="rstat ok">
+                <div className="rs-ic">✓</div>
+                <div className="rs-n">{rCorrect}</div>
+                <div className="rs-l">To‘g‘ri</div>
+              </div>
+              <div className="rstat no">
+                <div className="rs-ic">✕</div>
+                <div className="rs-n">{rWrong}</div>
+                <div className="rs-l">Noto‘g‘ri</div>
+              </div>
+              <div className="rstat sk">
+                <div className="rs-ic">—</div>
+                <div className="rs-n">{rSkip}</div>
+                <div className="rs-l">Javobsiz</div>
+              </div>
+            </div>
+            <div className="rgrid-label">Savollar</div>
+            <div className="rgrid">
+              {questions.map((qq, i) => {
+                const a = answers[qq.id];
+                const cls = a ? (a.isCorrect ? 'g' : 'r') : '';
+                return (
+                  <span
+                    key={qq.id}
+                    className={'rq ' + cls}
+                    onClick={() => {
+                      setFinished(false);
+                      setIdx(i);
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                );
+              })}
+            </div>
+            <div className="rbtns">
+              <button className="rbtn sec" onClick={retry}>↺ Qayta</button>
+              <button className="rbtn main" onClick={() => nav('/')}>Yakunlash</button>
+            </div>
           </div>
         </div>
       )}

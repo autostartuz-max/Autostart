@@ -210,6 +210,11 @@ userRouter.get(
       return res.json(await getMistakes(userId));
     }
 
+    // Mashq: xato qilgan YOKI hali to'g'ri yechilmagan savollar (Test yechish tugmasi)
+    if (mode === 'practice') {
+      return res.json(await getPractice(userId));
+    }
+
     let questions = await prisma.question.findMany({
       where: base,
       include: questionInclude,
@@ -253,6 +258,23 @@ userRouter.post(
     res.json({ isCorrect, correctOptionIds: correctIds });
   })
 );
+
+// To'g'ri yechilmagan (xato yoki umuman javob berilmagan) savollar
+async function getPractice(userId: number) {
+  const all = await prisma.question.findMany({
+    where: { status: 'published' },
+    include: questionInclude,
+    orderBy: { id: 'asc' },
+  });
+  const answers = await prisma.userAnswer.findMany({
+    where: { userId },
+    orderBy: { answeredAt: 'desc' },
+    select: { questionId: true, isCorrect: true },
+  });
+  const latest = new Map<number, boolean>();
+  for (const a of answers) if (!latest.has(a.questionId)) latest.set(a.questionId, a.isCorrect);
+  return all.filter((q) => latest.get(q.id) !== true);
+}
 
 async function getMistakes(userId: number) {
   const answers = await prisma.userAnswer.findMany({

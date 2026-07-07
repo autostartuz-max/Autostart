@@ -81,7 +81,7 @@ export default function Home() {
       </div>
 
       {/* Test yechish */}
-      <div className="hero2" onClick={() => nav('/test?mode=mistakes')}>
+      <div className="hero2" onClick={() => nav('/test?mode=practice')}>
         <div className="h2t">
           <b>Test yechish</b>
           <span>Siz xato qilgan yoki yechilmagan savollar</span>

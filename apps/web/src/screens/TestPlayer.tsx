@@ -152,10 +152,16 @@ export default function TestPlayer() {
   const explainText = () =>
     q.explanation || 'Bu savol uchun izoh hali kiritilmagan.';
 
+  // Ovozda aytiladigan to'liq tushuntirish: to'g'ri javob + izoh
+  const spokenExplain = () => {
+    const correct = q.options.find((o) => o.isCorrect);
+    return (correct ? `To‘g‘ri javob: ${correct.textLat}. ` : '') + explainText();
+  };
+
   const learn = () => {
     if (!answered) setLearned((s) => new Set(s).add(q.id));
     setShowRule(true);
-    speak(explainText()); // Tushuncha — ovoz orqali o'qiydi
+    speak(spokenExplain()); // Tushuncha — javobni ovoz bilan tushuntiradi
   };
 
   const closeRule = () => {
@@ -266,7 +272,7 @@ export default function TestPlayer() {
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-head">
               <h3>📘 Tushuncha / Qoida</h3>
-              <button className="listen" onClick={() => speak(explainText())}>🔊 Tinglash</button>
+              <button className="listen" onClick={() => speak(spokenExplain())}>🔊 Tinglash</button>
             </div>
             <p>{explainText()}</p>
             {q.ruleRef && <div className="ref">Manba: {q.ruleRef}</div>}

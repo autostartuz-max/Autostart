@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import { prisma } from '../prisma';
 import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser } from '../auth';
@@ -67,6 +68,36 @@ userRouter.post(
       create: { tgId, firstName, avatarUrl },
     });
     res.json({ token: signUserToken(user.id), user });
+  })
+);
+
+/* ---------- Ovozli o'qish (Microsoft Edge neural TTS, o'zbek ovozi) ---------- */
+userRouter.get(
+  '/tts',
+  ah(async (req, res) => {
+    const text = String(req.query.text || '').trim().slice(0, 1200);
+    if (!text) return res.status(400).json({ error: 'Matn yoʻq' });
+    const voice = String(req.query.voice || '') === 'male' ? 'uz-UZ-SardorNeural' : 'uz-UZ-MadinaNeural';
+    try {
+      const tts = new MsEdgeTTS();
+      await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+      const result: any = tts.toStream(text);
+      const stream = result.audioStream || result;
+      const chunks: Buffer[] = [];
+      await new Promise<void>((resolve, reject) => {
+        stream.on('data', (c: Buffer) => chunks.push(Buffer.from(c)));
+        stream.on('end', () => resolve());
+        stream.on('close', () => resolve());
+        stream.on('error', reject);
+      });
+      const audio = Buffer.concat(chunks);
+      if (!audio.length) return res.status(502).json({ error: 'Audio boʻsh' });
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.send(audio);
+    } catch (e: any) {
+      res.status(502).json({ error: 'TTS xatosi: ' + (e?.message || e) });
+    }
   })
 );
 

@@ -1,26 +1,50 @@
-// Matnni ovoz orqali o'qish (Web Speech API — brauzerga o'rnatilgan)
-export function ttsSupported(): boolean {
-  return typeof window !== 'undefined' && 'speechSynthesis' in window;
-}
+// Ovozli o'qish — serverdagi Microsoft Edge neural TTS (real o'zbek ovozi),
+// ishlamasa brauzer nutq sintezi (fallback)
+let audio: HTMLAudioElement | null = null;
 
-export function speak(text: string) {
-  if (!ttsSupported() || !text) return false;
-  const synth = window.speechSynthesis;
-  synth.cancel(); // avvalgi o'qishni to'xtatadi
-  const u = new SpeechSynthesisUtterance(text);
-  const voices = synth.getVoices();
-  // O'zbek ovozini qidiramiz, bo'lmasa rus, bo'lmasa standart
-  const uz = voices.find((v) => v.lang?.toLowerCase().startsWith('uz'));
-  const ru = voices.find((v) => v.lang?.toLowerCase().startsWith('ru'));
-  const chosen = uz || ru || null;
-  if (chosen) u.voice = chosen;
-  u.lang = chosen?.lang || 'uz-UZ';
-  u.rate = 0.95;
-  u.pitch = 1;
-  synth.speak(u);
+export function ttsSupported(): boolean {
   return true;
 }
 
+export function speak(text: string, voice: 'female' | 'male' = 'female') {
+  if (!text) return;
+  stopSpeak();
+  const v = voice === 'male' ? 'male' : 'female';
+  const url = `/api/tts?voice=${v}&text=${encodeURIComponent(text.slice(0, 1200))}`;
+  try {
+    audio = new Audio(url);
+    audio.play().catch(() => browserFallback(text));
+  } catch {
+    browserFallback(text);
+  }
+}
+
+function browserFallback(text: string) {
+  try {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'uz-UZ';
+    u.rate = 0.95;
+    synth.speak(u);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function stopSpeak() {
-  if (ttsSupported()) window.speechSynthesis.cancel();
+  if (audio) {
+    try {
+      audio.pause();
+    } catch {
+      /* ignore */
+    }
+    audio = null;
+  }
+  try {
+    window.speechSynthesis?.cancel();
+  } catch {
+    /* ignore */
+  }
 }

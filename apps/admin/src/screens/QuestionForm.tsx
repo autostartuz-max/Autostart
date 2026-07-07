@@ -31,6 +31,9 @@ export default function QuestionForm() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [hasAudio, setHasAudio] = useState(false);
+  const [audioBusy, setAudioBusy] = useState(false);
+  const [audioVer, setAudioVer] = useState(0);
 
   useEffect(() => {
     api.categories().then(setCats).catch(() => {});
@@ -47,12 +50,39 @@ export default function QuestionForm() {
         setDifficulty(String(it.difficulty || 1));
         setIsTricky(it.isTricky);
         setIsNumeric(it.isNumeric);
+        setHasAudio(!!it.hasAudio);
         setOptions(
           it.options.map((o: any) => ({ textLat: o.textLat, isCorrect: o.isCorrect, wrongReason: o.wrongReason || '' }))
         );
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onAudioFile = async (file?: File) => {
+    if (!file || !editing) return;
+    setErr('');
+    setAudioBusy(true);
+    try {
+      await api.uploadAudio(Number(id), file);
+      setHasAudio(true);
+      setAudioVer((v) => v + 1);
+    } catch (e: any) {
+      setErr(e.message || 'Ovoz yuklashda xato');
+    } finally {
+      setAudioBusy(false);
+    }
+  };
+  const removeAudio = async () => {
+    setAudioBusy(true);
+    try {
+      await api.deleteAudio(Number(id));
+      setHasAudio(false);
+    } catch (e: any) {
+      setErr(e.message || 'Xato');
+    } finally {
+      setAudioBusy(false);
+    }
+  };
 
   const setOpt = (i: number, patch: Partial<Opt>) =>
     setOptions((os) => os.map((o, j) => (j === i ? { ...o, ...patch } : o)));
@@ -133,8 +163,42 @@ export default function QuestionForm() {
         </div>
 
         <div className="field">
-          <label>Izoh (nega to‘g‘ri / qoida)</label>
+          <label>Izoh / Qoida matni (Qoidasi'da ko‘rsatiladi, Tushuncha ovozda o‘qiydi)</label>
           <textarea className="textarea" value={explanation} onChange={(e) => setExplanation(e.target.value)} />
+        </div>
+
+        <div className="field">
+          <label>Tushuncha ovozi (ixtiyoriy — yuklamasangiz avtomatik o‘zbek ovozida o‘qiladi)</label>
+          {editing ? (
+            <div className="row" style={{ alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              {hasAudio ? (
+                <>
+                  <audio
+                    controls
+                    src={`/api/questions/${id}/audio?v=${audioVer}`}
+                    style={{ height: 36, maxWidth: 240 }}
+                  />
+                  <button className="btn danger" onClick={removeAudio} disabled={audioBusy}>
+                    Ovozni o‘chirish
+                  </button>
+                </>
+              ) : (
+                <span style={{ color: '#8a94a6' }}>Ovoz yuklanmagan — avtomatik TTS o‘qiydi</span>
+              )}
+              <label className="btn sec" style={{ cursor: 'pointer' }}>
+                {audioBusy ? 'Yuklanmoqda…' : hasAudio ? 'Ovozni almashtirish' : '🎙 Ovoz yuklash'}
+                <input
+                  type="file"
+                  accept="audio/*"
+                  style={{ display: 'none' }}
+                  disabled={audioBusy}
+                  onChange={(e) => onAudioFile(e.target.files?.[0])}
+                />
+              </label>
+            </div>
+          ) : (
+            <div style={{ color: '#8a94a6' }}>Avval savolni saqlang — keyin ovoz yuklashingiz mumkin.</div>
+          )}
         </div>
 
         <div className="grid2">

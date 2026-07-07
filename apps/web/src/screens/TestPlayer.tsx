@@ -53,12 +53,11 @@ export default function TestPlayer() {
     }
   };
 
-  const playVoice = (text: string) => {
-    if (!text) return;
+  const playUrl = (url: string, fallbackText?: string) => {
     stopVoice();
     setAprog(0);
     setShowPlayer(true);
-    const a = new Audio(`/api/tts?text=${encodeURIComponent(text.slice(0, 1200))}`);
+    const a = new Audio(url);
     voiceRef.current = a;
     a.addEventListener('timeupdate', () => setAprog(a.duration ? a.currentTime / a.duration : 0));
     a.addEventListener('play', () => setPlaying(true));
@@ -69,8 +68,9 @@ export default function TestPlayer() {
     });
     a.play().catch(() => {
       // Fallback: brauzer nutq sintezi
+      if (!fallbackText) return;
       try {
-        const u = new SpeechSynthesisUtterance(text);
+        const u = new SpeechSynthesisUtterance(fallbackText);
         u.lang = 'uz-UZ';
         u.rate = 0.95;
         window.speechSynthesis?.speak(u);
@@ -79,6 +79,11 @@ export default function TestPlayer() {
         /* ignore */
       }
     });
+  };
+
+  const playVoice = (text: string) => {
+    if (!text) return;
+    playUrl(`/api/tts?text=${encodeURIComponent(text.slice(0, 1200))}`, text);
   };
 
   const togglePlay = () => {
@@ -223,10 +228,11 @@ export default function TestPlayer() {
     return (correct ? `To‘g‘ri javob: ${correct.textLat}. ` : '') + explainText();
   };
 
-  // Tushuncha — javobni OVOZ bilan tushuntiradi (ko'rinadigan pleyer bilan)
+  // Tushuncha — javobni OVOZ bilan tushuntiradi (admin ovozi bo'lsa u, bo'lmasa TTS)
   const learn = () => {
     if (!answered) setLearned((s) => new Set(s).add(q.id));
-    playVoice(spokenExplain());
+    if (q.hasAudio) playUrl(`/api/questions/${q.id}/audio`, spokenExplain());
+    else playVoice(spokenExplain());
   };
 
   const closeRule = () => setShowRule(false);
@@ -287,6 +293,7 @@ export default function TestPlayer() {
         <div className="grp">
           <button className={'sq' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm}>🔖</button>
           <button className="sq" onClick={share}>↗</button>
+          <button className="sq" onClick={() => playVoice(q.textLat)} title="Savolni tinglash">🔊</button>
         </div>
         <div className="ttime">🕐 {mm}:{ss}</div>
         <div className="grp">
@@ -305,9 +312,6 @@ export default function TestPlayer() {
       </div>
 
       <div className="qtitle">{q.textLat}</div>
-      <div className="qcenter">
-        <button className="qspeak" onClick={() => playVoice(q.textLat)}>🔊 Savolni tinglash</button>
-      </div>
       {q.imageUrl && (
         <div className="qimgwrap">
           <img src={q.imageUrl} />

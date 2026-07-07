@@ -101,6 +101,18 @@ userRouter.get(
   })
 );
 
+/* ---------- Savol ovozi (admin yuklagan — Tushuncha uchun, public) ---------- */
+userRouter.get(
+  '/questions/:id/audio',
+  ah(async (req, res) => {
+    const a = await prisma.questionAudio.findUnique({ where: { questionId: Number(req.params.id) } });
+    if (!a) return res.status(404).json({ error: 'Ovoz yoʻq' });
+    res.setHeader('Content-Type', a.mime || 'audio/mpeg');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(Buffer.from(a.data));
+  })
+);
+
 /* ---------- Profil ---------- */
 userRouter.get(
   '/me',

@@ -161,6 +161,33 @@ adminRouter.delete(
   })
 );
 
+/* ---------- Savol ovozi (Tushuncha uchun) ---------- */
+adminRouter.post(
+  '/questions/:id/audio',
+  upload.single('audio'),
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    if (!req.file) return res.status(400).json({ error: 'Fayl yuklanmadi' });
+    await prisma.questionAudio.upsert({
+      where: { questionId: id },
+      update: { data: req.file.buffer, mime: req.file.mimetype || 'audio/mpeg' },
+      create: { questionId: id, data: req.file.buffer, mime: req.file.mimetype || 'audio/mpeg' },
+    });
+    await prisma.question.update({ where: { id }, data: { hasAudio: true } });
+    res.json({ ok: true, hasAudio: true });
+  })
+);
+
+adminRouter.delete(
+  '/questions/:id/audio',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    await prisma.questionAudio.deleteMany({ where: { questionId: id } });
+    await prisma.question.update({ where: { id }, data: { hasAudio: false } });
+    res.json({ ok: true, hasAudio: false });
+  })
+);
+
 /* ---------- Katalog (mavzu / bilet / toifa) ---------- */
 for (const [path, model] of [
   ['topics', 'topic'],

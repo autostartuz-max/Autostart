@@ -48,11 +48,22 @@ model Question {
   isNumeric   Boolean      @default(false)
   isTricky    Boolean      @default(false)
   status      String       @default("published") // draft | published
+  hasAudio    Boolean      @default(false) // Tushuncha uchun ovoz yuklanganmi
   createdAt   DateTime     @default(now())
   options     Option[]
   answers     UserAnswer[]
   bookmarks   Bookmark[]
   complaints  Complaint[]
+  audio       QuestionAudio?
+}
+
+model QuestionAudio {
+  id         Int      @id @default(autoincrement())
+  questionId Int      @unique
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  data       Bytes
+  mime       String   @default("audio/mpeg")
+  createdAt  DateTime @default(now())
 }
 
 model Option {

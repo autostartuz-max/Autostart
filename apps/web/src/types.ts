@@ -17,6 +17,7 @@ export interface Question {
   difficulty: number;
   isNumeric: boolean;
   isTricky: boolean;
+  hasAudio?: boolean;
   options: Option[];
   topic?: { id: number; name: string } | null;
   ticket?: { id: number; name: string } | null;

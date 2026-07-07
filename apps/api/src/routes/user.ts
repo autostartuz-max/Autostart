@@ -292,15 +292,28 @@ async function getMistakes(userId: number) {
   const answers = await prisma.userAnswer.findMany({
     where: { userId },
     orderBy: { answeredAt: 'desc' },
-    select: { questionId: true, isCorrect: true },
+    select: { questionId: true, isCorrect: true, chosen: true },
   });
-  const latest = new Map<number, boolean>();
-  for (const a of answers) if (!latest.has(a.questionId)) latest.set(a.questionId, a.isCorrect);
-  const wrongIds = [...latest.entries()].filter(([, ok]) => !ok).map(([qid]) => qid);
-  if (!wrongIds.length) return [];
-  return prisma.question.findMany({
+  const latest = new Map<number, { ok: boolean; chosen: string }>();
+  for (const a of answers)
+    if (!latest.has(a.questionId)) latest.set(a.questionId, { ok: a.isCorrect, chosen: a.chosen });
+  const wrong = [...latest.entries()].filter(([, v]) => !v.ok);
+  if (!wrong.length) return [];
+  const wrongIds = wrong.map(([qid]) => qid);
+  const questions = await prisma.question.findMany({
     where: { id: { in: wrongIds } },
     include: questionInclude,
+  });
+  const chosenMap = new Map(wrong.map(([qid, v]) => [qid, v.chosen]));
+  // Har savolga foydalanuvchi tanlagan (xato) variantlarni biriktiramiz
+  return questions.map((q) => {
+    let myChosen: number[] = [];
+    try {
+      myChosen = JSON.parse(chosenMap.get(q.id) || '[]');
+    } catch {
+      myChosen = [];
+    }
+    return { ...q, myChosen };
   });
 }
 

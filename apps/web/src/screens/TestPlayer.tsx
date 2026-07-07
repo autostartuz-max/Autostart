@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
+  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag,
+} from 'lucide-react';
 import { api } from '../api';
 import { haptic, getTelegram } from '../telegram';
 import type { Question, Option } from '../types';
@@ -10,6 +14,7 @@ interface Answered {
 }
 
 const SET_KEY = 'yhq_test_settings';
+const SESSION_KEY = 'yhq_test_session';
 const SET_DEFAULTS = {
   autoNextCorrect: true,
   autoNextWrong: false,
@@ -143,6 +148,32 @@ export default function TestPlayer() {
       .then((qs: Question[]) => {
         setQuestions(qs);
         if (examMode) setSeconds(Math.max(qs.length, 10) * 60);
+        // Xatolar rejimida: oldin belgilangan xato javoblarni ko'rsatamiz
+        if (mode === 'mistakes') {
+          const pre: Record<number, Answered> = {};
+          for (const qq of qs) {
+            const ch = (qq as any).myChosen as number[] | undefined;
+            if (ch && ch.length) pre[qq.id] = { chosen: ch, isCorrect: false };
+          }
+          setAnswers(pre);
+        } else {
+          // Davom ettirish — saqlangan sessiyani tiklaymiz
+          try {
+            const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+            if (
+              s &&
+              s.mode === mode &&
+              String(s.topicId || '') === String(topicId || '') &&
+              String(s.ticketId || '') === String(ticketId || '') &&
+              s.answers
+            ) {
+              setAnswers(s.answers);
+              if (typeof s.idx === 'number' && s.idx < qs.length) setIdx(s.idx);
+            }
+          } catch {
+            /* ignore */
+          }
+        }
       })
       .catch(() => setQuestions([]));
     api.bookmarks().then((ids) => setBmarks(new Set(ids))).catch(() => {});
@@ -176,6 +207,17 @@ export default function TestPlayer() {
   }, [idx]);
 
   useEffect(() => () => stopVoice(), []); // ekrandan chiqqanda to'xtatadi
+
+  // Sessiyani saqlash — chiqib ketsa, o'sha joydan davom etish uchun
+  useEffect(() => {
+    if (!questions || finished || mode === 'mistakes') return;
+    try {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ mode, topicId, ticketId, idx, answers }));
+    } catch {
+      /* ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, answers, questions, finished]);
 
   if (!questions)
     return (
@@ -317,19 +359,21 @@ export default function TestPlayer() {
   return (
     <div className={`tplayer fs-${settings.fontSize} ff-${settings.fontStyle}`}>
       <div className="tbar">
-        <button className="tbtn" onClick={() => nav('/')}>← Orqaga</button>
+        <button className="tbtn" onClick={() => { localStorage.removeItem(SESSION_KEY); nav('/'); }}><ChevronLeft size={18} /> Orqaga</button>
         <button className="tbtn fin" onClick={() => setFinished(true)}>Yakunlash</button>
       </div>
 
       <div className="tbar2">
         <div className="grp">
-          <button className={'sq' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm}>🔖</button>
-          <button className="sq" onClick={share}>↗</button>
+          <button className={'sq' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm} title="Saqlash">
+            <Bookmark size={19} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
+          </button>
+          <button className="sq" onClick={share} title="Ulashish"><Share2 size={19} /></button>
         </div>
-        <div className="ttime">🕐 {mm}:{ss}</div>
+        <div className="ttime"><Clock size={15} /> {mm}:{ss}</div>
         <div className="grp">
-          <button className="sq" onClick={() => setShowSettings(true)}>⚙</button>
-          <button className="sq" onClick={() => setFinished(true)} title="Natija">📊</button>
+          <button className="sq" onClick={() => setShowSettings(true)} title="Sozlamalar"><Settings size={19} /></button>
+          <button className="sq" onClick={() => setFinished(true)} title="Natija"><BarChart3 size={19} /></button>
         </div>
       </div>
 
@@ -361,7 +405,9 @@ export default function TestPlayer() {
 
       {showPlayer && (
         <div className="aplayer">
-          <button className="pp" onClick={togglePlay}>{playing ? '❚❚' : '▶'}</button>
+          <button className="pp" onClick={togglePlay}>
+            {playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+          </button>
           <div className={'wave' + (playing ? ' playing' : '')}>
             {Array.from({ length: 22 }).map((_, i) => (
               <i
@@ -371,13 +417,13 @@ export default function TestPlayer() {
               />
             ))}
           </div>
-          <button className="pp x" onClick={closePlayer}>✕</button>
+          <button className="pp x" onClick={closePlayer}><X size={16} /></button>
         </div>
       )}
 
       <div className="qbar">
-        <button className="pill" onClick={() => setShowRule(true)}>ⓘ Qoidasi</button>
-        <button className="pill learn" onClick={learn}>🔊 Tushuncha</button>
+        <button className="pill" onClick={() => setShowRule(true)}><Info size={18} /> Qoidasi</button>
+        <button className="pill learn" onClick={learn}><Volume2 size={18} /> Tushuncha</button>
       </div>
 
       {showRule && (
@@ -400,42 +446,42 @@ export default function TestPlayer() {
           <div className="sheet settings-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="grip" />
             <div className="set-row">
-              <span className="set-ic green">⏭️</span>
+              <span className="set-ic green"><SkipForward size={18} /></span>
               <span className="set-label">To‘g‘ri javobda avtomatik o‘tish</span>
               <button className={'tog' + (settings.autoNextCorrect ? ' on' : '')} onClick={() => setS('autoNextCorrect', !settings.autoNextCorrect)} />
             </div>
             <div className="set-row">
-              <span className="set-ic red">⏭️</span>
+              <span className="set-ic red"><SkipForward size={18} /></span>
               <span className="set-label">Xato javobda avtomatik o‘tish</span>
               <button className={'tog' + (settings.autoNextWrong ? ' on' : '')} onClick={() => setS('autoNextWrong', !settings.autoNextWrong)} />
             </div>
             <div className="set-row">
-              <span className="set-ic purple">⚡</span>
+              <span className="set-ic purple"><Zap size={18} /></span>
               <span className="set-label">Animatsiyasiz o‘tish</span>
               <button className={'tog' + (settings.noAnim ? ' on' : '')} onClick={() => setS('noAnim', !settings.noAnim)} />
             </div>
             <div className="set-row">
-              <span className="set-ic amber">🔀</span>
+              <span className="set-ic amber"><Shuffle size={18} /></span>
               <span className="set-label">Variantlarni aralashtirish</span>
               <button className={'tog' + (settings.shuffle ? ' on' : '')} onClick={() => setS('shuffle', !settings.shuffle)} />
             </div>
             <div className="set-row" onClick={cycleFont}>
-              <span className="set-ic purple set-t">T</span>
+              <span className="set-ic purple"><Type size={18} /></span>
               <span className="set-label">Shrift o‘lchami</span>
               <span className="set-val">{FS_LABEL[settings.fontSize]}</span>
             </div>
             <div className="set-row" onClick={cycleStyle}>
-              <span className="set-ic blue set-t"><b>T</b></span>
+              <span className="set-ic blue"><Type size={18} /></span>
               <span className="set-label">Shrift uslubi</span>
               <span className="set-val">{FF_LABEL[settings.fontStyle]}</span>
             </div>
             <div className="set-row">
-              <span className="set-ic blue">🌐</span>
+              <span className="set-ic blue"><Globe size={18} /></span>
               <span className="set-label">Ilova tili</span>
               <span className="set-val">O‘zbekcha</span>
             </div>
             <div className="set-row" onClick={() => { setShowSettings(false); report(); }}>
-              <span className="set-ic red">🚩</span>
+              <span className="set-ic red"><Flag size={18} /></span>
               <span className="set-label">Xatolik haqida xabar berish</span>
             </div>
             <button className="save-btn" onClick={saveSettings}>Saqlash</button>
@@ -503,7 +549,7 @@ export default function TestPlayer() {
             </div>
             <div className="rbtns">
               <button className="rbtn sec" onClick={retry}>↺ Qayta</button>
-              <button className="rbtn main" onClick={() => nav('/')}>Yakunlash</button>
+              <button className="rbtn main" onClick={() => { localStorage.removeItem(SESSION_KEY); nav('/'); }}>Yakunlash</button>
             </div>
           </div>
         </div>

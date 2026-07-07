@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
-import { haptic } from '../telegram';
+import { haptic, getTelegram } from '../telegram';
 import type { Question, Option } from '../types';
 
 interface Answered {
@@ -303,9 +303,13 @@ export default function TestPlayer() {
   };
 
   const share = () => {
-    const text = q.textLat;
-    if ((navigator as any).share) (navigator as any).share({ title: 'Autostart test', text }).catch(() => {});
-    else window.alert('Ulashish: ' + text);
+    const appUrl = 'https://t.me/Autostartuzbot';
+    const text = `${q.textLat}\n\nAutostart test — YHQ imtihoniga tayyorlaning:`;
+    const link = `https://t.me/share/url?url=${encodeURIComponent(appUrl)}&text=${encodeURIComponent(text)}`;
+    const tg = getTelegram();
+    if (tg?.openTelegramLink) tg.openTelegramLink(link);
+    else if ((navigator as any).share) (navigator as any).share({ title: 'Autostart test', text, url: appUrl }).catch(() => {});
+    else window.open(link, '_blank');
   };
 
   const foptClass = (o: Option) => {
@@ -341,7 +345,7 @@ export default function TestPlayer() {
         <div className="ttime">🕐 {mm}:{ss}</div>
         <div className="grp">
           <button className="sq" onClick={() => setShowSettings(true)}>⚙</button>
-          <button className="sq" onClick={report}>⚑</button>
+          <button className="sq" onClick={() => setFinished(true)} title="Natija">📊</button>
         </div>
       </div>
 

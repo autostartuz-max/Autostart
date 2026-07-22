@@ -214,8 +214,16 @@ button { font-family: inherit; cursor: pointer; }
 .seg button { background: none; border: none; color: var(--muted); padding: 7px 14px; border-radius: 8px; font-size: 13px; }
 .seg button.act { background: var(--green); color: #04120a; font-weight: 700; }
 
-.empty { text-align: center; color: var(--muted); padding: 50px 20px; }
-.empty .em { font-size: 40px; margin-bottom: 10px; }
+.empty { text-align: center; color: var(--muted); padding: 46px 20px; max-width: 440px; margin: 0 auto; }
+.empty .em { font-size: 46px; margin-bottom: 12px; }
+.empty-title { font-size: 19px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.empty-text { font-size: 14px; line-height: 1.6; color: var(--muted); margin-bottom: 22px; }
+.empty-btns { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+.empty-cta { background: var(--green, #16a34a); color: #04120a; font-weight: 800; font-size: 15px;
+  border: none; border-radius: 14px; padding: 14px 20px; cursor: pointer; }
+.empty-cta:hover { filter: brightness(1.06); }
+.empty-ghost { background: var(--card); color: var(--text); font-weight: 600; font-size: 14px;
+  border: 1px solid var(--border); border-radius: 14px; padding: 12px 20px; cursor: pointer; }
 
 /* ================== Test player (yangi dizayn) ================== */
 .tplayer { padding-bottom: 96px; }

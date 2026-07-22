@@ -144,6 +144,11 @@ export default function TestPlayer() {
   };
 
   useEffect(() => {
+    // Rejim almashganda toza holatdan boshlaymiz
+    setQuestions(null);
+    setIdx(0);
+    setFinished(false);
+    setAnswers({});
     const params: Record<string, string> = { mode };
     if (topicId) params.topicId = topicId;
     if (ticketId) params.ticketId = ticketId;
@@ -185,7 +190,7 @@ export default function TestPlayer() {
     const sh = sp.get('shuffle');
     if (sh != null) setS('shuffle', sh === '1');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mode, topicId, ticketId]);
 
   useEffect(() => {
     if (!questions || finished) return;
@@ -285,18 +290,49 @@ export default function TestPlayer() {
       </div>
     );
 
-  if (!questions.length)
+  if (!questions.length) {
+    const EMPTY: Record<string, { em: string; title: string; text: string }> = {
+      mistakes: {
+        em: '✅',
+        title: 'Hali xato yo‘q — barakalla!',
+        text: 'Test yechganingizda xato qilgan savollaringiz shu yerda to‘planadi va ularni qayta ishlashingiz mumkin bo‘ladi.',
+      },
+      saved: {
+        em: '🔖',
+        title: 'Saqlangan savollar yo‘q',
+        text: 'Test yechish paytida savol ustidagi 🔖 tugmasini bosib, muhim savollarni shu yerga saqlab qo‘ying.',
+      },
+      tricky: {
+        em: '🧠',
+        title: 'Qiyin savollar topilmadi',
+        text: 'Hozircha bu bo‘lim uchun belgilangan savol yo‘q. Boshqa rejimda test yechishni boshlang.',
+      },
+      numeric: {
+        em: '🔢',
+        title: 'Raqamli savollar topilmadi',
+        text: 'Hozircha bu bo‘lim uchun belgilangan savol yo‘q. Boshqa rejimda test yechishni boshlang.',
+      },
+    };
+    const e = EMPTY[mode] || {
+      em: '🎉',
+      title: 'Bu bo‘limda hozircha savol yo‘q',
+      text: 'Boshqa rejimni tanlang yoki test yechishni boshlang.',
+    };
     return (
       <div>
         <button className="back" onClick={() => nav('/')}>← Bosh sahifa</button>
         <div className="empty">
-          <div className="em">🎉</div>
-          Bu bo‘limda hozircha savol yo‘q.
-          <br />
-          Boshqa rejimni tanlang.
+          <div className="em">{e.em}</div>
+          <div className="empty-title">{e.title}</div>
+          <div className="empty-text">{e.text}</div>
+          <div className="empty-btns">
+            <button className="empty-cta" onClick={() => nav('/test?mode=practice')}>Test yechishni boshlash →</button>
+            <button className="empty-ghost" onClick={() => nav('/')}>Bosh sahifa</button>
+          </div>
         </div>
       </div>
     );
+  }
 
   const retry = () => {
     setFinished(false);

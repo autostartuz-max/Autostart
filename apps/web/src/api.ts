@@ -27,8 +27,8 @@ async function req(path: string, opts: RequestInit = {}) {
 }
 
 export const api = {
-  authTelegram: (initData: string) =>
-    req('/auth/telegram', { method: 'POST', body: JSON.stringify({ initData }) }),
+  authTelegram: (initData: string, guestId?: string) =>
+    req('/auth/telegram', { method: 'POST', body: JSON.stringify({ initData, guestId }) }),
   me: () => req('/me'),
   updateMe: (data: any) => req('/me', { method: 'PATCH', body: JSON.stringify(data) }),
   categories: () => req('/categories'),

@@ -55,11 +55,18 @@ userRouter.post(
       }
     }
 
-    // 2) Telegram foydalanuvchisi aniqlanmadi — DEV rejimda demo, aks holda rad etamiz
+    // 2) Telegram foydalanuvchisi aniqlanmadi — web saytda qurilma bo'yicha mehmon hisobi
     if (!tgId) {
-      if (!DEV_AUTH) return res.status(401).json({ error: 'Telegram maʼlumoti yoʻq' });
-      tgId = 'dev-user';
-      firstName = 'Demo foydalanuvchi';
+      const guestId = req.body?.guestId ? String(req.body.guestId).slice(0, 80) : '';
+      if (guestId) {
+        tgId = 'guest-' + guestId;
+        firstName = 'Mehmon';
+      } else if (DEV_AUTH) {
+        tgId = 'dev-user';
+        firstName = 'Demo foydalanuvchi';
+      } else {
+        return res.status(401).json({ error: 'Maʼlumot yoʻq' });
+      }
     }
 
     const user = await prisma.user.upsert({

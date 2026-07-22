@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { api, setToken } from './api';
-import { initTelegram, getInitData } from './telegram';
+import { initTelegram, getInitData, getGuestId } from './telegram';
 import Home from './screens/Home';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
@@ -19,7 +19,7 @@ export default function App() {
     initTelegram();
     (async () => {
       try {
-        const r = await api.authTelegram(getInitData());
+        const r = await api.authTelegram(getInitData(), getGuestId());
         setToken(r.token);
         setReady(true);
       } catch (e: any) {

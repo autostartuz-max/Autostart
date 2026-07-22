@@ -15,10 +15,9 @@
 /* Sidebar */
 .db-side { width: 244px; flex-shrink: 0; background: var(--db-side); border-right: 1px solid var(--db-border);
   display: flex; flex-direction: column; padding: 16px 12px; overflow-y: auto; }
-.db-logo { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 20px; font-weight: 800; padding: 12px 8px 16px; }
-.db-logo-img { height: 78px; width: auto; max-width: 190px; object-fit: contain; }
-.db-logo-ic { width: 30px; height: 30px; border-radius: 8px; background: conic-gradient(from 200deg, #ef4444, #f59e0b, #22c55e, #ef4444);
-  display: inline-flex; align-items: center; justify-content: center; color: #fff; }
+.db-logo { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 8px 18px; }
+.db-logo-mark { height: 38px; width: auto; }
+.db-logo-word { font-size: 23px; font-weight: 900; font-style: italic; letter-spacing: .5px; }
 .db-logo .lg-a { color: #fff; } .db-logo .lg-s { color: #facc15; }
 .db-sec { color: #5f6f88; font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; padding: 14px 10px 6px; }
 .db-navi { display: flex; align-items: center; gap: 11px; background: none; border: none; color: var(--db-muted);
@@ -57,9 +56,11 @@
   border: 1px solid var(--db-border); }
 .db-hero-car { position: absolute; right: 0; top: 0; height: 100%; width: 56%; object-fit: cover; object-position: left center; z-index: 1;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 32%); mask-image: linear-gradient(90deg, transparent, #000 32%); }
-.db-hero-decal { position: absolute; right: 13%; top: 30%; z-index: 3; height: 118px; width: auto;
-  transform: skewX(-7deg) rotate(-2deg); border-radius: 12px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55); opacity: .97; pointer-events: none; }
+.db-hero-decal { position: absolute; right: 6%; top: 34%; z-index: 3; display: flex; align-items: center; gap: 9px;
+  transform: rotate(-4deg); pointer-events: none; filter: drop-shadow(0 3px 9px rgba(0, 0, 0, 0.6)); }
+.db-decal-mark { height: 50px; width: auto; }
+.db-decal-word { font-size: 25px; font-weight: 900; font-style: italic; letter-spacing: .5px; line-height: 1; }
+.db-decal-word .dw-a { color: #ffffff; } .db-decal-word .dw-s { color: #facc15; }
 .db-hero h1 { position: relative; z-index: 2; font-size: 38px; font-weight: 800; line-height: 1.1; letter-spacing: -.5px; max-width: 560px; }
 .db-hero h1 span { color: var(--db-blue); }
 .hero-brand { background: linear-gradient(90deg, #ef4444, #f59e0b 45%, #22c55e); -webkit-background-clip: text; background-clip: text; color: transparent; }

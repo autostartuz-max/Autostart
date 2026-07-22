@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle,
-  Search, Bell, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck, Car,
+  Search, Bell, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
 } from 'lucide-react';
 import { api } from '../api';
 import '../dashboard.css';
@@ -42,7 +42,6 @@ export default function Dashboard() {
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const [me, setMe] = useState<any>(null);
-  const [logoOk, setLogoOk] = useState(true);
   useEffect(() => { api.me().then(setMe).catch(() => {}); }, []);
 
   const name = me?.user?.firstName || 'Foydalanuvchi';
@@ -64,14 +63,8 @@ export default function Dashboard() {
     <div className="db">
       <aside className={'db-side' + (open ? ' open' : '')}>
         <div className="db-logo">
-          {logoOk ? (
-            <img src="/logo.png" alt="AUTOSTART" className="db-logo-img" onError={() => setLogoOk(false)} />
-          ) : (
-            <>
-              <span className="db-logo-ic"><Car size={20} /></span>
-              <span className="lg-a">AUTO</span><span className="lg-s">START</span>
-            </>
-          )}
+          <img src="/mark.png" alt="" className="db-logo-mark" />
+          <span className="db-logo-word"><span className="lg-a">AUTO</span><span className="lg-s">START</span></span>
         </div>
         <button className="db-navi active"><Home size={18} /> <span>Bosh sahifa</span></button>
         <div className="db-sec">Testlar</div>
@@ -104,7 +97,10 @@ export default function Dashboard() {
           {/* Hero */}
           <div className="db-hero">
             <img src="/car.png" alt="" className="db-hero-car" onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
-            <img src="/logo.png" alt="AUTOSTART" className="db-hero-decal" onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
+            <div className="db-hero-decal">
+              <img src="/mark.png" alt="" className="db-decal-mark" />
+              <span className="db-decal-word"><span className="dw-a">AUTO</span><span className="dw-s">START</span></span>
+            </div>
             <h1>Eng yaxshi haydovchi bo‘lish sari <b className="hero-brand">AUTOSTART</b> bilan <span>ilk qadam!</span></h1>
             <p>Rasmiy testlar bazasi, tushunarli izohlar va batafsil statistika bilan imtihonga mukammal tayyorlaning.</p>
             <div className="db-hero-btns">

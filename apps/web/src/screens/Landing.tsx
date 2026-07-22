@@ -18,7 +18,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
     <div className="lp">
       {/* Nav */}
       <nav className="lp-nav">
-        <div className="lp-logo"><img src="/logo.png" className="lp-logo-img" alt="Autostart" /></div>
+        <div className="lp-logo"><img src="/mark.png" className="lp-logo-mark" alt="" /><span className="lp-logo-word"><span className="la-a">AUTO</span><span className="la-s">START</span></span></div>
         <div className="lp-links">
           <a href="#imkoniyatlar">Imkoniyatlar</a>
           <a href="#tariflar">Tariflar</a>
@@ -115,7 +115,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
       </section>
 
       <footer className="lp-footer">
-        <div className="lp-logo"><img src="/logo.png" className="lp-logo-img sm" alt="Autostart" /></div>
+        <div className="lp-logo sm"><img src="/mark.png" className="lp-logo-mark" alt="" /><span className="lp-logo-word"><span className="la-a">AUTO</span><span className="la-s">START</span></span></div>
         <div className="lp-fnote">© 2026 Autostart — YHQ imtihoniga tayyorlov</div>
         <a className="lp-flink" href="https://t.me/Autostartuzbot" target="_blank" rel="noreferrer">Telegram bot</a>
       </footer>

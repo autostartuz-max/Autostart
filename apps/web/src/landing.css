@@ -23,11 +23,12 @@
   padding: 16px 28px; max-width: 1180px; margin: 0 auto;
   backdrop-filter: blur(8px);
 }
-.lp-logo { display: flex; align-items: center; gap: 9px; font-size: 20px; font-weight: 800; }
-.lp-logo-img { height: 46px; width: auto; object-fit: contain; }
-.lp-logo-img.sm { height: 40px; }
-.lp-logo-ic { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #2563eb, #60a5fa);
-  display: flex; align-items: center; justify-content: center; color: #fff; }
+.lp-logo { display: flex; align-items: center; gap: 9px; }
+.lp-logo-mark { height: 34px; width: auto; }
+.lp-logo-word { font-size: 22px; font-weight: 900; font-style: italic; letter-spacing: .4px; }
+.lp-logo-word .la-a { color: #fff; } .lp-logo-word .la-s { color: #facc15; }
+.lp-logo.sm .lp-logo-mark { height: 28px; }
+.lp-logo.sm .lp-logo-word { font-size: 18px; }
 .lp-links { display: flex; gap: 26px; font-size: 15px; color: var(--lp-muted); }
 .lp-links a:hover { color: var(--lp-text); }
 .lp-nav-actions { display: flex; gap: 10px; }

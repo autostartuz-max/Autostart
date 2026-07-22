@@ -52,7 +52,9 @@
   background: radial-gradient(700px 340px at 78% 30%, rgba(37, 99, 235, 0.4), transparent 62%), linear-gradient(115deg, #0c1730 0%, #0e1c3a 45%, #0a1424 100%); border: 1px solid var(--db-border); }
 .db-hero-car { position: absolute; right: 0; top: 0; height: 100%; width: 56%; object-fit: cover; object-position: left center; z-index: 1;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 32%); mask-image: linear-gradient(90deg, transparent, #000 32%); }
-.db-hero-brandmark { position: absolute; right: 30px; bottom: 18px; z-index: 2; font-size: 22px; font-weight: 900; letter-spacing: 3px; color: rgba(255, 255, 255, 0.16); text-transform: uppercase; }
+.db-hero-brandmark { position: absolute; right: 20%; top: 44%; z-index: 3; font-size: 24px; font-weight: 900; font-style: italic;
+  letter-spacing: 1px; color: #ffffff; text-transform: uppercase; transform: skewX(-10deg) rotate(-3deg);
+  text-shadow: 0 2px 7px rgba(0, 0, 0, 0.75); opacity: .93; pointer-events: none; }
 .db-hero h1 { position: relative; z-index: 2; font-size: 38px; font-weight: 800; line-height: 1.1; letter-spacing: -.5px; max-width: 560px; }
 .db-hero h1 span { color: var(--db-blue); }
 .hero-brand { background: linear-gradient(90deg, #ef4444, #f59e0b 45%, #22c55e); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -124,6 +126,6 @@
   .db-burger { display: inline-flex; }
   .db-backdrop { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, .5); z-index: 40; }
   .db-search { display: none; } .db-uname { display: none; }
-  .db-stats { grid-template-columns: 1fr 1fr; } .db-hero h1 { font-size: 28px; } .db-hero::after { display: none; }
+  .db-stats { grid-template-columns: 1fr 1fr; } .db-hero h1 { font-size: 28px; } .db-hero-car, .db-hero-brandmark { display: none; }
   .db-content { padding: 14px; }
 }

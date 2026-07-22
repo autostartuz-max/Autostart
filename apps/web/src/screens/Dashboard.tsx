@@ -96,11 +96,7 @@ export default function Dashboard() {
         <div className="db-content">
           {/* Hero */}
           <div className="db-hero">
-            <img src="/car.png" alt="" className="db-hero-car" onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
-            <div className="db-hero-decal">
-              <img src="/mark.png" alt="" className="db-decal-mark" />
-              <span className="db-decal-word"><span className="dw-a">AUTO</span><span className="dw-s">START</span></span>
-            </div>
+            <img src="/car.jpg" alt="" className="db-hero-car" onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
             <h1>Eng yaxshi haydovchi bo‘lish sari <b className="hero-brand">AUTOSTART</b> bilan <span>ilk qadam!</span></h1>
             <p>Rasmiy testlar bazasi, tushunarli izohlar va batafsil statistika bilan imtihonga mukammal tayyorlaning.</p>
             <div className="db-hero-btns">

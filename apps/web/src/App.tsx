@@ -16,7 +16,10 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
   const [entered, setEntered] = useState(
-    () => isTelegram() || localStorage.getItem('yhq_entered') === '1'
+    () =>
+      isTelegram() ||
+      localStorage.getItem('yhq_entered') === '1' ||
+      new URLSearchParams(window.location.search).get('enter') === '1'
   );
   const navigate = useNavigate();
 

@@ -66,6 +66,7 @@ export default function TestPlayer() {
   const [showSettings, setShowSettings] = useState(false);
   const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>('lat');
   const [configured, setConfigured] = useState(!examMode);
+  const [userName, setUserName] = useState('');
   const tx = (lat: string, cyr: string) => (cfgLang === 'cyr' ? cyr || lat : lat);
   const setS = (k: string, v: any) => setSettings((s: any) => ({ ...s, [k]: v }));
   const saveSettings = () => {
@@ -180,6 +181,7 @@ export default function TestPlayer() {
       })
       .catch(() => setQuestions([]));
     api.bookmarks().then((ids) => setBmarks(new Set(ids))).catch(() => {});
+    api.me().then((m: any) => setUserName(m?.user?.firstName || '')).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -213,21 +215,22 @@ export default function TestPlayer() {
 
   // Sessiyani saqlash — chiqib ketsa, o'sha joydan davom etish uchun
   useEffect(() => {
-    if (!questions || finished || mode === 'mistakes') return;
+    if (!questions || finished || mode === 'mistakes' || !configured) return;
     try {
       localStorage.setItem(SESSION_KEY, JSON.stringify({ mode, topicId, ticketId, idx, answers }));
     } catch {
       /* ignore */
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, answers, questions, finished]);
+  }, [idx, answers, questions, finished, configured]);
 
   if (!configured) {
     const LANGS: [string, string][] = [['lat', '🇺🇿 O‘zbek'], ['cyr', '🇺🇿 Кирилл'], ['rus', '🇷🇺 Рус']];
     return (
       <div className="cfg-wrap">
         <div className="cfg">
-          <div className="cfg-title">Tilni tanlang!</div>
+          {userName && <div className="cfg-name">{userName.toUpperCase()}</div>}
+          <div className="cfg-title">TILNI TANLANG!</div>
           <div className="cfg-langs">
             {LANGS.map(([v, label], i) => (
               <button key={v} className={'cfg-lang' + (cfgLang === v ? ' on' : '')} onClick={() => setCfgLang(v as any)}>
@@ -250,7 +253,19 @@ export default function TestPlayer() {
             <b> 3 tadan ortiq xato</b> javobda imtihondan yiqilgan hisoblanasiz.
           </div>
           <div className="cfg-btns">
-            <button className="cfg-back" onClick={() => nav('/')}>← Orqaga</button>
+            <button
+              className="cfg-back"
+              onClick={() => {
+                try {
+                  localStorage.removeItem(SESSION_KEY);
+                } catch {
+                  /* ignore */
+                }
+                nav('/shablon');
+              }}
+            >
+              ← Orqaga
+            </button>
             <button className="cfg-start" onClick={() => { startRef.current = Date.now(); setConfigured(true); }}>
               Boshlash →
             </button>

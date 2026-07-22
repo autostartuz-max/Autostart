@@ -360,28 +360,29 @@ button { font-family: inherit; cursor: pointer; }
 .rbtn.sec { background: var(--card); border: 1px solid var(--border); color: var(--text); }
 .rbtn.main { background: #22c55e; color: #04120a; }
 
-/* Test oldi sozlama oynasi (til, aralashish) */
-.cfg-wrap { min-height: 90vh; display: flex; align-items: center; justify-content: center; padding: 10px 2px; }
-.cfg { width: 100%; max-width: 460px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 22px; }
-.cfg-title { text-align: center; font-size: 18px; font-weight: 800; letter-spacing: .5px; margin-bottom: 18px; }
+/* Test oldi sozlama oynasi (til, aralashish) — OCH (light) mavzu */
+.cfg-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: #eef2f6; }
+.cfg { width: 100%; max-width: 640px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
+.cfg-name { text-align: center; font-size: 16px; font-weight: 800; color: #334155; letter-spacing: .5px; padding-bottom: 14px; border-bottom: 1px solid #eef2f6; margin-bottom: 14px; }
+.cfg-title { text-align: center; font-size: 15px; font-weight: 800; letter-spacing: .5px; color: #475569; margin-bottom: 18px; }
 .cfg-langs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-.cfg-lang { display: flex; align-items: center; background: var(--card2); border: 1.5px solid var(--border);
-  border-radius: 12px; padding: 0; overflow: hidden; color: var(--text); font-size: 15px; font-weight: 600; height: 48px; }
+.cfg-lang { display: flex; align-items: center; background: #fff; border: 1.5px solid #e2e8f0;
+  border-radius: 10px; padding: 0; overflow: hidden; color: #334155; font-size: 15px; font-weight: 600; height: 48px; }
 .cfg-lang.on { border-color: #3b82f6; }
-.cfg-num { width: 48px; height: 48px; background: #2b3a52; display: flex; align-items: center; justify-content: center;
-  font-weight: 800; color: #cbd5e1; flex-shrink: 0; }
-.cfg-lang.on .cfg-num { background: #3b82f6; color: #fff; }
-.cfg-lname { flex: 1; text-align: center; padding-right: 40px; color: #7fb0ff; }
+.cfg-num { width: 48px; height: 48px; background: #475569; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; color: #fff; flex-shrink: 0; }
+.cfg-lang.on .cfg-num { background: #3b82f6; }
+.cfg-lname { flex: 1; text-align: center; padding-right: 40px; color: #2563eb; }
 .cfg-shuffle { display: flex; gap: 10px; margin-bottom: 16px; }
-.cfg-sh { flex: 1; background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 12px;
+.cfg-sh { flex: 1; background: #fff; border: 1px solid #e2e8f0; color: #334155; border-radius: 10px;
   padding: 13px; font-size: 14px; font-weight: 600; }
 .cfg-sh.on { background: #4f46e5; border-color: #4f46e5; color: #fff; }
-.cfg-info { background: #2a2410; border: 1px solid #4a3f14; border-radius: 12px; padding: 14px; font-size: 13.5px;
-  line-height: 1.6; color: #ded3a2; margin-bottom: 18px; }
-.cfg-info b { color: #f5e6a8; }
+.cfg-info { background: #fffbea; border: 1px solid #fde68a; border-radius: 12px; padding: 14px; font-size: 13.5px;
+  line-height: 1.6; color: #8a6d1f; margin-bottom: 18px; text-align: center; }
+.cfg-info b { color: #6b520f; }
 .cfg-btns { display: flex; gap: 10px; }
-.cfg-back { background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 12px; padding: 14px 18px; font-weight: 600; }
-.cfg-start { flex: 1; background: var(--green); color: #04120a; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 800; }
+.cfg-back { background: #f1f5f9; border: 1px solid #e2e8f0; color: #334155; border-radius: 10px; padding: 14px 18px; font-weight: 700; }
+.cfg-start { flex: 1; background: #22c55e; color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 800; }
 
 /* ---- Tab bar ---- */
 .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,22,35,.96);

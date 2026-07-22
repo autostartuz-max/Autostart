@@ -1,5 +1,5 @@
 import {
-  ChevronRight, Car, ClipboardCheck, BarChart3, TriangleAlert, Swords,
+  ChevronRight, ClipboardCheck, BarChart3, TriangleAlert, Swords,
   Volume2, Send, CircleCheck, Bookmark, Star,
 } from 'lucide-react';
 import '../landing.css';
@@ -18,7 +18,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
     <div className="lp">
       {/* Nav */}
       <nav className="lp-nav">
-        <div className="lp-logo"><span className="lp-logo-ic"><Car size={20} /></span> Autostart</div>
+        <div className="lp-logo"><img src="/logo.png" className="lp-logo-img" alt="Autostart" /></div>
         <div className="lp-links">
           <a href="#imkoniyatlar">Imkoniyatlar</a>
           <a href="#tariflar">Tariflar</a>
@@ -115,7 +115,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
       </section>
 
       <footer className="lp-footer">
-        <div className="lp-logo"><span className="lp-logo-ic"><Car size={18} /></span> Autostart</div>
+        <div className="lp-logo"><img src="/logo.png" className="lp-logo-img sm" alt="Autostart" /></div>
         <div className="lp-fnote">© 2026 Autostart — YHQ imtihoniga tayyorlov</div>
         <a className="lp-flink" href="https://t.me/Autostartuzbot" target="_blank" rel="noreferrer">Telegram bot</a>
       </footer>

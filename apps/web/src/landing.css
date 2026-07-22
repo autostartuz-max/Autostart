@@ -24,6 +24,8 @@
   backdrop-filter: blur(8px);
 }
 .lp-logo { display: flex; align-items: center; gap: 9px; font-size: 20px; font-weight: 800; }
+.lp-logo-img { height: 46px; width: auto; object-fit: contain; }
+.lp-logo-img.sm { height: 40px; }
 .lp-logo-ic { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #2563eb, #60a5fa);
   display: flex; align-items: center; justify-content: center; color: #fff; }
 .lp-links { display: flex; gap: 26px; font-size: 15px; color: var(--lp-muted); }

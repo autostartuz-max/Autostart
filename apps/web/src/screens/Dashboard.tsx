@@ -104,7 +104,7 @@ export default function Dashboard() {
           {/* Hero */}
           <div className="db-hero">
             <img src="/car.png" alt="" className="db-hero-car" onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
-            <div className="db-hero-brandmark">AUTOSTART</div>
+            <img src="/logo.png" alt="AUTOSTART" className="db-hero-decal" onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
             <h1>Eng yaxshi haydovchi bo‘lish sari <b className="hero-brand">AUTOSTART</b> bilan <span>ilk qadam!</span></h1>
             <p>Rasmiy testlar bazasi, tushunarli izohlar va batafsil statistika bilan imtihonga mukammal tayyorlaning.</p>
             <div className="db-hero-btns">

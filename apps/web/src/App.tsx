@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { api, setToken } from './api';
-import { initTelegram, getInitData, getGuestId } from './telegram';
+import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
+import Landing from './screens/Landing';
 import Home from './screens/Home';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
@@ -13,6 +14,9 @@ import Placeholder from './screens/Placeholder';
 export default function App() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
+  const [entered, setEntered] = useState(
+    () => isTelegram() || localStorage.getItem('yhq_entered') === '1'
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +62,20 @@ export default function App() {
         <div className="spinner" />
         <div>Yuklanmoqda…</div>
       </div>
+    );
+
+  if (!entered)
+    return (
+      <Landing
+        onStart={() => {
+          try {
+            localStorage.setItem('yhq_entered', '1');
+          } catch {
+            /* ignore */
+          }
+          setEntered(true);
+        }}
+      />
     );
 
   return (

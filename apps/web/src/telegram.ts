@@ -21,6 +21,11 @@ export function getInitData(): string {
   return getTelegram()?.initData || '';
 }
 
+// Telegram ichida ochilganmi (initData faqat real Telegram ishga tushirishda bo'ladi)
+export function isTelegram(): boolean {
+  return !!getTelegram()?.initData;
+}
+
 // Web saytda (Telegramsiz) har bir qurilma uchun barqaror mehmon ID
 export function getGuestId(): string {
   const KEY = 'yhq_guest_id';

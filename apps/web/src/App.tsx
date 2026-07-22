@@ -4,6 +4,7 @@ import { api, setToken } from './api';
 import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
 import Landing from './screens/Landing';
 import Home from './screens/Home';
+import Shablon from './screens/Shablon';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
 import TestPlayer from './screens/TestPlayer';
@@ -82,6 +83,7 @@ export default function App() {
     <div className="app">
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/shablon" element={<Shablon />} />
         <Route path="/mavzular" element={<Topics />} />
         <Route path="/biletlar" element={<Tickets />} />
         <Route path="/test" element={<TestPlayer />} />

@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   ListChecks, HeartCrack, BookOpen, Ticket, ListOrdered, ClipboardCheck,
   CircleAlert, Bookmark, TriangleAlert, Hash, Swords, Play, Trophy, Search,
-  Settings, Check, X, Zap, Pencil, ChevronRight, User,
+  Settings, Check, X, Zap, Pencil, ChevronRight, User, Layers,
 } from 'lucide-react';
 import { api } from '../api';
 import type { Me } from '../types';
 
 const TILES = [
+  { to: '/shablon', Icon: Layers, cls: 'blue', title: 'Shablon testlar' },
   { to: '/mavzular', Icon: BookOpen, cls: 'purple', title: 'Mavzular' },
   { to: '/biletlar', Icon: Ticket, cls: 'amber', title: 'Biletlar' },
   { to: '/test?mode=50&exam=1', Icon: ListOrdered, cls: 'green', title: '50/100 talik' },
@@ -117,7 +118,7 @@ export default function Home() {
       </div>
 
       {/* Grid */}
-      <div className="tiles">
+      <div className="tiles wide">
         {TILES.map((t) => (
           <div key={t.to} className="tcard" onClick={() => nav(t.to)}>
             <div className={'ci ' + t.cls}><t.Icon size={22} /></div>

@@ -19,7 +19,7 @@ const NAV = [
   { Icon: Trophy, label: 'Reyting', to: '/reyting' },
 ];
 
-const COUNT = 24;
+const COUNT = 63;
 
 export default function Shablon() {
   const nav = useNavigate();

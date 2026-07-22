@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { api, setToken } from './api';
 import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
 import Landing from './screens/Landing';
-import Home from './screens/Home';
 import Shablon from './screens/Shablon';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
@@ -38,7 +37,7 @@ export default function App() {
     if (!ready) return;
     try {
       const s = JSON.parse(localStorage.getItem('yhq_test_session') || 'null');
-      if (s && s.mode && window.location.pathname === '/') {
+      if (s && s.mode && (window.location.pathname === '/' || window.location.pathname === '/shablon')) {
         const p = new URLSearchParams({ mode: s.mode });
         if (s.topicId) p.set('topicId', String(s.topicId));
         if (s.ticketId) p.set('ticketId', String(s.ticketId));
@@ -82,7 +81,7 @@ export default function App() {
   return (
     <div className="app">
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/shablon" replace />} />
         <Route path="/shablon" element={<Shablon />} />
         <Route path="/mavzular" element={<Topics />} />
         <Route path="/biletlar" element={<Tickets />} />

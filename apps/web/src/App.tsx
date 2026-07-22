@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { api, setToken } from './api';
 import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
 import Landing from './screens/Landing';
+import Dashboard from './screens/Dashboard';
 import Shablon from './screens/Shablon';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
@@ -81,7 +82,7 @@ export default function App() {
   return (
     <div className="app">
       <Routes>
-        <Route path="/" element={<Navigate to="/shablon" replace />} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/shablon" element={<Shablon />} />
         <Route path="/mavzular" element={<Topics />} />
         <Route path="/biletlar" element={<Tickets />} />

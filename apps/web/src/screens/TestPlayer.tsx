@@ -64,6 +64,9 @@ export default function TestPlayer() {
   const [aprog, setAprog] = useState(0);
   const [settings, setSettings] = useState<any>(() => loadSettings());
   const [showSettings, setShowSettings] = useState(false);
+  const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>('lat');
+  const [configured, setConfigured] = useState(!examMode);
+  const tx = (lat: string, cyr: string) => (cfgLang === 'cyr' ? cyr || lat : lat);
   const setS = (k: string, v: any) => setSettings((s: any) => ({ ...s, [k]: v }));
   const saveSettings = () => {
     try {
@@ -219,6 +222,44 @@ export default function TestPlayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, answers, questions, finished]);
 
+  if (!configured) {
+    const LANGS: [string, string][] = [['lat', '🇺🇿 O‘zbek'], ['cyr', '🇺🇿 Кирилл'], ['rus', '🇷🇺 Рус']];
+    return (
+      <div className="cfg-wrap">
+        <div className="cfg">
+          <div className="cfg-title">Tilni tanlang!</div>
+          <div className="cfg-langs">
+            {LANGS.map(([v, label], i) => (
+              <button key={v} className={'cfg-lang' + (cfgLang === v ? ' on' : '')} onClick={() => setCfgLang(v as any)}>
+                <span className="cfg-num">{i + 1}</span>
+                <span className="cfg-lname">{label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="cfg-shuffle">
+            <button className={'cfg-sh' + (settings.shuffle ? ' on' : '')} onClick={() => setS('shuffle', true)}>
+              Variantlar aralashsin
+            </button>
+            <button className={'cfg-sh' + (!settings.shuffle ? ' on' : '')} onClick={() => setS('shuffle', false)}>
+              Variantlar aralashmasin
+            </button>
+          </div>
+          <div className="cfg-info">
+            <b>20 ta aralash savoldan iborat imtihon bileti.</b> Barcha mavzulardan tasodifiy tuzilgan testlar bilan tanishib,
+            REAL IMTIHON JARAYONIGA tayyorlaning. Natija (javob holati) har bir javobdan so‘ng ko‘rinadi.
+            <b> 3 tadan ortiq xato</b> javobda imtihondan yiqilgan hisoblanasiz.
+          </div>
+          <div className="cfg-btns">
+            <button className="cfg-back" onClick={() => nav('/')}>← Orqaga</button>
+            <button className="cfg-start" onClick={() => { startRef.current = Date.now(); setConfigured(true); }}>
+              Boshlash →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!questions)
     return (
       <div className="splash">
@@ -254,7 +295,7 @@ export default function TestPlayer() {
   const rWrong = questions.filter((qq) => answers[qq.id] && !answers[qq.id].isCorrect).length;
   const rSkip = rTotal - rCorrect - rWrong;
   const rPct = rTotal ? Math.round((rCorrect / rTotal) * 100) : 0;
-  const rPass = rPct >= 90;
+  const rPass = examMode ? rWrong <= 3 : rPct >= 90;
   const RING_C = 2 * Math.PI * 52;
 
   const q = questions[idx];
@@ -386,7 +427,7 @@ export default function TestPlayer() {
         <button className="qn fin" onClick={() => setFinished(true)}>✓</button>
       </div>
 
-      <div className="qtitle">{q.textLat}</div>
+      <div className="qtitle">{tx(q.textLat, q.textCyr)}</div>
       {q.imageUrl && (
         <div className="qimgwrap">
           <img src={q.imageUrl} />
@@ -397,7 +438,7 @@ export default function TestPlayer() {
         {displayOpts.map((o, i) => (
           <button key={o.id} className={foptClass(o)} disabled={locked} onClick={() => choose(o.id)}>
             <span className="fb">F{i + 1}</span>
-            <span className="ftext">{o.textLat}</span>
+            <span className="ftext">{tx(o.textLat, o.textCyr)}</span>
             <span className="fmark">{foptMark(o)}</span>
           </button>
         ))}

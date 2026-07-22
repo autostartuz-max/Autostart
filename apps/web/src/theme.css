@@ -362,6 +362,7 @@ button { font-family: inherit; cursor: pointer; }
 
 /* Test oldi sozlama oynasi (til, aralashish) — OCH (light) mavzu */
 .cfg-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: #eef2f6; }
+.cfg-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 16px; }
 .cfg { width: 100%; max-width: 640px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
 .cfg-name { text-align: center; font-size: 16px; font-weight: 800; color: #334155; letter-spacing: .5px; padding-bottom: 14px; border-bottom: 1px solid #eef2f6; margin-bottom: 14px; }
 .cfg-title { text-align: center; font-size: 15px; font-weight: 800; letter-spacing: .5px; color: #475569; margin-bottom: 18px; }

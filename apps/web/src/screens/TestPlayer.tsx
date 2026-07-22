@@ -64,8 +64,8 @@ export default function TestPlayer() {
   const [aprog, setAprog] = useState(0);
   const [settings, setSettings] = useState<any>(() => loadSettings());
   const [showSettings, setShowSettings] = useState(false);
-  const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>('lat');
-  const [configured, setConfigured] = useState(!examMode);
+  const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>((sp.get('lang') as any) || 'lat');
+  const [configured, setConfigured] = useState(!examMode || !!sp.get('lang'));
   const [userName, setUserName] = useState('');
   const tx = (lat: string, cyr: string) => (cfgLang === 'cyr' ? cyr || lat : lat);
   const setS = (k: string, v: any) => setSettings((s: any) => ({ ...s, [k]: v }));
@@ -182,6 +182,8 @@ export default function TestPlayer() {
       .catch(() => setQuestions([]));
     api.bookmarks().then((ids) => setBmarks(new Set(ids))).catch(() => {});
     api.me().then((m: any) => setUserName(m?.user?.firstName || '')).catch(() => {});
+    const sh = sp.get('shuffle');
+    if (sh != null) setS('shuffle', sh === '1');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

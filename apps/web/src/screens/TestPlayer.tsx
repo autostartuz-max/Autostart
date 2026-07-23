@@ -481,9 +481,9 @@ export default function TestPlayer() {
   /* ===== intalim uslubidagi test oynasi ===== */
   const shablonN = sp.get('n');
   const shablonLabel = shablonN ? `${shablonN} - SHABLON` : examMode ? 'IMTIHON' : 'TEST';
-  const SIZES = ['sm', 'md', 'lg'];
-  const fontUp = () => setS('fontSize', SIZES[Math.min(SIZES.indexOf(settings.fontSize) + 1, 2)]);
-  const fontDown = () => setS('fontSize', SIZES[Math.max(SIZES.indexOf(settings.fontSize) - 1, 0)]);
+  const fscale = settings.fontScale ?? 1;
+  const fontUp = () => setS('fontScale', Math.min(fscale + 0.12, 4));
+  const fontDown = () => setS('fontScale', Math.max(fscale - 0.12, 0.7));
 
   const selectOpt = (optId: number) => { if (!locked) setSel(optId); };
   const confirm = async () => {
@@ -514,7 +514,7 @@ export default function TestPlayer() {
   const exit = () => { localStorage.removeItem(SESSION_KEY); nav('/shablon'); };
 
   return (
-    <div className={`tp2 fs-${settings.fontSize} ff-${settings.fontStyle}`}>
+    <div className={`tp2 ff-${settings.fontStyle}`} style={{ ['--fs' as any]: fscale }}>
       <header className="tp2-top">
         <div className="tp2-brand">
           <img src="/mark.png" alt="" className="tp2-mark" />

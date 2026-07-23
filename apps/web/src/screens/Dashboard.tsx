@@ -9,7 +9,7 @@ import { api } from '../api';
 import '../dashboard.css';
 
 const TESTLAR = [
-  { Icon: FileText, label: 'Rasmiy testlar', to: '/shablon' },
+  { Icon: FileText, label: 'Shablon testlar', to: '/shablon' },
   { Icon: BookOpen, label: "Mavzular bo'yicha", to: '/mavzular' },
   { Icon: CircleAlert, label: 'Qiyin savollar', to: '/test?mode=tricky' },
   { Icon: HeartCrack, label: 'Xatolarim', to: '/test?mode=mistakes', badge: true },
@@ -118,7 +118,7 @@ export default function Dashboard() {
             <div className="db-panel">
               <div className="db-ph"><h3>Test yechish</h3></div>
               {[
-                { Icon: FileText, c: 'p', t: 'Rasmiy testlar', s: 'YHQ rasmiy savollari', b: 'Barchasi', to: '/shablon' },
+                { Icon: FileText, c: 'p', t: 'Shablon testlar', s: '63 ta imtihon bileti', b: '63 ta', to: '/shablon' },
                 { Icon: Grid3x3, c: 'g', t: "Mavzular bo'yicha", s: 'Mavzular kesimida', b: '10 mavzu', to: '/mavzular' },
                 { Icon: CircleAlert, c: 'o', t: 'Qiyin savollar', s: 'Ko‘p xato qilinadigan', b: 'Tricky', to: '/test?mode=tricky' },
                 { Icon: ClipboardCheck, c: 'b', t: 'Imtihon simulyatori', s: 'Real imtihon sharoiti', b: '20 savol', to: '/shablon' },

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { api, setToken } from './api';
 import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
 import Landing from './screens/Landing';
@@ -21,8 +21,6 @@ export default function App() {
       localStorage.getItem('yhq_entered') === '1' ||
       new URLSearchParams(window.location.search).get('enter') === '1'
   );
-  const navigate = useNavigate();
-
   useEffect(() => {
     initTelegram();
     (async () => {
@@ -36,21 +34,6 @@ export default function App() {
     })();
   }, []);
 
-  // Davom ettirish — yarim qolgan test bo'lsa, ochilishda o'sha testga qaytaramiz
-  useEffect(() => {
-    if (!ready) return;
-    try {
-      const s = JSON.parse(localStorage.getItem('yhq_test_session') || 'null');
-      if (s && s.mode && (window.location.pathname === '/' || window.location.pathname === '/shablon')) {
-        const p = new URLSearchParams({ mode: s.mode });
-        if (s.topicId) p.set('topicId', String(s.topicId));
-        if (s.ticketId) p.set('ticketId', String(s.ticketId));
-        navigate('/test?' + p.toString(), { replace: true });
-      }
-    } catch {
-      /* ignore */
-    }
-  }, [ready, navigate]);
 
   if (error)
     return (

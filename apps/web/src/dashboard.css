@@ -13,7 +13,8 @@
 .db a { color: inherit; text-decoration: none; }
 
 /* Sidebar */
-.db-side { width: 244px; flex-shrink: 0; background: var(--db-side); border-right: 1px solid var(--db-border);
+.db-side { --db-side: #0c1322; --db-card: #111a2b; --db-border: #1e2a41; --db-text: #e8eef7; --db-muted: #8494ad; --db-blue: #3b82f6;
+  width: 244px; flex-shrink: 0; background: var(--db-side); border-right: 1px solid var(--db-border);
   display: flex; flex-direction: column; padding: 16px 12px; overflow-y: auto; }
 .db-logo { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 8px 18px; }
 .db-logo-mark { height: 38px; width: auto; }

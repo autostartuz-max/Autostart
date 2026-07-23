@@ -5,20 +5,8 @@ import {
   Bookmark, Swords, Trophy, Car, ChevronLeft, Bell, Search, Moon, Globe, User, Menu,
 } from 'lucide-react';
 import { api } from '../api';
+import AppSidebar from '../components/AppSidebar';
 import '../shablon.css';
-
-const NAV = [
-  { Icon: Home, label: 'Bosh sahifa', to: '/' },
-  { Icon: ClipboardList, label: 'Barcha testlar', to: '/test?mode=all' },
-  { Icon: Layers, label: 'Shablon testlar', to: '/shablon', active: true },
-  { Icon: BookOpen, label: 'Mavzular', to: '/mavzular' },
-  { Icon: Ticket, label: 'Biletlar', to: '/biletlar' },
-  { Icon: TriangleAlert, label: "Yo'l belgilari", to: '/belgilar' },
-  { Icon: HeartCrack, label: 'Xatolar', to: '/test?mode=mistakes' },
-  { Icon: Bookmark, label: 'Saqlanganlar', to: '/test?mode=saved' },
-  { Icon: Swords, label: 'Oktagon', to: '/oktagon' },
-  { Icon: Trophy, label: 'Reyting', to: '/reyting' },
-];
 
 const COUNT = 63;
 const LANGS: [string, string][] = [['lat', '🇺🇿 O‘zbek'], ['cyr', '🇺🇿 Кирилл'], ['rus', '🇷🇺 Рус']];
@@ -51,18 +39,7 @@ export default function Shablon() {
 
   return (
     <div className="wl">
-      {/* Sidebar */}
-      <aside className={'wl-side' + (open ? ' open' : '')}>
-        <div className="wl-logo"><span className="wl-logo-ic"><Car size={20} /></span> Autostart</div>
-        <nav className="wl-nav">
-          {NAV.map((n) => (
-            <button key={n.label} className={'wl-navi' + (n.active ? ' active' : '')} onClick={() => { setOpen(false); nav(n.to); }}>
-              <n.Icon size={19} /> <span>{n.label}</span>
-            </button>
-          ))}
-        </nav>
-      </aside>
-      {open && <div className="wl-backdrop" onClick={() => setOpen(false)} />}
+      <AppSidebar active="/shablon" open={open} onClose={() => setOpen(false)} />
 
       {/* Main */}
       <div className="wl-main">

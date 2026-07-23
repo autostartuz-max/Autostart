@@ -6,32 +6,9 @@ import {
   Search, Bell, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
 } from 'lucide-react';
 import { api } from '../api';
+import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
-const TESTLAR = [
-  { Icon: FileText, label: 'Shablon testlar', to: '/shablon' },
-  { Icon: BookOpen, label: "Mavzular bo'yicha", to: '/mavzular' },
-  { Icon: CircleAlert, label: 'Qiyin savollar', to: '/test?mode=tricky' },
-  { Icon: HeartCrack, label: 'Xatolarim', to: '/test?mode=mistakes', badge: true },
-  { Icon: Heart, label: 'Sevimlilar', to: '/test?mode=saved' },
-];
-const ORGANISH = [
-  { Icon: TriangleAlert, label: 'Yo‘l harakati qoidalari', to: '/belgilar' },
-  { Icon: SignpostBig, label: 'Belgilar', to: '/belgilar' },
-  { Icon: SignpostBig, label: "Yo'l belgilari", to: '/belgilar' },
-  { Icon: Video, label: 'Videodarslar', to: '/oktagon' },
-  { Icon: Info, label: "Foydali ma'lumotlar", to: '/oktagon' },
-];
-const STAT = [
-  { Icon: ChartBar, label: 'Natijalarim', to: '/profil' },
-  { Icon: TrendingUp, label: 'Progress', to: '/profil' },
-  { Icon: Trophy, label: 'Reyting', to: '/reyting' },
-];
-const BOSHQA = [
-  { Icon: Settings, label: 'Sozlamalar', to: '/profil' },
-  { Icon: LifeBuoy, label: 'Yordam / FAQ', to: '/oktagon' },
-  { Icon: MessageCircle, label: "Biz bilan bog'lanish", to: '/oktagon' },
-];
 const RANK = [
   { n: 'Asadbek', p: '98.7%' }, { n: 'Malika', p: '97.2%' },
   { n: 'Javohir', p: '96.1%' }, { n: 'Sardor', p: '95.4%' },
@@ -49,35 +26,11 @@ export default function Dashboard() {
   const acc = me?.stats?.accuracy ?? 0;
   const wrong = me?.stats?.wrong ?? 0;
 
-  const navi = (items: any[]) =>
-    items.map((it) => (
-      <button key={it.label} className="db-navi" onClick={() => { setOpen(false); nav(it.to); }}>
-        <it.Icon size={18} /> <span>{it.label}</span>
-        {it.badge && wrong > 0 && <span className="nb">{wrong}</span>}
-      </button>
-    ));
-
   const chartPts = CHART.map((v, i) => `${(i / (CHART.length - 1)) * 100},${100 - v}`).join(' ');
 
   return (
     <div className="db">
-      <aside className={'db-side' + (open ? ' open' : '')}>
-        <div className="db-logo">
-          <img src="/mark.png" alt="" className="db-logo-mark" />
-          <span className="db-logo-word"><span className="lg-a">AUTO</span><span className="lg-s">START</span></span>
-        </div>
-        <button className="db-navi active"><Home size={18} /> <span>Bosh sahifa</span></button>
-        <div className="db-sec">Testlar</div>
-        {navi(TESTLAR)}
-        <div className="db-sec">O‘rganish</div>
-        {navi(ORGANISH)}
-        <div className="db-sec">Statistika</div>
-        {navi(STAT)}
-        <div className="db-sec">Boshqa</div>
-        {navi(BOSHQA)}
-        <div className="db-night"><Moon size={17} /> Tungi rejim <button className="db-toggle" /></div>
-      </aside>
-      {open && <div className="db-backdrop" onClick={() => setOpen(false)} />}
+      <AppSidebar active="/" open={open} onClose={() => setOpen(false)} wrong={wrong} />
 
       <div className="db-main">
         <header className="db-top">

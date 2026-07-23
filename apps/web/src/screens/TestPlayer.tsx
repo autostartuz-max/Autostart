@@ -538,7 +538,10 @@ export default function TestPlayer() {
       <div className="tp2-tools">
         <button className="tp2-az" onClick={fontUp}>A+</button>
         <button className="tp2-az" onClick={fontDown}>A-</button>
-        <button className="tp2-confirm" disabled={locked || sel == null} onClick={confirm}>Javobni tasdiqlash</button>
+        <button className={'tp2-confirm' + (sel != null && !locked ? ' ready' : '')} disabled={locked || sel == null} onClick={confirm}>
+          Javobni tasdiqlash
+          {sel != null && !locked && <span className="tp2-fbadge">F{displayOpts.findIndex((o) => o.id === sel) + 1}</span>}
+        </button>
       </div>
 
       <div className="tp2-body">
@@ -548,7 +551,7 @@ export default function TestPlayer() {
               <button key={o.id} className={optClass(o)} disabled={locked} onClick={() => selectOpt(o.id)}>
                 <span className="io-f">F{i + 1}</span>
                 <span className="io-radio">
-                  {reveal && o.isCorrect ? '⊙' : reveal && answered && ans!.chosen.includes(o.id) && !o.isCorrect ? '⊗' : sel === o.id ? '⊙' : '○'}
+                  {reveal && o.isCorrect ? '⊙' : reveal && answered && ans!.chosen.includes(o.id) && !o.isCorrect ? '⊗' : sel === o.id ? '◉' : '○'}
                 </span>
                 <span className="io-text">{tx(o.textLat, o.textCyr)}</span>
               </button>

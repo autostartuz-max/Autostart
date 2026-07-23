@@ -426,9 +426,12 @@ button { font-family: inherit; cursor: pointer; }
 .tp2-tools { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 20px; }
 .tp2-az { width: 46px; height: 40px; background: #26344c; border: 1px solid #33465f; color: #e8eef7;
   border-radius: 9px; font-size: 15px; font-weight: 800; cursor: pointer; }
-.tp2-confirm { background: #d7dde6; border: none; color: #1f2937; border-radius: 9px; padding: 11px 22px;
+.tp2-confirm { position: relative; background: #d7dde6; border: none; color: #1f2937; border-radius: 9px; padding: 11px 22px;
   font-size: 14.5px; font-weight: 700; cursor: pointer; }
 .tp2-confirm:disabled { opacity: .5; cursor: default; }
+.tp2-confirm.ready { background: #22c55e; color: #fff; opacity: 1; }
+.tp2-fbadge { position: absolute; top: -9px; right: -9px; background: #ef4444; color: #fff; font-size: 11px;
+  font-weight: 800; border-radius: 10px; padding: 2px 7px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); }
 .tp2-body { display: flex; gap: 22px; padding: 4px 22px 12px; align-items: flex-start; }
 .tp2-left { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .tp2-opts { display: flex; flex-direction: column; gap: 14px; }
@@ -438,8 +441,9 @@ button { font-family: inherit; cursor: pointer; }
   background: #33445f; color: #cdd7e5; font-weight: 800; font-size: 14px; flex-shrink: 0; }
 .io-radio { width: 40px; text-align: center; font-size: 19px; color: #64748b; flex-shrink: 0; }
 .io-text { flex: 1; padding: 0 14px 0 2px; font-size: calc(15.5px * var(--fs, 1)); font-weight: 600; color: #1f2937; }
-.io.sel { outline: 2px solid #3b82f6; outline-offset: -2px; }
-.io.sel .io-radio { color: #3b82f6; }
+.io.sel { background: #ffe600; }
+.io.sel .io-radio { color: #161616; }
+.io.sel .io-text { color: #161616; }
 .io.ok { background: #a7e521; }
 .io.ok .io-f { background: #7cb700; color: #16280a; }
 .io.ok .io-radio { color: #1a5c00; }

@@ -372,16 +372,21 @@ button { font-family: inherit; cursor: pointer; }
 .cfg-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: #eef2f6; }
 .cfg-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 16px; }
 .cfg { width: 100%; max-width: 640px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 26px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
-.cfg-name { text-align: center; font-size: 16px; font-weight: 800; color: #334155; letter-spacing: .5px; padding-bottom: 14px; border-bottom: 1px solid #eef2f6; margin-bottom: 14px; }
+.cfg-name { display: flex; align-items: center; gap: 14px; font-size: 15px; font-weight: 800; color: #334155; letter-spacing: .5px; margin-bottom: 16px; }
+.cfg-name::before, .cfg-name::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
 .cfg-title { text-align: center; font-size: 15px; font-weight: 800; letter-spacing: .5px; color: #475569; margin-bottom: 18px; }
 .cfg-langs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-.cfg-lang { display: flex; align-items: center; background: #fff; border: 1.5px solid #e2e8f0;
-  border-radius: 10px; padding: 0; overflow: hidden; color: #334155; font-size: 15px; font-weight: 600; height: 48px; }
-.cfg-lang.on { border-color: #3b82f6; }
+.cfg-lang { display: flex; align-items: center; background: #fff; border: 1.6px solid #3b82f6;
+  border-radius: 10px; padding: 0; overflow: hidden; color: #334155; font-size: 15px; font-weight: 600; height: 48px; cursor: pointer; }
+.cfg-lang.on { border-color: #ef4444; }
 .cfg-num { width: 48px; height: 48px; background: #475569; display: flex; align-items: center; justify-content: center;
-  font-weight: 800; color: #fff; flex-shrink: 0; }
-.cfg-lang.on .cfg-num { background: #3b82f6; }
-.cfg-lname { flex: 1; text-align: center; padding-right: 40px; color: #2563eb; }
+  font-size: 16px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.cfg-lname { flex: 1; display: flex; align-items: center; justify-content: center; gap: 9px; padding-right: 48px; color: #2563eb; }
+.cfg-flag { width: 24px; height: 16px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1); flex-shrink: 0; }
+.cfg-review { display: flex; align-items: center; width: 100%; height: 48px; background: #fff;
+  border: 1.6px solid #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 16px; cursor: pointer;
+  color: #334155; font-size: 15px; font-weight: 600; }
+.cfg-review .cfg-lname { color: #334155; }
 .cfg-shuffle { display: flex; gap: 10px; margin-bottom: 16px; }
 .cfg-sh { flex: 1; background: #fff; border: 1px solid #e2e8f0; color: #334155; border-radius: 10px;
   padding: 13px; font-size: 14px; font-weight: 600; }

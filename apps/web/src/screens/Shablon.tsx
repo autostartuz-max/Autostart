@@ -1,18 +1,45 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Home, ClipboardList, Layers, BookOpen, Ticket, TriangleAlert, HeartCrack,
-  Bookmark, Swords, Trophy, Car, ChevronLeft, Bell, Search, Moon, Globe, User, Menu,
+  Bookmark, ChevronLeft, Bell, Search, Moon, Globe, User, Menu,
 } from 'lucide-react';
 import { api } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../shablon.css';
 
 const COUNT = 63;
-const LANGS: [string, string][] = [['lat', '🇺🇿 O‘zbek'], ['cyr', '🇺🇿 Кирилл'], ['rus', '🇷🇺 Рус']];
+const LANGS: [string, string, 'uz' | 'ru'][] = [
+  ['lat', 'O‘zbek', 'uz'],
+  ['cyr', 'Кирилл', 'uz'],
+  ['rus', 'Рус', 'ru'],
+];
+
+// Haqiqiy bayroqlar (emoji Windows'da harf bo'lib ko'rinadi, shuning uchun SVG)
+function Flag({ c }: { c: 'uz' | 'ru' }) {
+  if (c === 'ru')
+    return (
+      <svg className="cfg-flag" viewBox="0 0 30 20" aria-hidden="true">
+        <rect width="30" height="20" fill="#fff" />
+        <rect y="6.67" width="30" height="6.67" fill="#0039a6" />
+        <rect y="13.33" width="30" height="6.67" fill="#d52b1e" />
+      </svg>
+    );
+  return (
+    <svg className="cfg-flag" viewBox="0 0 30 20" aria-hidden="true">
+      <rect width="30" height="20" fill="#fff" />
+      <rect width="30" height="6.2" fill="#0099b5" />
+      <rect y="13.8" width="30" height="6.2" fill="#1eb53a" />
+      <rect y="6.2" width="30" height="0.7" fill="#ce1126" />
+      <rect y="13.1" width="30" height="0.7" fill="#ce1126" />
+      <circle cx="5.4" cy="3.1" r="2" fill="#fff" />
+      <circle cx="6.3" cy="3.1" r="1.7" fill="#0099b5" />
+    </svg>
+  );
+}
 
 export default function Shablon() {
   const nav = useNavigate();
+  const [sp] = useSearchParams();
   const [saved, setSaved] = useState<Set<number>>(new Set());
   const [open, setOpen] = useState(false); // mobil menyu
   const [name, setName] = useState('Mehmon');
@@ -23,6 +50,12 @@ export default function Shablon() {
   useEffect(() => {
     api.me().then((m: any) => setName(m?.user?.firstName || 'Mehmon')).catch(() => {});
   }, []);
+
+  // ?open=N — shablon modalini avtomatik ochish
+  useEffect(() => {
+    const o = sp.get('open');
+    if (o && /^\d+$/.test(o)) { setSelected(Number(o)); setCfgLang('lat'); setShuffle(false); }
+  }, [sp]);
 
   const toggleSave = (n: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -90,10 +123,10 @@ export default function Shablon() {
             {name && <div className="cfg-name">{name.toUpperCase()}</div>}
             <div className="cfg-title">TILNI TANLANG!</div>
             <div className="cfg-langs">
-              {LANGS.map(([v, label], i) => (
+              {LANGS.map(([v, label, flag], i) => (
                 <button key={v} className={'cfg-lang' + (cfgLang === v ? ' on' : '')} onClick={() => setCfgLang(v as any)}>
                   <span className="cfg-num">{i + 1}</span>
-                  <span className="cfg-lname">{label}</span>
+                  <span className="cfg-lname"><Flag c={flag} />{label}</span>
                 </button>
               ))}
             </div>
@@ -101,14 +134,15 @@ export default function Shablon() {
               <button className={'cfg-sh' + (shuffle ? ' on' : '')} onClick={() => setShuffle(true)}>Variantlar aralashsin</button>
               <button className={'cfg-sh' + (!shuffle ? ' on' : '')} onClick={() => setShuffle(false)}>Variantlar aralashmasin</button>
             </div>
+            <button className="cfg-review" onClick={start}>
+              <span className="cfg-num">‹</span>
+              <span className="cfg-lname">Javoblarni ko‘rib ketish</span>
+            </button>
             <div className="cfg-info">
-              <b>20 ta aralash savoldan iborat imtihon bileti.</b> Barcha mavzulardan tasodifiy tuzilgan testlar bilan tanishib,
-              REAL IMTIHON JARAYONIGA tayyorlaning. Natija (javob holati) har bir javobdan so‘ng ko‘rinadi.
-              <b> 3 tadan ortiq xato</b> javobda imtihondan yiqilgan hisoblanasiz.
-            </div>
-            <div className="cfg-btns">
-              <button className="cfg-back" onClick={() => setSelected(null)}>← Orqaga</button>
-              <button className="cfg-start" onClick={start}>Boshlash →</button>
+              <b>20 ta savollarga ajratilgan aralash savollar mavjud bo‘lgan biletlar.</b> Ushbu bo‘limda barcha fanlardan aralash
+              va tasodifiy shaklda tuzilgan testlar bilan tanishib, testlarga javob berish orqali REAL IMTIHON JARAYONIGA
+              tayyorlaning. Natijalar (berilgan javobning holati) har bir javob berilgandan so‘ng ko‘rinadi.
+              <b> 3 tadan ortiq xato</b> javob berilganda imtihondan yiqilgan hisoblanasiz.
             </div>
           </div>
         </div>

@@ -37,6 +37,31 @@ function stableShuffle<T extends { id: number }>(arr: T[], seed: number): T[] {
 const FS_LABEL: Record<string, string> = { sm: 'Kichik', md: "O'rtacha", lg: 'Katta' };
 const FF_LABEL: Record<string, string> = { soft: 'Yumshoq', classic: 'Klassik' };
 
+// Lotinchadan kirillchaga transliteratsiya — baza faqat lotincha, Кирилл tanlanganda shu ishlaydi
+const CYR_MAP: Record<string, string> = {
+  A: 'А', a: 'а', B: 'Б', b: 'б', V: 'В', v: 'в', G: 'Г', g: 'г', D: 'Д', d: 'д',
+  E: 'Е', e: 'е', J: 'Ж', j: 'ж', Z: 'З', z: 'з', I: 'И', i: 'и', Y: 'Й', y: 'й',
+  K: 'К', k: 'к', L: 'Л', l: 'л', M: 'М', m: 'м', N: 'Н', n: 'н', O: 'О', o: 'о',
+  P: 'П', p: 'п', R: 'Р', r: 'р', S: 'С', s: 'с', T: 'Т', t: 'т', U: 'У', u: 'у',
+  F: 'Ф', f: 'ф', X: 'Х', x: 'х', H: 'Ҳ', h: 'ҳ', Q: 'Қ', q: 'қ', C: 'К', c: 'к',
+  W: 'В', w: 'в', "'": 'ъ', 'ʼ': 'ъ', 'ʻ': 'ъ',
+};
+function latToCyr(s: string): string {
+  if (!s) return s;
+  let r = s;
+  const dg: [RegExp, string][] = [
+    [/O[`'ʻʼ‘’]/g, 'Ў'], [/o[`'ʻʼ‘’]/g, 'ў'], [/G[`'ʻʼ‘’]/g, 'Ғ'], [/g[`'ʻʼ‘’]/g, 'ғ'],
+    [/SH/g, 'Ш'], [/Sh/g, 'Ш'], [/sh/g, 'ш'], [/CH/g, 'Ч'], [/Ch/g, 'Ч'], [/ch/g, 'ч'],
+    [/YO/g, 'Ё'], [/Yo/g, 'Ё'], [/yo/g, 'ё'], [/YU/g, 'Ю'], [/Yu/g, 'Ю'], [/yu/g, 'ю'],
+    [/YA/g, 'Я'], [/Ya/g, 'Я'], [/ya/g, 'я'], [/YE/g, 'Е'], [/Ye/g, 'Е'], [/ye/g, 'е'],
+    [/TS/g, 'Ц'], [/Ts/g, 'Ц'], [/ts/g, 'ц'],
+  ];
+  for (const [re, v] of dg) r = r.replace(re, v);
+  let out = '';
+  for (const ch of r) out += CYR_MAP[ch] ?? ch;
+  return out;
+}
+
 export default function TestPlayer() {
   const nav = useNavigate();
   const [sp] = useSearchParams();
@@ -52,6 +77,7 @@ export default function TestPlayer() {
   const [bmarks, setBmarks] = useState<Set<number>>(new Set());
   const [finished, setFinished] = useState(false);
   const [showRule, setShowRule] = useState(false);
+  const [sel, setSel] = useState<number | null>(null); // tanlangan (hali tasdiqlanmagan) variant
   const [seconds, setSeconds] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const startRef = useRef<number>(Date.now());
@@ -67,7 +93,8 @@ export default function TestPlayer() {
   const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>((sp.get('lang') as any) || 'lat');
   const [configured, setConfigured] = useState(!examMode || !!sp.get('lang'));
   const [userName, setUserName] = useState('');
-  const tx = (lat: string, cyr: string) => (cfgLang === 'cyr' ? cyr || lat : lat);
+  const tx = (lat: string, cyr: string) =>
+    cfgLang === 'cyr' ? (cyr && cyr.trim() ? cyr : latToCyr(lat)) : lat;
   const setS = (k: string, v: any) => setSettings((s: any) => ({ ...s, [k]: v }));
   const saveSettings = () => {
     try {
@@ -214,6 +241,7 @@ export default function TestPlayer() {
     startRef.current = Date.now();
     stopVoice(); // savol almashganda ovozni to'xtatadi
     setShowPlayer(false);
+    setSel(null); // yangi savolda tanlovni tozalaymiz
     curRef.current?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx]);
@@ -450,75 +478,133 @@ export default function TestPlayer() {
     return c;
   };
 
+  /* ===== intalim uslubidagi test oynasi ===== */
+  const shablonN = sp.get('n');
+  const shablonLabel = shablonN ? `${shablonN} - SHABLON` : examMode ? 'IMTIHON' : 'TEST';
+  const SIZES = ['sm', 'md', 'lg'];
+  const fontUp = () => setS('fontSize', SIZES[Math.min(SIZES.indexOf(settings.fontSize) + 1, 2)]);
+  const fontDown = () => setS('fontSize', SIZES[Math.max(SIZES.indexOf(settings.fontSize) - 1, 0)]);
+
+  const selectOpt = (optId: number) => { if (!locked) setSel(optId); };
+  const confirm = async () => {
+    if (locked || sel == null) return;
+    haptic();
+    const timeMs = Date.now() - startRef.current;
+    try {
+      const r = await api.answer({ questionId: q.id, chosen: [sel], timeMs });
+      haptic(r.isCorrect ? 'success' : 'error');
+      setAnswers((a) => ({ ...a, [q.id]: { chosen: [sel], isCorrect: r.isCorrect } }));
+    } catch {
+      /* ignore */
+    }
+  };
+  const optClass = (o: Option) => {
+    if (reveal && o.isCorrect) return 'io ok';
+    if (reveal && answered && ans!.chosen.includes(o.id) && !o.isCorrect) return 'io no';
+    if (!locked && sel === o.id) return 'io sel';
+    return 'io';
+  };
+  const circleClass = (i: number) => {
+    const qq = questions[i];
+    let c = 'ic';
+    if (answers[qq.id]) c += answers[qq.id].isCorrect ? ' ok' : ' no';
+    if (i === idx) c += ' cur';
+    return c;
+  };
+  const exit = () => { localStorage.removeItem(SESSION_KEY); nav('/shablon'); };
+
   return (
-    <div className={`tplayer fs-${settings.fontSize} ff-${settings.fontStyle}`}>
-      <div className="tbar">
-        <button className="tbtn" onClick={() => { localStorage.removeItem(SESSION_KEY); nav('/'); }}><ChevronLeft size={18} /> Orqaga</button>
-        <button className="tbtn fin" onClick={() => setFinished(true)}>Yakunlash</button>
-      </div>
-
-      <div className="tbar2">
-        <div className="grp">
-          <button className={'sq' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm} title="Saqlash">
-            <Bookmark size={19} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
-          </button>
-          <button className="sq" onClick={share} title="Ulashish"><Share2 size={19} /></button>
+    <div className={`tp2 fs-${settings.fontSize} ff-${settings.fontStyle}`}>
+      <header className="tp2-top">
+        <div className="tp2-brand">
+          <img src="/mark.png" alt="" className="tp2-mark" />
+          <span className="tp2-word"><b>AUTO</b><i>START</i></span>
         </div>
-        <div className="ttime"><Clock size={15} /> {mm}:{ss}</div>
-        <div className="grp">
-          <button className="sq" onClick={() => setShowSettings(true)} title="Sozlamalar"><Settings size={19} /></button>
-          <button className="sq" onClick={() => setFinished(true)} title="Natija"><BarChart3 size={19} /></button>
+        <div className="tp2-mid">
+          <span className="tp2-shab">{shablonLabel}</span>
+          <span className="tp2-timer"><Clock size={15} /> {mm}:{ss}</span>
         </div>
-      </div>
-
-      <div className="qnav">
-        {questions.map((qq, i) => (
-          <button key={qq.id} ref={i === idx ? curRef : null} className={navClass(i)} onClick={() => setIdx(i)}>
-            {i + 1}
+        <div className="tp2-right">
+          <span className="tp2-tp">TOPSHIRUVCHI: <b>{(userName || 'Mehmon').toUpperCase()}</b></span>
+          <button className={'tp2-ic2' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm} title="Saqlash">
+            <Bookmark size={16} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
           </button>
-        ))}
-        <button className="qn fin" onClick={() => setFinished(true)}>✓</button>
-      </div>
-
-      <div className="qtitle">{tx(q.textLat, q.textCyr)}</div>
-      {q.imageUrl && (
-        <div className="qimgwrap">
-          <img src={q.imageUrl} />
+          <button className="tp2-esc" onClick={exit} title="Chiqish">ESC</button>
         </div>
-      )}
+      </header>
 
-      <div className="fopts">
-        {displayOpts.map((o, i) => (
-          <button key={o.id} className={foptClass(o)} disabled={locked} onClick={() => choose(o.id)}>
-            <span className="fb">F{i + 1}</span>
-            <span className="ftext">{tx(o.textLat, o.textCyr)}</span>
-            <span className="fmark">{foptMark(o)}</span>
-          </button>
-        ))}
+      <div className="tp2-qbar">{idx + 1}. {tx(q.textLat, q.textCyr)}</div>
+
+      <div className="tp2-tools">
+        <button className="tp2-az" onClick={fontUp}>A+</button>
+        <button className="tp2-az" onClick={fontDown}>A-</button>
+        <button className="tp2-confirm" disabled={locked || sel == null} onClick={confirm}>Javobni tasdiqlash</button>
       </div>
 
-      {showPlayer && (
-        <div className="aplayer">
-          <button className="pp" onClick={togglePlay}>
-            {playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
-          </button>
-          <div className={'wave' + (playing ? ' playing' : '')}>
-            {Array.from({ length: 22 }).map((_, i) => (
-              <i
-                key={i}
-                className={i / 22 <= aprog ? 'on' : ''}
-                style={{ animationDelay: `${(i % 11) * 0.06}s` }}
-              />
+      <div className="tp2-body">
+        <div className="tp2-left">
+          <div className="tp2-opts">
+            {displayOpts.map((o, i) => (
+              <button key={o.id} className={optClass(o)} disabled={locked} onClick={() => selectOpt(o.id)}>
+                <span className="io-f">F{i + 1}</span>
+                <span className="io-radio">
+                  {reveal && o.isCorrect ? '⊙' : reveal && answered && ans!.chosen.includes(o.id) && !o.isCorrect ? '⊗' : sel === o.id ? '⊙' : '○'}
+                </span>
+                <span className="io-text">{tx(o.textLat, o.textCyr)}</span>
+              </button>
             ))}
           </div>
-          <button className="pp x" onClick={closePlayer}><X size={16} /></button>
+          {reveal && (
+            <div className="tp2-legend">
+              <span className="lg ok">⊙ To‘g‘ri javob</span>
+              <span className="lg no">⊗ Nato‘g‘ri javob</span>
+              <span className="lg sk">○ Belgilanmagan javob</span>
+            </div>
+          )}
+          <div className="tp2-under">
+            <button className="pill" onClick={() => setShowRule(true)}><Info size={16} /> Qoidasi</button>
+            <button className="pill learn" onClick={learn}><Volume2 size={16} /> Tushuncha</button>
+            <button className="pill" onClick={() => setShowSettings(true)}><Settings size={16} /> Sozlamalar</button>
+          </div>
         </div>
-      )}
 
-      <div className="qbar">
-        <button className="pill" onClick={() => setShowRule(true)}><Info size={18} /> Qoidasi</button>
-        <button className="pill learn" onClick={learn}><Volume2 size={18} /> Tushuncha</button>
+        <div className="tp2-imgcol">
+          {q.imageUrl ? (
+            <div className="tp2-imgwrap"><span className="tp2-imgf">F</span><img src={q.imageUrl} className="tp2-img" /></div>
+          ) : (
+            <div className="tp2-noimg">Bu savolda rasm yo‘q</div>
+          )}
+          {showPlayer && (
+            <div className="aplayer">
+              <button className="pp" onClick={togglePlay}>
+                {playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+              </button>
+              <div className={'wave' + (playing ? ' playing' : '')}>
+                {Array.from({ length: 22 }).map((_, i) => (
+                  <i key={i} className={i / 22 <= aprog ? 'on' : ''} style={{ animationDelay: `${(i % 11) * 0.06}s` }} />
+                ))}
+              </div>
+              <button className="pp x" onClick={closePlayer}><X size={16} /></button>
+            </div>
+          )}
+        </div>
       </div>
+
+      <div className="tp2-nav">
+        <div className="tp2-circles">
+          {questions.map((qq, i) => (
+            <button key={qq.id} ref={i === idx ? curRef : null} className={circleClass(i)} onClick={() => setIdx(i)}>
+              {i + 1}
+            </button>
+          ))}
+        </div>
+        <div className="tp2-pn">
+          <button disabled={idx === 0} onClick={() => setIdx(Math.max(0, idx - 1))}>‹ oldingi</button>
+          <button onClick={() => (idx < questions.length - 1 ? setIdx(idx + 1) : setFinished(true))}>keyingi ›</button>
+        </div>
+      </div>
+
+      {/* ==== Modallar (izoh, sozlama, natija) ==== */}
 
       {showRule && (
         <div className="modal" onClick={closeRule}>

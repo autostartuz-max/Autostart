@@ -398,6 +398,82 @@ button { font-family: inherit; cursor: pointer; }
 .cfg-back { background: #f1f5f9; border: 1px solid #e2e8f0; color: #334155; border-radius: 10px; padding: 14px 18px; font-weight: 700; }
 .cfg-start { flex: 1; background: #22c55e; color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 800; }
 
+/* ===== intalim uslubidagi test oynasi (tp2) ===== */
+.tp2 { position: fixed; inset: 0; display: flex; flex-direction: column; overflow-y: auto; color: #e8eef7;
+  background: radial-gradient(1200px 500px at 50% -8%, #17293f, #0a1420 60%), #0a1420; }
+.tp2-top { display: flex; align-items: center; gap: 14px; padding: 11px 20px; border-bottom: 1px solid #1c2b43; }
+.tp2-brand { display: flex; align-items: center; gap: 8px; min-width: 150px; }
+.tp2-mark { height: 30px; width: auto; }
+.tp2-word { font-size: 20px; font-weight: 900; font-style: italic; }
+.tp2-word b { color: #fff; } .tp2-word i { color: #facc15; font-style: italic; }
+.tp2-mid { flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px; }
+.tp2-shab { font-size: 17px; font-weight: 800; }
+.tp2-timer { display: inline-flex; align-items: center; gap: 7px; background: #0e1c2f; border: 1px solid #2a3a54;
+  border-radius: 9px; padding: 6px 13px; font-size: 16px; font-weight: 800; color: #fbbf24; }
+.tp2-right { display: flex; align-items: center; gap: 10px; min-width: 150px; justify-content: flex-end; }
+.tp2-tp { font-size: 12.5px; font-weight: 700; color: #cbd5e1; }
+.tp2-tp b { color: #facc15; }
+.tp2-ic2 { width: 40px; height: 34px; border-radius: 7px; background: #e8edf3; border: 1px solid #cbd5e1; color: #334155;
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.tp2-ic2.on { color: #f59e0b; }
+.tp2-esc { background: #e8edf3; border: 1px solid #cbd5e1; color: #b91c1c; font-weight: 800; font-size: 12px;
+  border-radius: 7px; padding: 9px 12px; cursor: pointer; }
+.tp2-qbar { margin: 14px 20px 0; background: #101f33; border: 1px solid #24344e; border-radius: 10px;
+  padding: 14px 20px; font-size: 16px; font-weight: 700; text-align: center; color: #eaf1fb; }
+.tp2-tools { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 20px; }
+.tp2-az { width: 46px; height: 40px; background: #26344c; border: 1px solid #33465f; color: #e8eef7;
+  border-radius: 9px; font-size: 15px; font-weight: 800; cursor: pointer; }
+.tp2-confirm { background: #d7dde6; border: none; color: #1f2937; border-radius: 9px; padding: 11px 22px;
+  font-size: 14.5px; font-weight: 700; cursor: pointer; }
+.tp2-confirm:disabled { opacity: .5; cursor: default; }
+.tp2-body { display: flex; gap: 20px; padding: 4px 20px 10px; align-items: flex-start; }
+.tp2-left { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tp2-opts { display: flex; flex-direction: column; gap: 14px; }
+.io { display: flex; align-items: center; width: 100%; height: 56px; background: #fff; border: none;
+  border-radius: 8px; overflow: hidden; cursor: pointer; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.io-f { width: 44px; align-self: stretch; display: flex; align-items: center; justify-content: center;
+  background: #33445f; color: #cdd7e5; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+.io-radio { width: 40px; text-align: center; font-size: 19px; color: #64748b; flex-shrink: 0; }
+.io-text { flex: 1; padding: 0 14px 0 2px; font-size: 15.5px; font-weight: 600; color: #1f2937; }
+.io.sel { outline: 2px solid #3b82f6; outline-offset: -2px; }
+.io.sel .io-radio { color: #3b82f6; }
+.io.ok { background: #a7e521; }
+.io.ok .io-f { background: #7cb700; color: #16280a; }
+.io.ok .io-radio { color: #1a5c00; }
+.io.ok .io-text { color: #14300a; }
+.io.no { background: #f0483e; }
+.io.no .io-f { background: #c62f27; color: #fff; }
+.io.no .io-radio, .io.no .io-text { color: #fff; }
+.io:disabled { cursor: default; }
+.tp2-legend { display: flex; gap: 26px; padding: 14px 4px 0; flex-wrap: wrap; }
+.tp2-legend .lg { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; }
+.tp2-legend .lg.ok { color: #86efac; } .tp2-legend .lg.no { color: #fca5a5; } .tp2-legend .lg.sk { color: #94a3b8; }
+.tp2-under { display: flex; gap: 10px; padding: 18px 0 0; flex-wrap: wrap; }
+.tp2-imgcol { width: 46%; max-width: 640px; flex-shrink: 0; }
+.tp2-imgwrap { position: relative; border: 1px solid #2a3a54; border-radius: 8px; overflow: hidden; background: #000; }
+.tp2-img { width: 100%; display: block; }
+.tp2-imgf { position: absolute; top: 8px; right: 8px; background: rgba(20,30,48,.85); border: 1px solid #3a4a64;
+  color: #cbd5e1; font-weight: 800; font-size: 12px; padding: 3px 10px; border-radius: 6px; }
+.tp2-noimg { border: 1px dashed #2a3a54; border-radius: 8px; padding: 70px 20px; text-align: center; color: #64748b;
+  background: #0e1c2f; font-size: 14px; }
+.tp2-nav { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 18px;
+  flex-wrap: wrap; padding: 16px 20px 22px; border-top: 1px solid #1c2b43; }
+.tp2-circles { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.ic { width: 34px; height: 34px; border-radius: 50%; background: #16263c; border: 1px solid #2a3a54; color: #9fb2cc;
+  font-weight: 800; font-size: 13px; cursor: pointer; }
+.ic.cur { background: #facc15; color: #1a2233; border-color: #facc15; }
+.ic.ok { background: #22c55e; color: #04120a; border-color: #22c55e; }
+.ic.no { background: #ef4444; color: #fff; border-color: #ef4444; }
+.tp2-pn { display: flex; gap: 14px; }
+.tp2-pn button { background: none; border: none; color: #cbd5e1; font-size: 14px; font-weight: 700; cursor: pointer; }
+.tp2-pn button:disabled { color: #475569; cursor: default; }
+.tp2.fs-sm .io-text, .tp2.fs-sm .tp2-qbar { font-size: 14px; }
+.tp2.fs-lg .io-text { font-size: 18px; } .tp2.fs-lg .tp2-qbar { font-size: 19px; }
+@media (max-width: 900px) {
+  .tp2-body { flex-direction: column; } .tp2-imgcol { width: 100%; max-width: none; }
+  .tp2-tp { display: none; } .tp2-mid { gap: 10px; }
+}
+
 /* ---- Tab bar ---- */
 .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,22,35,.96);
   border-top: 1px solid var(--border); backdrop-filter: blur(8px); display: flex; justify-content: space-around;

@@ -67,7 +67,7 @@ export default function Shablon() {
   };
 
   const start = () => {
-    nav(`/test?mode=exam&exam=1&lang=${cfgLang}&shuffle=${shuffle ? 1 : 0}`);
+    nav(`/test?mode=exam&exam=1&lang=${cfgLang}&shuffle=${shuffle ? 1 : 0}${selected ? `&n=${selected}` : ''}`);
   };
 
   return (

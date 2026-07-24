@@ -35,6 +35,9 @@ export default function QuestionForm() {
   const [audioBusy, setAudioBusy] = useState(false);
   const [audioVer, setAudioVer] = useState(0);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageBusy, setImageBusy] = useState(false);
 
   useEffect(() => {
     api.categories().then(setCats).catch(() => {});
@@ -52,6 +55,7 @@ export default function QuestionForm() {
         setIsTricky(it.isTricky);
         setIsNumeric(it.isNumeric);
         setHasAudio(!!it.hasAudio);
+        setImageUrl(it.imageUrl || null);
         setOptions(
           it.options.map((o: any) => ({ textLat: o.textLat, isCorrect: o.isCorrect, wrongReason: o.wrongReason || '' }))
         );
@@ -68,6 +72,18 @@ export default function QuestionForm() {
       setErr(e.message || 'Xato');
     } finally {
       setAudioBusy(false);
+    }
+  };
+
+  const removeImage = async () => {
+    setImageBusy(true);
+    try {
+      await api.deleteImage(Number(id));
+      setImageUrl(null);
+    } catch (e: any) {
+      setErr(e.message || 'Xato');
+    } finally {
+      setImageBusy(false);
     }
   };
 
@@ -104,6 +120,7 @@ export default function QuestionForm() {
         qid = created.id;
       }
       if (audioFile && qid) await api.uploadAudio(qid, audioFile);
+      if (imageFile && qid) await api.uploadImage(qid, imageFile);
       nav('/questions');
     } catch (e: any) {
       setErr(e.message || 'Saqlashda xato');
@@ -123,6 +140,32 @@ export default function QuestionForm() {
         <div className="field">
           <label>Savol matni (kirill) — ixtiyoriy</label>
           <textarea className="textarea" value={textCyr} onChange={(e) => setTextCyr(e.target.value)} />
+        </div>
+
+        <div className="field">
+          <label>Savol rasmi (test oynasida o‘ng tomonda ko‘rsatiladi)</label>
+          <div className="row" style={{ alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
+            {imageFile ? (
+              <img src={URL.createObjectURL(imageFile)} alt="" style={{ maxWidth: 280, maxHeight: 180, borderRadius: 8, border: '1px solid #2a3547' }} />
+            ) : imageUrl ? (
+              <img src={imageUrl} alt="" style={{ maxWidth: 280, maxHeight: 180, borderRadius: 8, border: '1px solid #2a3547' }} />
+            ) : (
+              <div style={{ width: 200, height: 120, borderRadius: 8, border: '1px dashed #2a3547', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8a94a6', fontSize: 13 }}>Rasm yo‘q</div>
+            )}
+            <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+              <label className="btn sec" style={{ cursor: 'pointer' }}>
+                {imageFile ? `✓ ${imageFile.name}` : imageUrl ? 'Rasmni almashtirish' : '🖼 Rasm tanlash'}
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
+              </label>
+              {imageFile && <button className="btn sec" onClick={() => setImageFile(null)}>Bekor</button>}
+              {editing && imageUrl && !imageFile && (
+                <button className="btn danger" onClick={removeImage} disabled={imageBusy}>Rasmni o‘chirish</button>
+              )}
+            </div>
+          </div>
+          <div style={{ color: '#8a94a6', fontSize: 13, marginTop: 6 }}>
+            Rasm <b>"Saqlash"</b> bosilganda savol bilan birga yuklanadi. (JPG/PNG)
+          </div>
         </div>
 
         <div className="field">

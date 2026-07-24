@@ -55,6 +55,7 @@ model Question {
   bookmarks   Bookmark[]
   complaints  Complaint[]
   audio       QuestionAudio?
+  image       QuestionImage?
 }
 
 model QuestionAudio {
@@ -63,6 +64,15 @@ model QuestionAudio {
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   data       Bytes
   mime       String   @default("audio/mpeg")
+  createdAt  DateTime @default(now())
+}
+
+model QuestionImage {
+  id         Int      @id @default(autoincrement())
+  questionId Int      @unique
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  data       Bytes
+  mime       String   @default("image/jpeg")
   createdAt  DateTime @default(now())
 }
 

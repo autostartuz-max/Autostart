@@ -120,6 +120,18 @@ userRouter.get(
   })
 );
 
+/* ---------- Savol rasmi (admin yuklagan — test oynasida, public) ---------- */
+userRouter.get(
+  '/questions/:id/image',
+  ah(async (req, res) => {
+    const img = await prisma.questionImage.findUnique({ where: { questionId: Number(req.params.id) } });
+    if (!img) return res.status(404).json({ error: 'Rasm yoʻq' });
+    res.setHeader('Content-Type', img.mime || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(Buffer.from(img.data));
+  })
+);
+
 /* ---------- Profil ---------- */
 userRouter.get(
   '/me',

@@ -71,4 +71,16 @@ export const api = {
     return res.json();
   },
   deleteAudio: (id: number) => req('/admin/questions/' + id + '/audio', { method: 'DELETE' }),
+  uploadImage: async (id: number, file: File) => {
+    const fd = new FormData();
+    fd.append('image', file);
+    const res = await fetch(API + '/admin/questions/' + id + '/image', {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: fd,
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
+    return res.json();
+  },
+  deleteImage: (id: number) => req('/admin/questions/' + id + '/image', { method: 'DELETE' }),
 };

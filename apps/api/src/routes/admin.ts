@@ -85,7 +85,6 @@ function questionData(body: any) {
   return {
     textLat: String(body.textLat || '').trim(),
     textCyr: String(body.textCyr || '').trim(),
-    imageUrl: body.imageUrl ? String(body.imageUrl) : null,
     explanation: String(body.explanation || '').trim(),
     ruleRef: body.ruleRef ? String(body.ruleRef) : null,
     difficulty: Number(body.difficulty || 1),
@@ -185,6 +184,33 @@ adminRouter.delete(
     await prisma.questionAudio.deleteMany({ where: { questionId: id } });
     await prisma.question.update({ where: { id }, data: { hasAudio: false } });
     res.json({ ok: true, hasAudio: false });
+  })
+);
+
+/* ---------- Savol rasmi (test oynasida ko'rsatiladi) ---------- */
+adminRouter.post(
+  '/questions/:id/image',
+  upload.single('image'),
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    if (!req.file) return res.status(400).json({ error: 'Fayl yuklanmadi' });
+    await prisma.questionImage.upsert({
+      where: { questionId: id },
+      update: { data: req.file.buffer, mime: req.file.mimetype || 'image/jpeg' },
+      create: { questionId: id, data: req.file.buffer, mime: req.file.mimetype || 'image/jpeg' },
+    });
+    await prisma.question.update({ where: { id }, data: { imageUrl: `/api/questions/${id}/image` } });
+    res.json({ ok: true, imageUrl: `/api/questions/${id}/image` });
+  })
+);
+
+adminRouter.delete(
+  '/questions/:id/image',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    await prisma.questionImage.deleteMany({ where: { questionId: id } });
+    await prisma.question.update({ where: { id }, data: { imageUrl: null } });
+    res.json({ ok: true });
   })
 );
 

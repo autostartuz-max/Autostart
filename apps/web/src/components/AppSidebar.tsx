@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
+  Plus, ClipboardList,
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -40,6 +41,8 @@ interface Props {
 export default function AppSidebar({ active, open = false, onClose, wrong = 0 }: Props) {
   const nav = useNavigate();
   const go = (to: string) => { onClose?.(); nav(to); };
+  // Admin login qilgan bo'lsa (main + admin bir domenda — localStorage umumiy) — savol boshqaruvi ko'rinadi
+  const isAdmin = typeof window !== 'undefined' && !!localStorage.getItem('yhq_admin_token');
 
   const navi = (items: typeof TESTLAR) =>
     items.map((it) => (
@@ -65,6 +68,13 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         {navi(ORGANISH)}
         <div className="db-sec">Statistika</div>
         {navi(STAT)}
+        {isAdmin && (
+          <>
+            <div className="db-sec">Admin</div>
+            <a className="db-navi" href="/admin/questions"><ClipboardList size={18} /> <span>Savollar</span></a>
+            <a className="db-navi" href="/admin/questions/new"><Plus size={18} /> <span>Savol qo‘shish</span></a>
+          </>
+        )}
         <div className="db-side-bottom">
           <div className="db-sec">Boshqa</div>
           {navi(BOSHQA)}

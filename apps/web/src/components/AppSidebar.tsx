@@ -65,9 +65,11 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         {navi(ORGANISH)}
         <div className="db-sec">Statistika</div>
         {navi(STAT)}
-        <div className="db-sec">Boshqa</div>
-        {navi(BOSHQA)}
-        <div className="db-night"><Moon size={17} /> Tungi rejim <button className="db-toggle" /></div>
+        <div className="db-side-bottom">
+          <div className="db-sec">Boshqa</div>
+          {navi(BOSHQA)}
+          <div className="db-night"><Moon size={17} /> Tungi rejim <button className="db-toggle" /></div>
+        </div>
       </aside>
       {open && <div className="db-backdrop" onClick={onClose} />}
     </>

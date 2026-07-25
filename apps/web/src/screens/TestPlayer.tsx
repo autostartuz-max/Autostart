@@ -79,6 +79,7 @@ export default function TestPlayer() {
   const [finished, setFinished] = useState(false);
   const [showRule, setShowRule] = useState(false);
   const [sel, setSel] = useState<number | null>(null); // tanlangan (hali tasdiqlanmagan) variant
+  const [showImg, setShowImg] = useState(false); // rasm lightbox (F tugmasi)
   const [seconds, setSeconds] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const startRef = useRef<number>(Date.now());
@@ -248,11 +249,25 @@ export default function TestPlayer() {
     stopVoice(); // savol almashganda ovozni to'xtatadi
     setShowPlayer(false);
     setSel(null); // yangi savolda tanlovni tozalaymiz
+    setShowImg(false);
     curRef.current?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx]);
 
   useEffect(() => () => stopVoice(), []); // ekrandan chiqqanda to'xtatadi
+
+  // F tugmasi — rasmni kattalashtirish (lightbox), Esc — yopish
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setShowImg(false); return; }
+      if (e.key === 'f' || e.key === 'F' || e.key === 'а' || e.key === 'А') {
+        const cur = questions?.[idx];
+        if (cur?.imageUrl) setShowImg((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [questions, idx]);
 
   // Sessiyani saqlash — chiqib ketsa, o'sha joydan davom etish uchun
   useEffect(() => {
@@ -579,7 +594,10 @@ export default function TestPlayer() {
 
         <div className="tp2-imgcol">
           {q.imageUrl ? (
-            <div className="tp2-imgwrap"><span className="tp2-imgf">F</span><img src={q.imageUrl} className="tp2-img" /></div>
+            <div className="tp2-imgwrap">
+              <button className="tp2-imgf" onClick={() => setShowImg(true)} title="Kattalashtirish (F)">F</button>
+              <img src={q.imageUrl} className="tp2-img" onClick={() => setShowImg(true)} />
+            </div>
           ) : (
             <div className="tp2-noimg">Bu savolda rasm yo‘q</div>
           )}
@@ -612,6 +630,14 @@ export default function TestPlayer() {
           <button onClick={() => (idx < questions.length - 1 ? setIdx(idx + 1) : setFinished(true))}>keyingi ›</button>
         </div>
       </div>
+
+      {/* Rasm lightbox (F tugmasi) */}
+      {showImg && q.imageUrl && (
+        <div className="tp2-lightbox" onClick={() => setShowImg(false)}>
+          <img src={q.imageUrl} onClick={(e) => e.stopPropagation()} />
+          <button className="tp2-lightbox-x" onClick={() => setShowImg(false)}><X size={22} /></button>
+        </div>
+      )}
 
       {/* ==== Modallar (izoh, sozlama, natija) ==== */}
 

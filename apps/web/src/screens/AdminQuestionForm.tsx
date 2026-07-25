@@ -29,16 +29,13 @@ export default function AdminQuestionForm() {
   const [rusLoading, setRusLoading] = useState(false);
   const [shablon, setShablon] = useState('');
   const [explanation, setExplanation] = useState('');
-  const [categoryId, setCategoryId] = useState('');
   const [topicId, setTopicId] = useState('');
-  const [newTopic, setNewTopic] = useState('');
   const [options, setOptions] = useState<Opt[]>([
     { textLat: '', isCorrect: true, wrongReason: '' },
     { textLat: '', isCorrect: false, wrongReason: '' },
     { textLat: '', isCorrect: false, wrongReason: '' },
     { textLat: '', isCorrect: false, wrongReason: '' },
   ]);
-  const [cats, setCats] = useState<any[]>([]);
   const [topics, setTopics] = useState<any[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -77,7 +74,6 @@ export default function AdminQuestionForm() {
 
   useEffect(() => {
     if (!authed) return;
-    adminApi.categories().then(setCats).catch(() => {});
     adminApi.topics().then(setTopics).catch(() => {});
     if (editing)
       adminApi
@@ -90,7 +86,6 @@ export default function AdminQuestionForm() {
           if (it.textRus) setRusTouched(true);
           setShablon(it.shablon ? String(it.shablon) : '');
           setExplanation(it.explanation || '');
-          setCategoryId(it.categoryId ? String(it.categoryId) : '');
           setTopicId(it.topicId ? String(it.topicId) : '');
           setImageUrl(it.imageUrl || null);
           if (it.options?.length)
@@ -114,19 +109,6 @@ export default function AdminQuestionForm() {
     setOptions((os) => os.map((o, j) => (j === i ? { ...o, ...patch } : o)));
   const addOpt = () => setOptions((os) => [...os, { textLat: '', isCorrect: false, wrongReason: '' }]);
   const rmOpt = (i: number) => setOptions((os) => os.filter((_, j) => j !== i));
-
-  const addTopic = async () => {
-    const name = newTopic.trim();
-    if (!name) return;
-    try {
-      const t = await adminApi.createTopic(name);
-      setTopics((ts) => [...ts, t]);
-      setTopicId(String(t.id));
-      setNewTopic('');
-    } catch (e: any) {
-      setErr(e.message || 'Mavzu qo‘shilmadi');
-    }
-  };
 
   const removeImage = async () => {
     if (!editing) { setImageUrl(null); return; }
@@ -154,7 +136,6 @@ export default function AdminQuestionForm() {
       textRus: textRus.trim(),
       shablon: shablon ? Number(shablon) : null,
       explanation: explanation.trim(),
-      categoryId: categoryId ? Number(categoryId) : null,
       topicId: topicId ? Number(topicId) : null,
       options: opts,
     };
@@ -209,8 +190,13 @@ export default function AdminQuestionForm() {
               </div>
 
               <div className="adm-field">
-                <label>Shablon raqami (savol qaysi shablonga tushadi, 1–63)</label>
-                <input className="adm-inp" type="number" min={1} max={63} value={shablon} onChange={(e) => setShablon(e.target.value)} placeholder="Masalan: 1" style={{ maxWidth: 220 }} />
+                <label>Shablon (savol qaysi shablonga tushadi)</label>
+                <select className="adm-sel" value={shablon} onChange={(e) => setShablon(e.target.value)} style={{ maxWidth: 260 }}>
+                  <option value="">— tanlanmagan —</option>
+                  {Array.from({ length: 63 }, (_, i) => i + 1).map((n) => (
+                    <option key={n} value={n}>{n}-shablon</option>
+                  ))}
+                </select>
                 <div className="adm-hint">Bo‘sh qoldirilsa — savol shablonga biriktirilmaydi.</div>
               </div>
 
@@ -273,27 +259,12 @@ export default function AdminQuestionForm() {
                 </div>
               </div>
 
-              <div className="adm-grid2">
-                <div className="adm-field">
-                  <label>Toifa</label>
-                  <select className="adm-sel" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-                    <option value="">— tanlanmagan —</option>
-                    {cats.map((c) => <option key={c.id} value={c.id}>{c.code} — {c.name}</option>)}
-                  </select>
-                </div>
-                <div className="adm-field">
-                  <label>Mavzu</label>
-                  <select className="adm-sel" value={topicId} onChange={(e) => setTopicId(e.target.value)}>
-                    <option value="">— tanlanmagan —</option>
-                    {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-                  </select>
-                  <div className="adm-addtopic">
-                    <input className="adm-inp" placeholder="Yangi mavzu nomi" value={newTopic}
-                      onChange={(e) => setNewTopic(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTopic())} />
-                    <button className="adm-btn sec" onClick={addTopic}><Plus size={15} /> Qo‘shish</button>
-                  </div>
-                </div>
+              <div className="adm-field">
+                <label>Mavzu</label>
+                <select className="adm-sel" value={topicId} onChange={(e) => setTopicId(e.target.value)} style={{ maxWidth: 360 }}>
+                  <option value="">— tanlanmagan —</option>
+                  {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
               </div>
 
               {err && <div className="adm-err">{err}</div>}

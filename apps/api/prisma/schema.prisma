@@ -84,6 +84,7 @@ model Option {
   question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   textLat     String
   textCyr     String   @default("")
+  textRus     String   @default("")
   isCorrect   Boolean  @default(false)
   wrongReason String?
   order       Int      @default(0)

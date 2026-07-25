@@ -9,8 +9,10 @@ import '../dashboard.css';
 
 interface Opt {
   textLat: string;
+  textRus: string;
   isCorrect: boolean;
-  wrongReason: string;
+  rusTouched?: boolean;
+  rusSrc?: string;
 }
 
 export default function AdminQuestionForm() {
@@ -31,10 +33,10 @@ export default function AdminQuestionForm() {
   const [explanation, setExplanation] = useState('');
   const [topicId, setTopicId] = useState('');
   const [options, setOptions] = useState<Opt[]>([
-    { textLat: '', isCorrect: true, wrongReason: '' },
-    { textLat: '', isCorrect: false, wrongReason: '' },
-    { textLat: '', isCorrect: false, wrongReason: '' },
-    { textLat: '', isCorrect: false, wrongReason: '' },
+    { textLat: '', textRus: '', isCorrect: true },
+    { textLat: '', textRus: '', isCorrect: false },
+    { textLat: '', textRus: '', isCorrect: false },
+    { textLat: '', textRus: '', isCorrect: false },
   ]);
   const [topics, setTopics] = useState<any[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -89,7 +91,10 @@ export default function AdminQuestionForm() {
           setTopicId(it.topicId ? String(it.topicId) : '');
           setImageUrl(it.imageUrl || null);
           if (it.options?.length)
-            setOptions(it.options.map((o: any) => ({ textLat: o.textLat, isCorrect: o.isCorrect, wrongReason: o.wrongReason || '' })));
+            setOptions(it.options.map((o: any) => ({
+              textLat: o.textLat, textRus: o.textRus || '', isCorrect: o.isCorrect,
+              rusTouched: !!o.textRus, rusSrc: o.textLat,
+            })));
         })
         .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,9 +110,27 @@ export default function AdminQuestionForm() {
     setCyrTouched(true);
   };
 
+  // Variantlarni ruschaga avto-tarjima (debounce; admin qo'lda tegmagan va matn o'zgargan bo'lsa)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      options.forEach(async (o, i) => {
+        const lat = o.textLat.trim();
+        if (o.rusTouched || !lat || o.rusSrc === lat) return;
+        try {
+          const r = await adminApi.translate(lat);
+          setOptions((os) => os.map((oo, j) => (j === i ? { ...oo, textRus: r?.text || oo.textRus, rusSrc: lat } : oo)));
+        } catch {
+          /* ignore */
+        }
+      });
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options.map((o) => o.textLat).join('|')]);
+
   const setOpt = (i: number, patch: Partial<Opt>) =>
     setOptions((os) => os.map((o, j) => (j === i ? { ...o, ...patch } : o)));
-  const addOpt = () => setOptions((os) => [...os, { textLat: '', isCorrect: false, wrongReason: '' }]);
+  const addOpt = () => setOptions((os) => [...os, { textLat: '', textRus: '', isCorrect: false }]);
   const rmOpt = (i: number) => setOptions((os) => os.filter((_, j) => j !== i));
 
   const removeImage = async () => {
@@ -130,17 +153,30 @@ export default function AdminQuestionForm() {
     if (opts.length < 2) return setErr('Kamida 2 ta variant kerak');
     if (!opts.some((o) => o.isCorrect)) return setErr('To‘g‘ri javob belgilanmagan');
 
-    const data = {
-      textLat: textLat.trim(),
-      textCyr: textCyr.trim(),
-      textRus: textRus.trim(),
-      shablon: shablon ? Number(shablon) : null,
-      explanation: explanation.trim(),
-      topicId: topicId ? Number(topicId) : null,
-      options: opts,
-    };
     setBusy(true);
     try {
+      // Bo'sh qolgan ruscha variantlarni saqlashdan oldin to'ldiramiz
+      const optsFinal = await Promise.all(
+        opts.map(async (o) => {
+          if (o.textRus && o.textRus.trim())
+            return { textLat: o.textLat.trim(), textRus: o.textRus.trim(), isCorrect: o.isCorrect };
+          try {
+            const r = await adminApi.translate(o.textLat.trim());
+            return { textLat: o.textLat.trim(), textRus: r?.text || '', isCorrect: o.isCorrect };
+          } catch {
+            return { textLat: o.textLat.trim(), textRus: '', isCorrect: o.isCorrect };
+          }
+        })
+      );
+      const data = {
+        textLat: textLat.trim(),
+        textCyr: textCyr.trim(),
+        textRus: textRus.trim(),
+        shablon: shablon ? Number(shablon) : null,
+        explanation: explanation.trim(),
+        topicId: topicId ? Number(topicId) : null,
+        options: optsFinal,
+      };
       let qid = editing ? Number(id) : 0;
       if (editing) await adminApi.updateQuestion(Number(id), data);
       else {
@@ -233,8 +269,8 @@ export default function AdminQuestionForm() {
                       <input type="checkbox" checked={o.isCorrect} onChange={(e) => setOpt(i, { isCorrect: e.target.checked })} />
                       <span>to‘g‘ri</span>
                     </label>
-                    <input className="adm-inp flex" placeholder={`Variant ${i + 1}`} value={o.textLat} onChange={(e) => setOpt(i, { textLat: e.target.value })} />
-                    <input className="adm-inp flex" placeholder="Nega noto‘g‘ri (ixtiyoriy)" value={o.wrongReason} onChange={(e) => setOpt(i, { wrongReason: e.target.value })} />
+                    <input className="adm-inp flex" placeholder={`Variant ${i + 1} (lotin)`} value={o.textLat} onChange={(e) => setOpt(i, { textLat: e.target.value })} />
+                    <input className="adm-inp flex" placeholder="Rus tilida (avtomatik)" value={o.textRus} onChange={(e) => setOpt(i, { textRus: e.target.value, rusTouched: true })} />
                     {options.length > 2 && (
                       <button className="adm-x" onClick={() => rmOpt(i)}><X size={15} /></button>
                     )}

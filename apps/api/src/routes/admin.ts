@@ -16,6 +16,7 @@ const ah =
 interface OptionInput {
   textLat: string;
   textCyr?: string;
+  textRus?: string;
   isCorrect?: boolean;
   wrongReason?: string;
 }
@@ -135,6 +136,7 @@ adminRouter.post(
           create: options.map((o, i) => ({
             textLat: String(o.textLat || '').trim(),
             textCyr: String(o.textCyr || '').trim(),
+            textRus: String(o.textRus || '').trim(),
             isCorrect: !!o.isCorrect,
             wrongReason: o.wrongReason ? String(o.wrongReason) : null,
             order: i,
@@ -162,6 +164,7 @@ adminRouter.put(
           create: options.map((o, i) => ({
             textLat: String(o.textLat || '').trim(),
             textCyr: String(o.textCyr || '').trim(),
+            textRus: String(o.textRus || '').trim(),
             isCorrect: !!o.isCorrect,
             wrongReason: o.wrongReason ? String(o.wrongReason) : null,
             order: i,

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
-  Plus, ClipboardList,
+  ClipboardList,
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -71,8 +71,9 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         {isAdmin && (
           <>
             <div className="db-sec">Admin</div>
-            <a className="db-navi" href="/admin/questions"><ClipboardList size={18} /> <span>Savollar</span></a>
-            <a className="db-navi" href="/admin/questions/new"><Plus size={18} /> <span>Savol qo‘shish</span></a>
+            <button className={'db-navi' + (active === '/savollar' ? ' active' : '')} onClick={() => go('/savollar')}>
+              <ClipboardList size={18} /> <span>Savollar</span>
+            </button>
           </>
         )}
         <div className="db-side-bottom">

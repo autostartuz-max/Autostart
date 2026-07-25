@@ -190,7 +190,7 @@ export default function TestPlayer() {
       .questions(params)
       .then((qs: Question[]) => {
         setQuestions(qs);
-        if (examMode) setSeconds(Math.max(qs.length, 10) * 60);
+        if (examMode) setSeconds(25 * 60); // har shablon imtihoni — 25 daqiqa
         // Xatolar rejimida: oldin belgilangan xato javoblarni ko'rsatamiz
         if (mode === 'mistakes') {
           const pre: Record<number, Answered> = {};
@@ -389,7 +389,7 @@ export default function TestPlayer() {
     setAnswers({});
     setLearned(new Set());
     startRef.current = Date.now();
-    if (examMode) setSeconds(Math.max(questions.length, 10) * 60);
+    if (examMode) setSeconds(25 * 60); // har shablon imtihoni — 25 daqiqa
     else setElapsed(0);
   };
   const rTotal = questions.length;
@@ -588,7 +588,6 @@ export default function TestPlayer() {
           <div className="tp2-under">
             <button className="pill" onClick={() => setShowRule(true)}><Info size={16} /> Qoidasi</button>
             <button className="pill learn" onClick={learn}><Volume2 size={16} /> Tushuncha</button>
-            <button className="pill" onClick={() => setShowSettings(true)}><Settings size={16} /> Sozlamalar</button>
           </div>
         </div>
 

@@ -25,6 +25,8 @@
   padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; text-align: left; width: 100%; }
 .db-navi:hover { background: rgba(255, 255, 255, 0.04); color: var(--db-text); }
 .db-navi.active { background: rgba(59, 130, 246, 0.14); color: #7fb0ff; }
+.db-adminlink { opacity: .5; font-size: 12.5px; }
+.db-adminlink:hover { opacity: 1; }
 .db-navi .nb { margin-left: auto; background: #ef4444; color: #fff; font-size: 11px; font-weight: 800; border-radius: 20px; padding: 1px 7px; }
 .db-side-bottom { margin-top: auto; padding-top: 8px; }
 .db-night { display: flex; align-items: center; gap: 10px; padding: 12px 12px; color: var(--db-muted); font-size: 14px; font-weight: 600; }
@@ -209,6 +211,8 @@
 .adm-x { width: 34px; height: 34px; flex-shrink: 0; border-radius: 9px; background: rgba(239, 68, 68, .14);
   border: 1px solid rgba(239, 68, 68, .3); color: #f87171; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 
+.adm-addtopic { display: flex; gap: 8px; margin-top: 8px; }
+.adm-addtopic .adm-inp { flex: 1; }
 .adm-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .adm-actions { display: flex; gap: 10px; margin-top: 8px; }
 @media (max-width: 720px) {

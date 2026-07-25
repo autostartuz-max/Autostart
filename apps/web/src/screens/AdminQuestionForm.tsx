@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Menu, Plus, X } from 'lucide-react';
 import { adminApi, hasAdmin } from '../api';
+import { latToCyr } from '../translit';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
@@ -22,9 +23,12 @@ export default function AdminQuestionForm() {
 
   const [textLat, setTextLat] = useState('');
   const [textCyr, setTextCyr] = useState('');
+  const [cyrTouched, setCyrTouched] = useState(false);
+  const [shablon, setShablon] = useState('');
   const [explanation, setExplanation] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [topicId, setTopicId] = useState('');
+  const [newTopic, setNewTopic] = useState('');
   const [options, setOptions] = useState<Opt[]>([
     { textLat: '', isCorrect: true, wrongReason: '' },
     { textLat: '', isCorrect: false, wrongReason: '' },
@@ -35,10 +39,19 @@ export default function AdminQuestionForm() {
   const [topics, setTopics] = useState<any[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imgPreview, setImgPreview] = useState<string | null>(null);
   const [imageBusy, setImageBusy] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+
+  // Rasm preview — blob URL bir marta yaratiladi va tozalanadi (memory leak yo'q)
+  useEffect(() => {
+    if (!imageFile) { setImgPreview(null); return; }
+    const url = URL.createObjectURL(imageFile);
+    setImgPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
 
   useEffect(() => {
     if (!authed) return;
@@ -50,6 +63,8 @@ export default function AdminQuestionForm() {
         .then((it: any) => {
           setTextLat(it.textLat || '');
           setTextCyr(it.textCyr || '');
+          if (it.textCyr) setCyrTouched(true);
+          setShablon(it.shablon ? String(it.shablon) : '');
           setExplanation(it.explanation || '');
           setCategoryId(it.categoryId ? String(it.categoryId) : '');
           setTopicId(it.topicId ? String(it.topicId) : '');
@@ -61,10 +76,33 @@ export default function AdminQuestionForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
 
+  // Lotin yozilganda kirill qatorini avtomatik to'ldiramiz (agar admin qo'lda o'zgartirmagan bo'lsa)
+  const onLat = (v: string) => {
+    setTextLat(v);
+    if (!cyrTouched) setTextCyr(latToCyr(v));
+  };
+  const onCyr = (v: string) => {
+    setTextCyr(v);
+    setCyrTouched(true);
+  };
+
   const setOpt = (i: number, patch: Partial<Opt>) =>
     setOptions((os) => os.map((o, j) => (j === i ? { ...o, ...patch } : o)));
   const addOpt = () => setOptions((os) => [...os, { textLat: '', isCorrect: false, wrongReason: '' }]);
   const rmOpt = (i: number) => setOptions((os) => os.filter((_, j) => j !== i));
+
+  const addTopic = async () => {
+    const name = newTopic.trim();
+    if (!name) return;
+    try {
+      const t = await adminApi.createTopic(name);
+      setTopics((ts) => [...ts, t]);
+      setTopicId(String(t.id));
+      setNewTopic('');
+    } catch (e: any) {
+      setErr(e.message || 'Mavzu qo‘shilmadi');
+    }
+  };
 
   const removeImage = async () => {
     if (!editing) { setImageUrl(null); return; }
@@ -89,6 +127,7 @@ export default function AdminQuestionForm() {
     const data = {
       textLat: textLat.trim(),
       textCyr: textCyr.trim(),
+      shablon: shablon ? Number(shablon) : null,
       explanation: explanation.trim(),
       categoryId: categoryId ? Number(categoryId) : null,
       topicId: topicId ? Number(topicId) : null,
@@ -131,19 +170,25 @@ export default function AdminQuestionForm() {
 
               <div className="adm-field">
                 <label>Savol matni (lotin)</label>
-                <textarea className="adm-ta" value={textLat} onChange={(e) => setTextLat(e.target.value)} placeholder="Masalan: Svetoforning qizil signali nimani bildiradi?" />
+                <textarea className="adm-ta" value={textLat} onChange={(e) => onLat(e.target.value)} placeholder="Masalan: Svetoforning qizil signali nimani bildiradi?" />
               </div>
 
               <div className="adm-field">
-                <label>Savol matni (kirill) — ixtiyoriy</label>
-                <textarea className="adm-ta" value={textCyr} onChange={(e) => setTextCyr(e.target.value)} placeholder="Bo‘sh qoldirilsa — avtomatik kirillga o‘giriladi" />
+                <label>Savol matni (kirill) — lotin yozilganda avtomatik to‘ladi</label>
+                <textarea className="adm-ta" value={textCyr} onChange={(e) => onCyr(e.target.value)} placeholder="Автоматик тўлади (керак бўлса қўлда таҳрирланг)" />
+              </div>
+
+              <div className="adm-field">
+                <label>Shablon raqami (savol qaysi shablonga tushadi, 1–63)</label>
+                <input className="adm-inp" type="number" min={1} max={63} value={shablon} onChange={(e) => setShablon(e.target.value)} placeholder="Masalan: 1" style={{ maxWidth: 220 }} />
+                <div className="adm-hint">Bo‘sh qoldirilsa — savol shablonga biriktirilmaydi.</div>
               </div>
 
               <div className="adm-field">
                 <label>Savol rasmi (test oynasida o‘ng tomonda ko‘rinadi)</label>
                 <div className="adm-imgrow">
                   {imageFile ? (
-                    <img src={URL.createObjectURL(imageFile)} alt="" className="adm-imgprev" />
+                    <img src={imgPreview || undefined} alt="" className="adm-imgprev" />
                   ) : imageUrl ? (
                     <img src={imageUrl} alt="" className="adm-imgprev" />
                   ) : (
@@ -212,6 +257,12 @@ export default function AdminQuestionForm() {
                     <option value="">— tanlanmagan —</option>
                     {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </select>
+                  <div className="adm-addtopic">
+                    <input className="adm-inp" placeholder="Yangi mavzu nomi" value={newTopic}
+                      onChange={(e) => setNewTopic(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTopic())} />
+                    <button className="adm-btn sec" onClick={addTopic}><Plus size={15} /> Qo‘shish</button>
+                  </div>
                 </div>
               </div>
 

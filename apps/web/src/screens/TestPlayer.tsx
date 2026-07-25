@@ -68,6 +68,7 @@ export default function TestPlayer() {
   const mode = sp.get('mode') || 'all';
   const topicId = sp.get('topicId') || undefined;
   const ticketId = sp.get('ticketId') || undefined;
+  const shablon = sp.get('shablon') || undefined;
   const examMode = sp.get('exam') === '1' || mode === 'exam' || mode === '50' || mode === '100';
 
   const [questions, setQuestions] = useState<Question[] | null>(null);
@@ -179,6 +180,7 @@ export default function TestPlayer() {
     const params: Record<string, string> = { mode };
     if (topicId) params.topicId = topicId;
     if (ticketId) params.ticketId = ticketId;
+    if (shablon) params.shablon = shablon;
     api
       .questions(params)
       .then((qs: Question[]) => {
@@ -217,7 +219,7 @@ export default function TestPlayer() {
     const sh = sp.get('shuffle');
     if (sh != null) setS('shuffle', sh === '1');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, topicId, ticketId]);
+  }, [mode, topicId, ticketId, shablon]);
 
   useEffect(() => {
     if (!questions || finished) return;

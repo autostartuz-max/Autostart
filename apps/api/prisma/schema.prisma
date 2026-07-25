@@ -42,6 +42,7 @@ model Question {
   textLat     String
   textCyr     String       @default("")
   imageUrl    String?
+  shablon     Int?         // qaysi shablon (1-63) ga tegishli
   explanation String       @default("")
   ruleRef     String?
   difficulty  Int          @default(1)

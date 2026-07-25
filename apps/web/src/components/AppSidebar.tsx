@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
-  ClipboardList,
+  ClipboardList, ShieldCheck,
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -79,6 +79,11 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         <div className="db-side-bottom">
           <div className="db-sec">Boshqa</div>
           {navi(BOSHQA)}
+          {!isAdmin && (
+            <button className="db-navi db-adminlink" onClick={() => go('/savollar')}>
+              <ShieldCheck size={16} /> <span>Admin kirish</span>
+            </button>
+          )}
           <div className="db-night"><Moon size={17} /> Tungi rejim <button className="db-toggle" /></div>
         </div>
       </aside>

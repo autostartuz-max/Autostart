@@ -218,11 +218,13 @@ userRouter.get(
     const mode = String(req.query.mode || 'all');
     const topicId = req.query.topicId ? Number(req.query.topicId) : undefined;
     const ticketId = req.query.ticketId ? Number(req.query.ticketId) : undefined;
+    const shablon = req.query.shablon ? Number(req.query.shablon) : undefined;
     const limit = req.query.limit ? Number(req.query.limit) : undefined;
 
     const base: any = { status: 'published' };
     if (topicId) base.topicId = topicId;
     if (ticketId) base.ticketId = ticketId;
+    if (shablon) base.shablon = shablon;
     if (mode === 'tricky') base.isTricky = true;
     if (mode === 'numeric') base.isNumeric = true;
 

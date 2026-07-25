@@ -246,79 +246,32 @@ const SIGNS = [
 ];
 
 async function main() {
-  console.log('🌱 Seed boshlandi...');
+  console.log('🌱 Seed (ensure-only) boshlandi...');
 
-  // Agar baza allaqachon to'ldirilgan bo'lsa — o'tkazib yuboramiz (deploy'da ma'lumot o'chmasligi uchun)
-  const existing = await prisma.question.count().catch(() => 0);
-  if (existing > 0) {
-    console.log(`ℹ️ Baza allaqachon to'ldirilgan (${existing} savol) — seed o'tkazib yuborildi.`);
-    return;
-  }
+  // NAMUNA savol/mavzu YARATILMAYDI — admin ularni o'zi qo'shadi.
+  // Faqat zarur narsalarni ta'minlaymiz (idempotent, hech narsa o'chirilmaydi).
 
-  // Tozalash (qayta ishga tushirishga chidamli)
-  await prisma.userAnswer.deleteMany();
-  await prisma.bookmark.deleteMany();
-  await prisma.complaint.deleteMany();
-  await prisma.option.deleteMany();
-  await prisma.question.deleteMany();
-  await prisma.ticket.deleteMany();
-  await prisma.topic.deleteMany();
-  await prisma.category.deleteMany();
-  await prisma.roadSign.deleteMany();
-  await prisma.adminUser.deleteMany();
-
-  // Toifalar
-  const catB = await prisma.category.create({ data: { code: 'B', name: 'B toifasi (yengil avtomobil)' } });
-  await prisma.category.create({ data: { code: 'C', name: 'C toifasi (yuk avtomobili)' } });
-
-  // Mavzular
-  const topicNames = [...new Set(QUESTIONS.map((q) => q.topic))];
-  const topicMap = new Map<string, number>();
-  for (let i = 0; i < topicNames.length; i++) {
-    const t = await prisma.topic.create({ data: { name: topicNames[i], order: i } });
-    topicMap.set(topicNames[i], t.id);
-  }
-
-  // Biletlar (1..5)
-  const ticketMap = new Map<number, number>();
-  for (let i = 1; i <= 5; i++) {
-    const t = await prisma.ticket.create({ data: { name: `${i}-bilet`, order: i, categoryId: catB.id } });
-    ticketMap.set(i, t.id);
-  }
-
-  // Savollar
-  for (const q of QUESTIONS) {
-    await prisma.question.create({
-      data: {
-        textLat: q.text,
-        explanation: q.explanation,
-        categoryId: catB.id,
-        topicId: topicMap.get(q.topic) ?? null,
-        ticketId: q.ticket ? ticketMap.get(q.ticket) ?? null : null,
-        isNumeric: !!q.isNumeric,
-        isTricky: !!q.isTricky,
-        options: {
-          create: q.options.map((o, i) => ({
-            textLat: o.t,
-            isCorrect: !!o.correct,
-            wrongReason: o.wrong ?? null,
-            order: i,
-          })),
-        },
-      },
+  // Admin foydalanuvchi (bo'lmasa yaratamiz)
+  const adminCount = await prisma.adminUser.count().catch(() => 0);
+  if (adminCount === 0) {
+    await prisma.adminUser.create({
+      data: { login: 'admin', passwordHash: bcrypt.hashSync('admin123', 10), role: 'superadmin' },
     });
+    console.log('✅ Admin yaratildi: login=admin, parol=admin123');
   }
 
-  // Yo'l belgilari
-  for (const s of SIGNS) await prisma.roadSign.create({ data: s });
+  // Toifalar (idempotent — code unique)
+  await prisma.category.upsert({ where: { code: 'B' }, update: {}, create: { code: 'B', name: 'B toifasi (yengil avtomobil)' } });
+  await prisma.category.upsert({ where: { code: 'C' }, update: {}, create: { code: 'C', name: 'C toifasi (yuk avtomobili)' } });
 
-  // Admin
-  await prisma.adminUser.create({
-    data: { login: 'admin', passwordHash: bcrypt.hashSync('admin123', 10), role: 'superadmin' },
-  });
+  // Yo'l belgilari — faqat baza bo'sh bo'lsa (mavzu/savol emas)
+  const signCount = await prisma.roadSign.count().catch(() => 0);
+  if (signCount === 0) {
+    for (const s of SIGNS) await prisma.roadSign.create({ data: s });
+    console.log(`✅ ${SIGNS.length} yo'l belgisi qo'shildi.`);
+  }
 
-  console.log(`✅ Seed tugadi: ${QUESTIONS.length} savol, ${topicNames.length} mavzu, 5 bilet, ${SIGNS.length} belgi.`);
-  console.log('   Admin: login=admin, parol=admin123');
+  console.log('✅ Seed tugadi (namuna savol/mavzu yaratilmadi — admin o‘zi qo‘shadi).');
 }
 
 main()

@@ -85,6 +85,7 @@ function questionData(body: any) {
   return {
     textLat: String(body.textLat || '').trim(),
     textCyr: String(body.textCyr || '').trim(),
+    shablon: body.shablon !== undefined && body.shablon !== null && body.shablon !== '' ? Number(body.shablon) : null,
     explanation: String(body.explanation || '').trim(),
     ruleRef: body.ruleRef ? String(body.ruleRef) : null,
     difficulty: Number(body.difficulty || 1),

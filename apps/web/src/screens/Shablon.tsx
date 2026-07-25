@@ -68,7 +68,7 @@ export default function Shablon() {
 
   const start = () => {
     if (!cfgLang) return; // til tanlanmasa boshlanmaydi
-    nav(`/test?mode=exam&exam=1&lang=${cfgLang}&shuffle=${shuffle ? 1 : 0}${selected ? `&n=${selected}` : ''}`);
+    nav(`/test?mode=exam&exam=1&lang=${cfgLang}&shuffle=${shuffle ? 1 : 0}${selected ? `&n=${selected}&shablon=${selected}` : ''}`);
   };
 
   return (

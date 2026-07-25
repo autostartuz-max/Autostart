@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Menu, Plus, X } from 'lucide-react';
-import { adminApi, hasAdmin } from '../api';
+import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
 import { latToCyr } from '../translit';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
@@ -46,6 +46,12 @@ export default function AdminQuestionForm() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+
+  // Token bo'lmasa — hozircha avtomatik admin sifatida kiramiz
+  useEffect(() => {
+    if (!authed) ensureAdminAuto().then((ok) => ok && setAuthed(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Rasm preview — blob URL bir marta yaratiladi va tozalanadi (memory leak yo'q)
   useEffect(() => {

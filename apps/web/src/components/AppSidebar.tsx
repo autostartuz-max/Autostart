@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { SAVOLLAR_PUBLIC } from '../api';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
@@ -43,6 +44,7 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
   const go = (to: string) => { onClose?.(); nav(to); };
   // Admin login qilgan bo'lsa (main + admin bir domenda — localStorage umumiy) — savol boshqaruvi ko'rinadi
   const isAdmin = typeof window !== 'undefined' && !!localStorage.getItem('yhq_admin_token');
+  const showSavollar = isAdmin || SAVOLLAR_PUBLIC; // hozircha hammaga ochiq
 
   const navi = (items: typeof TESTLAR) =>
     items.map((it) => (
@@ -68,7 +70,7 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         {navi(ORGANISH)}
         <div className="db-sec">Statistika</div>
         {navi(STAT)}
-        {isAdmin && (
+        {showSavollar && (
           <>
             <div className="db-sec">Admin</div>
             <button className={'db-navi' + (active === '/savollar' ? ' active' : '')} onClick={() => go('/savollar')}>
@@ -79,7 +81,7 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         <div className="db-side-bottom">
           <div className="db-sec">Boshqa</div>
           {navi(BOSHQA)}
-          {!isAdmin && (
+          {!showSavollar && (
             <button className="db-navi db-adminlink" onClick={() => go('/savollar')}>
               <ShieldCheck size={16} /> <span>Admin kirish</span>
             </button>

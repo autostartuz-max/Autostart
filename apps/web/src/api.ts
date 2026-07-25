@@ -47,6 +47,9 @@ export const api = {
 };
 
 /* ---------- Admin (savol boshqaruvi — asosiy ilova ichida) ---------- */
+// HOZIRCHA: Savollar hammaga ochiq. Keyin faqat admin uchun yopish uchun — bu false qiling.
+export const SAVOLLAR_PUBLIC = true;
+
 export function adminToken() {
   return localStorage.getItem('yhq_admin_token') || '';
 }
@@ -117,3 +120,15 @@ export const adminApi = {
   uploadAudio: (id: number, file: File) => aupload('/admin/questions/' + id + '/audio', 'audio', file),
   deleteAudio: (id: number) => areq('/admin/questions/' + id + '/audio', { method: 'DELETE' }),
 };
+
+// Token bo'lmasa — hozircha (SAVOLLAR_PUBLIC) avtomatik admin sifatida kiramiz
+export async function ensureAdminAuto(): Promise<boolean> {
+  if (hasAdmin()) return true;
+  if (!SAVOLLAR_PUBLIC) return false;
+  try {
+    await adminApi.login('admin', 'admin123');
+    return true;
+  } catch {
+    return false;
+  }
+}

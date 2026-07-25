@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, Search, Plus, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
-import { adminApi, hasAdmin } from '../api';
+import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
@@ -18,6 +18,10 @@ export default function AdminQuestions() {
     setLoading(true);
     adminApi.questions(q).then(setList).catch(() => {}).finally(() => setLoading(false));
   };
+  useEffect(() => {
+    if (!authed) ensureAdminAuto().then((ok) => ok && setAuthed(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     if (authed) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps

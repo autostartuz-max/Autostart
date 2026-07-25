@@ -24,6 +24,9 @@ export default function AdminQuestionForm() {
   const [textLat, setTextLat] = useState('');
   const [textCyr, setTextCyr] = useState('');
   const [cyrTouched, setCyrTouched] = useState(false);
+  const [textRus, setTextRus] = useState('');
+  const [rusTouched, setRusTouched] = useState(false);
+  const [rusLoading, setRusLoading] = useState(false);
   const [shablon, setShablon] = useState('');
   const [explanation, setExplanation] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -53,6 +56,25 @@ export default function AdminQuestionForm() {
     return () => URL.revokeObjectURL(url);
   }, [imageFile]);
 
+  // Rus qatorini lotin matndan avtomatik tarjima qilamiz (debounce, admin qo'lda tegmagan bo'lsa)
+  useEffect(() => {
+    if (rusTouched) return;
+    const t = textLat.trim();
+    if (!t) { setTextRus(''); return; }
+    const timer = setTimeout(async () => {
+      setRusLoading(true);
+      try {
+        const r = await adminApi.translate(t);
+        if (r?.text) setTextRus(r.text);
+      } catch {
+        /* ignore */
+      } finally {
+        setRusLoading(false);
+      }
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [textLat, rusTouched]);
+
   useEffect(() => {
     if (!authed) return;
     adminApi.categories().then(setCats).catch(() => {});
@@ -64,6 +86,8 @@ export default function AdminQuestionForm() {
           setTextLat(it.textLat || '');
           setTextCyr(it.textCyr || '');
           if (it.textCyr) setCyrTouched(true);
+          setTextRus(it.textRus || '');
+          if (it.textRus) setRusTouched(true);
           setShablon(it.shablon ? String(it.shablon) : '');
           setExplanation(it.explanation || '');
           setCategoryId(it.categoryId ? String(it.categoryId) : '');
@@ -127,6 +151,7 @@ export default function AdminQuestionForm() {
     const data = {
       textLat: textLat.trim(),
       textCyr: textCyr.trim(),
+      textRus: textRus.trim(),
       shablon: shablon ? Number(shablon) : null,
       explanation: explanation.trim(),
       categoryId: categoryId ? Number(categoryId) : null,
@@ -176,6 +201,11 @@ export default function AdminQuestionForm() {
               <div className="adm-field">
                 <label>Savol matni (kirill) — lotin yozilganda avtomatik to‘ladi</label>
                 <textarea className="adm-ta" value={textCyr} onChange={(e) => onCyr(e.target.value)} placeholder="Автоматик тўлади (керак бўлса қўлда таҳрирланг)" />
+              </div>
+
+              <div className="adm-field">
+                <label>Savol matni (rus) — lotin yozilganda avtomatik tarjima qilinadi {rusLoading && <span style={{ color: '#7fb0ff' }}>· tarjima qilinmoqda…</span>}</label>
+                <textarea className="adm-ta" value={textRus} onChange={(e) => { setTextRus(e.target.value); setRusTouched(true); }} placeholder="Автоматический перевод (при необходимости отредактируйте)" />
               </div>
 
               <div className="adm-field">

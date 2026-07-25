@@ -41,6 +41,7 @@ model Question {
   ticket      Ticket?      @relation(fields: [ticketId], references: [id])
   textLat     String
   textCyr     String       @default("")
+  textRus     String       @default("") // rus tili (tarjima)
   imageUrl    String?
   shablon     Int?         // qaysi shablon (1-63) ga tegishli
   explanation String       @default("")

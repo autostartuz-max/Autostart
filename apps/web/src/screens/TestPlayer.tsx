@@ -94,8 +94,12 @@ export default function TestPlayer() {
   const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>((sp.get('lang') as any) || 'lat');
   const [configured, setConfigured] = useState(!examMode || !!sp.get('lang'));
   const [userName, setUserName] = useState('');
-  const tx = (lat: string, cyr: string) =>
-    cfgLang === 'cyr' ? (cyr && cyr.trim() ? cyr : latToCyr(lat)) : lat;
+  const tx = (lat: string, cyr: string, rus?: string) =>
+    cfgLang === 'cyr'
+      ? cyr && cyr.trim() ? cyr : latToCyr(lat)
+      : cfgLang === 'rus'
+        ? rus && rus.trim() ? rus : lat
+        : lat;
   const setS = (k: string, v: any) => setSettings((s: any) => ({ ...s, [k]: v }));
   const saveSettings = () => {
     try {
@@ -535,7 +539,7 @@ export default function TestPlayer() {
         </div>
       </header>
 
-      <div className="tp2-qbar">{idx + 1}. {tx(q.textLat, q.textCyr)}</div>
+      <div className="tp2-qbar">{idx + 1}. {tx(q.textLat, q.textCyr, (q as any).textRus)}</div>
 
       <div className="tp2-tools">
         <button className="tp2-az" onClick={fontUp}>A+</button>
@@ -555,7 +559,7 @@ export default function TestPlayer() {
                 <span className="io-radio">
                   {reveal && o.isCorrect ? '⊙' : reveal && answered && ans!.chosen.includes(o.id) && !o.isCorrect ? '⊗' : sel === o.id ? '◉' : '○'}
                 </span>
-                <span className="io-text">{tx(o.textLat, o.textCyr)}</span>
+                <span className="io-text">{tx(o.textLat, o.textCyr, (o as any).textRus)}</span>
               </button>
             ))}
           </div>

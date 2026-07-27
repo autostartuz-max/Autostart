@@ -12,6 +12,27 @@
   --radius: 18px;
 }
 
+/* ===== Light tema ===== */
+:root[data-theme="light"] {
+  --bg: #eef2f7;
+  --card: #ffffff;
+  --card2: #f6f8fb;
+  --border: #dde5ef;
+  --text: #101828;
+  --muted: #5a6b85;
+}
+:root[data-theme="light"] .db {
+  --db-bg: #eef2f7; --db-side: #ffffff; --db-card: #ffffff; --db-card2: #f4f7fb;
+  --db-border: #e2e8f0; --db-text: #0f172a; --db-muted: #5a6b85;
+}
+:root[data-theme="light"] .db-side {
+  --db-side: #ffffff; --db-card: #ffffff; --db-card2: #f4f7fb;
+  --db-border: #e2e8f0; --db-text: #0f172a; --db-muted: #5a6b85;
+}
+:root[data-theme="light"] .db-logo .lg-a { color: #0f172a; }
+:root[data-theme="light"] .db-navi.active { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
+:root[data-theme="light"] .db-uava { color: #fff; }
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body, #root { height: 100%; margin: 0; }
 body {

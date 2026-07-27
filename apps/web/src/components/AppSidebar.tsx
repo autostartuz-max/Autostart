@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { SAVOLLAR_PUBLIC } from '../api';
+import LangTheme from './LangTheme';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
@@ -57,7 +58,7 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
   return (
     <>
       <aside className={'db-side' + (open ? ' open' : '')}>
-        <div className="db-logo">
+        <div className="db-logo" data-notr>
           <img src="/mark.png" alt="" className="db-logo-mark" />
           <span className="db-logo-word"><span className="lg-a">AUTO</span><span className="lg-s">START</span></span>
         </div>
@@ -86,7 +87,7 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
               <ShieldCheck size={16} /> <span>Admin kirish</span>
             </button>
           )}
-          <div className="db-night"><Moon size={17} /> Tungi rejim <button className="db-toggle" /></div>
+          <LangTheme />
         </div>
       </aside>
       {open && <div className="db-backdrop" onClick={onClose} />}

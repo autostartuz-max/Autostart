@@ -132,6 +132,27 @@ userRouter.get(
   })
 );
 
+/* ---------- Tarjima (butun ilova UI uchun — public, o'zbekcha lotin -> rus/...) ---------- */
+userRouter.get(
+  '/translate',
+  ah(async (req, res) => {
+    const text = String(req.query.text || '').trim().slice(0, 900);
+    const to = String(req.query.to || 'ru');
+    if (!text) return res.json({ text: '' });
+    try {
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=uz&tl=${encodeURIComponent(to)}&dt=t&q=${encodeURIComponent(text)}`;
+      const r = await fetch(url);
+      if (!r.ok) return res.status(502).json({ error: 'Tarjima xizmati javob bermadi', text: '' });
+      const data: any = await r.json();
+      const translated = Array.isArray(data?.[0]) ? data[0].map((seg: any) => (seg && seg[0]) || '').join('') : '';
+      res.setHeader('Cache-Control', 'public, max-age=604800');
+      res.json({ text: translated });
+    } catch (e: any) {
+      res.status(502).json({ error: 'Tarjima xatosi', text: '' });
+    }
+  })
+);
+
 /* ---------- Profil ---------- */
 userRouter.get(
   '/me',

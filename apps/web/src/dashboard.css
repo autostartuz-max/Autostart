@@ -226,3 +226,26 @@
   .adm-grid2 { grid-template-columns: 1fr; }
   .adm-opt .adm-inp.flex { flex-basis: 100%; }
 }
+
+/* ===== Mavzular bo'yicha (topic grid) ===== */
+.mv-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.mv-back { display: inline-flex; align-items: center; gap: 4px; background: var(--db-card); border: 1px solid var(--db-border);
+  color: var(--db-text); border-radius: 11px; padding: 9px 15px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.mv-back:hover { border-color: var(--db-blue); }
+.mv-title { flex: 1; text-align: center; font-size: 19px; font-weight: 800; margin: 0; min-width: 220px; color: var(--db-text); }
+.mv-shuffle { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--db-muted); cursor: pointer; user-select: none; }
+.mv-tog { width: 46px; height: 26px; border-radius: 20px; background: #3a4658; position: relative; flex-shrink: 0; transition: background .2s; }
+.mv-tog.on { background: var(--db-blue); }
+.mv-tog::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .2s; }
+.mv-tog.on::after { left: 23px; }
+
+.mv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.mv-card { display: flex; align-items: center; gap: 14px; text-align: left; background: var(--db-card);
+  border: 1px solid var(--db-border); border-radius: 14px; padding: 16px; color: var(--db-text);
+  transition: border-color .15s, transform .08s, box-shadow .15s; cursor: pointer; }
+.mv-card:hover { border-color: var(--db-blue); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(37, 99, 235, .18); }
+.mv-num { width: 42px; height: 42px; flex-shrink: 0; border-radius: 11px; background: var(--db-blue); color: #fff;
+  font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.mv-name { font-size: 14.5px; font-weight: 600; line-height: 1.32; }
+@media (max-width: 1100px) { .mv-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .mv-grid { grid-template-columns: 1fr; } .mv-title { text-align: left; } }

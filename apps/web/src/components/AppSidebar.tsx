@@ -33,6 +33,10 @@ const BOSHQA = [
   { Icon: MessageCircle, label: "Biz bilan bog'lanish", to: '/oktagon' },
 ];
 
+// Menyu soddalashtirilgan holati (xozircha). Barcha bo'limlarni qaytarish uchun -> false qiling.
+// Ko'rinadi: Bosh sahifa, Shablon testlar, Mavzular bo'yicha, Savollar, Boshqa (Sozlamalar...).
+const MENU_MINIMAL = true;
+
 interface Props {
   active: string;
   open?: boolean;
@@ -66,11 +70,13 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
           <Home size={18} /> <span>Bosh sahifa</span>
         </button>
         <div className="db-sec">Testlar</div>
-        {navi(TESTLAR)}
-        <div className="db-sec">O‘rganish</div>
-        {navi(ORGANISH)}
-        <div className="db-sec">Statistika</div>
-        {navi(STAT)}
+        {navi(MENU_MINIMAL ? TESTLAR.slice(0, 2) : TESTLAR)}
+        {!MENU_MINIMAL && <>
+          <div className="db-sec">O‘rganish</div>
+          {navi(ORGANISH)}
+          <div className="db-sec">Statistika</div>
+          {navi(STAT)}
+        </>}
         {showSavollar && (
           <>
             <div className="db-sec">Admin</div>

@@ -232,17 +232,6 @@ export default function AdminQuestionForm() {
               </div>
 
               <div className="adm-field">
-                <label>Shablon (savol qaysi shablonga tushadi)</label>
-                <select className="adm-sel" value={shablon} onChange={(e) => setShablon(e.target.value)} style={{ maxWidth: 260 }}>
-                  <option value="">— tanlanmagan —</option>
-                  {Array.from({ length: 63 }, (_, i) => i + 1).map((n) => (
-                    <option key={n} value={n}>{n}-shablon</option>
-                  ))}
-                </select>
-                <div className="adm-hint">Bo‘sh qoldirilsa — savol shablonga biriktirilmaydi.</div>
-              </div>
-
-              <div className="adm-field">
                 <label>Savol rasmi (test oynasida o‘ng tomonda ko‘rinadi)</label>
                 <div className="adm-imgrow">
                   {imageFile ? (
@@ -264,6 +253,27 @@ export default function AdminQuestionForm() {
                   </div>
                 </div>
                 <div className="adm-hint">Saqlash bosilganda yuklanadi. (JPG/PNG)</div>
+              </div>
+
+              {/* Shablon + Mavzu — yonma-yon, formaning o'rta qismida */}
+              <div className="adm-grid2" style={{ marginBottom: 18 }}>
+                <div className="adm-field" style={{ marginBottom: 0 }}>
+                  <label>Shablon (savol qaysi shablonga tushadi)</label>
+                  <select className="adm-sel" value={shablon} onChange={(e) => setShablon(e.target.value)}>
+                    <option value="">— tanlanmagan —</option>
+                    {Array.from({ length: 63 }, (_, i) => i + 1).map((n) => (
+                      <option key={n} value={n}>{n}-shablon</option>
+                    ))}
+                  </select>
+                  <div className="adm-hint">Bo‘sh qoldirilsa — savol shablonga biriktirilmaydi.</div>
+                </div>
+                <div className="adm-field" style={{ marginBottom: 0 }}>
+                  <label>Mavzu</label>
+                  <select className="adm-sel" value={topicId} onChange={(e) => setTopicId(e.target.value)}>
+                    <option value="">— tanlanmagan —</option>
+                    {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                </div>
               </div>
 
               <div className="adm-field">
@@ -299,14 +309,6 @@ export default function AdminQuestionForm() {
                   </label>
                   {audioFile && <button className="adm-btn sec" onClick={() => setAudioFile(null)}>Bekor</button>}
                 </div>
-              </div>
-
-              <div className="adm-field">
-                <label>Mavzu</label>
-                <select className="adm-sel" value={topicId} onChange={(e) => setTopicId(e.target.value)} style={{ maxWidth: 360 }}>
-                  <option value="">— tanlanmagan —</option>
-                  {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-                </select>
               </div>
 
               {err && <div className="adm-err">{err}</div>}

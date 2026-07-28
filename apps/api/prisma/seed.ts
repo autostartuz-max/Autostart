@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { STANDARD_TOPICS } from './topics';
 
 const prisma = new PrismaClient();
 
@@ -269,6 +270,14 @@ async function main() {
   if (signCount === 0) {
     for (const s of SIGNS) await prisma.roadSign.create({ data: s });
     console.log(`✅ ${SIGNS.length} yo'l belgisi qo'shildi.`);
+  }
+
+  // Mavzular — faqat baza bo'sh bo'lsa (42 standart YHQ mavzusi)
+  const topicCount = await prisma.topic.count().catch(() => 0);
+  if (topicCount === 0) {
+    for (let i = 0; i < STANDARD_TOPICS.length; i++)
+      await prisma.topic.create({ data: { name: STANDARD_TOPICS[i], order: i + 1 } });
+    console.log(`✅ ${STANDARD_TOPICS.length} standart mavzu qo'shildi.`);
   }
 
   console.log('✅ Seed tugadi (namuna savol/mavzu yaratilmadi — admin o‘zi qo‘shadi).');

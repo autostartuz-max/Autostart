@@ -81,9 +81,24 @@
   padding: 13px 20px; font-size: 14.5px; font-weight: 700; font-family: inherit; }
 .db-btn.primary { background: var(--db-blue); color: #fff; }
 .db-btn.ghost { background: rgba(255, 255, 255, 0.06); color: var(--db-text); border: 1px solid var(--db-border); }
-/* Hero foni doim qorong'i — matn/tugma doim yorug' (Light temada ham ko'rinsin) */
+/* Hero matni/tugmasi (dark tema — hero foni qorong'i) */
 .db-hero .db-btn.ghost { color: #eaf1ff; border-color: rgba(255, 255, 255, 0.22); }
 .db-hero p { color: #cdd9ec; }
+
+/* Light temada hero yorug' bo'lsin (qorong'i blok bo'lib turmasin) */
+:root[data-theme="light"] .db-hero {
+  background:
+    radial-gradient(600px 300px at 15% 18%, rgba(239, 68, 68, .13), transparent 60%),
+    radial-gradient(660px 340px at 58% 94%, rgba(34, 197, 94, .13), transparent 62%),
+    radial-gradient(780px 400px at 82% 34%, rgba(245, 158, 11, .15), transparent 64%),
+    linear-gradient(120deg, #eef3fb 0%, #e8eef8 52%, #f1f5fc 100%);
+  border-color: #dbe4f0;
+}
+:root[data-theme="light"] .db-hero h1 { color: #16233f; }
+:root[data-theme="light"] .db-hero h1 span { color: #2563eb; }
+:root[data-theme="light"] .db-hero p { color: #46566f; }
+:root[data-theme="light"] .db-hero .db-btn.ghost { color: #1f2937; border-color: #c7d2e0; background: rgba(15, 23, 42, .04); }
+:root[data-theme="light"] .db-hero-car { opacity: .72; }
 
 /* Stat cards */
 .db-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
@@ -242,13 +257,12 @@
 .mv-tog::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .2s; }
 .mv-tog.on::after { left: 23px; }
 
-.mv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.mv-card { display: flex; align-items: center; gap: 14px; text-align: left; background: var(--db-card);
-  border: 1px solid var(--db-border); border-radius: 14px; padding: 16px; color: var(--db-text);
+.mv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 11px; padding-bottom: 34px; }
+.mv-card { display: flex; align-items: center; gap: 12px; text-align: left; background: var(--db-card);
+  border: 1px solid var(--db-border); border-radius: 13px; padding: 12px 13px; color: var(--db-text);
   transition: border-color .15s, transform .08s, box-shadow .15s; cursor: pointer; }
 .mv-card:hover { border-color: var(--db-blue); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(37, 99, 235, .18); }
-.mv-num { width: 42px; height: 42px; flex-shrink: 0; border-radius: 11px; background: var(--db-blue); color: #fff;
-  font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-.mv-name { font-size: 14.5px; font-weight: 600; line-height: 1.32; }
-@media (max-width: 1100px) { .mv-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px) { .mv-grid { grid-template-columns: 1fr; } .mv-title { text-align: left; } }
+.mv-num { width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; background: var(--db-blue); color: #fff;
+  font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+.mv-name { font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+@media (max-width: 640px) { .mv-title { text-align: left; } }

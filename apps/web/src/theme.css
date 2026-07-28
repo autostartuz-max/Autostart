@@ -294,12 +294,15 @@ button { font-family: inherit; cursor: pointer; }
   padding: 14px; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .pill.learn { background: #132a1e; border-color: #1f5b38; color: #4ade80; }
 
-.modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end; z-index: 50; }
-.sheet { background: var(--card); border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 22px;
+/* Test o'yini modallari doim qorong'i (Light temada ham) — ichki elementlar ham qorong'i o'zgaruvchilardan foydalansin */
+.modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end; z-index: 50;
+  --card: #131c2b; --card2: #172236; --border: #26344c; --text: #e7edf7; --muted: #8ba0bd; color: #e7edf7; }
+/* Test o'yini doim qorong'i — modal ham qorong'i (Light temada oq bo'lib qolmasin) */
+.sheet { background: #131c2b; border: 1px solid #26344c; color: #e7edf7; border-radius: 22px 22px 0 0; padding: 22px;
   width: 100%; max-width: 520px; margin: 0 auto; }
-.sheet h3 { margin: 0; font-size: 17px; }
+.sheet h3 { margin: 0; font-size: 17px; color: #e7edf7; }
 .sheet p { color: #c7d2e0; line-height: 1.55; margin: 0; }
-.sheet .ref { color: var(--muted); font-size: 13px; margin-top: 10px; }
+.sheet .ref { color: #8ba0bd; font-size: 13px; margin-top: 10px; }
 .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; }
 .listen { background: #132a1e; border: 1px solid #1f5b38; color: #4ade80; border-radius: 20px;
   padding: 8px 14px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }

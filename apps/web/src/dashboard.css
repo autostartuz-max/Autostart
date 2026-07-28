@@ -266,3 +266,50 @@
   font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; }
 .mv-name { font-size: 13.5px; font-weight: 600; line-height: 1.3; }
 @media (max-width: 640px) { .mv-title { text-align: left; } }
+
+/* ===== Savol formasi — 2 ustunli dizayn (qf-*) ===== */
+.qf-top { gap: 12px; }
+.qf-htitle { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.qf-htitle b { font-size: 15px; font-weight: 800; color: var(--db-text); }
+.qf-htitle span { font-size: 12px; color: var(--db-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.qf-grid { display: grid; grid-template-columns: 1fr 320px; gap: 18px; align-items: start; }
+.qf-left { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.qf-right { display: flex; flex-direction: column; gap: 14px; }
+
+.qf-card { background: var(--db-card); border: 1px solid var(--db-border); border-radius: 14px; padding: 15px 16px; }
+.qf-lab { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 12px; }
+.qf-ic { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-weight: 800; font-size: 15px; }
+.qf-ic.blue { background: rgba(59, 130, 246, .14); color: #60a5fa; }
+.qf-ic.green { background: rgba(34, 197, 94, .14); color: #4ade80; }
+.qf-ic.purple { background: rgba(168, 85, 247, .16); color: #c084fc; }
+.qf-ic.amber { background: rgba(245, 158, 11, .16); color: #fbbf24; }
+.qf-lab label { display: block; font-size: 14px; font-weight: 700; color: var(--db-text); }
+.qf-lab .sub { font-size: 12px; color: var(--db-muted); font-weight: 500; margin-top: 2px; }
+.qf-lab .req { color: #f87171; }
+
+.qf-inwrap { position: relative; }
+.qf-inwrap .adm-ta { padding-bottom: 22px; margin: 0; }
+.qf-count { position: absolute; right: 12px; bottom: 9px; font-size: 11px; color: var(--db-muted); pointer-events: none; }
+
+.qf-optnum { width: 30px; height: 30px; flex-shrink: 0; border-radius: 8px; background: var(--db-blue); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
+
+.qf-drop { display: block; border: 1.5px dashed var(--db-border); border-radius: 12px; padding: 22px 16px; text-align: center;
+  cursor: pointer; transition: border-color .15s, background .15s; }
+.qf-drop:hover, .qf-drop.drag { border-color: var(--db-blue); background: rgba(59, 130, 246, .06); }
+.qf-drop input { display: none; }
+.qf-drop-ic { color: var(--db-muted); }
+.qf-drop b { display: block; font-size: 14px; margin-top: 6px; color: var(--db-text); }
+.qf-drop small { display: block; color: var(--db-muted); font-size: 12px; margin-top: 3px; }
+.qf-drop-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; background: var(--db-card2);
+  border: 1px solid var(--db-border); color: var(--db-text); border-radius: 9px; padding: 8px 14px; font-size: 13px; font-weight: 600; }
+
+.qf-info-list { display: flex; flex-direction: column; gap: 12px; }
+.qf-info-item { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; color: var(--db-muted); line-height: 1.45; }
+.qf-info-item svg { color: #4ade80; flex-shrink: 0; margin-top: 1px; }
+
+.qf-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--db-border); }
+
+@media (max-width: 900px) { .qf-grid { grid-template-columns: 1fr; } .qf-htitle span { display: none; } }

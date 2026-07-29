@@ -316,31 +316,6 @@ export default function AdminQuestionForm() {
                     ))}
                     <button className="adm-btn sec" onClick={addOpt}><Plus size={15} /> Variant qo‘shish</button>
                   </div>
-
-                  <div className="qf-card">
-                    <div className="qf-lab">
-                      <span className="qf-ic purple"><Info size={18} /></span>
-                      <div><label>Izoh / Qoida matni</label><div className="sub">Qoidasi’da ko‘rsatiladi, Tushuncha ovozda o‘qiladi</div></div>
-                    </div>
-                    <div className="qf-inwrap">
-                      <textarea className="adm-ta" maxLength={500} value={explanation} onChange={(e) => setExplanation(e.target.value)} placeholder="Izoh yoki qoida matnini kiriting…" />
-                      <span className="qf-count">{explanation.length}/500</span>
-                    </div>
-                  </div>
-
-                  <div className="qf-card">
-                    <div className="qf-lab">
-                      <span className="qf-ic amber"><Mic size={18} /></span>
-                      <div><label>Tushuncha ovozi</label><div className="sub">ixtiyoriy — xulosa avtomatik o‘qib eshittiriladi</div></div>
-                    </div>
-                    <div className="adm-imgbtns">
-                      <label className="adm-btn sec file">
-                        {audioFile ? `✓ ${audioFile.name}` : '🎙 Ovoz tanlash'}
-                        <input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
-                      </label>
-                      {audioFile && <button className="adm-btn sec" onClick={() => setAudioFile(null)}>Bekor</button>}
-                    </div>
-                  </div>
                 </div>
 
                 {/* ===== O'NG ustun ===== */}
@@ -366,6 +341,31 @@ export default function AdminQuestionForm() {
                       <option value="">— tanlanmagan —</option>
                       {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
+                  </div>
+
+                  <div className="qf-card">
+                    <div className="qf-lab">
+                      <span className="qf-ic purple"><Info size={18} /></span>
+                      <div><label>Izoh / Qoida matni</label><div className="sub">Qoidasi’da ko‘rsatiladi, Tushuncha ovozda o‘qiladi</div></div>
+                    </div>
+                    <div className="qf-inwrap">
+                      <textarea className="adm-ta" maxLength={500} value={explanation} onChange={(e) => setExplanation(e.target.value)} placeholder="Izoh yoki qoida matnini kiriting…" />
+                      <span className="qf-count">{explanation.length}/500</span>
+                    </div>
+                  </div>
+
+                  <div className="qf-card">
+                    <div className="qf-lab">
+                      <span className="qf-ic amber"><Mic size={18} /></span>
+                      <div><label>Tushuncha ovozi</label><div className="sub">ixtiyoriy — xulosa avtomatik o‘qib eshittiriladi</div></div>
+                    </div>
+                    <div className="adm-imgbtns">
+                      <label className="adm-btn sec file">
+                        {audioFile ? `✓ ${audioFile.name}` : '🎙 Ovoz tanlash'}
+                        <input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
+                      </label>
+                      {audioFile && <button className="adm-btn sec" onClick={() => setAudioFile(null)}>Bekor</button>}
+                    </div>
                   </div>
 
                   <div className="qf-card">

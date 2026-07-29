@@ -312,4 +312,13 @@
 
 .qf-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--db-border); }
 
+/* Rasmni kattalashtirib ko'rish (lightbox) */
+.qf-zoomable { cursor: zoom-in; }
+.qf-lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(6, 10, 18, .9); display: flex;
+  align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; }
+.qf-lightbox img { max-width: 94vw; max-height: 92vh; border-radius: 10px; border: 3px solid #fff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .6); cursor: default; }
+.qf-lightbox-x { position: absolute; top: 18px; right: 22px; background: #e8edf3; border: none; color: #1f2937;
+  border-radius: 10px; padding: 8px 10px; cursor: pointer; display: inline-flex; }
+
 @media (max-width: 900px) { .qf-grid { grid-template-columns: 1fr; } .qf-htitle span { display: none; } }

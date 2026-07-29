@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ChevronLeft, Menu, Plus, X, Upload, Image as ImageIcon, ListChecks,
-  Info, Mic, Grid3x3, Lightbulb, CheckCircle2, BookOpen,
+  Info, Mic, Grid3x3, BookOpen,
 } from 'lucide-react';
 import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
 import { latToCyr } from '../translit';
@@ -47,6 +47,7 @@ export default function AdminQuestionForm() {
   const [imgPreview, setImgPreview] = useState<string | null>(null);
   const [imageBusy, setImageBusy] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [zoom, setZoom] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -165,16 +166,25 @@ export default function AdminQuestionForm() {
 
   const save = async () => {
     setErr('');
-    if (!textLat.trim()) return setErr('Savol matni bo‘sh');
-    const opts = options.filter((o) => o.textLat.trim());
-    if (opts.length < 2) return setErr('Kamida 2 ta variant kerak');
-    if (!opts.some((o) => o.isCorrect)) return setErr('To‘g‘ri javob belgilanmagan');
+    if (!textLat.trim()) return setErr('Savol matni (lotin) to‘ldirilmagan');
+    if (!shablon) return setErr('Shablon tanlanmagan');
+    if (!topicId) return setErr('Mavzu tanlanmagan');
+    if (options.some((o) => !o.textLat.trim())) return setErr('Barcha variantlarni to‘ldiring');
+    if (!options.some((o) => o.isCorrect)) return setErr('To‘g‘ri javob belgilanmagan');
 
     setBusy(true);
     try {
+      // Kirill/rus majburiy — bo'sh bo'lsa avtomatik to'ldiramiz
+      const cyrFinal = textCyr.trim() || latToCyr(textLat.trim());
+      let rusFinal = textRus.trim();
+      if (!rusFinal) {
+        try { const r = await adminApi.translate(textLat.trim()); rusFinal = r?.text || ''; } catch { /* ignore */ }
+      }
+      if (!rusFinal) { setBusy(false); return setErr('Savol matni (rus) to‘ldirilmadi — qo‘lda kiriting'); }
+
       // Bo'sh qolgan ruscha variantlarni saqlashdan oldin to'ldiramiz
       const optsFinal = await Promise.all(
-        opts.map(async (o) => {
+        options.map(async (o) => {
           if (o.textRus && o.textRus.trim())
             return { textLat: o.textLat.trim(), textRus: o.textRus.trim(), isCorrect: o.isCorrect };
           try {
@@ -187,11 +197,11 @@ export default function AdminQuestionForm() {
       );
       const data = {
         textLat: textLat.trim(),
-        textCyr: textCyr.trim(),
-        textRus: textRus.trim(),
-        shablon: shablon ? Number(shablon) : null,
+        textCyr: cyrFinal,
+        textRus: rusFinal,
+        shablon: Number(shablon),
         explanation: explanation.trim(),
-        topicId: topicId ? Number(topicId) : null,
+        topicId: Number(topicId),
         options: optsFinal,
       };
       let qid = editing ? Number(id) : 0;
@@ -245,7 +255,7 @@ export default function AdminQuestionForm() {
                   <div className="qf-card">
                     <div className="qf-lab">
                       <span className="qf-ic blue">A</span>
-                      <div><label>Savol matni (kirill)</label><div className="sub">lotin bilan bir xil ma’noda avtomatik tuziladi</div></div>
+                      <div><label>Savol matni (kirill) <span className="req">*</span></label><div className="sub">lotin bilan bir xil ma’noda avtomatik tuziladi</div></div>
                     </div>
                     <div className="qf-inwrap">
                       <textarea className="adm-ta" maxLength={500} value={textCyr} onChange={(e) => onCyr(e.target.value)} placeholder="Автоматик тузилади (керак бўлса қўлда таҳрирланг)" />
@@ -256,7 +266,7 @@ export default function AdminQuestionForm() {
                   <div className="qf-card">
                     <div className="qf-lab">
                       <span className="qf-ic blue">Я</span>
-                      <div><label>Savol matni (rus)</label><div className="sub">lotin bilan bir xil ma’noda avtomatik tarjima qilinadi {rusLoading && <span style={{ color: '#7fb0ff' }}>· tarjima qilinmoqda…</span>}</div></div>
+                      <div><label>Savol matni (rus) <span className="req">*</span></label><div className="sub">lotin bilan bir xil ma’noda avtomatik tarjima qilinadi {rusLoading && <span style={{ color: '#7fb0ff' }}>· tarjima qilinmoqda…</span>}</div></div>
                     </div>
                     <div className="qf-inwrap">
                       <textarea className="adm-ta" maxLength={500} value={textRus} onChange={(e) => { setTextRus(e.target.value); setRusTouched(true); }} placeholder="Автоматический перевод (при необходимости отредактируйте)" />
@@ -266,34 +276,12 @@ export default function AdminQuestionForm() {
 
                   <div className="qf-card">
                     <div className="qf-lab">
-                      <span className="qf-ic blue"><ListChecks size={18} /></span>
-                      <div><label>Variantlar — to‘g‘ri javob(lar)ni belgilang</label></div>
-                    </div>
-                    {options.map((o, i) => (
-                      <div className="adm-opt" key={i}>
-                        <span className="qf-optnum">{i + 1}</span>
-                        <label className="adm-chk" title="To‘g‘ri javob">
-                          <input type="checkbox" checked={o.isCorrect} onChange={(e) => setOpt(i, { isCorrect: e.target.checked })} />
-                        </label>
-                        <input className="adm-inp flex" placeholder={`Variant ${i + 1} (lotin)`} value={o.textLat} onChange={(e) => setOpt(i, { textLat: e.target.value })} />
-                        <input className="adm-inp flex" placeholder="Rus tilida (avtomatik)" value={o.textRus} onChange={(e) => setOpt(i, { textRus: e.target.value, rusTouched: true })} />
-                        {options.length > 2 && <button className="adm-x" onClick={() => rmOpt(i)}><X size={15} /></button>}
-                      </div>
-                    ))}
-                    <button className="adm-btn sec" onClick={addOpt}><Plus size={15} /> Variant qo‘shish</button>
-                  </div>
-                </div>
-
-                {/* ===== O'NG ustun ===== */}
-                <div className="qf-right">
-                  <div className="qf-card">
-                    <div className="qf-lab">
                       <span className="qf-ic green"><ImageIcon size={18} /></span>
                       <div><label>Savol rasmi</label><div className="sub">test oynasida ko‘rinadi</div></div>
                     </div>
                     {imageFile || imageUrl ? (
                       <div className="adm-imgrow">
-                        <img src={imageFile ? (imgPreview || undefined) : (imageUrl || undefined)} alt="" className="adm-imgprev" />
+                        <img src={imageFile ? (imgPreview || undefined) : (imageUrl || undefined)} alt="" className="adm-imgprev qf-zoomable" onClick={() => setZoom(true)} title="Kattalashtirish uchun bosing" />
                         <div className="adm-imgbtns">
                           <label className="adm-btn sec file">
                             {imageFile ? `✓ ${imageFile.name}` : 'Rasmni almashtirish'}
@@ -317,13 +305,35 @@ export default function AdminQuestionForm() {
                         <div className="qf-drop-btn"><ImageIcon size={15} /> Rasm tanlash</div>
                       </label>
                     )}
-                    <div className="adm-hint">Rasm test oynasida savol bilan birga ko‘rsatiladi.</div>
+                    <div className="adm-hint">Rasm test oynasida savol bilan birga ko‘rsatiladi. Ko‘rish uchun rasmga bosing.</div>
                   </div>
 
                   <div className="qf-card">
                     <div className="qf-lab">
+                      <span className="qf-ic blue"><ListChecks size={18} /></span>
+                      <div><label>Variantlar — to‘g‘ri javob(lar)ni belgilang <span className="req">*</span></label></div>
+                    </div>
+                    {options.map((o, i) => (
+                      <div className="adm-opt" key={i}>
+                        <span className="qf-optnum">{i + 1}</span>
+                        <label className="adm-chk" title="To‘g‘ri javob">
+                          <input type="checkbox" checked={o.isCorrect} onChange={(e) => setOpt(i, { isCorrect: e.target.checked })} />
+                        </label>
+                        <input className="adm-inp flex" placeholder={`Variant ${i + 1} (lotin)`} value={o.textLat} onChange={(e) => setOpt(i, { textLat: e.target.value })} />
+                        <input className="adm-inp flex" placeholder="Rus tilida (avtomatik)" value={o.textRus} onChange={(e) => setOpt(i, { textRus: e.target.value, rusTouched: true })} />
+                        {options.length > 2 && <button className="adm-x" onClick={() => rmOpt(i)}><X size={15} /></button>}
+                      </div>
+                    ))}
+                    <button className="adm-btn sec" onClick={addOpt}><Plus size={15} /> Variant qo‘shish</button>
+                  </div>
+                </div>
+
+                {/* ===== O'NG ustun ===== */}
+                <div className="qf-right">
+                  <div className="qf-card">
+                    <div className="qf-lab">
                       <span className="qf-ic green"><Grid3x3 size={18} /></span>
-                      <div><label>Shablon</label><div className="sub">savol qaysi shablonga tushadi</div></div>
+                      <div><label>Shablon <span className="req">*</span></label><div className="sub">savol qaysi shablonga tushadi</div></div>
                     </div>
                     <select className="adm-sel" value={shablon} onChange={(e) => setShablon(e.target.value)}>
                       <option value="">— tanlanmagan —</option>
@@ -335,7 +345,7 @@ export default function AdminQuestionForm() {
                   <div className="qf-card">
                     <div className="qf-lab">
                       <span className="qf-ic blue"><BookOpen size={18} /></span>
-                      <div><label>Mavzu</label><div className="sub">savol qaysi mavzuga tegishli</div></div>
+                      <div><label>Mavzu <span className="req">*</span></label><div className="sub">savol qaysi mavzuga tegishli</div></div>
                     </div>
                     <select className="adm-sel" value={topicId} onChange={(e) => setTopicId(e.target.value)}>
                       <option value="">— tanlanmagan —</option>
@@ -351,19 +361,6 @@ export default function AdminQuestionForm() {
                     <div className="qf-inwrap">
                       <textarea className="adm-ta" maxLength={500} value={explanation} onChange={(e) => setExplanation(e.target.value)} placeholder="Izoh yoki qoida matnini kiriting…" />
                       <span className="qf-count">{explanation.length}/500</span>
-                    </div>
-                  </div>
-
-                  <div className="qf-card">
-                    <div className="qf-lab">
-                      <span className="qf-ic amber"><Lightbulb size={18} /></span>
-                      <div><label>{editing ? 'Savolni tahrirlash' : 'Yangi savol'} haqida</label></div>
-                    </div>
-                    <div className="qf-info-list">
-                      <div className="qf-info-item"><CheckCircle2 size={16} /> Lotin, kirill va rus matnlari kiritiladi.</div>
-                      <div className="qf-info-item"><CheckCircle2 size={16} /> Rasm ixtiyoriy, test oynasida ko‘rinadi.</div>
-                      <div className="qf-info-item"><CheckCircle2 size={16} /> To‘g‘ri javob(lar)ni belgilashingiz mumkin.</div>
-                      <div className="qf-info-item"><CheckCircle2 size={16} /> Izoh va ovoz ixtiyoriy maydonlardir.</div>
                     </div>
                   </div>
 
@@ -388,6 +385,13 @@ export default function AdminQuestionForm() {
                 <button className="adm-btn sec" onClick={() => nav('/savollar')}><X size={16} /> Bekor qilish</button>
                 <button className="adm-btn primary" onClick={save} disabled={busy}>{busy ? 'Saqlanmoqda…' : 'Saqlash'}</button>
               </div>
+
+              {zoom && (imageFile || imageUrl) && (
+                <div className="qf-lightbox" onClick={() => setZoom(false)}>
+                  <img src={imageFile ? (imgPreview || undefined) : (imageUrl || undefined)} alt="" onClick={(e) => e.stopPropagation()} />
+                  <button className="qf-lightbox-x" onClick={() => setZoom(false)}><X size={18} /></button>
+                </div>
+              )}
             </>
           )}
         </div>

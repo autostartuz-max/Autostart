@@ -222,7 +222,7 @@
 
 /* Rasm maydoni */
 .adm-imgrow { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
-.adm-imgprev { max-width: 280px; max-height: 180px; border-radius: 10px; border: 1px solid var(--db-border); }
+.adm-imgprev { max-width: 220px; max-height: 150px; border-radius: 10px; border: 1px solid var(--db-border); }
 .adm-imgph { width: 200px; height: 120px; border-radius: 10px; border: 1px dashed var(--db-border);
   display: flex; align-items: center; justify-content: center; color: var(--db-muted); font-size: 13px; }
 .adm-imgbtns { display: flex; gap: 8px; flex-wrap: wrap; }

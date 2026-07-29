@@ -69,10 +69,11 @@ export default function AdminQuestions() {
               <div className="adm-list">
                 {loading && <div className="adm-empty">Yuklanmoqda…</div>}
                 {!loading && list.length === 0 && <div className="adm-empty">Savol topilmadi.</div>}
-                {list.map((item) => (
+                {list.map((item, i) => (
                   <div className="adm-row" key={item.id} onClick={() => nav('/savollar/' + item.id)}>
+                    <span className="adm-id">{i + 1}</span>
                     <span className="adm-txt">
-                      {item.imageUrl && <ImageIcon size={14} className="adm-imgic" />}
+                      {item.imageUrl && <ImageIcon size={12} className="adm-imgic" />}
                       {item.textLat}
                     </span>
                     <span className="adm-badge">{item.topic?.name || '—'}</span>

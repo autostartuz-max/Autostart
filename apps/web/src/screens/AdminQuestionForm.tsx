@@ -266,6 +266,28 @@ export default function AdminQuestionForm() {
 
                   <div className="qf-card">
                     <div className="qf-lab">
+                      <span className="qf-ic blue"><ListChecks size={18} /></span>
+                      <div><label>Variantlar — to‘g‘ri javob(lar)ni belgilang</label></div>
+                    </div>
+                    {options.map((o, i) => (
+                      <div className="adm-opt" key={i}>
+                        <span className="qf-optnum">{i + 1}</span>
+                        <label className="adm-chk" title="To‘g‘ri javob">
+                          <input type="checkbox" checked={o.isCorrect} onChange={(e) => setOpt(i, { isCorrect: e.target.checked })} />
+                        </label>
+                        <input className="adm-inp flex" placeholder={`Variant ${i + 1} (lotin)`} value={o.textLat} onChange={(e) => setOpt(i, { textLat: e.target.value })} />
+                        <input className="adm-inp flex" placeholder="Rus tilida (avtomatik)" value={o.textRus} onChange={(e) => setOpt(i, { textRus: e.target.value, rusTouched: true })} />
+                        {options.length > 2 && <button className="adm-x" onClick={() => rmOpt(i)}><X size={15} /></button>}
+                      </div>
+                    ))}
+                    <button className="adm-btn sec" onClick={addOpt}><Plus size={15} /> Variant qo‘shish</button>
+                  </div>
+                </div>
+
+                {/* ===== O'NG ustun ===== */}
+                <div className="qf-right">
+                  <div className="qf-card">
+                    <div className="qf-lab">
                       <span className="qf-ic green"><ImageIcon size={18} /></span>
                       <div><label>Savol rasmi</label><div className="sub">test oynasida ko‘rinadi</div></div>
                     </div>
@@ -298,28 +320,6 @@ export default function AdminQuestionForm() {
                     <div className="adm-hint">Rasm test oynasida savol bilan birga ko‘rsatiladi.</div>
                   </div>
 
-                  <div className="qf-card">
-                    <div className="qf-lab">
-                      <span className="qf-ic blue"><ListChecks size={18} /></span>
-                      <div><label>Variantlar — to‘g‘ri javob(lar)ni belgilang</label></div>
-                    </div>
-                    {options.map((o, i) => (
-                      <div className="adm-opt" key={i}>
-                        <span className="qf-optnum">{i + 1}</span>
-                        <label className="adm-chk" title="To‘g‘ri javob">
-                          <input type="checkbox" checked={o.isCorrect} onChange={(e) => setOpt(i, { isCorrect: e.target.checked })} />
-                        </label>
-                        <input className="adm-inp flex" placeholder={`Variant ${i + 1} (lotin)`} value={o.textLat} onChange={(e) => setOpt(i, { textLat: e.target.value })} />
-                        <input className="adm-inp flex" placeholder="Rus tilida (avtomatik)" value={o.textRus} onChange={(e) => setOpt(i, { textRus: e.target.value, rusTouched: true })} />
-                        {options.length > 2 && <button className="adm-x" onClick={() => rmOpt(i)}><X size={15} /></button>}
-                      </div>
-                    ))}
-                    <button className="adm-btn sec" onClick={addOpt}><Plus size={15} /> Variant qo‘shish</button>
-                  </div>
-                </div>
-
-                {/* ===== O'NG ustun ===== */}
-                <div className="qf-right">
                   <div className="qf-card">
                     <div className="qf-lab">
                       <span className="qf-ic green"><Grid3x3 size={18} /></span>
@@ -356,6 +356,19 @@ export default function AdminQuestionForm() {
 
                   <div className="qf-card">
                     <div className="qf-lab">
+                      <span className="qf-ic amber"><Lightbulb size={18} /></span>
+                      <div><label>{editing ? 'Savolni tahrirlash' : 'Yangi savol'} haqida</label></div>
+                    </div>
+                    <div className="qf-info-list">
+                      <div className="qf-info-item"><CheckCircle2 size={16} /> Lotin, kirill va rus matnlari kiritiladi.</div>
+                      <div className="qf-info-item"><CheckCircle2 size={16} /> Rasm ixtiyoriy, test oynasida ko‘rinadi.</div>
+                      <div className="qf-info-item"><CheckCircle2 size={16} /> To‘g‘ri javob(lar)ni belgilashingiz mumkin.</div>
+                      <div className="qf-info-item"><CheckCircle2 size={16} /> Izoh va ovoz ixtiyoriy maydonlardir.</div>
+                    </div>
+                  </div>
+
+                  <div className="qf-card">
+                    <div className="qf-lab">
                       <span className="qf-ic amber"><Mic size={18} /></span>
                       <div><label>Tushuncha ovozi</label><div className="sub">ixtiyoriy — xulosa avtomatik o‘qib eshittiriladi</div></div>
                     </div>
@@ -365,19 +378,6 @@ export default function AdminQuestionForm() {
                         <input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
                       </label>
                       {audioFile && <button className="adm-btn sec" onClick={() => setAudioFile(null)}>Bekor</button>}
-                    </div>
-                  </div>
-
-                  <div className="qf-card">
-                    <div className="qf-lab">
-                      <span className="qf-ic amber"><Lightbulb size={18} /></span>
-                      <div><label>{editing ? 'Savolni tahrirlash' : 'Yangi savol'} haqida</label></div>
-                    </div>
-                    <div className="qf-info-list">
-                      <div className="qf-info-item"><CheckCircle2 size={16} /> Lotin, kirill va rus matnlari kiritiladi.</div>
-                      <div className="qf-info-item"><CheckCircle2 size={16} /> Rasm ixtiyoriy, test oynasida ko‘rinadi.</div>
-                      <div className="qf-info-item"><CheckCircle2 size={16} /> To‘g‘ri javob(lar)ni belgilashingiz mumkin.</div>
-                      <div className="qf-info-item"><CheckCircle2 size={16} /> Izoh va ovoz ixtiyoriy maydonlardir.</div>
                     </div>
                   </div>
                 </div>

@@ -231,6 +231,12 @@ export default function AdminQuestionForm() {
             <b>{editing ? 'Savolni tahrirlash' : 'Yangi savol'}</b>
             <span>Savol ma’lumotlarini kiriting va to‘g‘ri javobni belgilang</span>
           </div>
+          {authed && (
+            <div className="qf-top-actions">
+              <button className="adm-btn sec" onClick={() => nav('/savollar')}><X size={16} /> Bekor qilish</button>
+              <button className="adm-btn primary" onClick={save} disabled={busy}>{busy ? 'Saqlanmoqda…' : 'Saqlash'}</button>
+            </div>
+          )}
         </header>
 
         <div className="db-content">
@@ -238,6 +244,7 @@ export default function AdminQuestionForm() {
             <AdminLogin onLogin={() => setAuthed(true)} />
           ) : (
             <>
+              {err && <div className="adm-err" style={{ marginBottom: 14 }}>{err}</div>}
               <div className="qf-grid">
                 {/* ===== CHAP ustun ===== */}
                 <div className="qf-left">
@@ -378,12 +385,6 @@ export default function AdminQuestionForm() {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {err && <div className="adm-err" style={{ marginTop: 14 }}>{err}</div>}
-              <div className="qf-footer">
-                <button className="adm-btn sec" onClick={() => nav('/savollar')}><X size={16} /> Bekor qilish</button>
-                <button className="adm-btn primary" onClick={save} disabled={busy}>{busy ? 'Saqlanmoqda…' : 'Saqlash'}</button>
               </div>
 
               {zoom && (imageFile || imageUrl) && (

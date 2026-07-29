@@ -272,6 +272,7 @@
 .qf-htitle { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
 .qf-htitle b { font-size: 15px; font-weight: 800; color: var(--db-text); }
 .qf-htitle span { font-size: 12px; color: var(--db-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qf-top-actions { margin-left: auto; display: flex; gap: 10px; flex-shrink: 0; }
 
 .qf-grid { display: grid; grid-template-columns: 1fr 320px; gap: 18px; align-items: start; }
 .qf-left { display: flex; flex-direction: column; gap: 14px; min-width: 0; }

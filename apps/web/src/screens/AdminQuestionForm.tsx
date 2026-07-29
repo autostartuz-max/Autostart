@@ -4,7 +4,7 @@ import {
   ChevronLeft, Menu, Plus, X, Upload, Image as ImageIcon, ListChecks,
   Info, Mic, Grid3x3, BookOpen,
 } from 'lucide-react';
-import { adminApi, hasAdmin, ensureAdminAuto, base64ToFile } from '../api';
+import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
 import { latToCyr } from '../translit';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
@@ -17,8 +17,6 @@ interface Opt {
   rusTouched?: boolean;
   rusSrc?: string;
 }
-
-const AI_COLORS = ['oq', 'qora', 'qizil', "ko'k", 'yashil', 'sariq', 'kulrang', 'jigarrang', "to'q sariq"];
 
 export default function AdminQuestionForm() {
   const nav = useNavigate();
@@ -50,11 +48,6 @@ export default function AdminQuestionForm() {
   const [imageBusy, setImageBusy] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [zoomSrc, setZoomSrc] = useState<string | null>(null);
-  // AI bilan rasmni qayta bo'yash
-  const [aiRows, setAiRows] = useState<{ object: string; color: string }[]>([{ object: '', color: '' }]);
-  const [aiBusy, setAiBusy] = useState(false);
-  const [aiErr, setAiErr] = useState('');
-  const [aiResult, setAiResult] = useState<{ imageBase64: string; mime: string } | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -169,53 +162,6 @@ export default function AdminQuestionForm() {
     setDragging(false);
     const f = e.dataTransfer.files?.[0];
     if (f && f.type.startsWith('image/')) setImageFile(f);
-  };
-
-  // ----- AI qayta bo'yash handlerlari -----
-  const setAiRow = (i: number, patch: Partial<{ object: string; color: string }>) =>
-    setAiRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
-  const addAiRow = () => setAiRows((rs) => [...rs, { object: '', color: '' }]);
-  const rmAiRow = (i: number) => setAiRows((rs) => rs.filter((_, j) => j !== i));
-
-  // Bo'yash uchun manba rasm: yangi tanlangan File yoki serverdagi rasm
-  const recolorSource = async (): Promise<File | null> => {
-    if (imageFile) return imageFile;
-    if (imageUrl) {
-      const res = await fetch(imageUrl);
-      const blob = await res.blob();
-      return new File([blob], 'source.jpg', { type: blob.type || 'image/jpeg' });
-    }
-    return null;
-  };
-
-  const runRecolor = async () => {
-    setAiErr('');
-    const rows = aiRows.filter((r) => r.object.trim() && r.color.trim());
-    if (rows.length === 0) return setAiErr('Kamida bitta obyekt va rang kiriting');
-    const src = await recolorSource();
-    if (!src) return setAiErr('Avval rasm yuklang');
-    setAiBusy(true);
-    try {
-      const out = await adminApi.recolorImage(src, rows);
-      setAiResult(out); // ORIGINALGA TEGMAYMIZ — alohida ko'rsatamiz
-    } catch (e: any) {
-      setAiErr(e.message || 'Bo‘yash xatosi');
-    } finally {
-      setAiBusy(false);
-    }
-  };
-
-  const applyRecolor = async () => {
-    if (!aiResult) return;
-    const f = await base64ToFile(aiResult.imageBase64, aiResult.mime);
-    setImageFile(f); // mavjud preview useEffect + save() -> uploadImage avtomat ishlaydi
-    setAiResult(null);
-  };
-
-  const cancelRecolor = () => {
-    setAiRows([{ object: '', color: '' }]);
-    setAiErr('');
-    setAiResult(null);
   };
 
   const save = async () => {
@@ -367,47 +313,6 @@ export default function AdminQuestionForm() {
                       </label>
                     )}
                     <div className="adm-hint">Rasm test oynasida savol bilan birga ko‘rsatiladi. Ko‘rish uchun rasmga bosing.</div>
-
-                    {(imageFile || imageUrl) && (
-                      <div className="qf-airecolor">
-                        <div className="qf-airecolor-head">🎨 AI bilan qayta bo‘yash <span>obyekt va rangni ko‘rsating</span></div>
-                        {aiRows.map((r, i) => (
-                          <div className="qf-airow" key={i}>
-                            <input className="adm-inp" placeholder="Obyekt (masalan: oldingi mashina)"
-                              value={r.object} onChange={(e) => setAiRow(i, { object: e.target.value })} />
-                            <div className="qf-color-presets">
-                              {AI_COLORS.map((c) => (
-                                <button type="button" key={c}
-                                  className={'qf-color-chip' + (r.color === c ? ' active' : '')}
-                                  onClick={() => setAiRow(i, { color: c })}>{c}</button>
-                              ))}
-                            </div>
-                            {aiRows.length > 1 && (
-                              <button className="adm-x" onClick={() => rmAiRow(i)}><X size={15} /></button>
-                            )}
-                          </div>
-                        ))}
-                        <div className="qf-airecolor-btns">
-                          <button className="adm-btn sec" onClick={addAiRow}><Plus size={15} /> Qator qo‘shish</button>
-                          <button className="adm-btn primary" onClick={runRecolor} disabled={aiBusy}>
-                            {aiBusy ? 'Bo‘yalmoqda…' : '🎨 Bo‘yash'}
-                          </button>
-                          <button className="adm-btn sec" onClick={cancelRecolor} disabled={aiBusy}><X size={15} /> Bekor qilish</button>
-                        </div>
-                        {aiErr && <div className="adm-err" style={{ marginTop: 8 }}>{aiErr}</div>}
-                        {aiResult && (
-                          <div className="qf-airesult">
-                            <div className="sub">Natija (original o‘zgarmaydi — tasdiqlang):</div>
-                            <img className="adm-imgprev qf-zoomable" onClick={() => setZoomSrc(`data:${aiResult.mime};base64,${aiResult.imageBase64}`)}
-                              src={`data:${aiResult.mime};base64,${aiResult.imageBase64}`} alt="AI natija" />
-                            <div className="adm-imgbtns">
-                              <button className="adm-btn primary" onClick={applyRecolor}>✓ Ishlatish</button>
-                              <button className="adm-btn sec" onClick={() => setAiResult(null)}>✕ Bekor</button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   <div className="qf-card">

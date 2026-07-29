@@ -212,6 +212,12 @@ export default function AdminQuestionForm() {
     setAiResult(null);
   };
 
+  const cancelRecolor = () => {
+    setAiRows([{ object: '', color: '' }]);
+    setAiErr('');
+    setAiResult(null);
+  };
+
   const save = async () => {
     setErr('');
     if (!textLat.trim()) return setErr('Savol matni (lotin) to‘ldirilmagan');
@@ -386,6 +392,7 @@ export default function AdminQuestionForm() {
                           <button className="adm-btn primary" onClick={runRecolor} disabled={aiBusy}>
                             {aiBusy ? 'Bo‘yalmoqda…' : '🎨 Bo‘yash'}
                           </button>
+                          <button className="adm-btn sec" onClick={cancelRecolor} disabled={aiBusy}><X size={15} /> Bekor qilish</button>
                         </div>
                         {aiErr && <div className="adm-err" style={{ marginTop: 8 }}>{aiErr}</div>}
                         {aiResult && (

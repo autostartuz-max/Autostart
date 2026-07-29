@@ -119,7 +119,29 @@ export const adminApi = {
   deleteImage: (id: number) => areq('/admin/questions/' + id + '/image', { method: 'DELETE' }),
   uploadAudio: (id: number, file: File) => aupload('/admin/questions/' + id + '/audio', 'audio', file),
   deleteAudio: (id: number) => areq('/admin/questions/' + id + '/audio', { method: 'DELETE' }),
+  recolorImage: async (
+    file: File,
+    pairs: { object: string; color: string }[]
+  ): Promise<{ imageBase64: string; mime: string }> => {
+    const fd = new FormData();
+    fd.append('image', file);
+    fd.append('pairs', JSON.stringify(pairs));
+    const res = await fetch(API + '/admin/recolor-image', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${adminToken()}` }, // Content-Type YO'Q — browser multipart boundary qo'yadi
+      body: fd,
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
+    return res.json();
+  },
 };
+
+// base64 -> File (AI natijasini mavjud rasm-yuklash oqimiga ulash uchun)
+export async function base64ToFile(b64: string, mime: string, name = 'recolored.png'): Promise<File> {
+  const res = await fetch(`data:${mime};base64,${b64}`);
+  const blob = await res.blob();
+  return new File([blob], name, { type: mime });
+}
 
 // Token bo'lmasa — hozircha (SAVOLLAR_PUBLIC) avtomatik admin sifatida kiramiz
 export async function ensureAdminAuto(): Promise<boolean> {

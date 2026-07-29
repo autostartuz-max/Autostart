@@ -275,7 +275,9 @@ userRouter.get(
       orderBy: { id: 'asc' },
     });
 
-    if (mode === 'exam' || mode === 'random' || mode === '50' || mode === '100') {
+    if (shablon) {
+      // Shablon test: savollar tartib (id asc) bo'yicha — aralashtirilmaydi (1 tepada, 2 pastda)
+    } else if (mode === 'exam' || mode === 'random' || mode === '50' || mode === '100') {
       const n = limit || (mode === '100' ? 100 : mode === '50' ? 50 : 20);
       questions = shuffle(questions).slice(0, n);
     } else if (limit) {

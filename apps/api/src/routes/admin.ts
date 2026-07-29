@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import { prisma } from '../prisma';
 import { signAdminToken, requireAdmin } from '../auth';
+import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL } from '../env';
 
 export const adminRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -56,6 +57,99 @@ adminRouter.get(
   })
 );
 
+/* ---------- AI bilan rasmni qayta bo'yash (Gemini Nano Banana) ---------- */
+
+// O'zbekcha rang nomlari -> inglizcha (Gemini ingliz promptni yaxshiroq tushunadi)
+const UZ_COLOR: Record<string, string> = {
+  oq: 'white', qora: 'black', qizil: 'red', "ko'k": 'blue', kok: 'blue',
+  yashil: 'green', sariq: 'yellow', kulrang: 'gray', jigarrang: 'brown',
+  "to'q sariq": 'orange', apelsin: 'orange', binafsha: 'purple',
+  pushti: 'pink', kumush: 'silver', kumushrang: 'silver',
+  oltin: 'gold', moviy: 'light blue', bej: 'beige',
+};
+const mapColor = (c: string) => {
+  const k = c.trim().toLowerCase();
+  return UZ_COLOR[k] || k; // topilmasa o'zini yuboramiz
+};
+
+function buildRecolorPrompt(pairs: { object: string; color: string }[]): string {
+  const lines = pairs
+    .filter((p) => p.object?.trim() && p.color?.trim())
+    .map((p) => `- the ${p.object.trim()} must become ${mapColor(p.color)}`)
+    .join('\n');
+  return [
+    'You are a precise photo editor. Edit ONLY the color of the specified objects in this image.',
+    'Recolor the following objects:',
+    lines,
+    '',
+    'Strict rules:',
+    '- Do NOT change the scene, road, background, road signs, markings, composition, camera angle or any other object.',
+    '- Change ONLY the color of the listed objects; keep their shape, texture, shadows and reflections realistic.',
+    '- Keep photorealistic lighting; the recolored object must look natural in the scene.',
+    '- Output the edited image only. Do not add text, watermarks or borders.',
+  ].join('\n');
+}
+
+adminRouter.post(
+  '/recolor-image',
+  upload.single('image'),
+  ah(async (req, res) => {
+    if (!GEMINI_API_KEY) return res.status(400).json({ error: 'GEMINI_API_KEY sozlanmagan (serverda .env)' });
+    if (!req.file) return res.status(400).json({ error: 'Rasm yuklanmadi' });
+
+    let pairs: { object: string; color: string }[] = [];
+    try { pairs = JSON.parse(String(req.body.pairs || '[]')); } catch { pairs = []; }
+    const promptText = pairs.length > 0 ? buildRecolorPrompt(pairs) : String(req.body.prompt || '').trim();
+    if (!promptText) return res.status(400).json({ error: 'Obyekt/rang kiritilmadi' });
+
+    const mime = req.file.mimetype || 'image/jpeg';
+    const base64 = req.file.buffer.toString('base64');
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent`;
+
+    let r: Awaited<ReturnType<typeof fetch>>;
+    try {
+      r = await fetch(url, {
+        method: 'POST',
+        headers: { 'x-goog-api-key': GEMINI_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ inline_data: { mime_type: mime, data: base64 } }, { text: promptText }] }],
+        }),
+        signal: AbortSignal.timeout(60_000), // rasm generatsiyasi sekin bo'lishi mumkin
+      });
+    } catch (e: any) {
+      const msg = e?.name === 'TimeoutError' ? 'Gemini javob bermadi (timeout)' : 'Tarmoq xatosi: ' + (e?.message || e);
+      return res.status(504).json({ error: msg });
+    }
+
+    if (!r.ok) {
+      const detail = await r.text().catch(() => '');
+      if (r.status === 429) return res.status(429).json({ error: 'Gemini bepul limiti tugadi, biroz kuting (429)' });
+      if (r.status === 400) return res.status(400).json({ error: 'Gemini so‘rovni rad etdi: ' + detail.slice(0, 300) });
+      return res.status(502).json({ error: `Gemini xatosi (${r.status})` });
+    }
+
+    const data: any = await r.json();
+    const cand = data?.candidates?.[0];
+    const block = data?.promptFeedback?.blockReason || cand?.finishReason;
+    const parts: any[] = cand?.content?.parts || [];
+
+    // Javob camelCase (inlineData); himoya uchun snake_case ham tekshiramiz
+    const imgPart = parts.find((p: any) => p?.inlineData?.data || p?.inline_data?.data);
+    if (!imgPart) {
+      const textPart = parts.find((p: any) => typeof p?.text === 'string')?.text;
+      const reason =
+        block && block !== 'STOP'
+          ? `Model rad etdi: ${block}`
+          : textPart
+          ? 'Model rasm o‘rniga matn qaytardi: ' + String(textPart).slice(0, 200)
+          : 'Model rasm qaytarmadi';
+      return res.status(502).json({ error: reason });
+    }
+    const inline = imgPart.inlineData || imgPart.inline_data;
+    res.json({ imageBase64: inline.data, mime: inline.mimeType || inline.mime_type || 'image/png' });
+  })
+);
+
 /* ---------- Statistika ---------- */
 adminRouter.get(
   '/stats',
@@ -83,7 +177,7 @@ adminRouter.get(
     const questions = await prisma.question.findMany({
       where,
       include: { options: { orderBy: { order: 'asc' } }, topic: true, ticket: true, category: true },
-      orderBy: { id: 'desc' },
+      orderBy: { id: 'asc' }, // 1 tepada, 2 pastda (tartib bo'yicha)
       take: 300,
     });
     res.json(questions);

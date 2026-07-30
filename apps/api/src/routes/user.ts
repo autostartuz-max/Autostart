@@ -272,7 +272,7 @@ userRouter.get(
     let questions = await prisma.question.findMany({
       where: base,
       include: questionInclude,
-      orderBy: { id: 'asc' },
+      orderBy: [{ order: 'asc' }, { id: 'asc' }],
     });
 
     if (shablon) {

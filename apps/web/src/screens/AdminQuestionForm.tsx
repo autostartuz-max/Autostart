@@ -48,6 +48,7 @@ export default function AdminQuestionForm() {
   const [rusTouched, setRusTouched] = useState(false);
   const [rusLoading, setRusLoading] = useState(false);
   const [shablon, setShablon] = useState('');
+  const [order, setOrder] = useState('');
   const [explanation, setExplanation] = useState('');
   const [topicId, setTopicId] = useState('');
   const [options, setOptions] = useState<Opt[]>([
@@ -117,6 +118,7 @@ export default function AdminQuestionForm() {
           setTextRus(it.textRus || '');
           if (it.textRus) setRusTouched(true);
           setShablon(it.shablon ? String(it.shablon) : '');
+          setOrder(it.order ? String(it.order) : '');
           setExplanation(it.explanation || '');
           setTopicId(it.topicId ? String(it.topicId) : '');
           setImageUrl(it.imageUrl || null);
@@ -231,6 +233,25 @@ export default function AdminQuestionForm() {
     }
   };
 
+  // Clipboard'dan (Ctrl+V) skrinshot -> OCR
+  useEffect(() => {
+    if (!authed) return;
+    const onPaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const it of Array.from(items)) {
+        if (it.type.startsWith('image/')) {
+          const f = it.getAsFile();
+          if (f) { e.preventDefault(); runOcr(f); }
+          return;
+        }
+      }
+    };
+    document.addEventListener('paste', onPaste);
+    return () => document.removeEventListener('paste', onPaste);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, topics]);
+
   const save = async () => {
     setErr('');
     if (!textLat.trim()) return setErr('Savol matni (lotin) to‘ldirilmagan');
@@ -267,6 +288,7 @@ export default function AdminQuestionForm() {
         textCyr: cyrFinal,
         textRus: rusFinal,
         shablon: Number(shablon),
+        order: order ? Number(order) : 0,
         explanation: explanation.trim(),
         topicId: Number(topicId),
         options: optsFinal,
@@ -314,9 +336,9 @@ export default function AdminQuestionForm() {
               {err && <div className="adm-err" style={{ marginBottom: 14 }}>{err}</div>}
 
               <div className="qf-ocr">
-                <div className="qf-ocr-head">📷 Skrinshotdan avtomat to‘ldirish <span>(qoralama — tekshirib chiqing)</span></div>
+                <div className="qf-ocr-head">📷 Skrinshotdan avtomat to‘ldirish <span>Ctrl+V bilan qo‘ying yoki tanlang (qoralama)</span></div>
                 <label className="adm-btn sec file">
-                  {ocrBusy ? `O‘qilmoqda… ${ocrPct}%` : 'Skrinshot tanlang'}
+                  {ocrBusy ? `O‘qilmoqda… ${ocrPct}%` : '📋 Skrinshot tanlang'}
                   <input type="file" accept="image/*" disabled={ocrBusy}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) runOcr(f); e.target.value = ''; }} />
                 </label>
@@ -426,6 +448,10 @@ export default function AdminQuestionForm() {
                       {Array.from({ length: 63 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}-shablon</option>)}
                     </select>
                     <div className="adm-hint">Bo‘sh qoldirilsa — savol shablonga biriktirilmaydi.</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--db-muted)', margin: '12px 0 6px' }}>Tartib raqami</div>
+                    <input className="adm-inp" type="number" min={0} placeholder="0" value={order}
+                      onChange={(e) => setOrder(e.target.value)} style={{ maxWidth: 140 }} />
+                    <div className="adm-hint">Savollar shu raqam bo‘yicha tartiblanadi (1, 2, 3…).</div>
                   </div>
 
                   <div className="qf-card">

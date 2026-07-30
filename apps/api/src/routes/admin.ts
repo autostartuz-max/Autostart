@@ -177,7 +177,7 @@ adminRouter.get(
     const questions = await prisma.question.findMany({
       where,
       include: { options: { orderBy: { order: 'asc' } }, topic: true, ticket: true, category: true },
-      orderBy: { id: 'asc' }, // 1 tepada, 2 pastda (tartib bo'yicha)
+      orderBy: [{ order: 'asc' }, { id: 'asc' }], // admin tartibi, keyin id
       take: 300,
     });
     res.json(questions);
@@ -202,6 +202,7 @@ function questionData(body: any) {
     textCyr: String(body.textCyr || '').trim(),
     textRus: String(body.textRus || '').trim(),
     shablon: body.shablon !== undefined && body.shablon !== null && body.shablon !== '' ? Number(body.shablon) : null,
+    order: body.order !== undefined && body.order !== null && body.order !== '' ? Number(body.order) : 0,
     explanation: String(body.explanation || '').trim(),
     ruleRef: body.ruleRef ? String(body.ruleRef) : null,
     difficulty: Number(body.difficulty || 1),
@@ -318,8 +319,10 @@ adminRouter.post(
       update: { data: req.file.buffer, mime: req.file.mimetype || 'image/jpeg' },
       create: { questionId: id, data: req.file.buffer, mime: req.file.mimetype || 'image/jpeg' },
     });
-    await prisma.question.update({ where: { id }, data: { imageUrl: `/api/questions/${id}/image` } });
-    res.json({ ok: true, imageUrl: `/api/questions/${id}/image` });
+    // ?v= versiya — rasm almashtirilganda cache eskisini ko'rsatmasin
+    const url = `/api/questions/${id}/image?v=${Date.now()}`;
+    await prisma.question.update({ where: { id }, data: { imageUrl: url } });
+    res.json({ ok: true, imageUrl: url });
   })
 );
 

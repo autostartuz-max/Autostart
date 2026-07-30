@@ -71,7 +71,7 @@ export default function AdminQuestions() {
                 {!loading && list.length === 0 && <div className="adm-empty">Savol topilmadi.</div>}
                 {list.map((item, i) => (
                   <div className="adm-row" key={item.id} onClick={() => nav('/savollar/' + item.id)}>
-                    <span className="adm-id">{i + 1}</span>
+                    <span className="adm-id">{item.order || i + 1}</span>
                     <span className="adm-txt">
                       {item.imageUrl && <ImageIcon size={12} className="adm-imgic" />}
                       {item.textLat}

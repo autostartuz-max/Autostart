@@ -44,6 +44,7 @@ model Question {
   textRus     String       @default("") // rus tili (tarjima)
   imageUrl    String?
   shablon     Int?         // qaysi shablon (1-63) ga tegishli
+  order       Int          @default(0) // admin belgilagan tartib raqami
   explanation String       @default("")
   ruleRef     String?
   difficulty  Int          @default(1)

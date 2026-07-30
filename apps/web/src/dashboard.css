@@ -183,12 +183,24 @@
 
 /* Ro'yxat */
 .adm-list { display: flex; flex-direction: column; gap: 10px; }
-.adm-group { display: flex; flex-direction: column; gap: 10px; }
-.adm-group + .adm-group { margin-top: 20px; }
-.adm-group-head { display: flex; align-items: baseline; gap: 10px; padding: 0 2px 8px; border-bottom: 1px solid var(--db-border); margin-bottom: 2px; }
-.adm-group-title { font-size: 14px; font-weight: 800; color: var(--db-text); display: inline-flex; align-items: center; gap: 8px; }
-.adm-group-title::before { content: ''; width: 4px; height: 14px; border-radius: 3px; background: var(--db-blue); }
-.adm-group-count { font-size: 12px; font-weight: 600; color: var(--db-muted); }
+.adm-head-l { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
+
+/* Shablon kartalari (Savollar admin) — Shablon testlar uslubida */
+.adm-shab-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.adm-shab-card { background: var(--db-card); border: 1px solid var(--db-border); border-radius: 14px;
+  padding: 18px 20px; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.adm-shab-card:hover { border-color: var(--db-blue); box-shadow: 0 6px 18px rgba(37, 99, 235, .18); transform: translateY(-2px); }
+.adm-shab-card.has { border-color: rgba(59, 130, 246, .5); }
+.adm-shab-num { font-size: 16px; font-weight: 800; color: var(--db-text); margin-bottom: 14px; letter-spacing: .3px; }
+.adm-shab-row { display: flex; align-items: center; gap: 14px; }
+.adm-shab-count { width: 46px; height: 46px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; border: 3px solid var(--db-border); font-size: 16px; font-weight: 800; color: var(--db-muted); }
+.adm-shab-card.has .adm-shab-count { border-color: var(--db-blue); color: var(--db-blue); }
+.adm-shab-info { font-size: 14px; color: var(--db-muted); font-weight: 600; }
+.adm-shab-card.has .adm-shab-info { color: var(--db-text); }
+@media (max-width: 1200px) { .adm-shab-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px) { .adm-shab-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .adm-shab-grid { grid-template-columns: 1fr 1fr; gap: 10px; } }
 .adm-row { display: flex; align-items: center; gap: 12px; background: var(--db-card); border: 1px solid var(--db-border);
   border-radius: 12px; padding: 12px 16px; cursor: pointer; transition: border-color .12s, background .12s; }
 .adm-row:hover { border-color: var(--db-blue); background: var(--db-card2); }

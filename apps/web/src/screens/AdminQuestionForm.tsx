@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Menu, Plus, X, Upload, Image as ImageIcon, ListChecks,
   Info, Mic, Grid3x3, BookOpen,
@@ -36,6 +36,7 @@ function guessTopic(q: string, topics: any[]) {
 export default function AdminQuestionForm() {
   const nav = useNavigate();
   const { id } = useParams();
+  const [sp] = useSearchParams();
   const editing = !!id;
 
   const [open, setOpen] = useState(false);
@@ -75,6 +76,15 @@ export default function AdminQuestionForm() {
   // Token bo'lmasa — hozircha avtomatik admin sifatida kiramiz
   useEffect(() => {
     if (!authed) ensureAdminAuto().then((ok) => ok && setAuthed(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Shablon kartasidan "Yangi savol" bosilganda (?shablon=N) — shablonni oldindan tanlaymiz
+  useEffect(() => {
+    if (!editing) {
+      const s = sp.get('shablon');
+      if (s && /^\d+$/.test(s)) setShablon(s);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

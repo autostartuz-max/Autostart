@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Search, Plus, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Menu, Search, Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft } from 'lucide-react';
 import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
+
+const SHABLON_COUNT = 63;
 
 export default function AdminQuestions() {
   const nav = useNavigate();
@@ -13,6 +15,7 @@ export default function AdminQuestions() {
   const [list, setList] = useState<any[]>([]);
   const [q, setQ] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sel, setSel] = useState<number | null>(null); // ochilgan shablon (null = grid)
 
   const load = () => {
     setLoading(true);
@@ -37,16 +40,16 @@ export default function AdminQuestions() {
     }
   };
 
-  // Savollarni shablon bo'yicha guruhlaymiz (shablonsizlar oxirida)
-  const groups = (() => {
-    const m = new Map<number, any[]>();
-    for (const item of list) {
-      const k = item.shablon || 0;
-      if (!m.has(k)) m.set(k, []);
-      m.get(k)!.push(item);
-    }
-    return [...m.entries()].sort((a, b) => (a[0] === 0 ? 1 : b[0] === 0 ? -1 : a[0] - b[0]));
-  })();
+  // Har shablondagi savollar soni (0 = shablonsiz)
+  const counts = new Map<number, number>();
+  for (const item of list) {
+    const k = item.shablon || 0;
+    counts.set(k, (counts.get(k) || 0) + 1);
+  }
+  const noShab = counts.get(0) || 0;
+
+  // Tanlangan shablon savollari
+  const selItems = sel != null ? list.filter((x) => (x.shablon || 0) === sel) : [];
 
   return (
     <div className="db">
@@ -68,7 +71,8 @@ export default function AdminQuestions() {
         <div className="db-content">
           {!authed ? (
             <AdminLogin onLogin={() => setAuthed(true)} />
-          ) : (
+          ) : sel == null ? (
+            /* ===== SHABLON KARTALARI ===== */
             <>
               <div className="adm-head">
                 <h1 className="adm-title">Savollar ({list.length})</h1>
@@ -77,32 +81,61 @@ export default function AdminQuestions() {
                 </button>
               </div>
 
-              <div className="adm-list">
-                {loading && <div className="adm-empty">Yuklanmoqda…</div>}
-                {!loading && list.length === 0 && <div className="adm-empty">Savol topilmadi.</div>}
-                {groups.map(([shab, items]) => (
-                  <div className="adm-group" key={shab}>
-                    <div className="adm-group-head">
-                      <span className="adm-group-title">{shab ? `${shab}-shablon` : 'Shablonsiz'}</span>
-                      <span className="adm-group-count">{items.length} ta savol</span>
-                    </div>
-                    {items.map((item, i) => (
-                      <div className="adm-row" key={item.id} onClick={() => nav('/savollar/' + item.id)}>
-                        <span className="adm-id">{item.order || i + 1}</span>
-                        <span className="adm-txt">
-                          {item.imageUrl && <ImageIcon size={12} className="adm-imgic" />}
-                          {item.textLat}
-                        </span>
-                        <span className="adm-badge">{item.topic?.name || '—'}</span>
-                        <span className="adm-badge b2">{item.options?.length || 0} variant</span>
-                        <button className="adm-mini" onClick={(e) => { e.stopPropagation(); nav('/savollar/' + item.id); }}>
-                          <Pencil size={15} /> Tahrir
-                        </button>
-                        <button className="adm-mini danger" onClick={(e) => { e.stopPropagation(); del(item.id); }}>
-                          <Trash2 size={15} />
-                        </button>
+              {loading && <div className="adm-empty">Yuklanmoqda…</div>}
+              <div className="adm-shab-grid">
+                {Array.from({ length: SHABLON_COUNT }, (_, i) => i + 1).map((n) => {
+                  const c = counts.get(n) || 0;
+                  return (
+                    <div className={'adm-shab-card' + (c ? ' has' : '')} key={n} onClick={() => setSel(n)}>
+                      <div className="adm-shab-num">{n}-SHABLON</div>
+                      <div className="adm-shab-row">
+                        <span className="adm-shab-count">{c}</span>
+                        <div className="adm-shab-info">{c ? `${c} ta savol` : 'Savol yo‘q'}</div>
                       </div>
-                    ))}
+                    </div>
+                  );
+                })}
+                {noShab > 0 && (
+                  <div className="adm-shab-card has" onClick={() => setSel(0)}>
+                    <div className="adm-shab-num">SHABLONSIZ</div>
+                    <div className="adm-shab-row">
+                      <span className="adm-shab-count">{noShab}</span>
+                      <div className="adm-shab-info">{noShab} ta savol</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            /* ===== TANLANGAN SHABLON SAVOLLARI ===== */
+            <>
+              <div className="adm-head">
+                <div className="adm-head-l">
+                  <button className="adm-back" onClick={() => setSel(null)}><ChevronLeft size={18} /> Shablonlar</button>
+                  <h1 className="adm-title">{sel ? `${sel}-shablon savollari` : 'Shablonsiz savollar'} ({selItems.length})</h1>
+                </div>
+                <button className="adm-btn primary" onClick={() => nav('/savollar/yangi' + (sel ? '?shablon=' + sel : ''))}>
+                  <Plus size={17} /> Yangi savol
+                </button>
+              </div>
+
+              <div className="adm-list">
+                {selItems.length === 0 && <div className="adm-empty">Bu shablonda savol yo‘q. “Yangi savol” bilan qo‘shing.</div>}
+                {selItems.map((item, i) => (
+                  <div className="adm-row" key={item.id} onClick={() => nav('/savollar/' + item.id)}>
+                    <span className="adm-id">{item.order || i + 1}</span>
+                    <span className="adm-txt">
+                      {item.imageUrl && <ImageIcon size={12} className="adm-imgic" />}
+                      {item.textLat}
+                    </span>
+                    <span className="adm-badge">{item.topic?.name || '—'}</span>
+                    <span className="adm-badge b2">{item.options?.length || 0} variant</span>
+                    <button className="adm-mini" onClick={(e) => { e.stopPropagation(); nav('/savollar/' + item.id); }}>
+                      <Pencil size={15} /> Tahrir
+                    </button>
+                    <button className="adm-mini danger" onClick={(e) => { e.stopPropagation(); del(item.id); }}>
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 ))}
               </div>

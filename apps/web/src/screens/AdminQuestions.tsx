@@ -37,6 +37,17 @@ export default function AdminQuestions() {
     }
   };
 
+  // Savollarni shablon bo'yicha guruhlaymiz (shablonsizlar oxirida)
+  const groups = (() => {
+    const m = new Map<number, any[]>();
+    for (const item of list) {
+      const k = item.shablon || 0;
+      if (!m.has(k)) m.set(k, []);
+      m.get(k)!.push(item);
+    }
+    return [...m.entries()].sort((a, b) => (a[0] === 0 ? 1 : b[0] === 0 ? -1 : a[0] - b[0]));
+  })();
+
   return (
     <div className="db">
       <AppSidebar active="/savollar" open={open} onClose={() => setOpen(false)} />
@@ -69,21 +80,29 @@ export default function AdminQuestions() {
               <div className="adm-list">
                 {loading && <div className="adm-empty">Yuklanmoqda…</div>}
                 {!loading && list.length === 0 && <div className="adm-empty">Savol topilmadi.</div>}
-                {list.map((item, i) => (
-                  <div className="adm-row" key={item.id} onClick={() => nav('/savollar/' + item.id)}>
-                    <span className="adm-id">{item.order || i + 1}</span>
-                    <span className="adm-txt">
-                      {item.imageUrl && <ImageIcon size={12} className="adm-imgic" />}
-                      {item.textLat}
-                    </span>
-                    <span className="adm-badge">{item.topic?.name || '—'}</span>
-                    <span className="adm-badge b2">{item.options?.length || 0} variant</span>
-                    <button className="adm-mini" onClick={(e) => { e.stopPropagation(); nav('/savollar/' + item.id); }}>
-                      <Pencil size={15} /> Tahrir
-                    </button>
-                    <button className="adm-mini danger" onClick={(e) => { e.stopPropagation(); del(item.id); }}>
-                      <Trash2 size={15} />
-                    </button>
+                {groups.map(([shab, items]) => (
+                  <div className="adm-group" key={shab}>
+                    <div className="adm-group-head">
+                      <span className="adm-group-title">{shab ? `${shab}-shablon` : 'Shablonsiz'}</span>
+                      <span className="adm-group-count">{items.length} ta savol</span>
+                    </div>
+                    {items.map((item, i) => (
+                      <div className="adm-row" key={item.id} onClick={() => nav('/savollar/' + item.id)}>
+                        <span className="adm-id">{item.order || i + 1}</span>
+                        <span className="adm-txt">
+                          {item.imageUrl && <ImageIcon size={12} className="adm-imgic" />}
+                          {item.textLat}
+                        </span>
+                        <span className="adm-badge">{item.topic?.name || '—'}</span>
+                        <span className="adm-badge b2">{item.options?.length || 0} variant</span>
+                        <button className="adm-mini" onClick={(e) => { e.stopPropagation(); nav('/savollar/' + item.id); }}>
+                          <Pencil size={15} /> Tahrir
+                        </button>
+                        <button className="adm-mini danger" onClick={(e) => { e.stopPropagation(); del(item.id); }}>
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>

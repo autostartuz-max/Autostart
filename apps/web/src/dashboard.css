@@ -273,6 +273,11 @@
 .qf-htitle b { font-size: 15px; font-weight: 800; color: var(--db-text); }
 .qf-htitle span { font-size: 12px; color: var(--db-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qf-top-actions { margin-left: auto; display: flex; gap: 10px; flex-shrink: 0; }
+.qf-ocr { background: rgba(59, 130, 246, .08); border: 1px dashed var(--db-border); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.qf-ocr-head { font-size: 13.5px; font-weight: 800; color: var(--db-text); }
+.qf-ocr-head span { font-size: 12px; font-weight: 500; color: var(--db-muted); }
+.qf-ocr-note { font-size: 12px; color: var(--db-muted); flex: 1; min-width: 180px; }
 
 .qf-grid { display: grid; grid-template-columns: 1fr 320px; gap: 18px; align-items: start; }
 .qf-left { display: flex; flex-direction: column; gap: 14px; min-width: 0; }

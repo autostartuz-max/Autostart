@@ -5,6 +5,7 @@ import {
   Info, Mic, Grid3x3, BookOpen,
 } from 'lucide-react';
 import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
+import Tesseract from 'tesseract.js';
 import { latToCyr } from '../translit';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
@@ -16,6 +17,20 @@ interface Opt {
   isCorrect: boolean;
   rusTouched?: boolean;
   rusSrc?: string;
+}
+
+// Savol matnidan mavzuni taxmin qilish (kalit so'zlar mosligi bo'yicha)
+function guessTopic(q: string, topics: any[]) {
+  if (!q || !topics?.length) return null;
+  const ql = q.toLowerCase();
+  let best: any = null;
+  let score = 0;
+  for (const t of topics) {
+    const words = String(t.name || '').toLowerCase().split(/[\s,()]+/).filter((w) => w.length > 4);
+    const s = words.filter((w) => ql.includes(w.slice(0, 6))).length;
+    if (s > score) { score = s; best = t; }
+  }
+  return score > 0 ? best : null;
 }
 
 export default function AdminQuestionForm() {
@@ -48,6 +63,10 @@ export default function AdminQuestionForm() {
   const [imageBusy, setImageBusy] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [zoomSrc, setZoomSrc] = useState<string | null>(null);
+  // Skrinshotdan OCR bilan avtomat to'ldirish (Tesseract)
+  const [ocrBusy, setOcrBusy] = useState(false);
+  const [ocrErr, setOcrErr] = useState('');
+  const [ocrPct, setOcrPct] = useState(0);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -164,6 +183,54 @@ export default function AdminQuestionForm() {
     if (f && f.type.startsWith('image/')) setImageFile(f);
   };
 
+  // Skrinshotdan OCR (Tesseract) bilan matnni o'qib formani to'ldirish
+  const runOcr = async (file: File) => {
+    setOcrErr('');
+    setOcrBusy(true);
+    setOcrPct(0);
+    try {
+      const { data } = await Tesseract.recognize(file, 'eng', {
+        logger: (m: any) => { if (m.status === 'recognizing text') setOcrPct(Math.round((m.progress || 0) * 100)); },
+      });
+      const lines = (data.text || '').split('\n').map((l: string) => l.trim()).filter(Boolean);
+
+      // Savol: '?' bo'lgan eng uzun qator
+      const qLine = lines.filter((l) => l.includes('?')).sort((a, b) => b.length - a.length)[0] || '';
+
+      // Shablon: "N - Bilet/Shablon"
+      let shab = '';
+      for (const l of lines) {
+        const m = l.match(/(\d{1,2})\s*[-–—]\s*(bilet|shablon)/i);
+        if (m) { shab = m[1]; break; }
+      }
+
+      // Variantlar: "F1 ...", "F2 ..." ko'rinishidagi qatorlar
+      const opts: string[] = [];
+      for (const l of lines) {
+        const m = l.match(/^F?\s*[1-4][.):]?\s+(.{2,})$/i);
+        if (m && !m[1].includes('?')) opts.push(m[1].trim());
+      }
+
+      if (qLine) onLat(qLine);
+      if (opts.length) {
+        setOptions((os) => os.map((o, i) => (opts[i]
+          ? { ...o, textLat: opts[i], textRus: '', rusTouched: false, rusSrc: '' }
+          : o)));
+      }
+      if (shab) setShablon(shab);
+      const g = guessTopic(qLine, topics);
+      if (g) setTopicId(String(g.id));
+
+      if (!qLine && opts.length === 0) {
+        setOcrErr('Matn o‘qib bo‘lmadi — rasm tiniqroq/kattaroq bo‘lsin yoki qo‘lda to‘ldiring.');
+      }
+    } catch (e: any) {
+      setOcrErr('OCR xatosi: ' + (e?.message || e));
+    } finally {
+      setOcrBusy(false);
+    }
+  };
+
   const save = async () => {
     setErr('');
     if (!textLat.trim()) return setErr('Savol matni (lotin) to‘ldirilmagan');
@@ -245,6 +312,18 @@ export default function AdminQuestionForm() {
           ) : (
             <>
               {err && <div className="adm-err" style={{ marginBottom: 14 }}>{err}</div>}
+
+              <div className="qf-ocr">
+                <div className="qf-ocr-head">📷 Skrinshotdan avtomat to‘ldirish <span>(qoralama — tekshirib chiqing)</span></div>
+                <label className="adm-btn sec file">
+                  {ocrBusy ? `O‘qilmoqda… ${ocrPct}%` : 'Skrinshot tanlang'}
+                  <input type="file" accept="image/*" disabled={ocrBusy}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) runOcr(f); e.target.value = ''; }} />
+                </label>
+                <span className="qf-ocr-note">Savol, javoblar, shablon va mavzu (taxmin) to‘ldiriladi. Savol rasmini alohida yuklang.</span>
+                {ocrErr && <div className="adm-err" style={{ marginTop: 8, width: '100%' }}>{ocrErr}</div>}
+              </div>
+
               <div className="qf-grid">
                 {/* ===== CHAP ustun ===== */}
                 <div className="qf-left">

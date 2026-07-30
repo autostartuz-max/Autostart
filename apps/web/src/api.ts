@@ -63,7 +63,7 @@ export function clearAdmin() {
   localStorage.removeItem('yhq_admin_token');
 }
 
-async function areq(path: string, opts: RequestInit = {}) {
+async function areq(path: string, opts: RequestInit = {}, _retried = false): Promise<any> {
   const at = adminToken();
   const res = await fetch(API + path, {
     ...opts,
@@ -73,13 +73,18 @@ async function areq(path: string, opts: RequestInit = {}) {
       ...(opts.headers || {}),
     },
   });
+  // Token eskirgan/yaroqsiz bo'lsa — tozalab, qayta kirib, bir marta qayta urinamiz
+  if ((res.status === 401 || res.status === 403) && !_retried && SAVOLLAR_PUBLIC) {
+    clearAdmin();
+    if (await ensureAdminAuto()) return areq(path, opts, true);
+  }
   if (!res.ok) {
     const b = await res.json().catch(() => ({}));
     throw new Error(b.error || res.statusText);
   }
   return res.json();
 }
-async function aupload(path: string, field: string, file: File) {
+async function aupload(path: string, field: string, file: File, _retried = false): Promise<any> {
   const fd = new FormData();
   fd.append(field, file);
   const res = await fetch(API + path, {
@@ -87,6 +92,10 @@ async function aupload(path: string, field: string, file: File) {
     headers: { Authorization: `Bearer ${adminToken()}` },
     body: fd,
   });
+  if ((res.status === 401 || res.status === 403) && !_retried && SAVOLLAR_PUBLIC) {
+    clearAdmin();
+    if (await ensureAdminAuto()) return aupload(path, field, file, true);
+  }
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
   return res.json();
 }

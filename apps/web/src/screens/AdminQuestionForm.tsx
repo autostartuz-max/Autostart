@@ -237,14 +237,21 @@ export default function AdminQuestionForm() {
   useEffect(() => {
     if (!authed) return;
     const onPaste = (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (const it of Array.from(items)) {
-        if (it.type.startsWith('image/')) {
-          const f = it.getAsFile();
-          if (f) { e.preventDefault(); runOcr(f); }
-          return;
+      const dt = e.clipboardData;
+      if (!dt) return;
+      let f: File | null = null;
+      for (const it of Array.from(dt.items || [])) {
+        if (it.type.startsWith('image/')) { f = it.getAsFile(); break; }
+      }
+      if (!f && dt.files) {
+        for (const file of Array.from(dt.files)) {
+          if (file.type.startsWith('image/')) { f = file; break; }
         }
+      }
+      if (f) {
+        e.preventDefault();
+        setImageFile(f); // rasmni darrov joylashtiramiz (preview'da ko'rinadi)
+        runOcr(f);       // matn/javob/shablon/mavzuni avtomat to'ldiramiz
       }
     };
     document.addEventListener('paste', onPaste);
@@ -335,16 +342,12 @@ export default function AdminQuestionForm() {
             <>
               {err && <div className="adm-err" style={{ marginBottom: 14 }}>{err}</div>}
 
-              <div className="qf-ocr">
-                <div className="qf-ocr-head">📷 Skrinshotdan avtomat to‘ldirish <span>Ctrl+V bilan qo‘ying yoki tanlang (qoralama)</span></div>
-                <label className="adm-btn sec file">
-                  {ocrBusy ? `O‘qilmoqda… ${ocrPct}%` : '📋 Skrinshot tanlang'}
-                  <input type="file" accept="image/*" disabled={ocrBusy}
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) runOcr(f); e.target.value = ''; }} />
-                </label>
-                <span className="qf-ocr-note">Savol, javoblar, shablon va mavzu (taxmin) to‘ldiriladi. Savol rasmini alohida yuklang.</span>
-                {ocrErr && <div className="adm-err" style={{ marginTop: 8, width: '100%' }}>{ocrErr}</div>}
-              </div>
+              {/* Ctrl+V bilan skrinshot qo'yilsa — jimgina OCR ishlaydi; faqat holat/xatolik ko'rinadi */}
+              {(ocrBusy || ocrErr) && (
+                <div className={'qf-ocr-toast' + (ocrErr && !ocrBusy ? ' err' : '')}>
+                  {ocrBusy ? `📋 Skrinshotdan o‘qilmoqda… ${ocrPct}%` : ocrErr}
+                </div>
+              )}
 
               <div className="qf-grid">
                 {/* ===== CHAP ustun ===== */}

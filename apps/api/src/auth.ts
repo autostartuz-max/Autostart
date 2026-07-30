@@ -40,7 +40,7 @@ export function signUserToken(userId: number): string {
 }
 
 export function signAdminToken(adminId: number, role: string): string {
-  return jwt.sign({ adminId, role, kind: 'admin' }, JWT_SECRET, { expiresIn: '2d' });
+  return jwt.sign({ adminId, role, kind: 'admin' }, JWT_SECRET, { expiresIn: '30d' });
 }
 
 export function requireUser(req: Request, res: Response, next: NextFunction) {

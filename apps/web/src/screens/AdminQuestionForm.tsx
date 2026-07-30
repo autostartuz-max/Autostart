@@ -79,11 +79,13 @@ export default function AdminQuestionForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Shablon kartasidan "Yangi savol" bosilganda (?shablon=N) — shablonni oldindan tanlaymiz
+  // Shablon kartasidan "Yangi savol" bosilganda (?shablon=N&order=M) — shablon va tartib raqamni oldindan qo'yamiz
   useEffect(() => {
     if (!editing) {
       const s = sp.get('shablon');
       if (s && /^\d+$/.test(s)) setShablon(s);
+      const o = sp.get('order');
+      if (o && /^\d+$/.test(o)) setOrder(o);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

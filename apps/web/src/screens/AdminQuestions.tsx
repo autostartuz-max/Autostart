@@ -50,6 +50,8 @@ export default function AdminQuestions() {
 
   // Tanlangan shablon savollari
   const selItems = sel != null ? list.filter((x) => (x.shablon || 0) === sel) : [];
+  // Yangi savol uchun keyingi tartib raqami (shu shablon ichida)
+  const nextOrder = Math.max(selItems.reduce((m, x) => Math.max(m, x.order || 0), 0), selItems.length) + 1;
 
   return (
     <div className="db">
@@ -114,7 +116,7 @@ export default function AdminQuestions() {
                   <button className="adm-back" onClick={() => setSel(null)}><ChevronLeft size={18} /> Shablonlar</button>
                   <h1 className="adm-title">{sel ? `${sel}-shablon savollari` : 'Shablonsiz savollar'} ({selItems.length})</h1>
                 </div>
-                <button className="adm-btn primary" onClick={() => nav('/savollar/yangi' + (sel ? '?shablon=' + sel : ''))}>
+                <button className="adm-btn primary" onClick={() => nav('/savollar/yangi' + (sel ? `?shablon=${sel}&order=${nextOrder}` : ''))}>
                   <Plus size={17} /> Yangi savol
                 </button>
               </div>

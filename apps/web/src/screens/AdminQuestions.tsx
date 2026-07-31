@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Menu, Search, Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft } from 'lucide-react';
 import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
 import AppSidebar from '../components/AppSidebar';
@@ -10,12 +10,16 @@ const SHABLON_COUNT = 63;
 
 export default function AdminQuestions() {
   const nav = useNavigate();
+  const [sp] = useSearchParams();
   const [open, setOpen] = useState(false);
   const [authed, setAuthed] = useState(hasAdmin());
   const [list, setList] = useState<any[]>([]);
   const [q, setQ] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sel, setSel] = useState<number | null>(null); // ochilgan shablon (null = grid)
+  const [sel, setSel] = useState<number | null>(() => {
+    const s = sp.get('shablon'); // ?shablon=N bilan kelsa — o'sha shablon ochiladi
+    return s !== null && /^\d+$/.test(s) ? Number(s) : null;
+  }); // ochilgan shablon (null = grid)
 
   const load = () => {
     setLoading(true);

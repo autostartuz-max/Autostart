@@ -346,7 +346,7 @@ export default function AdminQuestionForm() {
       }
       if (imageFile && qid) await adminApi.uploadImage(qid, imageFile);
       if (audioFile && qid) await adminApi.uploadAudio(qid, audioFile);
-      nav('/savollar');
+      nav('/savollar' + (shablon ? '?shablon=' + shablon : ''));
     } catch (e: any) {
       setErr(e.message || 'Saqlashda xato');
     } finally {
@@ -360,14 +360,14 @@ export default function AdminQuestionForm() {
       <div className="db-main">
         <header className="db-top qf-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
-          <button className="adm-back" onClick={() => nav('/savollar')}><ChevronLeft size={18} /> Savollar</button>
+          <button className="adm-back" onClick={() => nav('/savollar' + (shablon ? '?shablon=' + shablon : ''))}><ChevronLeft size={18} /> Savollar</button>
           <div className="qf-htitle">
             <b>{editing ? 'Savolni tahrirlash' : 'Yangi savol'}</b>
             <span>Savol ma’lumotlarini kiriting va to‘g‘ri javobni belgilang</span>
           </div>
           {authed && (
             <div className="qf-top-actions">
-              <button className="adm-btn sec" onClick={() => nav('/savollar')}><X size={16} /> Bekor qilish</button>
+              <button className="adm-btn sec" onClick={() => nav('/savollar' + (shablon ? '?shablon=' + shablon : ''))}><X size={16} /> Bekor qilish</button>
               <button className="adm-btn primary" onClick={save} disabled={busy}>{busy ? 'Saqlanmoqda…' : 'Saqlash'}</button>
             </div>
           )}

@@ -79,6 +79,7 @@ export default function TestPlayer() {
   const [finished, setFinished] = useState(false);
   const [showRule, setShowRule] = useState(false);
   const [sel, setSel] = useState<number | null>(null); // tanlangan (hali tasdiqlanmagan) variant
+  const kbRef = useRef<{ opts: { id: number }[]; select: (id: number) => void }>({ opts: [], select: () => {} });
   const [showImg, setShowImg] = useState(false); // rasm lightbox (F tugmasi)
   const [seconds, setSeconds] = useState(0);
   const [elapsed, setElapsed] = useState(0);
@@ -250,6 +251,7 @@ export default function TestPlayer() {
     setShowPlayer(false);
     setSel(null); // yangi savolda tanlovni tozalaymiz
     setShowImg(false);
+    setShowRule(false); // yangi savolda qoida yopiladi
     curRef.current?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx]);
@@ -259,6 +261,17 @@ export default function TestPlayer() {
   // F tugmasi — rasmni kattalashtirish (lightbox), Esc — yopish
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
+      // F1..F5 — javob variantini tanlash (ko'rsatilgan tartibda)
+      const fm = e.key.match(/^F([1-9]|1[0-2])$/);
+      if (fm) {
+        const n = Number(fm[1]);
+        const opts = kbRef.current.opts;
+        if (n >= 1 && n <= opts.length) {
+          e.preventDefault();
+          kbRef.current.select(opts[n - 1].id);
+        }
+        return;
+      }
       if (e.key === 'Escape') { setShowImg(false); return; }
       if (e.key === 'f' || e.key === 'F' || e.key === 'а' || e.key === 'А') {
         const cur = questions?.[idx];
@@ -507,6 +520,7 @@ export default function TestPlayer() {
   const fontDown = () => setS('fontScale', Math.max(fscale - 0.12, 0.7));
 
   const selectOpt = (optId: number) => { if (!locked) setSel(optId); };
+  kbRef.current = { opts: displayOpts, select: selectOpt }; // klaviatura (F1-F5) uchun eng so'nggi holat
   const confirm = async () => {
     if (locked || sel == null) return;
     haptic();

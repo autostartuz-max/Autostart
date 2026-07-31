@@ -493,7 +493,7 @@ button { font-family: inherit; cursor: pointer; }
   box-shadow: 0 24px 70px rgba(0,0,0,.6); cursor: default; }
 .tp2-lightbox-x { position: absolute; top: 18px; right: 22px; background: #e8edf3; border: none; color: #1f2937;
   border-radius: 10px; padding: 8px 10px; cursor: pointer; display: inline-flex; }
-.tp2-noimg { border: 2px solid #56637a; border-radius: 8px; overflow: hidden; background: #0b1424; }
+.tp2-noimg { border: 2px solid #56637a; border-radius: 8px; overflow: hidden; background: #0b0d10; }
 .tp2-noimg-img { width: 100%; max-height: 520px; object-fit: contain; display: block; }
 .tp2-nav { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 18px;
   flex-wrap: wrap; padding: 16px 20px 22px; border-top: 1px solid #1c2b43; }

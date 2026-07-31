@@ -599,7 +599,7 @@ export default function TestPlayer() {
             </div>
           ) : (
             <div className="tp2-noimg">
-              <img src="/car-placeholder.svg" alt="autostart.uz" className="tp2-noimg-img" />
+              <img src="/placeholder-car.jpg" alt="autostart.uz" className="tp2-noimg-img" />
             </div>
           )}
           {showPlayer && (

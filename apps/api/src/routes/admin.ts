@@ -46,25 +46,30 @@ adminRouter.post(
     const file = (req as any).file as { buffer: Buffer; mimetype?: string } | undefined;
     if (!file) return res.status(400).json({ error: 'Rasm yuborilmadi' });
     const dataUrl = `data:${file.mimetype || 'image/png'};base64,${file.buffer.toString('base64')}`;
+    const topics = await prisma.topic.findMany({ orderBy: { order: 'asc' }, select: { id: true, name: true } });
+    const topicStr = topics.map((t) => `${t.id}:${t.name}`).join(', ');
     const prompt =
-      "Bu O'zbekiston YHQ (yo'l harakati qoidalari) test savoli skrinshoti. Undan aniq o'qib FAQAT JSON qaytar (boshqa hech qanday gap yozma). Kalitlar: " +
+      "Bu O'zbekiston YHQ test savoli skrinshoti. Undan aniq o'qib FAQAT JSON qaytar (boshqa gap yozma). Kalitlar: " +
       "textLat (savol matni; boshidagi raqamni masalan '16.' olib tashla), " +
-      "options (javob variantlari ro'yxati — F1/F2/... yonidagi matnlar), " +
-      "shablon (BILET yoki SHABLON raqami — odatda tepada 'N - Bilet' yoki 'N - Shablon' ko'rinishida yoziladi; raqam yoki null), " +
-      "tartib (SAVOL raqami — pastdagi 1..20 raqamlardan ajratib/rangli ko'rsatilgani, yoki savol boshidagi 'N.'; raqam yoki null). " +
-      "DIQQAT: 'N - Bilet' dagi N = shablon; pastdagi ajratilgan/rangli raqam = tartib — ularni ADASHTIRMA. " +
-      "Matnni aynan skrinshotdagidek yoz: o' va g' harflarini saqla.";
+      "options (javob variantlari — FAQAT F1/F2/F3/F4 yonidagi matnlar; 'Izohni ko'rish','Izoh','Qoida','Tushuncha' kabi tugma/havolalarni KIRITMA), " +
+      "shablon (BILET yoki SHABLON raqami — tepada 'N - Bilet' yoki 'N - Shablon'; raqam yoki null), " +
+      "tartib (SAVOL raqami — pastdagi ajratilgan/rangli raqam yoki savol boshidagi 'N.'; raqam yoki null), " +
+      "correctIndex (to'g'ri javob indeksi 0 dan; skrinshotda javob YASHIL bo'lsa to'g'ri, QIZIL xato; rang ko'rsatilmagan bo'lsa null), " +
+      "izoh (izoh/qoida matni skrinshotda KO'RINSA o'sha matn, ko'rinmasa null), " +
+      "topicId (savolga eng mos mavzu raqami, FAQAT shu ro'yxatdan: [" + topicStr + "]). " +
+      "DIQQAT: 'N - Bilet' dagi N = shablon; pastdagi ajratilgan raqam = tartib — ADASHTIRMA. Matnni aynan skrinshotdagidek yoz: o' va g' harflarini saqla.";
     try {
       const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: GROQ_VISION_MODEL,
+          reasoning_effort: 'none', // o'ylashni o'chiramiz — tez + kam token (TPM limitiga sig'adi)
           messages: [{ role: 'user', content: [
             { type: 'text', text: prompt },
             { type: 'image_url', image_url: { url: dataUrl } },
           ] }],
-          max_tokens: 1500,
+          max_tokens: 600,
           temperature: 0,
         }),
         signal: AbortSignal.timeout(60_000),
@@ -82,11 +87,15 @@ adminRouter.post(
       try { parsed = JSON.parse(m[0]); } catch { return res.status(422).json({ error: 'AI javobini o‘qib bo‘lmadi' }); }
       const rawOpts = parsed.options || parsed.javoblar || [];
       const textLat = String(parsed.textLat || parsed.savol || '').trim().replace(/^\d{1,3}[.)]\s*/, '');
+      const validTopicIds = new Set(topics.map((t) => t.id));
       res.json({
         textLat,
         options: Array.isArray(rawOpts) ? rawOpts.map((x: any) => String(x).trim()).filter(Boolean) : [],
         shablon: parsed.shablon != null && !isNaN(Number(parsed.shablon)) ? Number(parsed.shablon) : null,
         tartib: parsed.tartib != null && !isNaN(Number(parsed.tartib)) ? Number(parsed.tartib) : null,
+        correctIndex: parsed.correctIndex != null && !isNaN(Number(parsed.correctIndex)) ? Number(parsed.correctIndex) : null,
+        izoh: parsed.izoh && String(parsed.izoh).trim() ? String(parsed.izoh).trim() : '',
+        topicId: parsed.topicId != null && validTopicIds.has(Number(parsed.topicId)) ? Number(parsed.topicId) : null,
       });
     } catch (e: any) {
       const msg = e?.name === 'TimeoutError' ? 'AI juda sekin javob berdi (timeout)' : ('AI xatosi: ' + (e?.message || e));

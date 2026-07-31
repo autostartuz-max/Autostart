@@ -209,12 +209,17 @@ export default function AdminQuestionForm() {
       const r = await adminApi.extractQuestion(file);
       if (r.textLat || (r.options && r.options.length)) {
         if (r.textLat) onLat(r.textLat);
-        if (r.options?.length) setOptions((os) => os.map((o, i) => (r.options[i]
-          ? { ...o, textLat: r.options[i], textRus: '', rusTouched: false, rusSrc: '' } : o)));
+        if (r.options?.length) {
+          setOptions(r.options.map((t: string, i: number) => ({
+            textLat: t, textRus: '', isCorrect: r.correctIndex != null && i === r.correctIndex,
+            rusTouched: false, rusSrc: '',
+          })));
+        }
         if (r.shablon != null) setShablon(String(r.shablon));
         if (r.tartib != null) setOrder(String(r.tartib));
-        const g = guessTopic(r.textLat || '', topics);
-        if (g) setTopicId(String(g.id));
+        if (r.izoh) setExplanation(r.izoh);
+        if (r.topicId != null) setTopicId(String(r.topicId));
+        else { const g = guessTopic(r.textLat || '', topics); if (g) setTopicId(String(g.id)); }
         setOcrBusy(false);
         return;
       }

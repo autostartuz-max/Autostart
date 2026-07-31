@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import { prisma } from '../prisma';
 import { signAdminToken, requireAdmin } from '../auth';
-import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL } from '../env';
+import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -13,6 +13,19 @@ const ah =
   (fn: (req: Request, res: Response) => Promise<any>) =>
   (req: Request, res: Response, next: NextFunction) =>
     fn(req, res).catch(next);
+
+// Vision chat (OpenAI-mos API) chaqiruvi — content matnini qaytaradi
+async function callVisionChat(url: string, key: string, body: any): Promise<string> {
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(60_000),
+  });
+  if (!r.ok) throw new Error('vision ' + r.status + ': ' + (await r.text()).slice(0, 150));
+  const data: any = await r.json();
+  return data?.choices?.[0]?.message?.content || '';
+}
 
 interface OptionInput {
   textLat: string;
@@ -42,7 +55,7 @@ adminRouter.post(
   '/extract-question',
   upload.single('image'),
   ah(async (req, res) => {
-    if (!GROQ_API_KEY) return res.status(400).json({ error: 'GROQ_API_KEY sozlanmagan' });
+    if (!GROQ_API_KEY && !OPENAI_API_KEY) return res.status(400).json({ error: 'AI kaliti sozlanmagan' });
     const file = (req as any).file as { buffer: Buffer; mimetype?: string } | undefined;
     if (!file) return res.status(400).json({ error: 'Rasm yuborilmadi' });
     const dataUrl = `data:${file.mimetype || 'image/png'};base64,${file.buffer.toString('base64')}`;
@@ -52,50 +65,51 @@ adminRouter.post(
       "Bu O'zbekiston YHQ test savoli skrinshoti. Undan aniq o'qib FAQAT JSON qaytar (boshqa gap yozma). Kalitlar: " +
       "textLat (savol matni; boshidagi raqamni masalan '16.' olib tashla), " +
       "options (javob variantlari — FAQAT F1/F2/F3/F4 yonidagi matnlar; 'Izohni ko'rish','Izoh','Qoida','Tushuncha' kabi tugma/havolalarni KIRITMA), " +
-      "shablon (BILET yoki SHABLON raqami — tepada 'N - Bilet' yoki 'N - Shablon'; raqam yoki null), " +
+      "shablon (BILET yoki SHABLON RAQAMI — faqat raqam, masalan tepada '1 - Bilet' bo'lsa 1; raqam yoki null), " +
       "tartib (JORIY savol raqami — pastdagi navigatsiya raqamlaridan KO'K rangda ajratib ko'rsatilgani; QIZIL raqamlar oldingi javoblar, ularni OLMA; yoki savol boshidagi 'N.'; raqam yoki null), " +
       "correctIndex (to'g'ri javob indeksi 0 dan; skrinshotda javob YASHIL bo'lsa to'g'ri, QIZIL xato; rang ko'rsatilmagan bo'lsa null), " +
       "izoh (izoh/qoida matni skrinshotda KO'RINSA o'sha to'liq matn, ko'rinmasa null; 'Izohlar test sifatida...' ogohlantirishini KIRITMA), " +
       "topicId (savolga eng mos mavzu raqami, FAQAT shu ro'yxatdan: [" + topicStr + "]). " +
       "DIQQAT: 'N - Bilet' dagi N = shablon; pastdagi KO'K raqam = joriy savol = tartib — ADASHTIRMA. Matnni aynan skrinshotdagidek yoz: o' va g' harflarini saqla.";
+    const messages = [{ role: 'user', content: [
+      { type: 'text', text: prompt },
+      { type: 'image_url', image_url: { url: dataUrl } },
+    ] }];
     try {
-      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: GROQ_VISION_MODEL,
-          reasoning_effort: 'none', // o'ylashni o'chiramiz — tez + kam token (TPM limitiga sig'adi)
-          messages: [{ role: 'user', content: [
-            { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: dataUrl } },
-          ] }],
-          max_tokens: 600,
-          temperature: 0,
-        }),
-        signal: AbortSignal.timeout(60_000),
-      });
-      if (!r.ok) {
-        const t = await r.text();
-        return res.status(502).json({ error: 'AI xizmati javob bermadi (' + r.status + ')', detail: t.slice(0, 200) });
+      let content = '';
+      // 1) OpenAI (aniqroq) — kalit bor bo'lsa asosiy
+      if (OPENAI_API_KEY) {
+        try {
+          content = await callVisionChat('https://api.openai.com/v1/chat/completions', OPENAI_API_KEY,
+            { model: OPENAI_VISION_MODEL, messages, max_tokens: 900, temperature: 0 });
+        } catch { /* OpenAI ishlamasa — Groq zaxirasiga o'tamiz */ }
       }
-      const data: any = await r.json();
-      const content: string = data?.choices?.[0]?.message?.content || '';
-      const cleaned = content.replace(/<think>[\s\S]*?<\/think>/gi, '');
+      // 2) Groq (bepul zaxira)
+      if (!content && GROQ_API_KEY) {
+        content = await callVisionChat('https://api.groq.com/openai/v1/chat/completions', GROQ_API_KEY,
+          { model: GROQ_VISION_MODEL, reasoning_effort: 'none', messages, max_tokens: 600, temperature: 0 });
+      }
+      if (!content) return res.status(502).json({ error: 'AI xizmati javob bermadi' });
+
+      const cleaned = content.replace(/```json/gi, '').replace(/```/g, '').replace(/<think>[\s\S]*?<\/think>/gi, '');
       const m = cleaned.match(/\{[\s\S]*\}/);
       if (!m) return res.status(422).json({ error: 'AI javobidan JSON topilmadi' });
       let parsed: any;
       try { parsed = JSON.parse(m[0]); } catch { return res.status(422).json({ error: 'AI javobini o‘qib bo‘lmadi' }); }
+
+      const numOf = (v: any) => { const mm = String(v ?? '').match(/\d+/); return mm ? Number(mm[0]) : null; };
       const rawOpts = parsed.options || parsed.javoblar || [];
       const textLat = String(parsed.textLat || parsed.savol || '').trim().replace(/^\d{1,3}[.)]\s*/, '');
       const validTopicIds = new Set(topics.map((t) => t.id));
+      const topicId = numOf(parsed.topicId);
       res.json({
         textLat,
         options: Array.isArray(rawOpts) ? rawOpts.map((x: any) => String(x).trim()).filter(Boolean) : [],
-        shablon: parsed.shablon != null && !isNaN(Number(parsed.shablon)) ? Number(parsed.shablon) : null,
-        tartib: parsed.tartib != null && !isNaN(Number(parsed.tartib)) ? Number(parsed.tartib) : null,
+        shablon: numOf(parsed.shablon),
+        tartib: numOf(parsed.tartib),
         correctIndex: parsed.correctIndex != null && !isNaN(Number(parsed.correctIndex)) ? Number(parsed.correctIndex) : null,
         izoh: parsed.izoh && String(parsed.izoh).trim() ? String(parsed.izoh).trim() : '',
-        topicId: parsed.topicId != null && validTopicIds.has(Number(parsed.topicId)) ? Number(parsed.topicId) : null,
+        topicId: topicId != null && validTopicIds.has(topicId) ? topicId : null,
       });
     } catch (e: any) {
       const msg = e?.name === 'TimeoutError' ? 'AI juda sekin javob berdi (timeout)' : ('AI xatosi: ' + (e?.message || e));

@@ -19,3 +19,7 @@ export const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-
 // Groq (vision) — skrinshotdan savolni AI bilan o'qish. Kalit: env yoki ubuntu yozadigan fayl.
 export const GROQ_API_KEY = process.env.GROQ_API_KEY || fileKey('/home/ubuntu/groq-key.txt');
 export const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.6-27b';
+
+// OpenAI (vision) — aniqroq (pullik). Bor bo'lsa asosiy, Groq zaxira.
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY || fileKey('/home/ubuntu/openai-key.txt');
+export const OPENAI_VISION_MODEL = process.env.OPENAI_VISION_MODEL || 'gpt-4o';

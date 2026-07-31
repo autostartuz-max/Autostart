@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Menu, Plus, X, Upload, Image as ImageIcon, ListChecks,
@@ -70,6 +70,7 @@ export default function AdminQuestionForm() {
   const [ocrErr, setOcrErr] = useState('');
   const [ocrPct, setOcrPct] = useState(0);
   const [ocrDrag, setOcrDrag] = useState(false);
+  const pasteRef = useRef<HTMLTextAreaElement>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -374,26 +375,37 @@ export default function AdminQuestionForm() {
               {err && <div className="adm-err" style={{ marginBottom: 14 }}>{err}</div>}
 
               {/* Skrinshotdan avtomat to'ldirish — bu yerga tashlang, tanlang yoki Ctrl+V */}
-              <label
+              <div
                 className={'qf-ocrbar' + (ocrDrag ? ' drag' : '') + (ocrBusy ? ' busy' : '') + (ocrErr && !ocrBusy ? ' err' : '')}
+                onClick={() => pasteRef.current?.focus()}
                 onDragOver={(e) => { e.preventDefault(); setOcrDrag(true); }}
                 onDragLeave={() => setOcrDrag(false)}
                 onDrop={(e) => { e.preventDefault(); setOcrDrag(false); const f = e.dataTransfer.files?.[0]; if (f && f.type.startsWith('image/')) runOcr(f); }}
               >
-                <input type="file" accept="image/*" disabled={ocrBusy}
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) runOcr(f); e.target.value = ''; }} />
+                <textarea
+                  ref={pasteRef}
+                  className="qf-ocrbar-catch"
+                  aria-label="Skrinshotni Ctrl+V bilan joylang"
+                  onPaste={(e) => {
+                    const dt = e.clipboardData;
+                    let f: File | null = null;
+                    for (const it of Array.from(dt.items || [])) if (it.type.startsWith('image/')) { f = it.getAsFile(); break; }
+                    if (!f && dt.files) for (const fl of Array.from(dt.files)) if (fl.type.startsWith('image/')) { f = fl; break; }
+                    if (f) { e.preventDefault(); e.stopPropagation(); runOcr(f); }
+                  }}
+                />
                 <span className="qf-ocrbar-ic">📋</span>
                 <div className="qf-ocrbar-txt">
-                  <b>Skrinshotdan avtomat to‘ldirish</b>
+                  <b>Skrinshotni Ctrl+V bilan joylang</b>
                   <span>
                     {ocrBusy
                       ? `🤖 AI o‘qiyapti…${ocrPct ? ' ' + ocrPct + '%' : ''}`
                       : ocrErr
                         ? ocrErr
-                        : 'Skrinshotni bu yerga tashlang, tanlang yoki Ctrl+V bosing — AI savol matni, javoblar va shablonni avtomat to‘ldiradi'}
+                        : 'Skrinshot oldingizmi? Shu yerga Ctrl+V bosing (yoki sudrab tashlang) — AI savol, javoblar va shablonni to‘ldiradi'}
                   </span>
                 </div>
-              </label>
+              </div>
 
               <div className="qf-grid">
                 {/* ===== CHAP ustun ===== */}

@@ -586,9 +586,15 @@ export default function TestPlayer() {
             </div>
           )}
           <div className="tp2-under">
-            <button className="pill" onClick={() => setShowRule(true)}><Info size={16} /> Qoidasi</button>
+            <button className={'pill' + (showRule ? ' active' : '')} onClick={() => setShowRule((v) => !v)}><Info size={16} /> Qoidasi</button>
             <button className="pill learn" onClick={learn}><Volume2 size={16} /> Tushuncha</button>
           </div>
+          {showRule && (
+            <div className="tp2-rule">
+              <p>{explainText()}</p>
+              {q.ruleRef && <div className="tp2-rule-ref">Manba: {q.ruleRef}</div>}
+            </div>
+          )}
         </div>
 
         <div className="tp2-imgcol">
@@ -642,20 +648,7 @@ export default function TestPlayer() {
 
       {/* ==== Modallar (izoh, sozlama, natija) ==== */}
 
-      {showRule && (
-        <div className="modal" onClick={closeRule}>
-          <div className="sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="sheet-head">
-              <h3>ⓘ Izoh</h3>
-            </div>
-            <p>{explainText()}</p>
-            {q.ruleRef && <div className="ref">Manba: {q.ruleRef}</div>}
-            <button className="btn" style={{ marginTop: 16 }} onClick={closeRule}>
-              Yopish
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Qoidasi endi variantlar ostida inline ko'rsatiladi (modal olib tashlandi) */}
 
       {showSettings && (
         <div className="modal" onClick={() => setShowSettings(false)}>

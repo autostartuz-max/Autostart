@@ -53,11 +53,11 @@ adminRouter.post(
       "textLat (savol matni; boshidagi raqamni masalan '16.' olib tashla), " +
       "options (javob variantlari — FAQAT F1/F2/F3/F4 yonidagi matnlar; 'Izohni ko'rish','Izoh','Qoida','Tushuncha' kabi tugma/havolalarni KIRITMA), " +
       "shablon (BILET yoki SHABLON raqami — tepada 'N - Bilet' yoki 'N - Shablon'; raqam yoki null), " +
-      "tartib (SAVOL raqami — pastdagi ajratilgan/rangli raqam yoki savol boshidagi 'N.'; raqam yoki null), " +
+      "tartib (JORIY savol raqami — pastdagi navigatsiya raqamlaridan KO'K rangda ajratib ko'rsatilgani; QIZIL raqamlar oldingi javoblar, ularni OLMA; yoki savol boshidagi 'N.'; raqam yoki null), " +
       "correctIndex (to'g'ri javob indeksi 0 dan; skrinshotda javob YASHIL bo'lsa to'g'ri, QIZIL xato; rang ko'rsatilmagan bo'lsa null), " +
-      "izoh (izoh/qoida matni skrinshotda KO'RINSA o'sha matn, ko'rinmasa null), " +
+      "izoh (izoh/qoida matni skrinshotda KO'RINSA o'sha to'liq matn, ko'rinmasa null; 'Izohlar test sifatida...' ogohlantirishini KIRITMA), " +
       "topicId (savolga eng mos mavzu raqami, FAQAT shu ro'yxatdan: [" + topicStr + "]). " +
-      "DIQQAT: 'N - Bilet' dagi N = shablon; pastdagi ajratilgan raqam = tartib — ADASHTIRMA. Matnni aynan skrinshotdagidek yoz: o' va g' harflarini saqla.";
+      "DIQQAT: 'N - Bilet' dagi N = shablon; pastdagi KO'K raqam = joriy savol = tartib — ADASHTIRMA. Matnni aynan skrinshotdagidek yoz: o' va g' harflarini saqla.";
     try {
       const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',

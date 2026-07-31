@@ -47,9 +47,13 @@ adminRouter.post(
     if (!file) return res.status(400).json({ error: 'Rasm yuborilmadi' });
     const dataUrl = `data:${file.mimetype || 'image/png'};base64,${file.buffer.toString('base64')}`;
     const prompt =
-      "Bu O'zbekiston YHQ (yo'l harakati qoidalari) test savoli skrinshoti. Undan aniq o'qib FAQAT JSON qaytar (boshqa hech qanday gap yozma). " +
-      "JSON kalitlari: textLat (savol matni, satr), options (javob variantlari, satrlar ro'yxati), shablon (raqam yoki null). " +
-      "Matnni aynan skrinshotdagidek yoz: o' va g' harflarini saqla. Savol boshidagi tartib raqamini (masalan '15. ') olib tashla.";
+      "Bu O'zbekiston YHQ (yo'l harakati qoidalari) test savoli skrinshoti. Undan aniq o'qib FAQAT JSON qaytar (boshqa hech qanday gap yozma). Kalitlar: " +
+      "textLat (savol matni; boshidagi raqamni masalan '16.' olib tashla), " +
+      "options (javob variantlari ro'yxati — F1/F2/... yonidagi matnlar), " +
+      "shablon (BILET yoki SHABLON raqami — odatda tepada 'N - Bilet' yoki 'N - Shablon' ko'rinishida yoziladi; raqam yoki null), " +
+      "tartib (SAVOL raqami — pastdagi 1..20 raqamlardan ajratib/rangli ko'rsatilgani, yoki savol boshidagi 'N.'; raqam yoki null). " +
+      "DIQQAT: 'N - Bilet' dagi N = shablon; pastdagi ajratilgan/rangli raqam = tartib — ularni ADASHTIRMA. " +
+      "Matnni aynan skrinshotdagidek yoz: o' va g' harflarini saqla.";
     try {
       const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -82,6 +86,7 @@ adminRouter.post(
         textLat,
         options: Array.isArray(rawOpts) ? rawOpts.map((x: any) => String(x).trim()).filter(Boolean) : [],
         shablon: parsed.shablon != null && !isNaN(Number(parsed.shablon)) ? Number(parsed.shablon) : null,
+        tartib: parsed.tartib != null && !isNaN(Number(parsed.tartib)) ? Number(parsed.tartib) : null,
       });
     } catch (e: any) {
       const msg = e?.name === 'TimeoutError' ? 'AI juda sekin javob berdi (timeout)' : ('AI xatosi: ' + (e?.message || e));

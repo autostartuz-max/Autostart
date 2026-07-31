@@ -212,6 +212,7 @@ export default function AdminQuestionForm() {
         if (r.options?.length) setOptions((os) => os.map((o, i) => (r.options[i]
           ? { ...o, textLat: r.options[i], textRus: '', rusTouched: false, rusSrc: '' } : o)));
         if (r.shablon != null) setShablon(String(r.shablon));
+        if (r.tartib != null) setOrder(String(r.tartib));
         const g = guessTopic(r.textLat || '', topics);
         if (g) setTopicId(String(g.id));
         setOcrBusy(false);

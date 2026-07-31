@@ -69,6 +69,7 @@ export default function AdminQuestionForm() {
   const [ocrBusy, setOcrBusy] = useState(false);
   const [ocrErr, setOcrErr] = useState('');
   const [ocrPct, setOcrPct] = useState(0);
+  const [ocrDrag, setOcrDrag] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -218,11 +219,13 @@ export default function AdminQuestionForm() {
         if (m) { shab = m[1]; break; }
       }
 
-      // Variantlar: "F1 ...", "F2 ..." ko'rinishidagi qatorlar
+      // Variantlar: "F1 ...", "F2 ..." ko'rinishidagi qatorlar (radio belgisi shovqinini tozalaymiz)
       const opts: string[] = [];
       for (const l of lines) {
         const m = l.match(/^F?\s*[1-4][.):]?\s+(.{2,})$/i);
-        if (m && !m[1].includes('?')) opts.push(m[1].trim());
+        if (!m) continue;
+        const t = m[1].trim().replace(/^[○◯●©®(){}\[\]|·•]+\s*/, '').trim();
+        if (t.length >= 2 && !t.includes('?')) opts.push(t);
       }
 
       if (qLine) onLat(qLine);
@@ -262,8 +265,7 @@ export default function AdminQuestionForm() {
       }
       if (f) {
         e.preventDefault();
-        setImageFile(f); // rasmni darrov joylashtiramiz (preview'da ko'rinadi)
-        runOcr(f);       // matn/javob/shablon/mavzuni avtomat to'ldiramiz
+        runOcr(f); // savol matni, javoblar, shablon, mavzuni avtomat to'ldiradi (rasm alohida yuklanadi)
       }
     };
     document.addEventListener('paste', onPaste);
@@ -354,12 +356,27 @@ export default function AdminQuestionForm() {
             <>
               {err && <div className="adm-err" style={{ marginBottom: 14 }}>{err}</div>}
 
-              {/* Ctrl+V bilan skrinshot qo'yilsa — jimgina OCR ishlaydi; faqat holat/xatolik ko'rinadi */}
-              {(ocrBusy || ocrErr) && (
-                <div className={'qf-ocr-toast' + (ocrErr && !ocrBusy ? ' err' : '')}>
-                  {ocrBusy ? `📋 Skrinshotdan o‘qilmoqda… ${ocrPct}%` : ocrErr}
+              {/* Skrinshotdan avtomat to'ldirish — bu yerga tashlang, tanlang yoki Ctrl+V */}
+              <label
+                className={'qf-ocrbar' + (ocrDrag ? ' drag' : '') + (ocrBusy ? ' busy' : '') + (ocrErr && !ocrBusy ? ' err' : '')}
+                onDragOver={(e) => { e.preventDefault(); setOcrDrag(true); }}
+                onDragLeave={() => setOcrDrag(false)}
+                onDrop={(e) => { e.preventDefault(); setOcrDrag(false); const f = e.dataTransfer.files?.[0]; if (f && f.type.startsWith('image/')) runOcr(f); }}
+              >
+                <input type="file" accept="image/*" disabled={ocrBusy}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) runOcr(f); e.target.value = ''; }} />
+                <span className="qf-ocrbar-ic">📋</span>
+                <div className="qf-ocrbar-txt">
+                  <b>Skrinshotdan avtomat to‘ldirish</b>
+                  <span>
+                    {ocrBusy
+                      ? `O‘qilmoqda… ${ocrPct}%`
+                      : ocrErr
+                        ? ocrErr
+                        : 'Skrinshotni bu yerga tashlang, tanlang yoki Ctrl+V bosing — savol matni, javoblar va shablon avtomat to‘ldiriladi'}
+                  </span>
                 </div>
-              )}
+              </label>
 
               <div className="qf-grid">
                 {/* ===== CHAP ustun ===== */}

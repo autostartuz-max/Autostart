@@ -291,11 +291,19 @@
 .qf-htitle b { font-size: 15px; font-weight: 800; color: var(--db-text); }
 .qf-htitle span { font-size: 12px; color: var(--db-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qf-top-actions { margin-left: auto; display: flex; gap: 10px; flex-shrink: 0; }
-/* Ctrl+V skrinshot OCR — kichik floating holat ko'rsatkichi */
-.qf-ocr-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60;
-  background: #1f6feb; color: #fff; padding: 10px 18px; border-radius: 10px;
-  font-size: 13.5px; font-weight: 700; box-shadow: 0 10px 28px rgba(0, 0, 0, .28); }
-.qf-ocr-toast.err { background: #b42318; }
+/* Skrinshotdan avtomat to'ldirish (OCR) — drop/paste zonasi */
+.qf-ocrbar { display: flex; align-items: center; gap: 13px; margin-bottom: 16px; cursor: pointer;
+  background: rgba(59, 130, 246, .08); border: 1.5px dashed var(--db-border); border-radius: 12px;
+  padding: 12px 16px; transition: border-color .15s, background .15s; }
+.qf-ocrbar:hover, .qf-ocrbar.drag { border-color: var(--db-blue); background: rgba(59, 130, 246, .15); }
+.qf-ocrbar.busy { border-style: solid; border-color: var(--db-blue); cursor: default; }
+.qf-ocrbar.err { border-color: #e5534b; background: rgba(229, 83, 75, .1); }
+.qf-ocrbar input { display: none; }
+.qf-ocrbar-ic { font-size: 22px; flex-shrink: 0; }
+.qf-ocrbar-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.qf-ocrbar-txt b { font-size: 13.5px; font-weight: 800; color: var(--db-text); }
+.qf-ocrbar-txt span { font-size: 12px; color: var(--db-muted); }
+.qf-ocrbar.err .qf-ocrbar-txt span { color: #e5534b; }
 
 .qf-grid { display: grid; grid-template-columns: 1fr 320px; gap: 18px; align-items: start; }
 .qf-left { display: flex; flex-direction: column; gap: 14px; min-width: 0; }

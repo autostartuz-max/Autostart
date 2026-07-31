@@ -203,6 +203,23 @@ export default function AdminQuestionForm() {
     setOcrErr('');
     setOcrBusy(true);
     setOcrPct(0);
+    // 1) AI vision (Groq) — aniq o'qish; ishlamasa pastdagi Tesseract zaxirasiga o'tamiz
+    try {
+      const r = await adminApi.extractQuestion(file);
+      if (r.textLat || (r.options && r.options.length)) {
+        if (r.textLat) onLat(r.textLat);
+        if (r.options?.length) setOptions((os) => os.map((o, i) => (r.options[i]
+          ? { ...o, textLat: r.options[i], textRus: '', rusTouched: false, rusSrc: '' } : o)));
+        if (r.shablon != null) setShablon(String(r.shablon));
+        const g = guessTopic(r.textLat || '', topics);
+        if (g) setTopicId(String(g.id));
+        setOcrBusy(false);
+        return;
+      }
+    } catch {
+      /* AI ishlamadi — Tesseract zaxirasiga o'tamiz */
+    }
+    // 2) Zaxira: mahalliy Tesseract OCR
     try {
       const { data } = await Tesseract.recognize(file, 'eng', {
         logger: (m: any) => { if (m.status === 'recognizing text') setOcrPct(Math.round((m.progress || 0) * 100)); },
@@ -370,10 +387,10 @@ export default function AdminQuestionForm() {
                   <b>Skrinshotdan avtomat to‘ldirish</b>
                   <span>
                     {ocrBusy
-                      ? `O‘qilmoqda… ${ocrPct}%`
+                      ? `🤖 AI o‘qiyapti…${ocrPct ? ' ' + ocrPct + '%' : ''}`
                       : ocrErr
                         ? ocrErr
-                        : 'Skrinshotni bu yerga tashlang, tanlang yoki Ctrl+V bosing — savol matni, javoblar va shablon avtomat to‘ldiriladi'}
+                        : 'Skrinshotni bu yerga tashlang, tanlang yoki Ctrl+V bosing — AI savol matni, javoblar va shablonni avtomat to‘ldiradi'}
                   </span>
                 </div>
               </label>

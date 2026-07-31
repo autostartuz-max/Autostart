@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import { prisma } from '../prisma';
 import { signAdminToken, requireAdmin } from '../auth';
-import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL } from '../env';
+import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -36,6 +36,59 @@ adminRouter.post(
 );
 
 adminRouter.use(requireAdmin);
+
+/* ---------- Skrinshotdan savolni AI (Groq vision) bilan o'qish ---------- */
+adminRouter.post(
+  '/extract-question',
+  upload.single('image'),
+  ah(async (req, res) => {
+    if (!GROQ_API_KEY) return res.status(400).json({ error: 'GROQ_API_KEY sozlanmagan' });
+    const file = (req as any).file as { buffer: Buffer; mimetype?: string } | undefined;
+    if (!file) return res.status(400).json({ error: 'Rasm yuborilmadi' });
+    const dataUrl = `data:${file.mimetype || 'image/png'};base64,${file.buffer.toString('base64')}`;
+    const prompt =
+      "Bu O'zbekiston YHQ (yo'l harakati qoidalari) test savoli skrinshoti. Undan aniq o'qib FAQAT JSON qaytar (boshqa hech qanday gap yozma). " +
+      "JSON kalitlari: textLat (savol matni, satr), options (javob variantlari, satrlar ro'yxati), shablon (raqam yoki null). " +
+      "Matnni aynan skrinshotdagidek yoz: o' va g' harflarini saqla. Savol boshidagi tartib raqamini (masalan '15. ') olib tashla.";
+    try {
+      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: GROQ_VISION_MODEL,
+          messages: [{ role: 'user', content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: dataUrl } },
+          ] }],
+          max_tokens: 1500,
+          temperature: 0,
+        }),
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!r.ok) {
+        const t = await r.text();
+        return res.status(502).json({ error: 'AI xizmati javob bermadi (' + r.status + ')', detail: t.slice(0, 200) });
+      }
+      const data: any = await r.json();
+      const content: string = data?.choices?.[0]?.message?.content || '';
+      const cleaned = content.replace(/<think>[\s\S]*?<\/think>/gi, '');
+      const m = cleaned.match(/\{[\s\S]*\}/);
+      if (!m) return res.status(422).json({ error: 'AI javobidan JSON topilmadi' });
+      let parsed: any;
+      try { parsed = JSON.parse(m[0]); } catch { return res.status(422).json({ error: 'AI javobini o‘qib bo‘lmadi' }); }
+      const rawOpts = parsed.options || parsed.javoblar || [];
+      const textLat = String(parsed.textLat || parsed.savol || '').trim().replace(/^\d{1,3}[.)]\s*/, '');
+      res.json({
+        textLat,
+        options: Array.isArray(rawOpts) ? rawOpts.map((x: any) => String(x).trim()).filter(Boolean) : [],
+        shablon: parsed.shablon != null && !isNaN(Number(parsed.shablon)) ? Number(parsed.shablon) : null,
+      });
+    } catch (e: any) {
+      const msg = e?.name === 'TimeoutError' ? 'AI juda sekin javob berdi (timeout)' : ('AI xatosi: ' + (e?.message || e));
+      res.status(502).json({ error: msg });
+    }
+  })
+);
 
 /* ---------- Tarjima (o'zbekcha lotin -> rus) ---------- */
 adminRouter.get(

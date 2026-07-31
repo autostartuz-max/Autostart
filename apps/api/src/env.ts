@@ -15,3 +15,7 @@ function fileKey(p: string): string {
 export const GEMINI_API_KEY =
   process.env.GEMINI_API_KEY || fileKey('/home/ubuntu/gemini-key.txt');
 export const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
+
+// Groq (vision) — skrinshotdan savolni AI bilan o'qish. Kalit: env yoki ubuntu yozadigan fayl.
+export const GROQ_API_KEY = process.env.GROQ_API_KEY || fileKey('/home/ubuntu/groq-key.txt');
+export const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.6-27b';

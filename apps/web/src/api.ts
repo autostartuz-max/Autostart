@@ -124,6 +124,8 @@ export const adminApi = {
   createTopic: (name: string): Promise<any> => areq('/admin/topics', { method: 'POST', body: JSON.stringify({ name }) }),
   translate: (text: string, to = 'ru'): Promise<{ text: string }> =>
     areq('/admin/translate?to=' + to + '&text=' + encodeURIComponent(text)),
+  extractQuestion: (file: File): Promise<{ textLat: string; options: string[]; shablon: number | null }> =>
+    aupload('/admin/extract-question', 'image', file),
   uploadImage: (id: number, file: File) => aupload('/admin/questions/' + id + '/image', 'image', file),
   deleteImage: (id: number) => areq('/admin/questions/' + id + '/image', { method: 'DELETE' }),
   uploadAudio: (id: number, file: File) => aupload('/admin/questions/' + id + '/audio', 'audio', file),

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
-  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, Car,
+  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag,
 } from 'lucide-react';
 import { api } from '../api';
 import { haptic, getTelegram } from '../telegram';
@@ -599,12 +599,7 @@ export default function TestPlayer() {
             </div>
           ) : (
             <div className="tp2-noimg">
-              <Car size={74} className="tp2-noimg-car" />
-              <div className="tp2-noimg-brand">
-                <img src="/mark.png" alt="" className="tp2-noimg-mark" />
-                <span className="tp2-word"><b>AUTO</b><i>START</i></span>
-              </div>
-              <div className="tp2-noimg-url">autostart.uz</div>
+              <img src="/car-placeholder.svg" alt="autostart.uz" className="tp2-noimg-img" />
             </div>
           )}
           {showPlayer && (

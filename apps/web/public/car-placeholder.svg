@@ -1,0 +1,64 @@
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="autostart.uz">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="36%" r="78%">
+      <stop offset="0%" stop-color="#2b3d57"/>
+      <stop offset="52%" stop-color="#16212f"/>
+      <stop offset="100%" stop-color="#070c13"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="52%" stop-color="#edf1f6"/>
+      <stop offset="100%" stop-color="#c4cedb"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#43587a"/>
+      <stop offset="100%" stop-color="#1a2740"/>
+    </linearGradient>
+    <radialGradient id="rim" cx="42%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#eef2f7"/>
+      <stop offset="100%" stop-color="#828fa1"/>
+    </radialGradient>
+    <g id="wheel">
+      <circle r="55" fill="#0f1319"/>
+      <circle r="46" fill="#1c222c"/>
+      <circle r="34" fill="url(#rim)"/>
+      <g stroke="#8b97a8" stroke-width="6" stroke-linecap="round">
+        <line y1="-9" y2="-31"/>
+        <line y1="-9" y2="-31" transform="rotate(72)"/>
+        <line y1="-9" y2="-31" transform="rotate(144)"/>
+        <line y1="-9" y2="-31" transform="rotate(216)"/>
+        <line y1="-9" y2="-31" transform="rotate(288)"/>
+      </g>
+      <circle r="9" fill="#586274"/>
+    </g>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <ellipse cx="400" cy="452" rx="340" ry="40" fill="#38506f" opacity="0.25"/>
+  <ellipse cx="405" cy="420" rx="292" ry="26" fill="#000000" opacity="0.5"/>
+
+  <use href="#wheel" x="248" y="360"/>
+  <use href="#wheel" x="560" y="360"/>
+
+  <path d="M 118 336 C 118 306 137 292 165 290 L 300 286 C 345 283 366 279 406 278 L 560 281 C 612 283 648 295 663 320 L 671 353 C 671 367 661 373 645 373 L 612 373 Q 558 293 504 373 L 300 373 Q 246 293 192 373 L 150 373 C 132 373 118 360 118 342 Z" fill="url(#body)" stroke="#a9b4c3" stroke-width="1.5"/>
+
+  <path d="M 314 284 L 357 213 Q 361 207 369 207 L 477 207 Q 485 207 488 215 L 524 284 Z" fill="url(#body)" stroke="#a9b4c3" stroke-width="1.5"/>
+
+  <path d="M 336 280 L 371 224 L 423 224 L 423 280 Z" fill="url(#glass)"/>
+  <path d="M 433 280 L 433 224 L 471 224 L 501 280 Z" fill="url(#glass)"/>
+
+  <path d="M 200 300 L 610 300" stroke="#cfd7e1" stroke-width="1.5" opacity="0.5"/>
+  <line x1="423" y1="286" x2="423" y2="360" stroke="#c2cad6" stroke-width="2"/>
+  <rect x="452" y="304" width="27" height="7" rx="3.5" fill="#aeb8c6"/>
+
+  <path d="M 656 320 L 671 332 L 669 347 L 649 344 Z" fill="#eef4fa"/>
+  <circle cx="660" cy="335" r="7" fill="#fff6cf" opacity="0.9"/>
+  <rect x="121" y="314" width="13" height="17" rx="3" fill="#d9534f"/>
+
+  <text x="418" y="335" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="31" fill="#131a26" letter-spacing="0.5">autostart.uz</text>
+
+  <rect x="596" y="351" width="74" height="21" rx="3" fill="#ffffff" stroke="#9aa4b2" stroke-width="1"/>
+  <text x="633" y="366" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="12" fill="#1b2436">autostart.uz</text>
+
+  <text x="42" y="58" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-style="italic" font-size="27" fill="#ffffff">AUTO<tspan fill="#facc15">START</tspan></text>
+</svg>

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
-  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag,
+  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, Car,
 } from 'lucide-react';
 import { api } from '../api';
 import { haptic, getTelegram } from '../telegram';
@@ -598,7 +598,14 @@ export default function TestPlayer() {
               <img src={q.imageUrl} className="tp2-img" onClick={() => setShowImg(true)} />
             </div>
           ) : (
-            <div className="tp2-noimg">Bu savolda rasm yo‘q</div>
+            <div className="tp2-noimg">
+              <Car size={74} className="tp2-noimg-car" />
+              <div className="tp2-noimg-brand">
+                <img src="/mark.png" alt="" className="tp2-noimg-mark" />
+                <span className="tp2-word"><b>AUTO</b><i>START</i></span>
+              </div>
+              <div className="tp2-noimg-url">autostart.uz</div>
+            </div>
           )}
           {showPlayer && (
             <div className="aplayer">

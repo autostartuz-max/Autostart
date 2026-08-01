@@ -74,7 +74,7 @@ export default function Profile() {
       <button
         className="setrow"
         style={{ width: '100%', color: '#ff6b6b', fontWeight: 700, cursor: 'pointer', border: 'none', background: 'transparent', textAlign: 'left' }}
-        onClick={() => { clearToken(); window.location.href = '/'; }}
+        onClick={() => { clearToken(); localStorage.removeItem('yhq_entered'); window.location.href = '/'; }}
       >
         Chiqish (logout)
       </button>

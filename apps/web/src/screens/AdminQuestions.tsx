@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Menu, Search, Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft } from 'lucide-react';
+import { Menu, Search, Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, Upload } from 'lucide-react';
 import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
@@ -82,9 +82,14 @@ export default function AdminQuestions() {
             <>
               <div className="adm-head">
                 <h1 className="adm-title">Savollar ({list.length})</h1>
-                <button className="adm-btn primary" onClick={() => nav('/savollar/yangi')}>
-                  <Plus size={17} /> Yangi savol
-                </button>
+                <div className="adm-head-btns">
+                  <button className="adm-btn sec" onClick={() => nav('/savollar/import')}>
+                    <Upload size={16} /> Ommaviy import
+                  </button>
+                  <button className="adm-btn primary" onClick={() => nav('/savollar/yangi')}>
+                    <Plus size={17} /> Yangi savol
+                  </button>
+                </div>
               </div>
 
               {loading && <div className="adm-empty">Yuklanmoqda…</div>}
@@ -120,9 +125,14 @@ export default function AdminQuestions() {
                   <button className="adm-back" onClick={() => setSel(null)}><ChevronLeft size={18} /> Shablonlar</button>
                   <h1 className="adm-title">{sel ? `${sel}-shablon savollari` : 'Shablonsiz savollar'} ({selItems.length})</h1>
                 </div>
-                <button className="adm-btn primary" onClick={() => nav('/savollar/yangi' + (sel ? `?shablon=${sel}&order=${nextOrder}` : ''))}>
-                  <Plus size={17} /> Yangi savol
-                </button>
+                <div className="adm-head-btns">
+                  <button className="adm-btn sec" onClick={() => nav('/savollar/import' + (sel ? `?shablon=${sel}` : ''))}>
+                    <Upload size={16} /> Ommaviy import
+                  </button>
+                  <button className="adm-btn primary" onClick={() => nav('/savollar/yangi' + (sel ? `?shablon=${sel}&order=${nextOrder}` : ''))}>
+                    <Plus size={17} /> Yangi savol
+                  </button>
+                </div>
               </div>
 
               <div className="adm-list">

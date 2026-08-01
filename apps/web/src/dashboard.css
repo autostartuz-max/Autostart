@@ -169,6 +169,7 @@
 .adm-back { display: inline-flex; align-items: center; gap: 5px; background: var(--db-card); border: 1px solid var(--db-border);
   color: var(--db-text); border-radius: 10px; padding: 8px 13px; font-size: 14px; font-weight: 600; cursor: pointer; }
 .adm-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+.adm-head-btns { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
 .adm-title { font-size: 22px; font-weight: 800; color: var(--db-text); }
 
 .adm-btn { display: inline-flex; align-items: center; gap: 7px; border: none; border-radius: 10px; padding: 11px 18px;

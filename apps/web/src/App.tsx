@@ -13,6 +13,7 @@ import Profile from './screens/Profile';
 import Placeholder from './screens/Placeholder';
 import AdminQuestions from './screens/AdminQuestions';
 import AdminQuestionForm from './screens/AdminQuestionForm';
+import AdminImport from './screens/AdminImport';
 
 export default function App() {
   const [ready, setReady] = useState(false);
@@ -78,6 +79,7 @@ export default function App() {
         <Route path="/belgilar" element={<Signs />} />
         <Route path="/profil" element={<Profile />} />
         <Route path="/savollar" element={<AdminQuestions />} />
+        <Route path="/savollar/import" element={<AdminImport />} />
         <Route path="/savollar/yangi" element={<AdminQuestionForm />} />
         <Route path="/savollar/:id" element={<AdminQuestionForm />} />
         <Route path="/oktagon" element={<Placeholder title="Oktagon" emoji="⚔️" text="Bellashuv rejimi tez orada qo‘shiladi." />} />

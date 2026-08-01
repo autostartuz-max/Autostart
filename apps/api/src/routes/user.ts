@@ -1,8 +1,17 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma';
 import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser } from '../auth';
+
+// Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi
+function normPhone(raw: any): string | null {
+  let d = String(raw || '').replace(/\D/g, '');
+  if (d.length === 9) d = '998' + d; // 90XXXXXXX -> 99890XXXXXXX
+  if (d.startsWith('998') && d.length === 12) return '+' + d;
+  return null;
+}
 
 export const userRouter = Router();
 
@@ -74,6 +83,38 @@ userRouter.post(
       update: { firstName, avatarUrl },
       create: { tgId, firstName, avatarUrl },
     });
+    res.json({ token: signUserToken(user.id), user });
+  })
+);
+
+// Telefon + parol bilan ro'yxatdan o'tish
+userRouter.post(
+  '/auth/register',
+  ah(async (req, res) => {
+    const name = String(req.body?.name || '').trim().slice(0, 60) || 'Foydalanuvchi';
+    const phone = normPhone(req.body?.phone);
+    const password = String(req.body?.password || '');
+    if (!phone) return res.status(400).json({ error: 'Telefon raqami noto‘g‘ri. +998 bilan 9 raqam kiriting' });
+    if (password.length < 4) return res.status(400).json({ error: 'Parol kamida 4 ta belgidan iborat bo‘lsin' });
+    const exists = await prisma.user.findUnique({ where: { phone } });
+    if (exists) return res.status(409).json({ error: 'Bu raqam allaqachon ro‘yxatdan o‘tgan. Kiring.' });
+    const user = await prisma.user.create({
+      data: { phone, passwordHash: bcrypt.hashSync(password, 10), firstName: name },
+    });
+    res.json({ token: signUserToken(user.id), user });
+  })
+);
+
+// Telefon + parol bilan kirish
+userRouter.post(
+  '/auth/login',
+  ah(async (req, res) => {
+    const phone = normPhone(req.body?.phone);
+    const password = String(req.body?.password || '');
+    if (!phone) return res.status(400).json({ error: 'Telefon raqami noto‘g‘ri' });
+    const user = await prisma.user.findUnique({ where: { phone } });
+    if (!user || !user.passwordHash || !bcrypt.compareSync(password, user.passwordHash))
+      return res.status(401).json({ error: 'Telefon yoki parol xato' });
     res.json({ token: signUserToken(user.id), user });
   })
 );

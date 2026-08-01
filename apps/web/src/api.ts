@@ -9,6 +9,10 @@ export function setToken(t: string) {
 export function hasToken() {
   return !!token;
 }
+export function clearToken() {
+  token = '';
+  localStorage.removeItem('yhq_token');
+}
 
 async function req(path: string, opts: RequestInit = {}) {
   const res = await fetch(API + path, {
@@ -29,6 +33,10 @@ async function req(path: string, opts: RequestInit = {}) {
 export const api = {
   authTelegram: (initData: string, guestId?: string) =>
     req('/auth/telegram', { method: 'POST', body: JSON.stringify({ initData, guestId }) }),
+  register: (name: string, phone: string, password: string) =>
+    req('/auth/register', { method: 'POST', body: JSON.stringify({ name, phone, password }) }),
+  login: (phone: string, password: string) =>
+    req('/auth/login', { method: 'POST', body: JSON.stringify({ phone, password }) }),
   me: () => req('/me'),
   updateMe: (data: any) => req('/me', { method: 'PATCH', body: JSON.stringify(data) }),
   categories: () => req('/categories'),

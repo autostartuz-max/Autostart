@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { api, setToken } from './api';
+import { api, setToken, hasToken, clearToken } from './api';
 import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
 import Landing from './screens/Landing';
+import Login from './screens/Login';
+import Register from './screens/Register';
 import Dashboard from './screens/Dashboard';
 import Shablon from './screens/Shablon';
 import Topics from './screens/Topics';
@@ -16,8 +18,8 @@ import AdminQuestionForm from './screens/AdminQuestionForm';
 import AdminImport from './screens/AdminImport';
 
 export default function App() {
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState('');
+  const [checking, setChecking] = useState(true);
+  const [authed, setAuthed] = useState(false);
   const [entered, setEntered] = useState(
     () =>
       isTelegram() ||
@@ -27,26 +29,24 @@ export default function App() {
   useEffect(() => {
     initTelegram();
     (async () => {
-      try {
-        const r = await api.authTelegram(getInitData(), getGuestId());
-        setToken(r.token);
-        setReady(true);
-      } catch (e: any) {
-        setError(e.message || 'Ulanib bo‘lmadi');
+      // 1) Mavjud token bo'lsa — tekshiramiz
+      if (hasToken()) {
+        try { await api.me(); setAuthed(true); setChecking(false); return; }
+        catch { clearToken(); }
       }
+      // 2) Telegram WebApp ichida — avtomatik kiramiz (seamless)
+      if (isTelegram()) {
+        try {
+          const r = await api.authTelegram(getInitData(), getGuestId());
+          setToken(r.token);
+          setAuthed(true);
+        } catch { /* login ekrani ko'rsatiladi */ }
+      }
+      setChecking(false);
     })();
   }, []);
 
-
-  if (error)
-    return (
-      <div className="splash">
-        <div className="em" style={{ fontSize: 40 }}>⚠️</div>
-        <div>Serverga ulanib bo‘lmadi</div>
-        <div style={{ fontSize: 12 }}>{error}</div>
-      </div>
-    );
-  if (!ready)
+  if (checking)
     return (
       <div className="splash">
         <div className="spinner" />
@@ -54,19 +54,26 @@ export default function App() {
       </div>
     );
 
-  if (!entered)
+  // Login shart — token yo'q bo'lsa: Landing → Kirish/Ro'yxat
+  if (!authed) {
+    if (!entered)
+      return (
+        <Landing
+          onStart={() => {
+            try { localStorage.setItem('yhq_entered', '1'); } catch { /* ignore */ }
+            setEntered(true);
+          }}
+        />
+      );
     return (
-      <Landing
-        onStart={() => {
-          try {
-            localStorage.setItem('yhq_entered', '1');
-          } catch {
-            /* ignore */
-          }
-          setEntered(true);
-        }}
-      />
+      <div className="app">
+        <Routes>
+          <Route path="/royxat" element={<Register onAuthed={() => setAuthed(true)} />} />
+          <Route path="*" element={<Login onAuthed={() => setAuthed(true)} />} />
+        </Routes>
+      </div>
     );
+  }
 
   return (
     <div className="app">

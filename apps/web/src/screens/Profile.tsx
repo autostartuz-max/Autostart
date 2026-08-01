@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api';
+import { api, clearToken } from '../api';
 import type { Me } from '../types';
 
 export default function Profile() {
@@ -70,6 +70,14 @@ export default function Profile() {
         <div>Yo‘l belgilari</div>
         <div style={{ color: 'var(--muted)' }}>›</div>
       </div>
+
+      <button
+        className="setrow"
+        style={{ width: '100%', color: '#ff6b6b', fontWeight: 700, cursor: 'pointer', border: 'none', background: 'transparent', textAlign: 'left' }}
+        onClick={() => { clearToken(); window.location.href = '/'; }}
+      >
+        Chiqish (logout)
+      </button>
     </div>
   );
 }

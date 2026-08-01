@@ -92,9 +92,11 @@ model Option {
 }
 
 model User {
-  id         Int          @id @default(autoincrement())
-  tgId       String       @unique
-  firstName  String       @default("Foydalanuvchi")
+  id           Int          @id @default(autoincrement())
+  tgId         String?      @unique
+  phone        String?      @unique
+  passwordHash String?
+  firstName    String       @default("Foydalanuvchi")
   avatarUrl  String?
   lang       String       @default("uz")
   alphabet   String       @default("lat") // lat | cyr

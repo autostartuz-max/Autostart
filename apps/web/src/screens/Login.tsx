@@ -18,6 +18,7 @@ export default function Login({ onAuthed }: { onAuthed: () => void }) {
       const r = await api.login(phone, password);
       setToken(r.token);
       onAuthed();
+      nav('/', { replace: true });
     } catch (e: any) {
       setErr(e.message || 'Telefon yoki parol xato');
     } finally {

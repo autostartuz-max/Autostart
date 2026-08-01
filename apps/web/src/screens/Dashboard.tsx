@@ -4,8 +4,9 @@ import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle,
   Search, Bell, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
+  LogOut, User,
 } from 'lucide-react';
-import { api } from '../api';
+import { api, clearToken } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
@@ -18,6 +19,7 @@ const CHART = [72, 74, 68, 76, 73, 82, 80, 88, 90];
 export default function Dashboard() {
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
+  const [umenu, setUmenu] = useState(false);
   const [me, setMe] = useState<any>(null);
   useEffect(() => { api.me().then(setMe).catch(() => {}); }, []);
 
@@ -39,9 +41,20 @@ export default function Dashboard() {
           <div className="db-top-right">
             <div className="db-chip">UZ</div>
             <div className="db-chip"><Bell size={17} /><span className="nb">3</span></div>
-            <div className="db-userchip">
-              <span className="db-uava"><ShieldCheck size={18} /></span>
-              <span className="db-uname"><b>{name}</b><span>Pro</span></span>
+            <div className="db-userwrap">
+              <div className="db-userchip" onClick={() => setUmenu((v) => !v)}>
+                <span className="db-uava"><ShieldCheck size={18} /></span>
+                <span className="db-uname"><b>{name}</b><span>Pro</span></span>
+              </div>
+              {umenu && (
+                <>
+                  <div className="db-umenu-ov" onClick={() => setUmenu(false)} />
+                  <div className="db-umenu">
+                    <button onClick={() => { setUmenu(false); nav('/profil'); }}><User size={15} /> Profil</button>
+                    <button className="danger" onClick={() => { clearToken(); window.location.href = '/'; }}><LogOut size={15} /> Chiqish</button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>

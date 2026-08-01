@@ -23,6 +23,7 @@ export default function Register({ onAuthed }: { onAuthed: () => void }) {
       const r = await api.register(name, phone, password);
       setToken(r.token);
       onAuthed();
+      nav('/', { replace: true });
     } catch (e: any) {
       setErr(e.message || 'Ro‘yxatdan o‘tishda xato');
     } finally {

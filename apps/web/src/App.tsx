@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { api, setToken, hasToken, clearToken } from './api';
 import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
 import Landing from './screens/Landing';
@@ -91,6 +91,7 @@ export default function App() {
         <Route path="/savollar/:id" element={<AdminQuestionForm />} />
         <Route path="/oktagon" element={<Placeholder title="Oktagon" emoji="⚔️" text="Bellashuv rejimi tez orada qo‘shiladi." />} />
         <Route path="/reyting" element={<Placeholder title="Reyting" emoji="🏆" text="Reyting va liga tizimi tez orada qo‘shiladi." />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );

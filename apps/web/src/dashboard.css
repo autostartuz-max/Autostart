@@ -1,19 +1,23 @@
 /* ===== AVTOTEST-uslubidagi dark dashboard (Bosh sahifa) ===== */
 .db {
-  --db-bg: #0a0f1a;
-  --db-side: #0c1322;
-  --db-card: #111a2b;
-  --db-card2: #162034;
-  --db-border: #1e2a41;
-  --db-text: #e8eef7;
-  --db-muted: #8494ad;
-  --db-blue: #3b82f6;
-  position: fixed; inset: 0; display: flex; background: var(--db-bg); color: var(--db-text); overflow: hidden;
+  --db-bg: #090d18;
+  --db-side: #0c1120;
+  --db-card: #141a2b;
+  --db-card2: #1b2338;
+  --db-border: #232d47;
+  --db-text: #e9edf7;
+  --db-muted: #8b98b4;
+  --db-blue: #7c6cf5;
+  position: fixed; inset: 0; display: flex; overflow: hidden; color: var(--db-text);
+  background:
+    radial-gradient(1100px 520px at 12% -8%, rgba(89, 74, 226, .22) 0%, transparent 55%),
+    radial-gradient(900px 480px at 100% 0%, rgba(41, 98, 214, .14) 0%, transparent 50%),
+    var(--db-bg);
 }
 .db a { color: inherit; text-decoration: none; }
 
 /* Sidebar */
-.db-side { --db-side: #0c1322; --db-card: #111a2b; --db-border: #1e2a41; --db-text: #e8eef7; --db-muted: #8494ad; --db-blue: #3b82f6;
+.db-side { --db-side: #0c1120; --db-card: #141a2b; --db-border: #232d47; --db-text: #e9edf7; --db-muted: #8b98b4; --db-blue: #7c6cf5;
   width: 244px; flex-shrink: 0; background: var(--db-side); border-right: 1px solid var(--db-border);
   display: flex; flex-direction: column; padding: 16px 12px; overflow-y: auto; }
 .db-logo { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 8px 18px; }

@@ -252,14 +252,19 @@ adminRouter.get(
   ah(async (req, res) => {
     const q = String(req.query.q || '').trim();
     const topicId = req.query.topicId ? Number(req.query.topicId) : undefined;
+    const shablon = req.query.shablon ? Number(req.query.shablon) : undefined;
     const where: any = {};
     if (q) where.textLat = { contains: q };
     if (topicId) where.topicId = topicId;
+    if (shablon) where.shablon = shablon;
+    // Cheklov savollar soniga qarab: 300 ta bo'lsa shablonlarning faqat boshi ko'rinib qolardi
+    const takeRaw = Number(req.query.take);
+    const take = Number.isFinite(takeRaw) && takeRaw > 0 ? Math.min(takeRaw, 5000) : 3000;
     const questions = await prisma.question.findMany({
       where,
       include: { options: { orderBy: { order: 'asc' } }, topic: true, ticket: true, category: true },
-      orderBy: [{ order: 'asc' }, { id: 'asc' }], // admin tartibi, keyin id
-      take: 300,
+      orderBy: [{ shablon: 'asc' }, { order: 'asc' }, { id: 'asc' }], // shablon, keyin tartib
+      take,
     });
     res.json(questions);
   })

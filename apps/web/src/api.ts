@@ -55,8 +55,10 @@ export const api = {
 };
 
 /* ---------- Admin (savol boshqaruvi — asosiy ilova ichida) ---------- */
-// HOZIRCHA: Savollar hammaga ochiq. Keyin faqat admin uchun yopish uchun — bu false qiling.
-export const SAVOLLAR_PUBLIC = true;
+// XAVFSIZLIK: false. Avval true edi — bu har bir tashrifchini avtomat admin
+// (admin/admin123) qilib kirgizardi, ya'ni istalgan odam hamma savolni o'qishi/
+// o'zgartirishi mumkin edi. Endi admin panelga faqat haqiqiy parol bilan kiriladi.
+export const SAVOLLAR_PUBLIC = false;
 
 export function adminToken() {
   return localStorage.getItem('yhq_admin_token') || '';
@@ -162,14 +164,9 @@ export async function base64ToFile(b64: string, mime: string, name = 'recolored.
   return new File([blob], name, { type: mime });
 }
 
-// Token bo'lmasa — hozircha (SAVOLLAR_PUBLIC) avtomatik admin sifatida kiramiz
+// XAVFSIZLIK: avtomat admin login OLIB TASHLANDI.
+// Avval bu yerda admin/admin123 kodda ochiq turardi va har bir tashrifchi
+// avtomat admin bo'lardi. Endi admin panelga faqat haqiqiy parol bilan kiriladi.
 export async function ensureAdminAuto(): Promise<boolean> {
-  if (hasAdmin()) return true;
-  if (!SAVOLLAR_PUBLIC) return false;
-  try {
-    await adminApi.login('admin', 'admin123');
-    return true;
-  } catch {
-    return false;
-  }
+  return hasAdmin();
 }

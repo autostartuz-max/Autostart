@@ -316,13 +316,21 @@ userRouter.get(
       orderBy: [{ order: 'asc' }, { id: 'asc' }],
     });
 
+    // XAVFSIZLIK (ko'chirishga qarshi): bitta so'rovda butun savol banki
+    // qaytarilmaydi. Avval mode=all HAMMA 1238 savolni javoblari bilan berardi —
+    // obunachi ham bir so'rovda hammasini ko'chirib olardi. Endi qat'iy cheklov:
+    // eng ko'pi MAX ta (test uchun yetarli: shablon=20, imtihon=20/50/100).
+    const MAX = 120;
     if (shablon) {
-      // Shablon test: savollar tartib (id asc) bo'yicha — aralashtirilmaydi (1 tepada, 2 pastda)
+      // Shablon test: bitta bilet (20 ta), tartib bo'yicha — cheklov ichida
+      questions = questions.slice(0, MAX);
     } else if (mode === 'exam' || mode === 'random' || mode === '50' || mode === '100') {
-      const n = limit || (mode === '100' ? 100 : mode === '50' ? 50 : 20);
+      const n = Math.min(limit || (mode === '100' ? 100 : mode === '50' ? 50 : 20), MAX);
       questions = shuffle(questions).slice(0, n);
-    } else if (limit) {
-      questions = questions.slice(0, limit);
+    } else {
+      // mode=all / mavzu / bilet mashqi — baribir cheklanadi (butun bank emas)
+      const n = Math.min(limit || MAX, MAX);
+      questions = questions.slice(0, n);
     }
 
     res.json(questions);

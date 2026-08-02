@@ -100,9 +100,9 @@ export default function Dashboard() {
             <div className="db-panel">
               <div className="db-ph"><h3>Statistikam</h3><span className="lnk">7 kunlik</span></div>
               <svg className="db-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
-                {[0, 25, 50, 75, 100].map((y) => <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="#1e2a41" strokeWidth="0.5" />)}
-                <polyline points={chartPts} fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinejoin="round" />
-                {CHART.map((v, i) => <circle key={i} cx={(i / (CHART.length - 1)) * 100} cy={100 - v} r="1.5" fill="#60a5fa" />)}
+                {[0, 25, 50, 75, 100].map((y) => <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="rgba(124,108,245,.14)" strokeWidth="0.5" />)}
+                <polyline points={chartPts} fill="none" stroke="#7c6cf5" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
+                {CHART.map((v, i) => <circle key={i} cx={(i / (CHART.length - 1)) * 100} cy={100 - v} r="1.6" fill="#b3a6ff" />)}
               </svg>
               <div className="db-cstats">
                 <div className="db-cstat"><b style={{ color: '#4ade80' }}>98%</b><span>Eng yaxshi</span></div>

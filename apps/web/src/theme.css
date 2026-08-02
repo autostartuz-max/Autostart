@@ -30,7 +30,7 @@
   --db-border: #e2e8f0; --db-text: #0f172a; --db-muted: #5a6b85;
 }
 :root[data-theme="light"] .db-logo .lg-a { color: #0f172a; }
-:root[data-theme="light"] .db-navi.active { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
+:root[data-theme="light"] .db-navi.active { background: rgba(124, 108, 245, 0.13); color: #6d5efc; }
 :root[data-theme="light"] .db-uava { color: #fff; }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }

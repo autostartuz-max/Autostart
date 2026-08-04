@@ -4,7 +4,7 @@ import LangTheme from './LangTheme';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
-  ClipboardList, ShieldCheck,
+  ClipboardList,
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -49,7 +49,9 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
   const go = (to: string) => { onClose?.(); nav(to); };
   // Admin login qilgan bo'lsa (main + admin bir domenda — localStorage umumiy) — savol boshqaruvi ko'rinadi
   const isAdmin = typeof window !== 'undefined' && !!localStorage.getItem('yhq_admin_token');
-  const showSavollar = isAdmin || SAVOLLAR_PUBLIC; // hozircha hammaga ochiq
+  // FAQAT ADMIN uchun. Oddiy (ro'yxatdan o'tgan) foydalanuvchi "Savollar" bo'limini
+  // ham, unga olib boradigan hech qanday tugmani ham ko'rmaydi.
+  const showSavollar = isAdmin || SAVOLLAR_PUBLIC;
 
   const navi = (items: typeof TESTLAR) =>
     items.map((it) => (
@@ -88,11 +90,6 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         <div className="db-side-bottom">
           <div className="db-sec">Boshqa</div>
           {navi(BOSHQA)}
-          {!showSavollar && (
-            <button className="db-navi db-adminlink" onClick={() => go('/savollar')}>
-              <ShieldCheck size={16} /> <span>Admin kirish</span>
-            </button>
-          )}
           <LangTheme />
         </div>
       </aside>

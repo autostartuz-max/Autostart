@@ -29,8 +29,6 @@
   padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; text-align: left; width: 100%; }
 .db-navi:hover { background: rgba(255, 255, 255, 0.04); color: var(--db-text); }
 .db-navi.active { background: rgba(124, 108, 245, 0.16); color: #b3a6ff; }
-.db-adminlink { opacity: .5; font-size: 12.5px; }
-.db-adminlink:hover { opacity: 1; }
 .db-navi .nb { margin-left: auto; background: #ef4444; color: #fff; font-size: 11px; font-weight: 800; border-radius: 20px; padding: 1px 7px; }
 .db-side-bottom { margin-top: auto; padding-top: 8px; }
 .lt { display: flex; flex-direction: column; gap: 8px; padding: 10px 4px 4px; }

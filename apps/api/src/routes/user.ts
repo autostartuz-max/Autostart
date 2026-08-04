@@ -168,7 +168,7 @@ userRouter.get(
     const img = await prisma.questionImage.findUnique({ where: { questionId: Number(req.params.id) } });
     if (!img) return res.status(404).json({ error: 'Rasm yoʻq' });
     res.setHeader('Content-Type', img.mime || 'image/jpeg');
-    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');  // rasm o'zgarsa darhol ko'rinsin (ETag baribir tejaydi)
     res.send(Buffer.from(img.data));
   })
 );

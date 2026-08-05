@@ -7,6 +7,7 @@ import Login from './screens/Login';
 import Register from './screens/Register';
 import Dashboard from './screens/Dashboard';
 import Shablon from './screens/Shablon';
+import RandomTests from './screens/RandomTests';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
 import TestPlayer from './screens/TestPlayer';
@@ -80,6 +81,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/shablon" element={<Shablon />} />
+        <Route path="/random" element={<RandomTests />} />
         <Route path="/mavzular" element={<Topics />} />
         <Route path="/biletlar" element={<Tickets />} />
         <Route path="/test" element={<TestPlayer />} />

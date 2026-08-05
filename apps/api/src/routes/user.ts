@@ -321,11 +321,16 @@ userRouter.get(
     // obunachi ham bir so'rovda hammasini ko'chirib olardi. Endi qat'iy cheklov:
     // eng ko'pi MAX ta (test uchun yetarli: shablon=20, imtihon=20/50/100).
     const MAX = 120;
+    // Random test bo'limi 200 tagacha so'raydi (20/50/100/200) — shu rejimga alohida
+    // yuqori shift. Bank 1238 ta, ya'ni 200 ham bankning oltidan biri: ko'chirishga
+    // qarshi himoya kuchida qoladi.
+    const RANDOM_MAX = 200;
     if (shablon) {
       // Shablon test: bitta bilet (20 ta), tartib bo'yicha — cheklov ichida
       questions = questions.slice(0, MAX);
     } else if (mode === 'exam' || mode === 'random' || mode === '50' || mode === '100') {
-      const n = Math.min(limit || (mode === '100' ? 100 : mode === '50' ? 50 : 20), MAX);
+      const cap = mode === 'random' ? RANDOM_MAX : MAX;
+      const n = Math.min(limit || (mode === '100' ? 100 : mode === '50' ? 50 : 20), cap);
       questions = shuffle(questions).slice(0, n);
     } else {
       // mode=all / mavzu / bilet mashqi — baribir cheklanadi (butun bank emas)

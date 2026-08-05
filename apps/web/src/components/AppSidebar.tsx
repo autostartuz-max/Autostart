@@ -4,12 +4,13 @@ import LangTheme from './LangTheme';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
-  ClipboardList,
+  ClipboardList, Shuffle,
 } from 'lucide-react';
 import '../dashboard.css';
 
 const TESTLAR = [
   { Icon: FileText, label: 'Shablon testlar', to: '/shablon' },
+  { Icon: Shuffle, label: 'Random testlar', to: '/random' },
   { Icon: BookOpen, label: "Mavzular bo'yicha", to: '/mavzular' },
   { Icon: CircleAlert, label: 'Qiyin savollar', to: '/test?mode=tricky' },
   { Icon: HeartCrack, label: 'Xatolarim', to: '/test?mode=mistakes', badge: true },
@@ -34,7 +35,7 @@ const BOSHQA = [
 ];
 
 // Menyu soddalashtirilgan holati (xozircha). Barcha bo'limlarni qaytarish uchun -> false qiling.
-// Ko'rinadi: Bosh sahifa, Shablon testlar, Mavzular bo'yicha, Savollar, Boshqa (Sozlamalar...).
+// Ko'rinadi: Bosh sahifa, Shablon testlar, Random testlar, Mavzular bo'yicha, Savollar, Boshqa.
 const MENU_MINIMAL = true;
 
 interface Props {
@@ -72,7 +73,7 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
           <Home size={18} /> <span>Bosh sahifa</span>
         </button>
         <div className="db-sec">Testlar</div>
-        {navi(MENU_MINIMAL ? TESTLAR.slice(0, 2) : TESTLAR)}
+        {navi(MENU_MINIMAL ? TESTLAR.slice(0, 3) : TESTLAR)}
         {!MENU_MINIMAL && <>
           <div className="db-sec">O‘rganish</div>
           {navi(ORGANISH)}

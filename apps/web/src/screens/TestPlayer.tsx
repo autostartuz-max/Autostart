@@ -69,7 +69,13 @@ export default function TestPlayer() {
   const topicId = sp.get('topicId') || undefined;
   const ticketId = sp.get('ticketId') || undefined;
   const shablon = sp.get('shablon') || undefined;
+  const limit = sp.get('limit') || undefined;
   const examMode = sp.get('exam') === '1' || mode === 'exam' || mode === '50' || mode === '100';
+  // Random test: barcha shablonlardan aralash N ta savol (20/50/100/200)
+  const randomMode = mode === 'random';
+  // Imtihon me'yori: 20 savolga 25 daqiqa (1.25 daq/savol). Shablon/imtihon uchun
+  // avvalgidek qat'iy 25 daqiqa, random uchun savol soniga qarab o'sadi.
+  const examSecondsFor = (n: number) => (randomMode ? Math.round(n * 1.25) : 25) * 60;
 
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [idx, setIdx] = useState(0);
@@ -187,11 +193,12 @@ export default function TestPlayer() {
     if (topicId) params.topicId = topicId;
     if (ticketId) params.ticketId = ticketId;
     if (shablon) params.shablon = shablon;
+    if (limit) params.limit = limit;
     api
       .questions(params)
       .then((qs: Question[]) => {
         setQuestions(qs);
-        if (examMode) setSeconds(25 * 60); // har shablon imtihoni — 25 daqiqa
+        if (examMode) setSeconds(examSecondsFor(qs.length));
         // Xatolar rejimida: oldin belgilangan xato javoblarni ko'rsatamiz
         if (mode === 'mistakes') {
           const pre: Record<number, Answered> = {};
@@ -200,7 +207,9 @@ export default function TestPlayer() {
             if (ch && ch.length) pre[qq.id] = { chosen: ch, isCorrect: false };
           }
           setAnswers(pre);
-        } else {
+        } else if (!randomMode) {
+          // Random testda savollar har safar qaytadan aralashadi — eski sessiyani
+          // tiklash boshqa savollarga tushib qolardi, shuning uchun tiklanmaydi.
           // Davom ettirish — saqlangan sessiyani tiklaymiz
           try {
             const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
@@ -225,7 +234,7 @@ export default function TestPlayer() {
     const sh = sp.get('shuffle');
     if (sh != null) setS('shuffle', sh === '1');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, topicId, ticketId, shablon]);
+  }, [mode, topicId, ticketId, shablon, limit]);
 
   useEffect(() => {
     if (!questions || finished) return;
@@ -295,6 +304,7 @@ export default function TestPlayer() {
 
   if (!configured) {
     const LANGS: [string, string][] = [['lat', '🇺🇿 O‘zbek'], ['cyr', '🇺🇿 Кирилл'], ['rus', '🇷🇺 Рус']];
+    const cfgCount = Number(limit) || questions?.length || 20;
     return (
       <div className="cfg-wrap">
         <div className="cfg">
@@ -317,9 +327,19 @@ export default function TestPlayer() {
             </button>
           </div>
           <div className="cfg-info">
-            <b>20 ta aralash savoldan iborat imtihon bileti.</b> Barcha mavzulardan tasodifiy tuzilgan testlar bilan tanishib,
-            REAL IMTIHON JARAYONIGA tayyorlaning. Natija (javob holati) har bir javobdan so‘ng ko‘rinadi.
-            <b> 3 tadan ortiq xato</b> javobda imtihondan yiqilgan hisoblanasiz.
+            {randomMode ? (
+              <>
+                <b>{cfgCount} ta savol — barcha shablonlardan tasodifiy tanlanadi.</b> Har safar yangi to‘plam
+                tuziladi. Natija (javob holati) har bir javobdan so‘ng ko‘rinadi.
+                <b> {Math.max(3, Math.round(cfgCount * 0.15))} tadan ortiq xato</b> javobda imtihondan yiqilgan hisoblanasiz.
+              </>
+            ) : (
+              <>
+                <b>20 ta aralash savoldan iborat imtihon bileti.</b> Barcha mavzulardan tasodifiy tuzilgan testlar bilan tanishib,
+                REAL IMTIHON JARAYONIGA tayyorlaning. Natija (javob holati) har bir javobdan so‘ng ko‘rinadi.
+                <b> 3 tadan ortiq xato</b> javobda imtihondan yiqilgan hisoblanasiz.
+              </>
+            )}
           </div>
           <div className="cfg-btns">
             <button
@@ -330,7 +350,7 @@ export default function TestPlayer() {
                 } catch {
                   /* ignore */
                 }
-                nav('/shablon');
+                nav(randomMode ? '/random' : '/shablon');
               }}
             >
               ← Orqaga
@@ -402,7 +422,7 @@ export default function TestPlayer() {
     setAnswers({});
     setLearned(new Set());
     startRef.current = Date.now();
-    if (examMode) setSeconds(25 * 60); // har shablon imtihoni — 25 daqiqa
+    if (examMode) setSeconds(examSecondsFor(questions.length));
     else setElapsed(0);
   };
   const rTotal = questions.length;
@@ -410,7 +430,10 @@ export default function TestPlayer() {
   const rWrong = questions.filter((qq) => answers[qq.id] && !answers[qq.id].isCorrect).length;
   const rSkip = rTotal - rCorrect - rWrong;
   const rPct = rTotal ? Math.round((rCorrect / rTotal) * 100) : 0;
-  const rPass = examMode ? rWrong <= 3 : rPct >= 90;
+  // Imtihon: 20 savolga 3 xato (15%). Random testda savol soni turlicha —
+  // shu nisbat saqlanadi (50→8, 100→15, 200→30).
+  const rMaxWrong = randomMode ? Math.max(3, Math.round(rTotal * 0.15)) : 3;
+  const rPass = examMode ? rWrong <= rMaxWrong : rPct >= 90;
   const RING_C = 2 * Math.PI * 52;
 
   const q = questions[idx];
@@ -514,7 +537,11 @@ export default function TestPlayer() {
 
   /* ===== intalim uslubidagi test oynasi ===== */
   const shablonN = sp.get('n');
-  const shablonLabel = shablonN ? `${shablonN} - SHABLON` : examMode ? 'IMTIHON' : 'TEST';
+  const shablonLabel = shablonN
+    ? `${shablonN} - SHABLON`
+    : randomMode
+      ? `RANDOM ${questions.length}`
+      : examMode ? 'IMTIHON' : 'TEST';
   const fscale = settings.fontScale ?? 1;
   const fontUp = () => setS('fontScale', Math.min(fscale + 0.12, 4));
   const fontDown = () => setS('fontScale', Math.max(fscale - 0.12, 0.7));
@@ -546,7 +573,7 @@ export default function TestPlayer() {
     if (i === idx) c += ' cur';
     return c;
   };
-  const exit = () => { localStorage.removeItem(SESSION_KEY); nav('/shablon'); };
+  const exit = () => { localStorage.removeItem(SESSION_KEY); nav(randomMode ? '/random' : '/shablon'); };
 
   return (
     <div className={`tp2 ff-${settings.fontStyle}`} style={{ ['--fs' as any]: fscale }}>

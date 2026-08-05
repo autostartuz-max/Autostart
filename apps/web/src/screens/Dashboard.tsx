@@ -4,7 +4,7 @@ import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle,
   Search, Bell, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
-  LogOut, User,
+  LogOut, User, Shuffle,
 } from 'lucide-react';
 import { api, clearToken } from '../api';
 import AppSidebar from '../components/AppSidebar';
@@ -85,6 +85,7 @@ export default function Dashboard() {
               <div className="db-ph"><h3>Test yechish</h3></div>
               {[
                 { Icon: FileText, c: 'p', t: 'Shablon testlar', s: '63 ta imtihon bileti', b: '63 ta', to: '/shablon' },
+                { Icon: Shuffle, c: 'g', t: 'Random testlar', s: 'Barcha shablonlardan aralash', b: '20–200', to: '/random' },
                 { Icon: Grid3x3, c: 'g', t: "Mavzular bo'yicha", s: 'Mavzular kesimida', b: '10 mavzu', to: '/mavzular' },
                 { Icon: CircleAlert, c: 'o', t: 'Qiyin savollar', s: 'Ko‘p xato qilinadigan', b: 'Tricky', to: '/test?mode=tricky' },
                 { Icon: ClipboardCheck, c: 'b', t: 'Imtihon simulyatori', s: 'Real imtihon sharoiti', b: '20 savol', to: '/shablon' },

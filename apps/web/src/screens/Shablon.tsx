@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Bookmark, ChevronLeft, Bell, Search, Moon, Globe, User, Menu,
+  Bookmark, ChevronLeft, Bell, Search, Moon, Globe, User, Menu, X,
 } from 'lucide-react';
 import { api } from '../api';
 import AppSidebar from '../components/AppSidebar';
@@ -120,30 +120,36 @@ export default function Shablon() {
       {/* Til tanlash MODAL (grid ustida) */}
       {selected != null && (
         <div className="cfg-overlay" onClick={() => setSelected(null)}>
-          <div className="cfg" onClick={(e) => e.stopPropagation()}>
-            {name && <div className="cfg-name">{name.toUpperCase()}</div>}
-            <div className="cfg-title">TILNI TANLANG!</div>
-            <div className="cfg-langs">
-              {LANGS.map(([v, label, flag], i) => (
-                <button key={v} className={'cfg-lang' + (cfgLang === v ? ' on' : '')} onClick={() => setCfgLang(v as any)}>
-                  <span className="cfg-num">{i + 1}</span>
-                  <span className="cfg-lname"><Flag c={flag} />{label}</span>
-                </button>
-              ))}
+          <div className="rnd-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="rnd-mhead">
+              <span>Tanlang</span>
+              <button className="rnd-x" onClick={() => setSelected(null)} title="Yopish"><X size={20} /></button>
             </div>
-            <div className="cfg-shuffle">
-              <button className={'cfg-sh' + (shuffle ? ' on' : '')} onClick={() => setShuffle(true)}>Variantlar aralashsin</button>
-              <button className={'cfg-sh' + (!shuffle ? ' on' : '')} onClick={() => setShuffle(false)}>Variantlar aralashmasin</button>
-            </div>
-            <button className="cfg-review" disabled={!cfgLang} onClick={start}>
-              <span className="cfg-num">‹</span>
-              <span className="cfg-lname">Javoblarni ko‘rib ketish</span>
-            </button>
-            <div className="cfg-info">
-              <b>20 ta savollarga ajratilgan aralash savollar mavjud bo‘lgan biletlar.</b> Ushbu bo‘limda barcha fanlardan aralash
-              va tasodifiy shaklda tuzilgan testlar bilan tanishib, testlarga javob berish orqali REAL IMTIHON JARAYONIGA
-              tayyorlaning. Natijalar (berilgan javobning holati) har bir javob berilgandan so‘ng ko‘rinadi.
-              <b> 3 tadan ortiq xato</b> javob berilganda imtihondan yiqilgan hisoblanasiz.
+            <div className="rnd-mbody">
+              {name && <div className="cfg-name">{name.toUpperCase()}</div>}
+              <div className="cfg-title">TILNI TANLANG!</div>
+              <div className="cfg-langs">
+                {LANGS.map(([v, label, flag], i) => (
+                  <button key={v} className={'cfg-lang' + (cfgLang === v ? ' on' : '')} onClick={() => setCfgLang(v as any)}>
+                    <span className="cfg-num">{i + 1}</span>
+                    <span className="cfg-lname"><Flag c={flag} />{label}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="cfg-shuffle">
+                <button className={'cfg-sh' + (shuffle ? ' on' : '')} onClick={() => setShuffle(true)}>Variantlar aralashsin</button>
+                <button className={'cfg-sh' + (!shuffle ? ' on' : '')} onClick={() => setShuffle(false)}>Variantlar aralashmasin</button>
+              </div>
+              <button className="cfg-review" disabled={!cfgLang} onClick={start}>
+                <span className="cfg-num">‹</span>
+                <span className="cfg-lname">Javoblarni ko‘rib ketish</span>
+              </button>
+              <div className="cfg-info">
+                <b>20 ta savollarga ajratilgan aralash savollar mavjud bo‘lgan biletlar.</b> Ushbu bo‘limda barcha fanlardan aralash
+                va tasodifiy shaklda tuzilgan testlar bilan tanishib, testlarga javob berish orqali REAL IMTIHON JARAYONIGA
+                tayyorlaning. Natijalar (berilgan javobning holati) har bir javob berilgandan so‘ng ko‘rinadi.
+                <b> 3 tadan ortiq xato</b> javob berilganda imtihondan yiqilgan hisoblanasiz.
+              </div>
             </div>
           </div>
         </div>

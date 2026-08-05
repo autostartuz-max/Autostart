@@ -120,19 +120,8 @@ export default function RandomTests() {
             </div>
 
             <div className="rnd-mbody">
-              <label className="rnd-lab" htmlFor="rnd-count">Birini tanlang</label>
-              <select
-                id="rnd-count"
-                className="rnd-sel"
-                value={count}
-                onChange={(e) => setCount(Number(e.target.value))}
-              >
-                {COUNTS.map((n) => (
-                  <option key={n} value={n}>{n} ta ishlash</option>
-                ))}
-              </select>
-
               <div className="rnd-meta">
+                <span><ListChecks size={14} /> {count} ta savol</span>
                 <span><Clock size={14} /> {minutesFor(count)} daqiqa</span>
                 <span>Ruxsat etilgan xato: {allowedWrong(count)} ta</span>
               </div>

@@ -76,16 +76,25 @@
 .rnd-x { background: none; border: none; color: var(--muted); cursor: pointer; display: flex; }
 .rnd-x:hover { color: var(--text); }
 .rnd-mbody { padding: 18px 20px 20px; }
-.rnd-lab { display: block; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
-.rnd-sel { width: 100%; height: 46px; padding: 0 12px; border-radius: 10px; background: var(--card2);
-  border: 1.6px solid #3b82f6; color: var(--text); font-size: 15px; font-weight: 600; cursor: pointer; }
-.rnd-sel:focus { outline: none; border-color: #7c3aed; }
-.rnd-meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin: 12px 0 18px; }
+.rnd-meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin: 0 0 18px; }
 .rnd-meta span { display: inline-flex; align-items: center; gap: 6px; }
 .rnd-modal .cfg-title { color: var(--muted); }
 .rnd-modal .cfg-lang { background: var(--card2); color: var(--text); }
 .rnd-modal .cfg-sh { background: var(--card2); border-color: var(--border); color: var(--text); }
 .rnd-modal .cfg-sh.on { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+/* Shablon modalidagi elementlar ham shu oynaga moslashadi (och/qorong'i) */
+.rnd-modal .cfg-name { color: var(--text); }
+.rnd-modal .cfg-name::before, .rnd-modal .cfg-name::after { background: var(--border); }
+.rnd-modal .cfg-info { background: var(--card2); border: 1px solid var(--border); border-left: 3px solid #f59e0b;
+  color: var(--muted); text-align: left; margin-bottom: 0; }
+.rnd-modal .cfg-info b { color: var(--text); }
+/* Til tanlangach — yashil tugma (rnd-start bilan bir xil) */
+.rnd-modal .cfg-review { background: #22c55e; border-color: #22c55e; margin-bottom: 16px; }
+.rnd-modal .cfg-review .cfg-lname { color: #04120a; font-weight: 800; }
+.rnd-modal .cfg-review .cfg-num { background: rgba(0, 0, 0, .22); color: #04120a; }
+.rnd-modal .cfg-review:disabled { background: var(--card2); border-color: var(--border); }
+.rnd-modal .cfg-review:disabled .cfg-lname { color: var(--muted); }
+.rnd-modal .cfg-review:disabled .cfg-num { background: var(--border); color: var(--muted); }
 .rnd-start { width: 100%; background: #22c55e; color: #04120a; border: none; border-radius: 10px;
   padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; }
 .rnd-start:disabled { background: var(--border); color: var(--muted); cursor: default; }

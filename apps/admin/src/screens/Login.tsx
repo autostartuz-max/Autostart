@@ -39,9 +39,6 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
           {busy ? 'Kirilyapti…' : 'Kirish'}
         </button>
         {err && <div className="err">{err}</div>}
-        <p style={{ marginTop: 16 }}>
-          Namuna: <b>admin</b> / <b>admin123</b>
-        </p>
       </form>
     </div>
   );

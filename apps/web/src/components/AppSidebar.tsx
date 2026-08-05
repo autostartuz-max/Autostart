@@ -109,12 +109,12 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         )}
         <div className="db-side-bottom">
           <div className="db-sec">Boshqa</div>
-          {navi(BOSHQA)}
           {!showSavollar && (
             <button className="db-navi db-navi-quiet" onClick={() => go('/savollar')} title="Admin panelga kirish">
               <ShieldCheck size={18} /> <span>Admin kirish</span>
             </button>
           )}
+          {navi(BOSHQA)}
           <LangTheme />
         </div>
       </aside>

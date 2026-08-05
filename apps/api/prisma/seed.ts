@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { STANDARD_TOPICS } from './topics';
 
 const prisma = new PrismaClient();
@@ -252,13 +253,24 @@ async function main() {
   // NAMUNA savol/mavzu YARATILMAYDI — admin ularni o'zi qo'shadi.
   // Faqat zarur narsalarni ta'minlaymiz (idempotent, hech narsa o'chirilmaydi).
 
-  // Admin foydalanuvchi (bo'lmasa yaratamiz)
+  // Admin foydalanuvchi (bo'lmasa yaratamiz).
+  // XAVFSIZLIK: avval bu yerda 'admin123' kodda ochiq turardi — commit tarixida
+  // qolib ketgan va yangi o'rnatishlarning hammasi bir xil ma'lum parol bilan
+  // chiqardi. Endi parol ADMIN_PASSWORD env'idan olinadi; berilmasa tasodifiy
+  // parol yaratilib, bir marta logga chiqariladi.
+  // Mavjud adminning paroli TEGILMAYDI (faqat adminCount === 0 bo'lganda ishlaydi),
+  // ya'ni har deployda parol qaytarilmaydi.
   const adminCount = await prisma.adminUser.count().catch(() => 0);
   if (adminCount === 0) {
+    const parol = process.env.ADMIN_PASSWORD || randomBytes(9).toString('base64url');
     await prisma.adminUser.create({
-      data: { login: 'admin', passwordHash: bcrypt.hashSync('admin123', 10), role: 'superadmin' },
+      data: { login: 'admin', passwordHash: bcrypt.hashSync(parol, 10), role: 'superadmin' },
     });
-    console.log('✅ Admin yaratildi: login=admin, parol=admin123');
+    console.log(`✅ Admin yaratildi: login=admin, parol=${parol}`);
+    if (!process.env.ADMIN_PASSWORD) {
+      console.log('   ⚠️  Parol tasodifiy yaratildi — shu qatorni saqlab qo‘ying.');
+      console.log('   Almashtirish: npx tsx scripts/set-admin-password.ts "yangi-parol"');
+    }
   }
 
   // Toifalar (idempotent — code unique)

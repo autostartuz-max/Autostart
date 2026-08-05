@@ -76,18 +76,29 @@ export function hasAdmin() {
 export function wasAdmin() {
   return localStorage.getItem(ADMIN_SEEN) === '1';
 }
+// Menyu darhol yangilanishi uchun signal. Brauzerning 'storage' hodisasi
+// o'zgarishni QILGAN tabda ishlamaydi — shusiz admin kirgandan keyin ham
+// yon menyu eski holatda qolardi ("kirdim, baribir ko'rinmadi").
+export const ADMIN_CHANGED = 'yhq-admin-changed';
+function notifyAdminChanged() {
+  try { window.dispatchEvent(new Event(ADMIN_CHANGED)); } catch { /* ignore */ }
+}
+
 export function setAdminToken(t: string) {
   localStorage.setItem('yhq_admin_token', t);
   try { localStorage.setItem(ADMIN_SEEN, '1'); } catch { /* ignore */ }
+  notifyAdminChanged();
 }
 /** Token eskirdi — o'chiramiz, lekin havola qolsin (qayta kira olishi uchun) */
 export function clearAdmin() {
   localStorage.removeItem('yhq_admin_token');
+  notifyAdminChanged();
 }
 /** To'liq chiqish — havola ham yo'qoladi */
 export function forgetAdmin() {
-  clearAdmin();
+  localStorage.removeItem('yhq_admin_token');
   localStorage.removeItem(ADMIN_SEEN);
+  notifyAdminChanged();
 }
 
 async function areq(path: string, opts: RequestInit = {}, _retried = false): Promise<any> {

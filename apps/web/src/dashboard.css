@@ -30,6 +30,9 @@
 .db-navi:hover { background: rgba(255, 255, 255, 0.04); color: var(--db-text); }
 .db-navi.active { background: rgba(124, 108, 245, 0.16); color: #b3a6ff; }
 .db-navi .nb { margin-left: auto; background: #ef4444; color: #fff; font-size: 11px; font-weight: 800; border-radius: 20px; padding: 1px 7px; }
+/* "Admin kirish" — oddiy foydalanuvchiga ko'zga tashlanmaydigan, ammo mavjud havola */
+.db-navi-quiet { opacity: .55; font-size: 13px; }
+.db-navi-quiet:hover { opacity: 1; }
 .db-side-bottom { margin-top: auto; padding-top: 8px; }
 .lt { display: flex; flex-direction: column; gap: 8px; padding: 10px 4px 4px; }
 .lt-seg { display: flex; gap: 3px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--db-border); border-radius: 11px; padding: 3px; }

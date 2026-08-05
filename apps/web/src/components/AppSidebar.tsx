@@ -1,10 +1,11 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SAVOLLAR_PUBLIC, hasAdmin, wasAdmin } from '../api';
+import { SAVOLLAR_PUBLIC, hasAdmin, wasAdmin, ADMIN_CHANGED } from '../api';
 import LangTheme from './LangTheme';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
-  ClipboardList, Shuffle,
+  ClipboardList, Shuffle, ShieldCheck,
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -48,11 +49,28 @@ interface Props {
 export default function AppSidebar({ active, open = false, onClose, wrong = 0 }: Props) {
   const nav = useNavigate();
   const go = (to: string) => { onClose?.(); nav(to); };
-  // Admin login qilgan bo'lsa (main + admin bir domenda — localStorage umumiy) — savol boshqaruvi ko'rinadi.
-  // wasAdmin(): token eskirgan bo'lsa ham havola qoladi, aks holda qayta kirish yo'li yo'qoladi.
-  const isAdmin = typeof window !== 'undefined' && (hasAdmin() || wasAdmin());
-  // FAQAT ADMIN uchun. Oddiy (ro'yxatdan o'tgan) foydalanuvchi "Savollar" bo'limini
-  // ham, unga olib boradigan hech qanday tugmani ham ko'rmaydi.
+
+  // Admin holatini REAKTIV kuzatamiz. Avval localStorage faqat render paytida
+  // bir marta o'qilardi — boshqa tabda yoki /savollar sahifasida kirgandan keyin
+  // bu yerdagi menyu yangilanmasdi ("kirdim, baribir ko'rinmadi").
+  const [isAdmin, setIsAdmin] = useState(() => hasAdmin() || wasAdmin());
+  useEffect(() => {
+    const sync = () => setIsAdmin(hasAdmin() || wasAdmin());
+    sync();
+    window.addEventListener(ADMIN_CHANGED, sync); // shu tabda kirish/chiqish
+    window.addEventListener('storage', sync);     // boshqa tab
+    window.addEventListener('focus', sync);       // tabga qaytganda
+    return () => {
+      window.removeEventListener(ADMIN_CHANGED, sync);
+      window.removeEventListener('storage', sync);
+      window.removeEventListener('focus', sync);
+    };
+  }, []);
+
+  // FAQAT ADMIN uchun. Oddiy foydalanuvchi "Savollar" bo'limini ko'rmaydi —
+  // uning o'rniga pastda kichik "Admin kirish" havolasi turadi (parolsiz hech
+  // narsa bermaydi, API baribir haqiqiy JWT talab qiladi). Bu havola bo'lmasa
+  // token eskirgach admin panelga qaytishning ilova ichida yo'li qolmaydi.
   const showSavollar = isAdmin || SAVOLLAR_PUBLIC;
 
   const navi = (items: typeof TESTLAR) =>
@@ -92,6 +110,11 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         <div className="db-side-bottom">
           <div className="db-sec">Boshqa</div>
           {navi(BOSHQA)}
+          {!showSavollar && (
+            <button className="db-navi db-navi-quiet" onClick={() => go('/savollar')} title="Admin panelga kirish">
+              <ShieldCheck size={18} /> <span>Admin kirish</span>
+            </button>
+          )}
           <LangTheme />
         </div>
       </aside>

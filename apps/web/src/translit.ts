@@ -8,9 +8,23 @@ const CYR_MAP: Record<string, string> = {
   W: 'В', w: 'в', "'": 'ъ', 'ʼ': 'ъ', 'ʻ': 'ъ',
 };
 
+// Rasmga ishora qiluvchi KALIT HARFLAR tilga qarab o'zgarmasligi kerak:
+// "Faqat A", "Faqat C", "Faqat A va Г", "Faqat « А »", "Faqat M1 toifali" ...
+// Aks holda C -> К, B -> Б bo'lib ketadi va javob rasmdagi belgiga mos kelmaydi.
+// Yakka turgan bosh harf (ikki tomonida harf/apostrof yo'q) shunday belgi hisoblanadi.
+const LETTER = "A-Za-zА-Яа-яЁёЎўҚқҒғҲҳ'ʻʼ`‘’";
+const KEY_LETTER_RE = new RegExp(`(^|[^${LETTER}])([A-ZА-ЯЁЎҚҒҲ])(?=$|[^${LETTER}])`, 'g');
+const MARK = ''; // matnda uchramaydigan ajratgich
+const RESTORE_RE = new RegExp(`${MARK}(\\d+)${MARK}`, 'g');
+
 export function latToCyr(s: string): string {
   if (!s) return s;
-  let r = s;
+  // 1) Kalit harflarni vaqtincha chetga olamiz — transliteratsiya ularga tegmasin
+  const keep: string[] = [];
+  let r = s.replace(KEY_LETTER_RE, (_m, pre: string, ch: string) => {
+    keep.push(ch);
+    return pre + MARK + (keep.length - 1) + MARK;
+  });
   const dg: [RegExp, string][] = [
     [/O[`'ʻʼ‘’]/g, 'Ў'], [/o[`'ʻʼ‘’]/g, 'ў'], [/G[`'ʻʼ‘’]/g, 'Ғ'], [/g[`'ʻʼ‘’]/g, 'ғ'],
     [/SH/g, 'Ш'], [/Sh/g, 'Ш'], [/sh/g, 'ш'], [/CH/g, 'Ч'], [/Ch/g, 'Ч'], [/ch/g, 'ч'],
@@ -21,5 +35,6 @@ export function latToCyr(s: string): string {
   for (const [re, v] of dg) r = r.replace(re, v);
   let out = '';
   for (const ch of r) out += CYR_MAP[ch] ?? ch;
-  return out;
+  // 2) Kalit harflarni o'z holicha joyiga qaytaramiz
+  return out.replace(RESTORE_RE, (_m, i: string) => keep[Number(i)]);
 }

@@ -90,7 +90,9 @@ async function areq(path: string, opts: RequestInit = {}, _retried = false): Pro
   }
   if (!res.ok) {
     const b = await res.json().catch(() => ({}));
-    throw new Error(b.error || res.statusText);
+    // Statusni xatoga biriktiramiz — chaqiruvchi 401/403 ni ajrata olsin
+    // (token eskirganda ro'yxat "bo'sh" bo'lib ko'rinmasligi uchun).
+    throw Object.assign(new Error(b.error || res.statusText), { status: res.status });
   }
   return res.json();
 }
@@ -106,7 +108,10 @@ async function aupload(path: string, field: string, file: File, _retried = false
     clearAdmin();
     if (await ensureAdminAuto()) return aupload(path, field, file, true);
   }
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
+  if (!res.ok) {
+    const b = await res.json().catch(() => ({}));
+    throw Object.assign(new Error(b.error || res.statusText), { status: res.status });
+  }
   return res.json();
 }
 

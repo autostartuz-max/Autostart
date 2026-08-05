@@ -80,8 +80,6 @@
 .rnd-meta span { display: inline-flex; align-items: center; gap: 6px; }
 .rnd-modal .cfg-title { color: var(--muted); }
 .rnd-modal .cfg-lang { background: var(--card2); color: var(--text); }
-.rnd-modal .cfg-sh { background: var(--card2); border-color: var(--border); color: var(--text); }
-.rnd-modal .cfg-sh.on { background: #7c3aed; border-color: #7c3aed; color: #fff; }
 /* Shablon modalidagi elementlar ham shu oynaga moslashadi (och/qorong'i) */
 .rnd-modal .cfg-name { color: var(--text); }
 .rnd-modal .cfg-name::before, .rnd-modal .cfg-name::after { background: var(--border); }

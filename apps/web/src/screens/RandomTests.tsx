@@ -49,7 +49,6 @@ export default function RandomTests() {
   const [picking, setPicking] = useState(false); // "Tanlang" oynasi
   const [count, setCount] = useState(20);
   const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus' | null>(null);
-  const [shuffle, setShuffle] = useState(false);
 
   useEffect(() => {
     api.me().then((m: any) => setName(m?.user?.firstName || 'Mehmon')).catch(() => {});
@@ -58,13 +57,13 @@ export default function RandomTests() {
   const openPicker = (n: number) => {
     setCount(n);
     setCfgLang(null);
-    setShuffle(false);
     setPicking(true);
   };
 
   const start = () => {
     if (!cfgLang) return; // til tanlanmasa boshlanmaydi
-    nav(`/test?mode=random&limit=${count}&exam=1&lang=${cfgLang}&shuffle=${shuffle ? 1 : 0}`);
+    // shuffle=0 — variantlar aralashmasin (avvalgi standart holat)
+    nav(`/test?mode=random&limit=${count}&exam=1&lang=${cfgLang}&shuffle=0`);
   };
 
   return (
@@ -134,11 +133,6 @@ export default function RandomTests() {
                     <span className="cfg-lname"><Flag c={flag} />{label}</span>
                   </button>
                 ))}
-              </div>
-
-              <div className="cfg-shuffle">
-                <button className={'cfg-sh' + (shuffle ? ' on' : '')} onClick={() => setShuffle(true)}>Variantlar aralashsin</button>
-                <button className={'cfg-sh' + (!shuffle ? ' on' : '')} onClick={() => setShuffle(false)}>Variantlar aralashmasin</button>
               </div>
 
               <button className="rnd-start" disabled={!cfgLang} onClick={start}>

@@ -45,7 +45,6 @@ export default function Shablon() {
   const [name, setName] = useState('Mehmon');
   const [selected, setSelected] = useState<number | null>(null); // ochilgan shablon (modal)
   const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus' | null>(null);
-  const [shuffle, setShuffle] = useState(false);
 
   useEffect(() => {
     api.me().then((m: any) => setName(m?.user?.firstName || 'Mehmon')).catch(() => {});
@@ -54,7 +53,7 @@ export default function Shablon() {
   // ?open=N — shablon modalini avtomatik ochish
   useEffect(() => {
     const o = sp.get('open');
-    if (o && /^\d+$/.test(o)) { setSelected(Number(o)); setCfgLang(null); setShuffle(false); }
+    if (o && /^\d+$/.test(o)) { setSelected(Number(o)); setCfgLang(null); }
   }, [sp]);
 
   const toggleSave = (n: number, e: React.MouseEvent) => {
@@ -68,7 +67,8 @@ export default function Shablon() {
 
   const start = () => {
     if (!cfgLang) return; // til tanlanmasa boshlanmaydi
-    nav(`/test?mode=exam&exam=1&lang=${cfgLang}&shuffle=${shuffle ? 1 : 0}${selected ? `&n=${selected}&shablon=${selected}` : ''}`);
+    // shuffle=0 — variantlar aralashmasin (avvalgi standart holat)
+    nav(`/test?mode=exam&exam=1&lang=${cfgLang}&shuffle=0${selected ? `&n=${selected}&shablon=${selected}` : ''}`);
   };
 
   return (
@@ -93,7 +93,7 @@ export default function Shablon() {
           <h1 className="wl-h1">Shablon testlar (Imtihon)</h1>
           <div className="wl-grid">
             {Array.from({ length: COUNT }, (_, i) => i + 1).map((n) => (
-              <div className="wl-card" key={n} onClick={() => { setSelected(n); setCfgLang(null); setShuffle(false); }}>
+              <div className="wl-card" key={n} onClick={() => { setSelected(n); setCfgLang(null); }}>
                 <button className={'wl-bm' + (saved.has(n) ? ' on' : '')} onClick={(e) => toggleSave(n, e)} title="Saqlash">
                   <Bookmark size={18} fill={saved.has(n) ? 'currentColor' : 'none'} />
                 </button>
@@ -135,10 +135,6 @@ export default function Shablon() {
                     <span className="cfg-lname"><Flag c={flag} />{label}</span>
                   </button>
                 ))}
-              </div>
-              <div className="cfg-shuffle">
-                <button className={'cfg-sh' + (shuffle ? ' on' : '')} onClick={() => setShuffle(true)}>Variantlar aralashsin</button>
-                <button className={'cfg-sh' + (!shuffle ? ' on' : '')} onClick={() => setShuffle(false)}>Variantlar aralashmasin</button>
               </div>
               <button className="cfg-review" disabled={!cfgLang} onClick={start}>
                 <span className="cfg-num">‹</span>

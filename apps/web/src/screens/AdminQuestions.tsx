@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Menu, Search, Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, Upload } from 'lucide-react';
-import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
+import { adminApi, hasAdmin, ensureAdminAuto, clearAdmin } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
@@ -16,6 +16,7 @@ export default function AdminQuestions() {
   const [list, setList] = useState<any[]>([]);
   const [q, setQ] = useState('');
   const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
   const [sel, setSel] = useState<number | null>(() => {
     const s = sp.get('shablon'); // ?shablon=N bilan kelsa — o'sha shablon ochiladi
     return s !== null && /^\d+$/.test(s) ? Number(s) : null;
@@ -23,7 +24,23 @@ export default function AdminQuestions() {
 
   const load = () => {
     setLoading(true);
-    adminApi.questions(q).then(setList).catch(() => {}).finally(() => setLoading(false));
+    setErr('');
+    adminApi
+      .questions(q)
+      .then(setList)
+      .catch((e: any) => {
+        // Token eskirgan/yaroqsiz bo'lsa — ro'yxatni "bo'sh" ko'rsatib qo'ymaymiz,
+        // tokenni tozalab qayta kirish formasini chiqaramiz.
+        if (e?.status === 401 || e?.status === 403) {
+          clearAdmin();
+          setAuthed(false);
+          setList([]);
+          setErr('Sessiya muddati tugagan. Qaytadan kiring.');
+        } else {
+          setErr(e?.message || 'Savollarni yuklab bo‘lmadi');
+        }
+      })
+      .finally(() => setLoading(false));
   };
   useEffect(() => {
     if (!authed) ensureAdminAuto().then((ok) => ok && setAuthed(true));
@@ -75,6 +92,7 @@ export default function AdminQuestions() {
         </header>
 
         <div className="db-content">
+          {err && <div className="adm-err">{err}</div>}
           {!authed ? (
             <AdminLogin onLogin={() => setAuthed(true)} />
           ) : sel == null ? (
@@ -93,6 +111,9 @@ export default function AdminQuestions() {
               </div>
 
               {loading && <div className="adm-empty">Yuklanmoqda…</div>}
+              {!loading && !err && list.length === 0 && (
+                <div className="adm-empty">Savollar topilmadi.</div>
+              )}
               <div className="adm-shab-grid">
                 {Array.from({ length: SHABLON_COUNT }, (_, i) => i + 1).map((n) => {
                   const c = counts.get(n) || 0;

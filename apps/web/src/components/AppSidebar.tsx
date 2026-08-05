@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { SAVOLLAR_PUBLIC } from '../api';
+import { SAVOLLAR_PUBLIC, hasAdmin, wasAdmin } from '../api';
 import LangTheme from './LangTheme';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
@@ -48,8 +48,9 @@ interface Props {
 export default function AppSidebar({ active, open = false, onClose, wrong = 0 }: Props) {
   const nav = useNavigate();
   const go = (to: string) => { onClose?.(); nav(to); };
-  // Admin login qilgan bo'lsa (main + admin bir domenda — localStorage umumiy) — savol boshqaruvi ko'rinadi
-  const isAdmin = typeof window !== 'undefined' && !!localStorage.getItem('yhq_admin_token');
+  // Admin login qilgan bo'lsa (main + admin bir domenda — localStorage umumiy) — savol boshqaruvi ko'rinadi.
+  // wasAdmin(): token eskirgan bo'lsa ham havola qoladi, aks holda qayta kirish yo'li yo'qoladi.
+  const isAdmin = typeof window !== 'undefined' && (hasAdmin() || wasAdmin());
   // FAQAT ADMIN uchun. Oddiy (ro'yxatdan o'tgan) foydalanuvchi "Savollar" bo'limini
   // ham, unga olib boradigan hech qanday tugmani ham ko'rmaydi.
   const showSavollar = isAdmin || SAVOLLAR_PUBLIC;

@@ -6,7 +6,7 @@ import {
   Search, Bell, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
   LogOut, User, Shuffle,
 } from 'lucide-react';
-import { api, clearToken } from '../api';
+import { api, clearToken, forgetAdmin } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
@@ -51,7 +51,7 @@ export default function Dashboard() {
                   <div className="db-umenu-ov" onClick={() => setUmenu(false)} />
                   <div className="db-umenu">
                     <button onClick={() => { setUmenu(false); nav('/profil'); }}><User size={15} /> Profil</button>
-                    <button className="danger" onClick={() => { clearToken(); localStorage.removeItem('yhq_entered'); window.location.href = '/'; }}><LogOut size={15} /> Chiqish</button>
+                    <button className="danger" onClick={() => { clearToken(); forgetAdmin(); localStorage.removeItem('yhq_entered'); window.location.href = '/'; }}><LogOut size={15} /> Chiqish</button>
                   </div>
                 </>
               )}

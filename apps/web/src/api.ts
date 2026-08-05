@@ -60,17 +60,34 @@ export const api = {
 // o'zgartirishi mumkin edi. Endi admin panelga faqat haqiqiy parol bilan kiriladi.
 export const SAVOLLAR_PUBLIC = false;
 
+// "Bu brauzerda admin kirgan" belgisi. Token 30 kunda eskiradi; eskirganda uni
+// o'chiramiz, lekin menyudagi "Savollar" havolasi shu belgi bo'yicha turaveradi.
+// Aks holda havola yo'qoladi va admin panelga qaytishning UI yo'li qolmaydi
+// (menyudagi "Admin kirish" tugmasi f39e293 da ataylab olib tashlangan).
+// Belgi hech qanday huquq bermaydi — API baribir haqiqiy JWT talab qiladi.
+const ADMIN_SEEN = 'yhq_admin_seen';
+
 export function adminToken() {
   return localStorage.getItem('yhq_admin_token') || '';
 }
 export function hasAdmin() {
   return !!adminToken();
 }
+export function wasAdmin() {
+  return localStorage.getItem(ADMIN_SEEN) === '1';
+}
 export function setAdminToken(t: string) {
   localStorage.setItem('yhq_admin_token', t);
+  try { localStorage.setItem(ADMIN_SEEN, '1'); } catch { /* ignore */ }
 }
+/** Token eskirdi — o'chiramiz, lekin havola qolsin (qayta kira olishi uchun) */
 export function clearAdmin() {
   localStorage.removeItem('yhq_admin_token');
+}
+/** To'liq chiqish — havola ham yo'qoladi */
+export function forgetAdmin() {
+  clearAdmin();
+  localStorage.removeItem(ADMIN_SEEN);
 }
 
 async function areq(path: string, opts: RequestInit = {}, _retried = false): Promise<any> {

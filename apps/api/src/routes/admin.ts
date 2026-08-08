@@ -3,7 +3,7 @@ import multer from 'multer';
 import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import { prisma } from '../prisma';
-import { signAdminToken, requireAdmin } from '../auth';
+import { signAdminToken, requireAdmin, requireOwner } from '../auth';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
@@ -50,9 +50,10 @@ adminRouter.post(
 
 adminRouter.use(requireAdmin);
 
-/* ---------- Foydalanuvchilar va rollar ---------- */
+/* ---------- Foydalanuvchilar va rollar (FAQAT owner) ---------- */
 
-const ROLES = ['admin', 'student'] as const;
+// owner — to'liq huquq, admin — faqat savollar, user — oddiy talaba
+const ROLES = ['owner', 'admin', 'user'] as const;
 const userSelect = {
   id: true, firstName: true, phone: true, tgId: true, role: true, createdAt: true,
   // passwordHash ATAYLAB yo'q — parol hashi hech qachon javobga tushmasin
@@ -61,6 +62,7 @@ const userSelect = {
 // Ro'yxat (ism yoki telefon bo'yicha qidiruv)
 adminRouter.get(
   '/users',
+  requireOwner,
   ah(async (req, res) => {
     const q = String(req.query.q || '').trim();
     const where = q
@@ -82,9 +84,10 @@ adminRouter.get(
   })
 );
 
-// Role almashtirish
+// Role almashtirish — faqat owner
 adminRouter.patch(
   '/users/:id/role',
+  requireOwner,
   ah(async (req, res) => {
     const id = Number(req.params.id);
     const role = String(req.body?.role || '');
@@ -100,16 +103,16 @@ adminRouter.patch(
       return res.status(400).json({ error: 'O‘z rolingizni o‘zgartira olmaysiz' });
     }
 
-    // 2) Mehmon (qurilma bo'yicha vaqtinchalik hisob) admin bo'la olmaydi
-    if (role === 'admin' && target.tgId?.startsWith('guest-')) {
-      return res.status(400).json({ error: 'Mehmon hisobini admin qilib bo‘lmaydi' });
+    // 2) Mehmon (qurilma bo'yicha vaqtinchalik hisob) huquq ololmaydi
+    if (role !== 'user' && target.tgId?.startsWith('guest-')) {
+      return res.status(400).json({ error: 'Mehmon hisobiga huquq berib bo‘lmaydi' });
     }
 
-    // 3) Oxirgi adminni tushirib bo'lmaydi — tizimsiz qolib ketmaslik uchun
-    if (role === 'student' && target.role === 'admin') {
-      const adminlar = await prisma.user.count({ where: { role: 'admin' } });
-      if (adminlar <= 1) {
-        return res.status(400).json({ error: 'Bu oxirgi admin — rolini olib bo‘lmaydi' });
+    // 3) Oxirgi owner'ni tushirib bo'lmaydi — tizim egasiz qolib ketmasin
+    if (target.role === 'owner' && role !== 'owner') {
+      const ownerlar = await prisma.user.count({ where: { role: 'owner' } });
+      if (ownerlar <= 1) {
+        return res.status(400).json({ error: 'Bu oxirgi Owner — rolini olib bo‘lmaydi' });
       }
     }
 

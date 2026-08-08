@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SAVOLLAR_PUBLIC, hasAdmin, isAdminRole, ADMIN_CHANGED } from '../api';
+import { SAVOLLAR_PUBLIC, hasAdmin, canManageQuestions, isOwner, ADMIN_CHANGED } from '../api';
 import LangTheme from './LangTheme';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
@@ -54,9 +54,15 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
   // (/me javobidan keladi); hasAdmin() esa eski AdminUser tokeni bilan
   // kirganlar uchun zaxira. Avval localStorage faqat render paytida bir marta
   // o'qilardi — kirgandan keyin menyu yangilanmasdi.
-  const [isAdmin, setIsAdmin] = useState(() => isAdminRole() || hasAdmin());
+  // Savollar — owner va admin uchun; rollarni tayinlash — faqat owner uchun.
+  // hasAdmin(): eski AdminUser tokeni (zaxira hisob) owner darajasida hisoblanadi.
+  const [isAdmin, setIsAdmin] = useState(() => canManageQuestions() || hasAdmin());
+  const [owner, setOwner] = useState(() => isOwner() || hasAdmin());
   useEffect(() => {
-    const sync = () => setIsAdmin(isAdminRole() || hasAdmin());
+    const sync = () => {
+      setIsAdmin(canManageQuestions() || hasAdmin());
+      setOwner(isOwner() || hasAdmin());
+    };
     sync();
     window.addEventListener(ADMIN_CHANGED, sync); // shu tabda kirish/chiqish
     window.addEventListener('storage', sync);     // boshqa tab
@@ -105,9 +111,11 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
             <button className={'db-navi' + (active === '/savollar' ? ' active' : '')} onClick={() => go('/savollar')}>
               <ClipboardList size={18} /> <span>Savollar</span>
             </button>
-            <button className={'db-navi' + (active === '/foydalanuvchilar' ? ' active' : '')} onClick={() => go('/foydalanuvchilar')}>
-              <ShieldCheck size={18} /> <span>Foydalanuvchilar</span>
-            </button>
+            {owner && (
+              <button className={'db-navi' + (active === '/foydalanuvchilar' ? ' active' : '')} onClick={() => go('/foydalanuvchilar')}>
+                <ShieldCheck size={18} /> <span>Foydalanuvchilar</span>
+              </button>
+            )}
           </>
         )}
         <div className="db-side-bottom">

@@ -59,46 +59,59 @@ export function requireUser(req: Request, res: Response, next: NextFunction) {
 }
 
 /**
- * Admin huquqini tekshiradi. Ikkita yo'l bilan o'tish mumkin:
- *   1) kind='admin'  — eski AdminUser tokeni (zaxira yo'l, /savollar formasi)
- *   2) kind='user'   — oddiy foydalanuvchi tokeni, agar User.role === 'admin' bo'lsa
+ * Rollar:
+ *   owner — to'liq huquq: savollar + boshqa foydalanuvchilarga rol tayinlash
+ *   admin — faqat savollarni ko'rish/qo'shish/tahrirlash
+ *   user  — oddiy talaba, admin bo'limlariga umuman kira olmaydi
  *
- * MUHIM: role tokendan EMAS, har safar bazadan o'qiladi. Shunda adminlik olib
- * tashlanganda eski token darhol kuchini yo'qotadi — 30 kunlik muddat kutilmaydi.
+ * Ruxsat ikki yo'l bilan olinadi:
+ *   1) kind='admin' — eski AdminUser tokeni. Bu zaxira ("break-glass") hisob,
+ *      shuning uchun owner darajasidagi huquq beradi.
+ *   2) kind='user'  — oddiy foydalanuvchi tokeni; roli bazadan o'qiladi.
+ *
+ * MUHIM: role tokendan EMAS, HAR SAFAR bazadan o'qiladi. Shunda rol olib
+ * tashlanganda eski token darhol kuchini yo'qotadi — 30 kun kutilmaydi.
  */
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  const header = req.headers.authorization || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-  if (!token) return res.status(401).json({ error: 'Token yo‘q' });
+function checkRole(ruxsat: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const header = req.headers.authorization || '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+    if (!token) return res.status(401).json({ error: 'Token yo‘q' });
 
-  let payload: any;
-  try {
-    payload = jwt.verify(token, JWT_SECRET);
-  } catch {
-    return res.status(401).json({ error: 'Token yaroqsiz' });
-  }
+    let payload: any;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return res.status(401).json({ error: 'Token yaroqsiz' });
+    }
 
-  // 1) Eski admin tokeni
-  if (payload.kind === 'admin') {
-    (req as any).adminId = payload.adminId as number;
-    (req as any).adminRole = payload.role as string;
-    return next();
-  }
+    // Eski AdminUser tokeni — zaxira hisob, owner huquqi
+    if (payload.kind === 'admin') {
+      (req as any).adminId = payload.adminId as number;
+      (req as any).adminRole = 'owner';
+      return next();
+    }
 
-  // 2) Foydalanuvchi tokeni — roli bazadan tekshiriladi
-  if (payload.kind === 'user') {
-    const userId = payload.userId as number;
-    prisma.user
-      .findUnique({ where: { id: userId }, select: { role: true } })
-      .then((u) => {
-        if (!u || u.role !== 'admin') return res.status(403).json({ error: 'Ruxsat yo‘q' });
-        (req as any).userId = userId;
-        (req as any).adminRole = 'admin';
-        next();
-      })
-      .catch(() => res.status(500).json({ error: 'Server xatosi' }));
-    return;
-  }
+    if (payload.kind === 'user') {
+      const userId = payload.userId as number;
+      prisma.user
+        .findUnique({ where: { id: userId }, select: { role: true } })
+        .then((u) => {
+          if (!u || !ruxsat.includes(u.role)) return res.status(403).json({ error: 'Ruxsat yo‘q' });
+          (req as any).userId = userId;
+          (req as any).adminRole = u.role;
+          next();
+        })
+        .catch(() => res.status(500).json({ error: 'Server xatosi' }));
+      return;
+    }
 
-  return res.status(401).json({ error: 'Admin emas' });
+    return res.status(401).json({ error: 'Ruxsat yo‘q' });
+  };
 }
+
+/** Savollar bo'limi — owner ham, admin ham kiradi */
+export const requireAdmin = checkRole(['owner', 'admin']);
+
+/** Rollarni tayinlash — FAQAT owner */
+export const requireOwner = checkRole(['owner']);

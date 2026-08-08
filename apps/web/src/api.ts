@@ -22,14 +22,31 @@ export function clearToken() {
 /**
  * Foydalanuvchi roli — /me javobidan olinadi va menyuni ko'rsatish uchun
  * keshlanadi. Bu FAQAT UI keshi: huquq bermaydi, API har so'rovda role'ni
- * bazadan tekshiradi (auth.ts -> requireAdmin).
+ * bazadan tekshiradi (auth.ts -> checkRole).
+ *
+ *   owner — to'liq huquq: savollar + rollarni tayinlash
+ *   admin — faqat savollarni ko'rish/qo'shish/tahrirlash
+ *   user  — oddiy talaba
  */
+export type Role = 'owner' | 'admin' | 'user';
+export const ROLE_LABEL: Record<Role, string> = { owner: 'Owner', admin: 'Admin', user: 'Talaba' };
+
 const ROLE_KEY = 'yhq_role';
-export function isAdminRole() {
-  return localStorage.getItem(ROLE_KEY) === 'admin';
+export function userRole(): Role {
+  const r = localStorage.getItem(ROLE_KEY);
+  return r === 'owner' || r === 'admin' ? r : 'user';
+}
+/** Rollarni tayinlay oladimi — faqat owner */
+export function isOwner() {
+  return userRole() === 'owner';
+}
+/** Savollar bo'limiga kira oladimi — owner yoki admin */
+export function canManageQuestions() {
+  const r = userRole();
+  return r === 'owner' || r === 'admin';
 }
 function rememberRole(role: unknown) {
-  const r = role === 'admin' ? 'admin' : 'student';
+  const r: Role = role === 'owner' || role === 'admin' ? role : 'user';
   if (localStorage.getItem(ROLE_KEY) === r) return;
   try { localStorage.setItem(ROLE_KEY, r); } catch { /* ignore */ }
   notifyAdminChanged(); // menyu darhol yangilansin
@@ -209,7 +226,7 @@ export const adminApi = {
   /* ---- Foydalanuvchilar va rollar ---- */
   users: (q = ''): Promise<{ users: AdminUserRow[]; meId: number | null }> =>
     areq('/admin/users' + (q ? '?q=' + encodeURIComponent(q) : '')),
-  setUserRole: (id: number, role: 'admin' | 'student'): Promise<{ user: AdminUserRow }> =>
+  setUserRole: (id: number, role: Role): Promise<{ user: AdminUserRow }> =>
     areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
 };
 

@@ -5,16 +5,25 @@
  * "tovuqmi-tuxummi" holati. Shu skript bilan birinchi admin belgilanadi,
  * keyingilarini u ilova ichidagi "Foydalanuvchilar" bo'limidan qo'yadi.
  *
+ * Rollar:
+ *   owner — to'liq huquq: savollar + boshqalarga rol tayinlash
+ *   admin — faqat savollarni ko'rish/qo'shish/tahrirlash
+ *   user  — oddiy talaba (standart)
+ *
  * Ishlatish:
- *   npx tsx scripts/set-user-role.ts +998990068452 admin
- *   npx tsx scripts/set-user-role.ts +998990068452 student
- *   npx tsx scripts/set-user-role.ts --list          # adminlarni ko'rish
+ *   npx tsx scripts/set-user-role.ts +998990068452 owner
+ *   npx tsx scripts/set-user-role.ts +998901234567 admin
+ *   npx tsx scripts/set-user-role.ts +998901234567 user
+ *   npx tsx scripts/set-user-role.ts --list          # huquqli hisoblarni ko'rish
  */
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const ROLES = ['admin', 'student'];
+// owner — to'liq huquq (savollar + rollarni tayinlash)
+// admin — faqat savollarni tahrirlash
+// user  — oddiy talaba
+const ROLES = ['owner', 'admin', 'user'];
 
 // Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi (user.ts dagi bilan bir xil)
 function normPhone(raw: string): string | null {
@@ -28,13 +37,16 @@ async function main() {
   const args = process.argv.slice(2);
 
   if (args.includes('--list')) {
-    const adminlar = await prisma.user.findMany({
-      where: { role: 'admin' },
-      select: { id: true, firstName: true, phone: true },
-      orderBy: { id: 'asc' },
+    const huquqli = await prisma.user.findMany({
+      where: { role: { in: ['owner', 'admin'] } },
+      select: { id: true, firstName: true, phone: true, role: true },
+      orderBy: [{ role: 'asc' }, { id: 'asc' }],
     });
-    console.log(`Adminlar: ${adminlar.length}`);
-    for (const a of adminlar) console.log(`  id=${a.id}  ${a.firstName}  ${a.phone || '(telefonsiz)'}`);
+    const talabalar = await prisma.user.count({ where: { role: 'user' } });
+    console.log(`Huquqli hisoblar: ${huquqli.length}  |  Talabalar: ${talabalar}`);
+    for (const a of huquqli) {
+      console.log(`  ${a.role.padEnd(5)}  id=${a.id}  ${a.firstName}  ${a.phone || '(telefonsiz)'}`);
+    }
     return;
   }
 
@@ -64,11 +76,11 @@ async function main() {
     return;
   }
 
-  // Oxirgi adminni tushirib qo'ymaslik (endpointdagi cheklovning aynan o'zi)
-  if (role === 'student' && user.role === 'admin') {
-    const adminlar = await prisma.user.count({ where: { role: 'admin' } });
-    if (adminlar <= 1) {
-      console.error('Bu oxirgi admin — rolini olib bo‘lmaydi.');
+  // Oxirgi owner'ni tushirib qo'ymaslik (endpointdagi cheklovning aynan o'zi)
+  if (user.role === 'owner' && role !== 'owner') {
+    const ownerlar = await prisma.user.count({ where: { role: 'owner' } });
+    if (ownerlar <= 1) {
+      console.error('Bu oxirgi Owner — rolini olib bo‘lmaydi.');
       process.exitCode = 1;
       return;
     }

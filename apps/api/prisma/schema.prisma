@@ -97,10 +97,13 @@ model User {
   phone        String?      @unique
   passwordHash String?
   firstName    String       @default("Foydalanuvchi")
-  // student | admin — admin panelga kirish huquqi shu yerdan aniqlanadi.
+  // owner | admin | user
+  //   owner — to'liq huquq: savollar + rollarni tayinlash
+  //   admin — faqat savollarni ko'rish/qo'shish/tahrirlash
+  //   user  — oddiy talaba (standart)
   // PATCH /me bu maydonni QABUL QILMAYDI (huquq oshirishning oldini olish uchun);
-  // faqat /admin/users/:id/role orqali, boshqa admin tomonidan o'zgartiriladi.
-  role         String       @default("student")
+  // faqat /admin/users/:id/role orqali, FAQAT owner tomonidan o'zgartiriladi.
+  role         String       @default("user")
   avatarUrl  String?
   lang       String       @default("uz")
   alphabet   String       @default("lat") // lat | cyr

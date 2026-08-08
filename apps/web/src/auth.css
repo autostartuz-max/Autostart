@@ -42,6 +42,9 @@
 }
 .auth-inp::placeholder { color: #5b6a82; }
 .auth-inp:focus { border-color: #2f6fed; }
+/* Majburiy qatorlar: yulduzcha va to'ldirilmagan qatorni ajratib ko'rsatish */
+.auth-req { color: #ff8080; }
+.auth-inp.bad { border-color: #ff5050; background: rgba(255, 80, 80, .06); }
 .auth-err {
   margin-top: 12px;
   color: #ff8080;

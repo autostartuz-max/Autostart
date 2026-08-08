@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ChevronLeft, Menu, LogOut, ShieldCheck, ClipboardList, GraduationCap, ChevronRight,
+  ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap,
   CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare,
-  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark, Type, SignpostBig,
+  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark,
 } from 'lucide-react';
-import { api, clearToken, forgetAdmin, ROLE_LABEL, type Role } from '../api';
+import { api, ROLE_LABEL, type Role } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
@@ -13,8 +13,6 @@ const roleOf = (r?: string): Role => (r === 'owner' || r === 'admin' ? r : 'user
 const ROLE_IC: Record<Role, typeof ShieldCheck> = {
   owner: ShieldCheck, admin: ClipboardList, user: GraduationCap,
 };
-const ALIFBO: Record<string, string> = { lat: 'Lotin', cyr: 'Kirill' };
-
 const sana = (s?: string | null) => {
   if (!s) return '—';
   try { return new Date(s).toLocaleDateString('uz-UZ'); } catch { return '—'; }
@@ -28,23 +26,13 @@ export default function Profile() {
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const [me, setMe] = useState<any>(null);
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
   }, []);
 
-  // Foydalanuvchi o'zi o'zgartira oladigan sozlamalar (rol emas — u faqat Owner qo'lida)
-  const update = async (data: any) => {
-    setBusy(true);
-    try {
-      const r = await api.updateMe(data);
-      setMe((m: any) => (m ? { ...m, user: { ...m.user, ...r.user } } : m));
-    } finally {
-      setBusy(false);
-    }
-  };
-
+  // Sahifa faqat KO'RISH uchun: alifbo, toifa va rolni foydalanuvchi
+  // o'zgartira olmaydi — ularni Owner admin panelidan qo'yadi.
   const u = me?.user;
   const s = me?.stats;
   const r = roleOf(u?.role);
@@ -75,20 +63,6 @@ export default function Profile() {
                     <div className="ud-izoh">Mening sahifam</div>
                   </div>
                 </div>
-                <div className="adm-head-btns">
-                  <button
-                    className="adm-btn danger"
-                    onClick={() => {
-                      if (!window.confirm('Hisobdan chiqasizmi?')) return;
-                      clearToken();
-                      forgetAdmin();
-                      localStorage.removeItem('yhq_entered');
-                      window.location.href = '/';
-                    }}
-                  >
-                    <LogOut size={16} /> Chiqish
-                  </button>
-                </div>
               </div>
 
               <div className="adm-d-sec">Faollik</div>
@@ -110,55 +84,13 @@ export default function Profile() {
               </div>
 
               <div className="ud-card">
-                <div className="ud-card-h">Sozlamalar</div>
-                <div className="ud-grid">
-                  <div className="ud-row">
-                    <span className="ud-k"><Type size={16} /> Alifbo</span>
-                    <div className="ud-vwrap">
-                      <div className="ud-seg">
-                        {['lat', 'cyr'].map((a) => (
-                          <button
-                            key={a}
-                            type="button"
-                            className={'ud-seg-b' + (u.alphabet === a ? ' on' : '')}
-                            disabled={busy}
-                            onClick={() => update({ alphabet: a })}
-                          >
-                            {ALIFBO[a]}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="ud-row">
-                    <span className="ud-k"><Bookmark size={16} /> Toifa</span>
-                    <div className="ud-vwrap">
-                      <div className="ud-seg">
-                        {['B', 'C', 'D'].map((c) => (
-                          <button
-                            key={c}
-                            type="button"
-                            className={'ud-seg-b' + (u.category === c ? ' on' : '')}
-                            disabled={busy}
-                            onClick={() => update({ category: c })}
-                          >
-                            {c}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="ud-card" style={{ marginTop: 16 }}>
                 <div className="ud-card-h">Hisob ma’lumotlari</div>
                 <div className="ud-grid">
                   {[
                     { Ic: User, k: 'Ism', v: u.firstName || '—' },
                     { Ic: Mail, k: 'Pochta', v: u.email || '—' },
                     { Ic: Phone, k: 'Telefon', v: u.phone || '—' },
+                    { Ic: Bookmark, k: 'Toifa', v: u.category || '—' },
                     { Ic: CalendarDays, k: 'Ro‘yxatdan o‘tgan', v: sanaVaqt(u.createdAt) },
                     { Ic: CalendarCheck, k: 'Imtihon sanasi', v: sana(u.examDate) },
                     { Ic: FileText, k: 'Saqlangan savollar', v: (s.bookmarks ?? 0) + ' ta' },
@@ -170,11 +102,6 @@ export default function Profile() {
                   ))}
                 </div>
               </div>
-
-              <button className="pf-link" onClick={() => nav('/belgilar')}>
-                <span><SignpostBig size={17} /> Yo‘l belgilari</span>
-                <ChevronRight size={17} />
-              </button>
             </>
           )}
         </div>

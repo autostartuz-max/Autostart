@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap, Pencil, Trash2, KeyRound,
-  CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare, X, Check,
+  CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare, X, Check, ChevronDown,
   User, Phone, Mail, Lock, CalendarDays, CalendarCheck, Bookmark, Globe, Type, TrendingUp, Clock,
 } from 'lucide-react';
 import {
@@ -45,6 +45,35 @@ const sanaVaqt = (s: string | null) => {
   try { return new Date(s).toLocaleString('uz-UZ'); } catch { return '—'; }
 };
 const roleOf = (r: string): Role => (r === 'owner' || r === 'admin' ? r : 'user');
+
+/**
+ * Yonma-yon tugmalar (segment). Variantlar 2-3 ta bo'lgani uchun ochiladigan
+ * ro'yxat shart emas — u pastdagi qatorlarni yopib qo'yardi va brauzerning
+ * o'z oynasi qorong'i mavzuga mos kelmasdi. Bu yerda hammasi bir qarashda.
+ */
+function Tanlov({
+  value, options, bad, onChange,
+}: {
+  value: string;
+  options: { v: string; t: string }[];
+  bad?: boolean;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className={'ud-seg' + (bad ? ' bad' : '')}>
+      {options.map((o) => (
+        <button
+          type="button"
+          key={o.v}
+          className={'ud-seg-b' + (o.v === value ? ' on' : '')}
+          onClick={() => onChange(o.v)}
+        >
+          {o.t}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // Maydon ostida turadigan namuna — qanday yozish kerakligini ko'rsatadi
 const NAMUNA: Record<string, string> = {
@@ -386,21 +415,26 @@ export default function AdminUserDetailScreen() {
                               onChange={(e) => { setFParol(e.target.value); setXato(null); }} />
                           )}
                           {x.edit === 'toifa' && (
-                            <select className={inpCls('toifa')} value={fToifa}
-                              onChange={(e) => { setFToifa(e.target.value); setXato(null); }}>
-                              {/* Foydalanuvchining hozirgi toifasi ro'yxatda bo'lmasa ham yo'qolmasin */}
-                              {[...new Set([...(toifalar.length ? toifalar : ['B', 'C']), fToifa])].map((c) => (
-                                <option key={c} value={c}>{c}</option>
-                              ))}
-                            </select>
+                            <Tanlov
+                              value={fToifa}
+                              bad={xato?.f === 'toifa'}
+                              /* Foydalanuvchining hozirgi toifasi ro'yxatda bo'lmasa ham yo'qolmasin */
+                              options={[...new Set([...(toifalar.length ? toifalar : ['B', 'C']), fToifa])]
+                                .map((c) => ({ v: c, t: c }))}
+                              onChange={(v) => { setFToifa(v); setXato(null); }}
+                            />
                           )}
                           {x.edit === 'til' && (
-                            <select className={inpCls('til')} value={fTil}
-                              onChange={(e) => { setFTil(e.target.value as Til); setXato(null); }}>
-                              <option value="uz">O‘zbek</option>
-                              <option value="rus">Rus</option>
-                              <option value="cyr">Kirill</option>
-                            </select>
+                            <Tanlov
+                              value={fTil}
+                              bad={xato?.f === 'til'}
+                              options={[
+                                { v: 'uz', t: 'O‘zbek' },
+                                { v: 'rus', t: 'Rus' },
+                                { v: 'cyr', t: 'Kirill' },
+                              ]}
+                              onChange={(v) => { setFTil(v as Til); setXato(null); }}
+                            />
                           )}
                           {x.edit === 'imtihon' && (
                             <input className={inpCls('imtihon')} type="date" value={fImtihon}

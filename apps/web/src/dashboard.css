@@ -242,9 +242,6 @@
 .adm-badge.owner { background: rgba(124, 108, 245, .18); color: #b3a6ff; }
 .adm-badge.admin { background: rgba(59, 130, 246, .16); color: #7fb0ff; }
 .adm-badge.user { background: rgba(148, 163, 184, .14); color: #a9b6cc; }
-.adm-role-sel { flex-shrink: 0; height: 36px; padding: 0 10px; border-radius: 9px; background: var(--db-card2);
-  border: 1px solid var(--db-border); color: var(--db-text); font-size: 13px; font-weight: 600; cursor: pointer; }
-.adm-role-sel:disabled { opacity: .5; cursor: default; }
 .adm-roles-legend { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .adm-rl { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--db-muted); }
 .adm-rl b { color: var(--db-text); }
@@ -330,19 +327,6 @@
   .ud-row { flex-direction: column; align-items: flex-start; gap: 4px; }
   .ud-k { width: auto; }
 }
-/* Rolni o'zgartirish tugmasi va ochiladigan menyusi */
-.adm-rolebox { position: relative; }
-.adm-rolebg { position: fixed; inset: 0; z-index: 40; }
-.adm-rolemenu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 50; width: 290px;
-  background: var(--db-card); border: 1px solid var(--db-border); border-radius: 12px; padding: 6px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, .5); display: flex; flex-direction: column; gap: 2px; }
-.adm-rolemi { display: flex; flex-direction: column; gap: 2px; text-align: left; background: none; border: none;
-  border-radius: 9px; padding: 9px 11px; cursor: pointer; }
-.adm-rolemi:hover:not(:disabled) { background: var(--db-card2); }
-.adm-rolemi:disabled { opacity: .45; cursor: default; }
-.adm-rolemi.on { background: rgba(124, 108, 245, .16); }
-.adm-rolemi b { color: var(--db-text); font-size: 13.5px; }
-.adm-rolemi span { color: var(--db-muted); font-size: 11.5px; line-height: 1.4; }
 /* Foydalanuvchi qo'shish/tahrirlash formasi */
 .adm-form { max-width: 520px; display: flex; flex-direction: column; }
 .adm-f-lab { font-size: 13px; color: var(--db-muted); font-weight: 600; margin: 14px 0 6px; }

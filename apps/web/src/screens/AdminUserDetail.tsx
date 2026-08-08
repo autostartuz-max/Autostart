@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap, Pencil, Trash2, KeyRound,
   CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare, X, Check, ChevronDown,
-  User, Phone, Mail, Lock, CalendarDays, CalendarCheck, Bookmark, Globe, Type, TrendingUp, Clock,
+  User, Phone, Mail, Lock, CalendarDays, CalendarCheck, Bookmark, TrendingUp, Clock,
 } from 'lucide-react';
 import {
   adminApi, hasAdmin, isOwner, clearAdmin, ROLE_LABEL,
@@ -22,19 +22,8 @@ const ROLE_IZOH: Record<Role, string> = {
 const ROLE_IC: Record<Role, typeof ShieldCheck> = {
   owner: ShieldCheck, admin: ClipboardList, user: GraduationCap,
 };
-/**
- * Ilovada til uchta: O'zbek (lotin), Kirill, Rus. Bazada esa ikki ustunga
- * bo'lingan — lang (uz|ru) va alphabet (lat|cyr). Ekranda ular bitta "Til"
- * qatori sifatida ko'rsatiladi, saqlashda yana ikkiga ajratiladi.
- */
-type Til = 'uz' | 'cyr' | 'rus';
-const TIL_NOM: Record<Til, string> = { uz: 'O‘zbek', cyr: 'Kirill', rus: 'Rus' };
-const tilniAniqla = (lang?: string, alphabet?: string): Til =>
-  lang === 'ru' ? 'rus' : alphabet === 'cyr' ? 'cyr' : 'uz';
-const tilniYoy = (t: Til) =>
-  t === 'rus' ? { lang: 'ru', alphabet: 'lat' }
-    : t === 'cyr' ? { lang: 'uz', alphabet: 'cyr' }
-      : { lang: 'uz', alphabet: 'lat' };
+// Til va alifboni foydalanuvchining o'zi profilida tanlaydi — admin panelida
+// ular ko'rsatilmaydi.
 
 const sana = (s: string | null) => {
   if (!s) return '—';
@@ -96,7 +85,6 @@ export default function AdminUserDetailScreen() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [meId, setMeId] = useState<number | null>(null);
-  const [rolOchiq, setRolOchiq] = useState(false);
 
   // Inline tahrirlash — boshqa sahifaga o'tmasdan, shu yerning o'zida
   const [tahrir, setTahrir] = useState(false);
@@ -105,7 +93,7 @@ export default function AdminUserDetailScreen() {
   const [fPochta, setFPochta] = useState('');
   const [fParol, setFParol] = useState('');
   const [fToifa, setFToifa] = useState('B');
-  const [fTil, setFTil] = useState<Til>('uz');
+  const [fRole, setFRole] = useState<Role>('user');
   const [fImtihon, setFImtihon] = useState('');
   const [toifalar, setToifalar] = useState<string[]>([]);
   // Qaysi maydonda xato va nima deyish kerak — xabar o'sha qator ostida chiqadi
@@ -124,7 +112,7 @@ export default function AdminUserDetailScreen() {
     setFPochta(data.user.email || '');
     setFParol('');
     setFToifa(data.user.category || 'B');
-    setFTil(tilniAniqla(data.user.lang, data.user.alphabet));
+    setFRole(roleOf(data.user.role));
     setFImtihon(sanaInput(data.user.examDate));
     setErr('');
     setTahrir(true);
@@ -167,10 +155,15 @@ export default function AdminUserDetailScreen() {
         phone: fTel.trim(),
         email: fPochta.trim(),
         category: fToifa,
-        ...tilniYoy(fTil), // bitta tanlov -> lang + alphabet
         examDate: fImtihon,
         ...(fParol ? { password: fParol } : {}),
       });
+      // Role alohida endpoint orqali (o'z cheklovlari bilan: oxirgi Owner,
+      // o'z rolini o'zgartirish, mehmon hisobi)
+      if (fRole !== roleOf(data.user.role)) {
+        const rr = await adminApi.setUserRole(data.user.id, fRole);
+        r.user.role = rr.user.role;
+      }
       setData((d) => (d ? { ...d, user: { ...d.user, ...r.user } } : d));
       setTahrir(false);
       setFParol('');
@@ -179,7 +172,8 @@ export default function AdminUserDetailScreen() {
       const m = String(e?.message || 'Saqlab bo‘lmadi');
       const f = /pochta/i.test(m) ? 'pochta' : /telefon|raqam/i.test(m) ? 'tel'
         : /parol/i.test(m) ? 'parol' : /ism/i.test(m) ? 'ism'
-          : /toifa/i.test(m) ? 'toifa' : /sana/i.test(m) ? 'imtihon' : '';
+          : /toifa/i.test(m) ? 'toifa' : /sana/i.test(m) ? 'imtihon'
+            : /role|owner|mehmon/i.test(m) ? 'role' : '';
       if (f) setXato({ f, m });
       else setErr(m);
     } finally {
@@ -220,24 +214,6 @@ export default function AdminUserDetailScreen() {
     if (data && sp.get('tahrir') === '1' && !tahrir) tahrirBoshla();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
-
-  const almashtir = async (yangi: Role) => {
-    if (!data) return;
-    const eski = roleOf(data.user.role);
-    if (yangi === eski) return;
-    const savol = `${data.user.firstName} uchun rol "${ROLE_LABEL[yangi]}" qilinsinmi?\n\n${ROLE_LABEL[yangi]} — ${ROLE_IZOH[yangi]}.`;
-    if (!window.confirm(savol)) return;
-    setBusy(true);
-    setErr('');
-    try {
-      const r = await adminApi.setUserRole(data.user.id, yangi);
-      setData((d) => (d ? { ...d, user: { ...d.user, role: r.user.role } } : d));
-    } catch (e: any) {
-      setErr(e?.message || 'Rolni o‘zgartirib bo‘lmadi');
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const ochir = async () => {
     if (!data) return;
@@ -297,34 +273,6 @@ export default function AdminUserDetailScreen() {
                   </div>
                 </div>
                 <div className="adm-head-btns">
-                  <div className="adm-rolebox">
-                    <button
-                      className="adm-btn sec"
-                      disabled={busy || ozi}
-                      title={ozi ? 'O‘z rolingizni o‘zgartira olmaysiz' : 'Rolni o‘zgartirish'}
-                      onClick={() => setRolOchiq((v) => !v)}
-                    >
-                      <ShieldCheck size={16} /> Rolni o‘zgartirish
-                    </button>
-                    {rolOchiq && (
-                      <>
-                        <div className="adm-rolebg" onClick={() => setRolOchiq(false)} />
-                        <div className="adm-rolemenu">
-                          {ROLES.map((x) => (
-                            <button
-                              key={x}
-                              className={'adm-rolemi' + (x === r ? ' on' : '')}
-                              disabled={mehmon && x !== 'user'}
-                              onClick={() => { setRolOchiq(false); almashtir(x); }}
-                            >
-                              <b>{ROLE_LABEL[x]}</b>
-                              <span>{ROLE_IZOH[x]}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
                   {tahrir ? (
                     <>
                       <button className="adm-btn sec" onClick={tahrirBekor} disabled={busy}>
@@ -377,12 +325,12 @@ export default function AdminUserDetailScreen() {
                 <div className="ud-grid">
                   {[
                     { Ic: User, k: 'Ism', v: u.firstName, edit: 'ism' },
-                    { Ic: Phone, k: 'Telefon', v: u.phone || '—', link: u.phone ? 'tel:' + u.phone : '', edit: 'tel' },
                     { Ic: Mail, k: 'Pochta', v: u.email || '—', link: u.email ? 'mailto:' + u.email : '', edit: 'pochta' },
                     { Ic: Lock, k: 'Parol', parol: true, edit: 'parol' },
-                    { Ic: CalendarDays, k: 'Ro‘yxatdan o‘tgan', v: sanaVaqt(u.createdAt) },
+                    { Ic: Phone, k: 'Telefon', v: u.phone || '—', link: u.phone ? 'tel:' + u.phone : '', edit: 'tel' },
+                    { Ic: ShieldCheck, k: 'Role', v: ROLE_LABEL[r], edit: 'role' },
                     { Ic: Bookmark, k: 'Toifa', v: u.category || '—', edit: 'toifa' },
-                    { Ic: Globe, k: 'Til', v: TIL_NOM[tilniAniqla(u.lang, u.alphabet)], edit: 'til' },
+                    { Ic: CalendarDays, k: 'Ro‘yxatdan o‘tgan', v: sanaVaqt(u.createdAt) },
                     { Ic: CalendarCheck, k: 'Imtihon sanasi', v: sana(u.examDate), edit: 'imtihon' },
                     { Ic: TrendingUp, k: 'Birinchi faollik', v: sanaVaqt(s.firstActive) },
                     { Ic: Clock, k: 'Oxirgi faollik', v: sanaVaqt(s.lastActive) },
@@ -424,17 +372,20 @@ export default function AdminUserDetailScreen() {
                               onChange={(v) => { setFToifa(v); setXato(null); }}
                             />
                           )}
-                          {x.edit === 'til' && (
-                            <Tanlov
-                              value={fTil}
-                              bad={xato?.f === 'til'}
-                              options={[
-                                { v: 'uz', t: 'O‘zbek' },
-                                { v: 'rus', t: 'Rus' },
-                                { v: 'cyr', t: 'Kirill' },
-                              ]}
-                              onChange={(v) => { setFTil(v as Til); setXato(null); }}
-                            />
+                          {x.edit === 'role' && (
+                            ozi ? (
+                              <span className="ud-v">{ROLE_LABEL[r]}</span>
+                            ) : (
+                              <Tanlov
+                                value={fRole}
+                                bad={xato?.f === 'role'}
+                                options={ROLES
+                                  // Mehmon hisobiga huquq berib bo'lmaydi
+                                  .filter((x2) => !mehmon || x2 === 'user')
+                                  .map((x2) => ({ v: x2, t: ROLE_LABEL[x2] }))}
+                                onChange={(v) => { setFRole(v as Role); setXato(null); }}
+                              />
+                            )
                           )}
                           {x.edit === 'imtihon' && (
                             <input className={inpCls('imtihon')} type="date" value={fImtihon}

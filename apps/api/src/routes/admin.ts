@@ -84,6 +84,47 @@ adminRouter.get(
   })
 );
 
+// Bitta foydalanuvchi — batafsil ma'lumot va statistika
+adminRouter.get(
+  '/users/:id',
+  requireOwner,
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID noto‘g‘ri' });
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { ...userSelect, lang: true, alphabet: true, category: true, examDate: true },
+    });
+    if (!user) return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+
+    const [answered, correct, solved, bookmarks, complaints, oxirgi, birinchi] = await Promise.all([
+      prisma.userAnswer.count({ where: { userId: id } }),
+      prisma.userAnswer.count({ where: { userId: id, isCorrect: true } }),
+      prisma.userAnswer.findMany({ where: { userId: id }, distinct: ['questionId'], select: { questionId: true } }),
+      prisma.bookmark.count({ where: { userId: id } }),
+      prisma.complaint.count({ where: { userId: id } }),
+      prisma.userAnswer.findFirst({ where: { userId: id }, orderBy: { answeredAt: 'desc' }, select: { answeredAt: true } }),
+      prisma.userAnswer.findFirst({ where: { userId: id }, orderBy: { answeredAt: 'asc' }, select: { answeredAt: true } }),
+    ]);
+
+    res.json({
+      user,
+      stats: {
+        answered,
+        correct,
+        wrong: answered - correct,
+        accuracy: answered ? Math.round((correct / answered) * 100) : 0,
+        solvedQuestions: solved.length,
+        bookmarks,
+        complaints,
+        lastActive: oxirgi?.answeredAt ?? null,
+        firstActive: birinchi?.answeredAt ?? null,
+      },
+    });
+  })
+);
+
 // Role almashtirish — faqat owner
 adminRouter.patch(
   '/users/:id/role',

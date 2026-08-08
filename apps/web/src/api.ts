@@ -226,6 +226,8 @@ export const adminApi = {
   /* ---- Foydalanuvchilar va rollar ---- */
   users: (q = ''): Promise<{ users: AdminUserRow[]; meId: number | null }> =>
     areq('/admin/users' + (q ? '?q=' + encodeURIComponent(q) : '')),
+  user: (id: number): Promise<{ user: AdminUserDetail; stats: AdminUserStats }> =>
+    areq('/admin/users/' + id),
   setUserRole: (id: number, role: Role): Promise<{ user: AdminUserRow }> =>
     areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
 };
@@ -237,6 +239,25 @@ export interface AdminUserRow {
   tgId: string | null;
   role: string;
   createdAt: string;
+}
+
+export interface AdminUserDetail extends AdminUserRow {
+  lang: string;
+  alphabet: string;
+  category: string;
+  examDate: string | null;
+}
+
+export interface AdminUserStats {
+  answered: number;
+  correct: number;
+  wrong: number;
+  accuracy: number;
+  solvedQuestions: number;
+  bookmarks: number;
+  complaints: number;
+  lastActive: string | null;
+  firstActive: string | null;
 }
 
 // base64 -> File (AI natijasini mavjud rasm-yuklash oqimiga ulash uchun)

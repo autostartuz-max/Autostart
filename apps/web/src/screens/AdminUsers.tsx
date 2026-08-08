@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Menu, Search, ShieldCheck, ClipboardList, GraduationCap, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Menu, Search, ShieldCheck, ClipboardList, GraduationCap, Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   adminApi, hasAdmin, isOwner, clearAdmin, ROLE_LABEL,
-  type AdminUserRow, type AdminUserDetail, type AdminUserStats, type Role,
+  type AdminUserRow, type Role,
 } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
@@ -27,20 +28,10 @@ const sana = (s: string | null) => {
   if (!s) return '—';
   try { return new Date(s).toLocaleDateString('uz-UZ'); } catch { return '—'; }
 };
-const sanaVaqt = (s: string | null) => {
-  if (!s) return '—';
-  try { return new Date(s).toLocaleString('uz-UZ'); } catch { return '—'; }
-};
 const roleOf = (r: string): Role => (r === 'owner' || r === 'admin' ? r : 'user');
-const hisobTuri = (u: AdminUserRow) =>
-  u.phone && u.email ? 'Telefon + pochta'
-    : u.phone ? 'Telefon + parol'
-      : u.email ? 'Pochta + parol'
-        : u.tgId?.startsWith('guest-') ? 'Mehmon (qurilma)' : 'Telegram';
-const TIL: Record<string, string> = { uz: 'O‘zbek', ru: 'Rus' };
-const ALIFBO: Record<string, string> = { lat: 'Lotin', cyr: 'Kirill' };
 
 export default function AdminUsers() {
+  const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const [authed, setAuthed] = useState(() => isOwner() || hasAdmin());
   const [list, setList] = useState<AdminUserRow[]>([]);
@@ -50,21 +41,8 @@ export default function AdminUsers() {
   const [err, setErr] = useState('');
   const [busyId, setBusyId] = useState<number | null>(null);
 
-  // Batafsil oyna
-  const [detail, setDetail] = useState<{ user: AdminUserDetail; stats: AdminUserStats } | null>(null);
-  const [detailId, setDetailId] = useState<number | null>(null);
-  const [detailErr, setDetailErr] = useState('');
-
-  const ochish = (id: number) => {
-    setDetailId(id);
-    setDetail(null);
-    setDetailErr('');
-    adminApi
-      .user(id)
-      .then(setDetail)
-      .catch((e: any) => setDetailErr(e?.message || 'Ma’lumotni yuklab bo‘lmadi'));
-  };
-  const yopish = () => { setDetailId(null); setDetail(null); setDetailErr(''); };
+  // Batafsil — alohida sahifa (/foydalanuvchilar/:id)
+  const ochish = (id: number) => nav('/foydalanuvchilar/' + id);
 
   const load = () => {
     setLoading(true);
@@ -104,10 +82,23 @@ export default function AdminUsers() {
     try {
       const r = await adminApi.setUserRole(u.id, yangi);
       setList((l) => l.map((x) => (x.id === u.id ? { ...x, role: r.user.role } : x)));
-      // Batafsil oyna ochiq bo'lsa — u ham yangilansin
-      setDetail((d) => (d && d.user.id === u.id ? { ...d, user: { ...d.user, role: r.user.role } } : d));
     } catch (e: any) {
       setErr(e?.message || 'Rolni o‘zgartirib bo‘lmadi');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const ochir = async (u: AdminUserRow) => {
+    const savol = `${u.firstName} o‘chirilsinmi?\n\nUning barcha javoblari, saqlangan savollari va shikoyatlari ham o‘chadi. Buni qaytarib bo‘lmaydi.`;
+    if (!window.confirm(savol)) return;
+    setBusyId(u.id);
+    setErr('');
+    try {
+      await adminApi.deleteUser(u.id);
+      setList((l) => l.filter((x) => x.id !== u.id));
+    } catch (e: any) {
+      setErr(e?.message || 'O‘chirib bo‘lmadi');
     } finally {
       setBusyId(null);
     }
@@ -141,6 +132,11 @@ export default function AdminUsers() {
             <>
               <div className="adm-head">
                 <h1 className="adm-title">Foydalanuvchilar ({list.length})</h1>
+                <div className="adm-head-btns">
+                  <button className="adm-btn primary" onClick={() => nav('/foydalanuvchilar/yangi')}>
+                    <Plus size={17} /> Yangi foydalanuvchi
+                  </button>
+                </div>
               </div>
 
               <div className="adm-roles-legend">
@@ -191,6 +187,21 @@ export default function AdminUsers() {
                           </option>
                         ))}
                       </select>
+                      <button
+                        className="adm-mini"
+                        title="Tahrirlash"
+                        onClick={(e) => { e.stopPropagation(); nav('/foydalanuvchilar/' + u.id + '/tahrir'); }}
+                      >
+                        <Pencil size={15} />
+                      </button>
+                      <button
+                        className="adm-mini danger"
+                        title={ozi ? 'O‘z hisobingizni o‘chira olmaysiz' : 'O‘chirish'}
+                        disabled={ozi || busyId === u.id}
+                        onClick={(e) => { e.stopPropagation(); ochir(u); }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
                     </div>
                   );
                 })}
@@ -199,70 +210,6 @@ export default function AdminUsers() {
           )}
         </div>
       </div>
-
-      {/* Batafsil oyna */}
-      {detailId != null && (
-        <div className="adm-overlay" onClick={yopish}>
-          <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="adm-mhead">
-              <span>{detail ? detail.user.firstName : 'Yuklanmoqda…'}</span>
-              <button className="adm-mx" onClick={yopish} title="Yopish"><X size={20} /></button>
-            </div>
-
-            <div className="adm-mbody">
-              {detailErr && <div className="adm-err">{detailErr}</div>}
-              {!detail && !detailErr && <div className="adm-empty">Yuklanmoqda…</div>}
-
-              {detail && (() => {
-                const u = detail.user;
-                const s = detail.stats;
-                const r = roleOf(u.role);
-                const Ic = ROLE_IC[r];
-                return (
-                  <>
-                    <div className="adm-d-top">
-                      <span className={'adm-role-ic ' + r}><Ic size={20} /></span>
-                      <div>
-                        <span className={'adm-badge ' + r}>{ROLE_LABEL[r]}</span>
-                        <div className="adm-d-sub">{ROLE_IZOH[r]}</div>
-                      </div>
-                    </div>
-
-                    <div className="adm-d-sec">Hisob</div>
-                    <dl className="adm-d-list">
-                      <div><dt>ID</dt><dd>{u.id}</dd></div>
-                      <div><dt>Ism</dt><dd>{u.firstName}</dd></div>
-                      <div><dt>Telefon</dt><dd>{u.phone || '—'}</dd></div>
-                      <div><dt>Pochta</dt><dd>{u.email || '—'}</dd></div>
-                      <div><dt>Hisob turi</dt><dd>{hisobTuri(u)}</dd></div>
-                      <div><dt>Ro‘yxatdan o‘tgan</dt><dd>{sanaVaqt(u.createdAt)}</dd></div>
-                      <div><dt>Toifa</dt><dd>{u.category || '—'}</dd></div>
-                      <div><dt>Til</dt><dd>{TIL[u.lang] || u.lang || '—'}</dd></div>
-                      <div><dt>Alifbo</dt><dd>{ALIFBO[u.alphabet] || u.alphabet || '—'}</dd></div>
-                      <div><dt>Imtihon sanasi</dt><dd>{sana(u.examDate)}</dd></div>
-                    </dl>
-
-                    <div className="adm-d-sec">Faollik</div>
-                    <div className="adm-d-stats">
-                      <div className="adm-d-stat"><b>{s.answered}</b><span>Javob berilgan</span></div>
-                      <div className="adm-d-stat ok"><b>{s.correct}</b><span>To‘g‘ri</span></div>
-                      <div className="adm-d-stat no"><b>{s.wrong}</b><span>Xato</span></div>
-                      <div className="adm-d-stat"><b>{s.accuracy}%</b><span>Aniqlik</span></div>
-                      <div className="adm-d-stat"><b>{s.solvedQuestions}</b><span>Yechilgan savol</span></div>
-                      <div className="adm-d-stat"><b>{s.bookmarks}</b><span>Saqlangan</span></div>
-                      <div className="adm-d-stat"><b>{s.complaints}</b><span>Shikoyat</span></div>
-                    </div>
-                    <dl className="adm-d-list">
-                      <div><dt>Birinchi faollik</dt><dd>{sanaVaqt(s.firstActive)}</dd></div>
-                      <div><dt>Oxirgi faollik</dt><dd>{sanaVaqt(s.lastActive)}</dd></div>
-                    </dl>
-                  </>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

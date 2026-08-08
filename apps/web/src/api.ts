@@ -229,6 +229,16 @@ export const adminApi = {
     areq('/admin/users' + (q ? '?q=' + encodeURIComponent(q) : '')),
   user: (id: number): Promise<{ user: AdminUserDetail; stats: AdminUserStats }> =>
     areq('/admin/users/' + id),
+  createUser: (data: {
+    firstName: string; phone?: string; email?: string; password: string; role: Role;
+  }): Promise<{ user: AdminUserRow }> =>
+    areq('/admin/users', { method: 'POST', body: JSON.stringify(data) }),
+  updateUser: (id: number, data: {
+    firstName?: string; phone?: string; email?: string; password?: string;
+  }): Promise<{ user: AdminUserRow }> =>
+    areq('/admin/users/' + id, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteUser: (id: number): Promise<{ ok: boolean; id: number }> =>
+    areq('/admin/users/' + id, { method: 'DELETE' }),
   setUserRole: (id: number, role: Role): Promise<{ user: AdminUserRow }> =>
     areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
 };

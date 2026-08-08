@@ -85,6 +85,139 @@ adminRouter.get(
   })
 );
 
+// Telefon/pochtani tekshirish — user.ts dagi qoidalar bilan bir xil
+function normPhone(raw: any): string | null {
+  let d = String(raw || '').replace(/\D/g, '');
+  if (d.length === 9) d = '998' + d;
+  if (d.startsWith('998') && d.length === 12) return '+' + d;
+  return null;
+}
+function normEmail(raw: any): string | null {
+  const e = String(raw || '').trim().toLowerCase();
+  if (!e || e.length > 120) return null;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e) ? e : null;
+}
+
+// Yangi foydalanuvchi qo'shish
+adminRouter.post(
+  '/users',
+  requireOwner,
+  ah(async (req, res) => {
+    const name = String(req.body?.firstName || '').trim().slice(0, 60);
+    const password = String(req.body?.password || '');
+    const role = String(req.body?.role || 'user');
+    const phoneRaw = String(req.body?.phone || '').trim();
+    const emailRaw = String(req.body?.email || '').trim();
+
+    if (!name) return res.status(400).json({ error: 'Ismni kiriting' });
+    if (!ROLES.includes(role as any)) return res.status(400).json({ error: 'Role noto‘g‘ri' });
+    if (!phoneRaw && !emailRaw) return res.status(400).json({ error: 'Telefon yoki pochta kiriting' });
+    if (password.length < 4) return res.status(400).json({ error: 'Parol kamida 4 ta belgidan iborat bo‘lsin' });
+
+    const phone = phoneRaw ? normPhone(phoneRaw) : null;
+    if (phoneRaw && !phone) return res.status(400).json({ error: 'Telefon raqami noto‘g‘ri' });
+    const email = emailRaw ? normEmail(emailRaw) : null;
+    if (emailRaw && !email) return res.status(400).json({ error: 'Pochta manzili noto‘g‘ri' });
+
+    if (phone && (await prisma.user.findUnique({ where: { phone } })))
+      return res.status(409).json({ error: 'Bu raqam allaqachon ro‘yxatdan o‘tgan' });
+    if (email && (await prisma.user.findUnique({ where: { email } })))
+      return res.status(409).json({ error: 'Bu pochta allaqachon ro‘yxatdan o‘tgan' });
+
+    const user = await prisma.user.create({
+      data: { firstName: name, phone, email, role, passwordHash: bcrypt.hashSync(password, 10) },
+      select: userSelect,
+    });
+    res.json({ user });
+  })
+);
+
+// Tahrirlash — ism, telefon, pochta, ixtiyoriy yangi parol
+adminRouter.patch(
+  '/users/:id',
+  requireOwner,
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID noto‘g‘ri' });
+    const target = await prisma.user.findUnique({ where: { id } });
+    if (!target) return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+
+    const data: any = {};
+
+    if (req.body?.firstName !== undefined) {
+      const name = String(req.body.firstName).trim().slice(0, 60);
+      if (!name) return res.status(400).json({ error: 'Ismni kiriting' });
+      data.firstName = name;
+    }
+
+    if (req.body?.phone !== undefined) {
+      const raw = String(req.body.phone).trim();
+      if (!raw) data.phone = null;
+      else {
+        const phone = normPhone(raw);
+        if (!phone) return res.status(400).json({ error: 'Telefon raqami noto‘g‘ri' });
+        const band = await prisma.user.findUnique({ where: { phone } });
+        if (band && band.id !== id) return res.status(409).json({ error: 'Bu raqam boshqa hisobda band' });
+        data.phone = phone;
+      }
+    }
+
+    if (req.body?.email !== undefined) {
+      const raw = String(req.body.email).trim();
+      if (!raw) data.email = null;
+      else {
+        const email = normEmail(raw);
+        if (!email) return res.status(400).json({ error: 'Pochta manzili noto‘g‘ri' });
+        const band = await prisma.user.findUnique({ where: { email } });
+        if (band && band.id !== id) return res.status(409).json({ error: 'Bu pochta boshqa hisobda band' });
+        data.email = email;
+      }
+    }
+
+    if (req.body?.password) {
+      const p = String(req.body.password);
+      if (p.length < 4) return res.status(400).json({ error: 'Parol kamida 4 ta belgidan iborat bo‘lsin' });
+      data.passwordHash = bcrypt.hashSync(p, 10);
+    }
+
+    // Telefon ham, pochta ham qolmasa — hisobga kirib bo'lmay qoladi
+    const yangiPhone = 'phone' in data ? data.phone : target.phone;
+    const yangiEmail = 'email' in data ? data.email : target.email;
+    if (!yangiPhone && !yangiEmail && !target.tgId) {
+      return res.status(400).json({ error: 'Telefon yoki pochtadan kamida bittasi qolishi kerak' });
+    }
+
+    if (!Object.keys(data).length) return res.status(400).json({ error: 'O‘zgartirish yo‘q' });
+
+    const user = await prisma.user.update({ where: { id }, data, select: userSelect });
+    res.json({ user });
+  })
+);
+
+// O'chirish — javoblar, saqlanganlar va shikoyatlar ham birga o'chadi (Cascade)
+adminRouter.delete(
+  '/users/:id',
+  requireOwner,
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID noto‘g‘ri' });
+
+    const target = await prisma.user.findUnique({ where: { id }, select: { id: true, role: true } });
+    if (!target) return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+
+    const meId = (req as any).userId as number | undefined;
+    if (meId && meId === id) return res.status(400).json({ error: 'O‘z hisobingizni o‘chira olmaysiz' });
+
+    if (target.role === 'owner') {
+      const ownerlar = await prisma.user.count({ where: { role: 'owner' } });
+      if (ownerlar <= 1) return res.status(400).json({ error: 'Bu oxirgi Owner — o‘chirib bo‘lmaydi' });
+    }
+
+    await prisma.user.delete({ where: { id } });
+    res.json({ ok: true, id });
+  })
+);
+
 // Bitta foydalanuvchi — batafsil ma'lumot va statistika
 adminRouter.get(
   '/users/:id',

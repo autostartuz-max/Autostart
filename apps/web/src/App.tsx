@@ -16,6 +16,8 @@ import Profile from './screens/Profile';
 import Placeholder from './screens/Placeholder';
 import AdminQuestions from './screens/AdminQuestions';
 import AdminUsers from './screens/AdminUsers';
+import AdminUserDetail from './screens/AdminUserDetail';
+import AdminUserForm from './screens/AdminUserForm';
 import AdminQuestionForm from './screens/AdminQuestionForm';
 import AdminImport from './screens/AdminImport';
 
@@ -90,6 +92,9 @@ export default function App() {
         <Route path="/profil" element={<Profile />} />
         <Route path="/savollar" element={<AdminQuestions />} />
         <Route path="/foydalanuvchilar" element={<AdminUsers />} />
+        <Route path="/foydalanuvchilar/yangi" element={<AdminUserForm />} />
+        <Route path="/foydalanuvchilar/:id" element={<AdminUserDetail />} />
+        <Route path="/foydalanuvchilar/:id/tahrir" element={<AdminUserForm />} />
         <Route path="/savollar/import" element={<AdminImport />} />
         <Route path="/savollar/yangi" element={<AdminQuestionForm />} />
         <Route path="/savollar/:id" element={<AdminQuestionForm />} />

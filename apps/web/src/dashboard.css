@@ -248,18 +248,16 @@
 .adm-rl.owner { color: #b3a6ff; } .adm-rl.owner b { color: #b3a6ff; }
 .adm-rl.admin { color: #7fb0ff; } .adm-rl.admin b { color: #7fb0ff; }
 .adm-u-row { cursor: pointer; }
-/* Foydalanuvchi batafsil oynasi */
-.adm-overlay { position: fixed; inset: 0; background: rgba(6, 10, 18, .6); display: flex; align-items: center;
-  justify-content: center; z-index: 80; padding: 16px; }
-.adm-modal { width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; background: var(--db-card);
-  border: 1px solid var(--db-border); border-radius: 14px; box-shadow: 0 20px 60px rgba(0, 0, 0, .45); }
-.adm-mhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px;
-  border-bottom: 1px solid var(--db-border); font-size: 18px; font-weight: 800; color: var(--db-text); }
-.adm-mx { background: none; border: none; color: var(--db-muted); cursor: pointer; display: flex; flex-shrink: 0; }
-.adm-mx:hover { color: var(--db-text); }
-.adm-mbody { padding: 16px 20px 20px; }
-.adm-d-top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-.adm-d-sub { color: var(--db-muted); font-size: 12.5px; margin-top: 4px; }
+/* Foydalanuvchi batafsil sahifasi */
+.adm-d-sub { color: var(--db-muted); font-size: 12.5px; margin: -8px 0 4px; }
+.adm-d-card { background: var(--db-card); border: 1px solid var(--db-border); border-radius: 12px; padding: 4px 16px; }
+/* Foydalanuvchi qo'shish/tahrirlash formasi */
+.adm-form { max-width: 520px; display: flex; flex-direction: column; }
+.adm-f-lab { font-size: 13px; color: var(--db-muted); font-weight: 600; margin: 14px 0 6px; }
+.adm-f-inp { background: var(--db-card2); border: 1px solid var(--db-border); border-radius: 10px;
+  padding: 11px 13px; color: var(--db-text); font-size: 14.5px; outline: none; transition: border-color .15s; }
+.adm-f-inp:focus { border-color: var(--db-blue); }
+.adm-f-hint { margin-top: 8px; font-size: 12.5px; color: var(--db-muted); }
 .adm-d-sec { font-size: 11.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
   color: var(--db-muted); margin: 18px 0 8px; }
 .adm-d-list { display: flex; flex-direction: column; gap: 0; margin: 0; }

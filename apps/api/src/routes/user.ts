@@ -15,6 +15,18 @@ function normPhone(raw: any): string | null {
 
 export const userRouter = Router();
 
+/**
+ * Foydalanuvchi obyektini brauzerga yuborishdan oldin tozalaydi.
+ * XAVFSIZLIK: avval /auth/login, /auth/register, /auth/telegram va /me javoblari
+ * butun User yozuvini, ya'ni passwordHash ni ham qaytarardi — parol hashi
+ * brauzerga chiqib ketardi. Endi u hech qachon javobga tushmaydi.
+ */
+function safeUser<T extends { passwordHash?: string | null }>(u: T) {
+  if (!u) return u;
+  const { passwordHash: _drop, ...rest } = u;
+  return rest;
+}
+
 const ah =
   (fn: (req: Request, res: Response) => Promise<any>) =>
   (req: Request, res: Response, next: NextFunction) =>
@@ -83,7 +95,7 @@ userRouter.post(
       update: { firstName, avatarUrl },
       create: { tgId, firstName, avatarUrl },
     });
-    res.json({ token: signUserToken(user.id), user });
+    res.json({ token: signUserToken(user.id), user: safeUser(user) });
   })
 );
 
@@ -101,7 +113,7 @@ userRouter.post(
     const user = await prisma.user.create({
       data: { phone, passwordHash: bcrypt.hashSync(password, 10), firstName: name },
     });
-    res.json({ token: signUserToken(user.id), user });
+    res.json({ token: signUserToken(user.id), user: safeUser(user) });
   })
 );
 
@@ -115,7 +127,7 @@ userRouter.post(
     const user = await prisma.user.findUnique({ where: { phone } });
     if (!user || !user.passwordHash || !bcrypt.compareSync(password, user.passwordHash))
       return res.status(401).json({ error: 'Telefon yoki parol xato' });
-    res.json({ token: signUserToken(user.id), user });
+    res.json({ token: signUserToken(user.id), user: safeUser(user) });
   })
 );
 
@@ -211,7 +223,7 @@ userRouter.get(
     const bookmarks = await prisma.bookmark.count({ where: { userId } });
     const totalQuestions = await prisma.question.count({ where: { status: 'published' } });
     res.json({
-      user,
+      user: user ? safeUser(user) : user,
       stats: {
         answered: total,
         correct,
@@ -230,6 +242,9 @@ userRouter.patch(
   requireUser,
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
+    // XAVFSIZLIK: faqat shu uchta maydon qabul qilinadi. `role` bu yerga
+    // HECH QACHON qo'shilmasin — aks holda istalgan foydalanuvchi o'zini
+    // admin qilib olardi. Role faqat /admin/users/:id/role orqali o'zgaradi.
     const { alphabet, category, lang } = req.body || {};
     const user = await prisma.user.update({
       where: { id: userId },
@@ -239,7 +254,7 @@ userRouter.patch(
         ...(lang ? { lang } : {}),
       },
     });
-    res.json({ user });
+    res.json({ user: safeUser(user) });
   })
 );
 

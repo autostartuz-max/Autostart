@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from './env';
+import { prisma } from './prisma';
 
 export interface TgUser {
   id: number;
@@ -57,17 +58,47 @@ export function requireUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+/**
+ * Admin huquqini tekshiradi. Ikkita yo'l bilan o'tish mumkin:
+ *   1) kind='admin'  — eski AdminUser tokeni (zaxira yo'l, /savollar formasi)
+ *   2) kind='user'   — oddiy foydalanuvchi tokeni, agar User.role === 'admin' bo'lsa
+ *
+ * MUHIM: role tokendan EMAS, har safar bazadan o'qiladi. Shunda adminlik olib
+ * tashlanganda eski token darhol kuchini yo'qotadi — 30 kunlik muddat kutilmaydi.
+ */
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';
   if (!token) return res.status(401).json({ error: 'Token yo‘q' });
+
+  let payload: any;
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as any;
-    if (payload.kind !== 'admin') return res.status(401).json({ error: 'Admin emas' });
-    (req as any).adminId = payload.adminId as number;
-    (req as any).adminRole = payload.role as string;
-    next();
+    payload = jwt.verify(token, JWT_SECRET);
   } catch {
     return res.status(401).json({ error: 'Token yaroqsiz' });
   }
+
+  // 1) Eski admin tokeni
+  if (payload.kind === 'admin') {
+    (req as any).adminId = payload.adminId as number;
+    (req as any).adminRole = payload.role as string;
+    return next();
+  }
+
+  // 2) Foydalanuvchi tokeni — roli bazadan tekshiriladi
+  if (payload.kind === 'user') {
+    const userId = payload.userId as number;
+    prisma.user
+      .findUnique({ where: { id: userId }, select: { role: true } })
+      .then((u) => {
+        if (!u || u.role !== 'admin') return res.status(403).json({ error: 'Ruxsat yo‘q' });
+        (req as any).userId = userId;
+        (req as any).adminRole = 'admin';
+        next();
+      })
+      .catch(() => res.status(500).json({ error: 'Server xatosi' }));
+    return;
+  }
+
+  return res.status(401).json({ error: 'Admin emas' });
 }

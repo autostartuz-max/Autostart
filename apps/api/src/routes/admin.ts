@@ -50,6 +50,74 @@ adminRouter.post(
 
 adminRouter.use(requireAdmin);
 
+/* ---------- Foydalanuvchilar va rollar ---------- */
+
+const ROLES = ['admin', 'student'] as const;
+const userSelect = {
+  id: true, firstName: true, phone: true, tgId: true, role: true, createdAt: true,
+  // passwordHash ATAYLAB yo'q — parol hashi hech qachon javobga tushmasin
+};
+
+// Ro'yxat (ism yoki telefon bo'yicha qidiruv)
+adminRouter.get(
+  '/users',
+  ah(async (req, res) => {
+    const q = String(req.query.q || '').trim();
+    const where = q
+      ? {
+          OR: [
+            { firstName: { contains: q, mode: 'insensitive' as const } },
+            { phone: { contains: q } },
+          ],
+        }
+      : {};
+    const users = await prisma.user.findMany({
+      where,
+      select: userSelect,
+      orderBy: [{ role: 'asc' }, { id: 'desc' }], // adminlar tepada
+      take: 200,
+    });
+    // O'z satrini UI da ajratish uchun — kim so'rayotganini qaytaramiz
+    res.json({ users, meId: (req as any).userId ?? null });
+  })
+);
+
+// Role almashtirish
+adminRouter.patch(
+  '/users/:id/role',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const role = String(req.body?.role || '');
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID noto‘g‘ri' });
+    if (!ROLES.includes(role as any)) return res.status(400).json({ error: 'Role noto‘g‘ri' });
+
+    const target = await prisma.user.findUnique({ where: { id }, select: userSelect });
+    if (!target) return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+
+    // 1) O'z rolini o'zgartirib bo'lmaydi — tasodifan o'zini tushirib qulflanib qolmasin
+    const meId = (req as any).userId as number | undefined;
+    if (meId && meId === id) {
+      return res.status(400).json({ error: 'O‘z rolingizni o‘zgartira olmaysiz' });
+    }
+
+    // 2) Mehmon (qurilma bo'yicha vaqtinchalik hisob) admin bo'la olmaydi
+    if (role === 'admin' && target.tgId?.startsWith('guest-')) {
+      return res.status(400).json({ error: 'Mehmon hisobini admin qilib bo‘lmaydi' });
+    }
+
+    // 3) Oxirgi adminni tushirib bo'lmaydi — tizimsiz qolib ketmaslik uchun
+    if (role === 'student' && target.role === 'admin') {
+      const adminlar = await prisma.user.count({ where: { role: 'admin' } });
+      if (adminlar <= 1) {
+        return res.status(400).json({ error: 'Bu oxirgi admin — rolini olib bo‘lmaydi' });
+      }
+    }
+
+    const user = await prisma.user.update({ where: { id }, data: { role }, select: userSelect });
+    res.json({ user });
+  })
+);
+
 /* ---------- Skrinshotdan savolni AI (Groq vision) bilan o'qish ---------- */
 adminRouter.post(
   '/extract-question',

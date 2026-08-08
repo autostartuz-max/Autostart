@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SAVOLLAR_PUBLIC, hasAdmin, wasAdmin, ADMIN_CHANGED } from '../api';
+import { SAVOLLAR_PUBLIC, hasAdmin, isAdminRole, ADMIN_CHANGED } from '../api';
 import LangTheme from './LangTheme';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
@@ -50,12 +50,13 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
   const nav = useNavigate();
   const go = (to: string) => { onClose?.(); nav(to); };
 
-  // Admin holatini REAKTIV kuzatamiz. Avval localStorage faqat render paytida
-  // bir marta o'qilardi — boshqa tabda yoki /savollar sahifasida kirgandan keyin
-  // bu yerdagi menyu yangilanmasdi ("kirdim, baribir ko'rinmadi").
-  const [isAdmin, setIsAdmin] = useState(() => hasAdmin() || wasAdmin());
+  // Admin holatini REAKTIV kuzatamiz. Asosiy manba — foydalanuvchi roli
+  // (/me javobidan keladi); hasAdmin() esa eski AdminUser tokeni bilan
+  // kirganlar uchun zaxira. Avval localStorage faqat render paytida bir marta
+  // o'qilardi — kirgandan keyin menyu yangilanmasdi.
+  const [isAdmin, setIsAdmin] = useState(() => isAdminRole() || hasAdmin());
   useEffect(() => {
-    const sync = () => setIsAdmin(hasAdmin() || wasAdmin());
+    const sync = () => setIsAdmin(isAdminRole() || hasAdmin());
     sync();
     window.addEventListener(ADMIN_CHANGED, sync); // shu tabda kirish/chiqish
     window.addEventListener('storage', sync);     // boshqa tab
@@ -67,10 +68,9 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
     };
   }, []);
 
-  // FAQAT ADMIN uchun. Oddiy foydalanuvchi "Savollar" bo'limini ko'rmaydi —
-  // uning o'rniga pastda kichik "Admin kirish" havolasi turadi (parolsiz hech
-  // narsa bermaydi, API baribir haqiqiy JWT talab qiladi). Bu havola bo'lmasa
-  // token eskirgach admin panelga qaytishning ilova ichida yo'li qolmaydi.
+  // FAQAT ADMIN uchun. Oddiy foydalanuvchi admin panel borligini ham bilmaydi —
+  // menyuda unga olib boradigan hech qanday havola ko'rinmaydi.
+  // Zaxira yo'l: /savollar manzilini qo'lda yozib, eski admin/parol bilan kirish.
   const showSavollar = isAdmin || SAVOLLAR_PUBLIC;
 
   const navi = (items: typeof TESTLAR) =>
@@ -105,15 +105,13 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
             <button className={'db-navi' + (active === '/savollar' ? ' active' : '')} onClick={() => go('/savollar')}>
               <ClipboardList size={18} /> <span>Savollar</span>
             </button>
+            <button className={'db-navi' + (active === '/foydalanuvchilar' ? ' active' : '')} onClick={() => go('/foydalanuvchilar')}>
+              <ShieldCheck size={18} /> <span>Foydalanuvchilar</span>
+            </button>
           </>
         )}
         <div className="db-side-bottom">
           <div className="db-sec">Boshqa</div>
-          {!showSavollar && (
-            <button className="db-navi db-navi-quiet" onClick={() => go('/savollar')} title="Admin panelga kirish">
-              <ShieldCheck size={18} /> <span>Admin kirish</span>
-            </button>
-          )}
           {navi(BOSHQA)}
           <LangTheme />
         </div>

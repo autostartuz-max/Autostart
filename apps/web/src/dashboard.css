@@ -30,9 +30,6 @@
 .db-navi:hover { background: rgba(255, 255, 255, 0.04); color: var(--db-text); }
 .db-navi.active { background: rgba(124, 108, 245, 0.16); color: #b3a6ff; }
 .db-navi .nb { margin-left: auto; background: #ef4444; color: #fff; font-size: 11px; font-weight: 800; border-radius: 20px; padding: 1px 7px; }
-/* "Admin kirish" — oddiy foydalanuvchiga ko'zga tashlanmaydigan, ammo mavjud havola */
-.db-navi-quiet { opacity: .55; font-size: 13px; }
-.db-navi-quiet:hover { opacity: 1; }
 .db-side-bottom { margin-top: auto; padding-top: 8px; }
 .lt { display: flex; flex-direction: column; gap: 8px; padding: 10px 4px 4px; }
 .lt-seg { display: flex; gap: 3px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--db-border); border-radius: 11px; padding: 3px; }
@@ -230,6 +227,19 @@
 .adm-mini { display: inline-flex; align-items: center; gap: 5px; background: var(--db-card2); border: 1px solid var(--db-border);
   color: var(--db-text); border-radius: 9px; padding: 7px 11px; font-size: 13px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
 .adm-mini.danger { color: #f87171; }
+/* Foydalanuvchilar ro'yxati (rollar) */
+.adm-row.adm-u, .adm-list .adm-row { cursor: default; }
+.adm-role-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; background: rgba(148, 163, 184, .14); color: var(--db-muted); }
+.adm-role-ic.on { background: rgba(124, 108, 245, .18); color: #b3a6ff; }
+.adm-u-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.adm-u-main b { color: var(--db-text); font-size: 14.5px; font-weight: 700; overflow-wrap: anywhere; }
+.adm-u-main span { color: var(--db-muted); font-size: 12.5px; overflow-wrap: anywhere; }
+.adm-badge.admin { background: rgba(124, 108, 245, .18); color: #b3a6ff; }
+@media (max-width: 640px) {
+  .adm-list .adm-row { flex-wrap: wrap; }
+  .adm-u-main { flex-basis: 100%; order: -1; }
+}
 .adm-empty { color: var(--db-muted); text-align: center; padding: 40px; }
 
 /* Login */

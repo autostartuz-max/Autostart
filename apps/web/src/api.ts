@@ -9,9 +9,30 @@ export function setToken(t: string) {
 export function hasToken() {
   return !!token;
 }
+export function authToken() {
+  return token;
+}
 export function clearToken() {
   token = '';
   localStorage.removeItem('yhq_token');
+  localStorage.removeItem(ROLE_KEY);
+  notifyAdminChanged();
+}
+
+/**
+ * Foydalanuvchi roli — /me javobidan olinadi va menyuni ko'rsatish uchun
+ * keshlanadi. Bu FAQAT UI keshi: huquq bermaydi, API har so'rovda role'ni
+ * bazadan tekshiradi (auth.ts -> requireAdmin).
+ */
+const ROLE_KEY = 'yhq_role';
+export function isAdminRole() {
+  return localStorage.getItem(ROLE_KEY) === 'admin';
+}
+function rememberRole(role: unknown) {
+  const r = role === 'admin' ? 'admin' : 'student';
+  if (localStorage.getItem(ROLE_KEY) === r) return;
+  try { localStorage.setItem(ROLE_KEY, r); } catch { /* ignore */ }
+  notifyAdminChanged(); // menyu darhol yangilansin
 }
 
 async function req(path: string, opts: RequestInit = {}) {
@@ -37,7 +58,11 @@ export const api = {
     req('/auth/register', { method: 'POST', body: JSON.stringify({ name, phone, password }) }),
   login: (phone: string, password: string) =>
     req('/auth/login', { method: 'POST', body: JSON.stringify({ phone, password }) }),
-  me: () => req('/me'),
+  me: async () => {
+    const r = await req('/me');
+    rememberRole(r?.user?.role);
+    return r;
+  },
   updateMe: (data: any) => req('/me', { method: 'PATCH', body: JSON.stringify(data) }),
   categories: () => req('/categories'),
   topics: () => req('/topics'),
@@ -60,21 +85,13 @@ export const api = {
 // o'zgartirishi mumkin edi. Endi admin panelga faqat haqiqiy parol bilan kiriladi.
 export const SAVOLLAR_PUBLIC = false;
 
-// "Bu brauzerda admin kirgan" belgisi. Token 30 kunda eskiradi; eskirganda uni
-// o'chiramiz, lekin menyudagi "Savollar" havolasi shu belgi bo'yicha turaveradi.
-// Aks holda havola yo'qoladi va admin panelga qaytishning UI yo'li qolmaydi
-// (menyudagi "Admin kirish" tugmasi f39e293 da ataylab olib tashlangan).
-// Belgi hech qanday huquq bermaydi — API baribir haqiqiy JWT talab qiladi.
-const ADMIN_SEEN = 'yhq_admin_seen';
-
+// Eski AdminUser tokeni (login+parol). Endi asosiy yo'l — foydalanuvchi roli;
+// bu esa zaxira sifatida qoladi (/savollar manzilidagi forma).
 export function adminToken() {
   return localStorage.getItem('yhq_admin_token') || '';
 }
 export function hasAdmin() {
   return !!adminToken();
-}
-export function wasAdmin() {
-  return localStorage.getItem(ADMIN_SEEN) === '1';
 }
 // Menyu darhol yangilanishi uchun signal. Brauzerning 'storage' hodisasi
 // o'zgarishni QILGAN tabda ishlamaydi — shusiz admin kirgandan keyin ham
@@ -86,23 +103,23 @@ function notifyAdminChanged() {
 
 export function setAdminToken(t: string) {
   localStorage.setItem('yhq_admin_token', t);
-  try { localStorage.setItem(ADMIN_SEEN, '1'); } catch { /* ignore */ }
   notifyAdminChanged();
 }
-/** Token eskirdi — o'chiramiz, lekin havola qolsin (qayta kira olishi uchun) */
 export function clearAdmin() {
   localStorage.removeItem('yhq_admin_token');
   notifyAdminChanged();
 }
-/** To'liq chiqish — havola ham yo'qoladi */
+/** To'liq chiqish */
 export function forgetAdmin() {
   localStorage.removeItem('yhq_admin_token');
-  localStorage.removeItem(ADMIN_SEEN);
+  localStorage.removeItem(ROLE_KEY);
   notifyAdminChanged();
 }
 
 async function areq(path: string, opts: RequestInit = {}, _retried = false): Promise<any> {
-  const at = adminToken();
+  // Admin tokeni bo'lsa o'shani, bo'lmasa oddiy foydalanuvchi tokenini yuboramiz —
+  // role='admin' bo'lgan foydalanuvchi alohida admin login qilmasdan ishlaydi.
+  const at = adminToken() || authToken();
   const res = await fetch(API + path, {
     ...opts,
     headers: {
@@ -129,7 +146,7 @@ async function aupload(path: string, field: string, file: File, _retried = false
   fd.append(field, file);
   const res = await fetch(API + path, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${adminToken()}` },
+    headers: { Authorization: `Bearer ${adminToken() || authToken()}` },
     body: fd,
   });
   if ((res.status === 401 || res.status === 403) && !_retried && SAVOLLAR_PUBLIC) {
@@ -182,13 +199,28 @@ export const adminApi = {
     fd.append('pairs', JSON.stringify(pairs));
     const res = await fetch(API + '/admin/recolor-image', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${adminToken()}` }, // Content-Type YO'Q — browser multipart boundary qo'yadi
+      headers: { Authorization: `Bearer ${adminToken() || authToken()}` }, // Content-Type YO'Q — browser multipart boundary qo'yadi
       body: fd,
     });
     if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
     return res.json();
   },
+
+  /* ---- Foydalanuvchilar va rollar ---- */
+  users: (q = ''): Promise<{ users: AdminUserRow[]; meId: number | null }> =>
+    areq('/admin/users' + (q ? '?q=' + encodeURIComponent(q) : '')),
+  setUserRole: (id: number, role: 'admin' | 'student'): Promise<{ user: AdminUserRow }> =>
+    areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
 };
+
+export interface AdminUserRow {
+  id: number;
+  firstName: string;
+  phone: string | null;
+  tgId: string | null;
+  role: string;
+  createdAt: string;
+}
 
 // base64 -> File (AI natijasini mavjud rasm-yuklash oqimiga ulash uchun)
 export async function base64ToFile(b64: string, mime: string, name = 'recolored.png'): Promise<File> {

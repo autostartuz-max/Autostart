@@ -92,6 +92,9 @@ export const api = {
   mistakes: () => req('/mistakes'),
   rating: (limit = 100): Promise<{ list: RatingRow[]; meId: number }> =>
     req('/rating?limit=' + limit),
+  solved: () => req('/solved'),
+  dailyStats: (days = 7): Promise<{ list: DailyStat[]; best: number | null; worst: number | null }> =>
+    req('/stats/daily?days=' + days),
   bookmarks: (): Promise<number[]> => req('/bookmarks'),
   toggleBookmark: (id: number) => req('/bookmarks/' + id, { method: 'POST' }),
   signs: () => req('/signs'),
@@ -245,6 +248,14 @@ export const adminApi = {
   setUserRole: (id: number, role: Role): Promise<{ user: AdminUserRow }> =>
     areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
 };
+
+export interface DailyStat {
+  date: string;
+  answered: number;
+  correct: number;
+  /** Javob berilmagan kunda null — grafikda nuqta qo'yilmaydi */
+  accuracy: number | null;
+}
 
 export interface RatingRow {
   userId: number;

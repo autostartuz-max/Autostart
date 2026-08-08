@@ -279,12 +279,12 @@ userRouter.get(
       orderBy: { answeredAt: 'desc' },
       take: 2000,
     });
-    const kunSet = new Set(kunlar.map((k) => k.answeredAt.toISOString().slice(0, 10)));
+    const kunSet = new Set(kunlar.map((k) => kunKaliti(k.answeredAt)));
     let streak = 0;
     const d = new Date();
     // Bugun hali yechmagan bo'lsa, ketma-ketlik kechadan boshlanadi
-    if (!kunSet.has(d.toISOString().slice(0, 10))) d.setDate(d.getDate() - 1);
-    while (kunSet.has(d.toISOString().slice(0, 10))) {
+    if (!kunSet.has(kunKaliti(d))) d.setDate(d.getDate() - 1);
+    while (kunSet.has(kunKaliti(d))) {
       streak++;
       d.setDate(d.getDate() - 1);
     }
@@ -497,6 +497,98 @@ async function getMistakes(userId: number) {
     return { ...q, myChosen };
   });
 }
+
+/** Sanani YYYY-MM-DD ga aylantiradi (server vaqti bo'yicha, UTC emas) */
+function kunKaliti(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const kun = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${kun}`;
+}
+
+/* ---------- Yechilgan savollar ---------- */
+/** Foydalanuvchi javob bergan savollar (har biriga OXIRGI javobi bilan) */
+userRouter.get(
+  '/solved',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+    const answers = await prisma.userAnswer.findMany({
+      where: { userId },
+      orderBy: { answeredAt: 'desc' },
+      select: { questionId: true, isCorrect: true, chosen: true, answeredAt: true },
+    });
+    const oxirgi = new Map<number, { ok: boolean; chosen: string; at: Date }>();
+    for (const a of answers) {
+      if (!oxirgi.has(a.questionId)) oxirgi.set(a.questionId, { ok: a.isCorrect, chosen: a.chosen, at: a.answeredAt });
+    }
+    if (!oxirgi.size) return res.json([]);
+
+    const questions = await prisma.question.findMany({
+      where: { id: { in: [...oxirgi.keys()] } },
+      include: questionInclude,
+    });
+    // Oxirgi javob vaqti bo'yicha yangisidan eskisiga
+    return res.json(
+      questions
+        .map((q) => {
+          const o = oxirgi.get(q.id)!;
+          let myChosen: number[] = [];
+          try { myChosen = JSON.parse(o.chosen || '[]'); } catch { myChosen = []; }
+          return { ...q, myChosen, myCorrect: o.ok, answeredAt: o.at };
+        })
+        .sort((a, b) => +new Date(b.answeredAt) - +new Date(a.answeredAt))
+    );
+  })
+);
+
+/* ---------- Kunlik statistika (7/30 kunlik grafik uchun) ---------- */
+userRouter.get(
+  '/stats/daily',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+    const days = Math.min(Math.max(Number(req.query.days) || 7, 2), 60);
+
+    // MUHIM: oraliq ham, javoblar ham BIR XIL usulda sanaga aylantiriladi.
+    // Avval oraliq mahalliy vaqtda, javoblar esa UTC bo'yicha guruhlangandi —
+    // shu sababli bugungi kun ro'yxatga tushmay qolardi.
+    const boshi = new Date();
+    boshi.setHours(0, 0, 0, 0);
+    boshi.setDate(boshi.getDate() - (days - 1));
+
+    const answers = await prisma.userAnswer.findMany({
+      where: { userId, answeredAt: { gte: boshi } },
+      select: { isCorrect: true, answeredAt: true },
+    });
+
+    const kun = new Map<string, { total: number; correct: number }>();
+    for (let i = 0; i < days; i++) {
+      const d = new Date(boshi);
+      d.setDate(boshi.getDate() + i);
+      kun.set(kunKaliti(d), { total: 0, correct: 0 });
+    }
+    for (const a of answers) {
+      const g = kun.get(kunKaliti(a.answeredAt));
+      if (!g) continue;
+      g.total++;
+      if (a.isCorrect) g.correct++;
+    }
+
+    const list = [...kun.entries()].map(([date, g]) => ({
+      date,
+      answered: g.total,
+      correct: g.correct,
+      accuracy: g.total ? Math.round((g.correct / g.total) * 100) : null, // javob yo'q kun — nuqta yo'q
+    }));
+    const bor = list.filter((x) => x.accuracy != null).map((x) => x.accuracy as number);
+    res.json({
+      list,
+      best: bor.length ? Math.max(...bor) : null,
+      worst: bor.length ? Math.min(...bor) : null,
+    });
+  })
+);
 
 /* ---------- Reyting ---------- */
 /**

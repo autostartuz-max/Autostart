@@ -6,11 +6,9 @@ import {
   Search, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
   LogOut, User, Shuffle, ChevronDown,
 } from 'lucide-react';
-import { api, clearToken, forgetAdmin, isOwner, type RatingRow } from '../api';
+import { api, clearToken, forgetAdmin, isOwner, type RatingRow, type DailyStat } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
-
-const CHART = [72, 74, 68, 76, 73, 82, 80, 88, 90];
 
 export default function Dashboard() {
   const nav = useNavigate();
@@ -19,9 +17,12 @@ export default function Dashboard() {
   const [me, setMe] = useState<any>(null);
   // Reyting — haqiqiy foydalanuvchilar (avval bu yerda qo'lda yozilgan ismlar turardi)
   const [reyting, setReyting] = useState<RatingRow[]>([]);
+  // 7 kunlik statistika — avval bu yerda qotirib yozilgan raqamlar turardi
+  const [kunlik, setKunlik] = useState<{ list: DailyStat[]; best: number | null; worst: number | null } | null>(null);
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
     api.rating(50).then((r) => setReyting(r.list || [])).catch(() => {});
+    api.dailyStats(7).then(setKunlik).catch(() => {});
   }, []);
 
   const name = me?.user?.firstName || 'Foydalanuvchi';
@@ -34,7 +35,12 @@ export default function Dashboard() {
   const streak = me?.stats?.streak ?? 0;
   const wrong = me?.stats?.wrong ?? 0;
 
-  const chartPts = CHART.map((v, i) => `${(i / (CHART.length - 1)) * 100},${100 - v}`).join(' ');
+  // Grafik: javob berilgan kunlargina nuqta bo'ladi
+  const kunList = kunlik?.list ?? [];
+  const nuqtalar = kunList
+    .map((d, i) => ({ ...d, x: kunList.length > 1 ? (i / (kunList.length - 1)) * 100 : 50 }))
+    .filter((d) => d.accuracy != null);
+  const chartPts = nuqtalar.map((d) => `${d.x},${100 - (d.accuracy as number)}`).join(' ');
 
   // Owner o'z sahifasini admin ko'rinishida (statistika bilan) ko'radi,
   // qolganlar oddiy profilga tushadi — /foydalanuvchilar ular uchun 403.
@@ -88,7 +94,7 @@ export default function Dashboard() {
 
           {/* Stat cards */}
           <div className="db-stats">
-            <div className="db-stat"><div className="si p"><FileText size={24} /></div><div><div className="sl">Yechilgan testlar</div><div className="sv">{solved.toLocaleString()}</div><div className="sd">jami {total.toLocaleString()} tadan</div></div></div>
+            <div className="db-stat db-stat-link" onClick={() => nav('/yechilgan')} title="Yechilgan savollarni ko‘rish"><div className="si p"><FileText size={24} /></div><div><div className="sl">Yechilgan testlar</div><div className="sv">{solved.toLocaleString()}</div><div className="sd">jami {total.toLocaleString()} tadan</div></div></div>
             <div className="db-stat"><div className="si b"><Check size={24} /></div><div><div className="sl">To‘g‘ri javoblar</div><div className="sv">{correct.toLocaleString()}</div><div className="sd">{answered.toLocaleString()} ta javobdan</div></div></div>
             <div className="db-stat"><div className="si g"><TrendingUp size={24} /></div><div><div className="sl">O‘rtacha natija</div><div className="sv">{acc}%</div><div className="sd">{answered ? (acc >= 90 ? 'Zo‘r natija! 🔥' : acc >= 70 ? 'Yaxshi ketyapti 👍' : 'Mashq qiling 💪') : 'Hali test yechilmagan'}</div></div></div>
             <div className="db-stat"><div className="si o"><Flame size={24} /></div><div><div className="sl">Ketma-ketlik</div><div className="sv">{streak} kun</div><div className="sd">{streak > 0 ? 'Davom eting! 💪' : 'Bugun boshlang'}</div></div></div>
@@ -116,14 +122,24 @@ export default function Dashboard() {
 
             <div className="db-panel">
               <div className="db-ph"><h3>Statistikam</h3><span className="lnk">7 kunlik</span></div>
-              <svg className="db-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
-                {[0, 25, 50, 75, 100].map((y) => <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="rgba(124,108,245,.14)" strokeWidth="0.5" />)}
-                <polyline points={chartPts} fill="none" stroke="#7c6cf5" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
-                {CHART.map((v, i) => <circle key={i} cx={(i / (CHART.length - 1)) * 100} cy={100 - v} r="1.6" fill="#b3a6ff" />)}
-              </svg>
+              {nuqtalar.length === 0 ? (
+                <div className="db-rempty">Oxirgi 7 kunda test yechilmagan.</div>
+              ) : (
+                <svg className="db-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  {[0, 25, 50, 75, 100].map((y) => <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="rgba(124,108,245,.14)" strokeWidth="0.5" />)}
+                  {nuqtalar.length > 1 && (
+                    <polyline points={chartPts} fill="none" stroke="#7c6cf5" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
+                  )}
+                  {nuqtalar.map((d) => (
+                    <circle key={d.date} cx={d.x} cy={100 - (d.accuracy as number)} r="1.6" fill="#b3a6ff">
+                      <title>{d.date}: {d.accuracy}% ({d.correct}/{d.answered})</title>
+                    </circle>
+                  ))}
+                </svg>
+              )}
               <div className="db-cstats">
-                <div className="db-cstat"><b style={{ color: '#4ade80' }}>98%</b><span>Eng yaxshi</span></div>
-                <div className="db-cstat"><b style={{ color: '#fb7185' }}>75%</b><span>Eng yomon</span></div>
+                <div className="db-cstat"><b style={{ color: '#4ade80' }}>{kunlik?.best != null ? kunlik.best + '%' : '—'}</b><span>Eng yaxshi</span></div>
+                <div className="db-cstat"><b style={{ color: '#fb7185' }}>{kunlik?.worst != null ? kunlik.worst + '%' : '—'}</b><span>Eng yomon</span></div>
                 <div className="db-cstat"><b>{acc}%</b><span>O‘rtacha</span></div>
               </div>
             </div>
@@ -155,41 +171,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Rules + achievements */}
-          <div className="db-grid2">
-            <div className="db-panel">
-              <div className="db-ph"><h3>Yo‘l harakati qoidalari</h3><span className="lnk" onClick={() => nav('/belgilar')}>Barchasini ko‘rish →</span></div>
-              <div className="db-rules">
-                {[
-                  { Icon: FileText, c: 'o', t: 'Umumiy qoidalar', s: '12 ta qoida' },
-                  { Icon: ShieldCheck, c: 'g', t: 'Majburiyatlar', s: '8 ta qoida' },
-                  { Icon: SignpostBig, c: 'b', t: 'Yo‘l belgilari', s: '45 ta belgi' },
-                  { Icon: TriangleAlert, c: 'p', t: 'Ishtirokchilar', s: '7 ta qoida' },
-                ].map((x) => (
-                  <div className="db-rule" key={x.t}>
-                    <div className={'ri si ' + x.c}><x.Icon size={18} /></div>
-                    <div><b>{x.t}</b><span>{x.s}</span></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="db-panel">
-              <div className="db-ph"><h3>Yutuqlar</h3></div>
-              <div className="db-ach">
-                {[
-                  { Icon: ShieldCheck, c: 'g', t: 'Birinchi test', s: 'Test yechdi' },
-                  { Icon: Check, c: 'b', t: 'Aniq javob', s: '90%+ natija' },
-                  { Icon: Zap, c: 'p', t: 'Tezkor', s: '10 ketma-ket' },
-                  { Icon: Award, c: 'o', t: 'Mukammal', s: '100% natija' },
-                ].map((x) => (
-                  <div className="db-achi" key={x.t}>
-                    <div className={'ac si ' + x.c}><x.Icon size={26} /></div>
-                    <b>{x.t}</b><span>{x.s}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

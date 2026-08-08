@@ -71,10 +71,11 @@ async function req(path: string, opts: RequestInit = {}) {
 export const api = {
   authTelegram: (initData: string, guestId?: string) =>
     req('/auth/telegram', { method: 'POST', body: JSON.stringify({ initData, guestId }) }),
-  register: (name: string, phone: string, password: string) =>
-    req('/auth/register', { method: 'POST', body: JSON.stringify({ name, phone, password }) }),
-  login: (phone: string, password: string) =>
-    req('/auth/login', { method: 'POST', body: JSON.stringify({ phone, password }) }),
+  register: (name: string, phone: string, password: string, email = '') =>
+    req('/auth/register', { method: 'POST', body: JSON.stringify({ name, phone, email, password }) }),
+  /** login — telefon yoki pochta */
+  login: (login: string, password: string) =>
+    req('/auth/login', { method: 'POST', body: JSON.stringify({ login, password }) }),
   me: async () => {
     const r = await req('/me');
     rememberRole(r?.user?.role);
@@ -236,6 +237,7 @@ export interface AdminUserRow {
   id: number;
   firstName: string;
   phone: string | null;
+  email: string | null;
   tgId: string | null;
   role: string;
   createdAt: string;

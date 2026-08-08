@@ -13,6 +13,15 @@ function normPhone(raw: any): string | null {
   return null;
 }
 
+// Pochtani kichik harfga keltirib tekshiradi. Qat'iy RFC emas — amaliy tekshiruv:
+// bo'sh joysiz, bitta @, nuqtali domen.
+function normEmail(raw: any): string | null {
+  const e = String(raw || '').trim().toLowerCase();
+  if (!e) return null;
+  if (e.length > 120) return null;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e) ? e : null;
+}
+
 export const userRouter = Router();
 
 /**
@@ -104,14 +113,35 @@ userRouter.post(
   '/auth/register',
   ah(async (req, res) => {
     const name = String(req.body?.name || '').trim().slice(0, 60) || 'Foydalanuvchi';
-    const phone = normPhone(req.body?.phone);
     const password = String(req.body?.password || '');
-    if (!phone) return res.status(400).json({ error: 'Telefon raqami noto‘g‘ri. +998 bilan 9 raqam kiriting' });
+
+    // Telefon YOKI pochta — kamida bittasi bo'lishi shart, ikkalasi ham bo'lsa bo'ladi
+    const phoneRaw = String(req.body?.phone || '').trim();
+    const emailRaw = String(req.body?.email || '').trim();
+    if (!phoneRaw && !emailRaw) {
+      return res.status(400).json({ error: 'Telefon raqami yoki pochta manzilini kiriting' });
+    }
+
+    const phone = phoneRaw ? normPhone(phoneRaw) : null;
+    if (phoneRaw && !phone) {
+      return res.status(400).json({ error: 'Telefon raqami noto‘g‘ri. +998 bilan 9 raqam kiriting' });
+    }
+    const email = emailRaw ? normEmail(emailRaw) : null;
+    if (emailRaw && !email) {
+      return res.status(400).json({ error: 'Pochta manzili noto‘g‘ri. Namuna: ism@example.com' });
+    }
+
     if (password.length < 4) return res.status(400).json({ error: 'Parol kamida 4 ta belgidan iborat bo‘lsin' });
-    const exists = await prisma.user.findUnique({ where: { phone } });
-    if (exists) return res.status(409).json({ error: 'Bu raqam allaqachon ro‘yxatdan o‘tgan. Kiring.' });
+
+    if (phone && (await prisma.user.findUnique({ where: { phone } }))) {
+      return res.status(409).json({ error: 'Bu raqam allaqachon ro‘yxatdan o‘tgan. Kiring.' });
+    }
+    if (email && (await prisma.user.findUnique({ where: { email } }))) {
+      return res.status(409).json({ error: 'Bu pochta allaqachon ro‘yxatdan o‘tgan. Kiring.' });
+    }
+
     const user = await prisma.user.create({
-      data: { phone, passwordHash: bcrypt.hashSync(password, 10), firstName: name },
+      data: { phone, email, passwordHash: bcrypt.hashSync(password, 10), firstName: name },
     });
     res.json({ token: signUserToken(user.id), user: safeUser(user) });
   })
@@ -121,12 +151,24 @@ userRouter.post(
 userRouter.post(
   '/auth/login',
   ah(async (req, res) => {
-    const phone = normPhone(req.body?.phone);
     const password = String(req.body?.password || '');
-    if (!phone) return res.status(400).json({ error: 'Telefon raqami noto‘g‘ri' });
-    const user = await prisma.user.findUnique({ where: { phone } });
+    // `login` — telefon yoki pochta. Eski mijozlar `phone` yuboradi, u ham ishlaydi.
+    const raw = String(req.body?.login ?? req.body?.phone ?? '').trim();
+    if (!raw) return res.status(400).json({ error: 'Telefon yoki pochta manzilini kiriting' });
+
+    let user = null;
+    if (raw.includes('@')) {
+      const email = normEmail(raw);
+      if (!email) return res.status(400).json({ error: 'Pochta manzili noto‘g‘ri' });
+      user = await prisma.user.findUnique({ where: { email } });
+    } else {
+      const phone = normPhone(raw);
+      if (!phone) return res.status(400).json({ error: 'Telefon raqami noto‘g‘ri' });
+      user = await prisma.user.findUnique({ where: { phone } });
+    }
+
     if (!user || !user.passwordHash || !bcrypt.compareSync(password, user.passwordHash))
-      return res.status(401).json({ error: 'Telefon yoki parol xato' });
+      return res.status(401).json({ error: 'Login yoki parol xato' });
     res.json({ token: signUserToken(user.id), user: safeUser(user) });
   })
 );

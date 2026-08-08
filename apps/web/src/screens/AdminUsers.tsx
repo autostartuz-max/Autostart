@@ -33,7 +33,10 @@ const sanaVaqt = (s: string | null) => {
 };
 const roleOf = (r: string): Role => (r === 'owner' || r === 'admin' ? r : 'user');
 const hisobTuri = (u: AdminUserRow) =>
-  u.phone ? 'Telefon + parol' : u.tgId?.startsWith('guest-') ? 'Mehmon (qurilma)' : 'Telegram';
+  u.phone && u.email ? 'Telefon + pochta'
+    : u.phone ? 'Telefon + parol'
+      : u.email ? 'Pochta + parol'
+        : u.tgId?.startsWith('guest-') ? 'Mehmon (qurilma)' : 'Telegram';
 const TIL: Record<string, string> = { uz: 'O‘zbek', ru: 'Rus' };
 const ALIFBO: Record<string, string> = { lat: 'Lotin', cyr: 'Kirill' };
 
@@ -168,7 +171,7 @@ export default function AdminUsers() {
                       <div className="adm-u-main">
                         <b>{u.firstName}{ozi ? ' (siz)' : ''}</b>
                         <span>
-                          {u.phone || (g ? 'Mehmon (qurilma hisobi)' : 'Telegram')}
+                          {u.phone || u.email || (g ? 'Mehmon (qurilma hisobi)' : 'Telegram')}
                           {' · '}{sana(u.createdAt)}
                         </span>
                       </div>
@@ -230,6 +233,7 @@ export default function AdminUsers() {
                       <div><dt>ID</dt><dd>{u.id}</dd></div>
                       <div><dt>Ism</dt><dd>{u.firstName}</dd></div>
                       <div><dt>Telefon</dt><dd>{u.phone || '—'}</dd></div>
+                      <div><dt>Pochta</dt><dd>{u.email || '—'}</dd></div>
                       <div><dt>Hisob turi</dt><dd>{hisobTuri(u)}</dd></div>
                       <div><dt>Ro‘yxatdan o‘tgan</dt><dd>{sanaVaqt(u.createdAt)}</dd></div>
                       <div><dt>Toifa</dt><dd>{u.category || '—'}</dd></div>

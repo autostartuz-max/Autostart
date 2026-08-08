@@ -7,6 +7,7 @@ export default function Register({ onAuthed }: { onAuthed: () => void }) {
   const nav = useNavigate();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('+998');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [err, setErr] = useState('');
@@ -19,16 +20,32 @@ export default function Register({ onAuthed }: { onAuthed: () => void }) {
     const d = p.replace(/\D/g, '');
     return d.length === 9 || (d.length === 12 && d.startsWith('998'));
   };
+  // Maydonda faqat "+998" tursa — bu bo'sh hisoblanadi
+  const telefonBor = phone.replace(/\D/g, '').replace(/^998$/, '').length > 0;
+  const pochtaToOgri = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
 
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setErr('');
     setBad('');
 
-    // Hamma qator MAJBURIY — bo'sh qoldirilganini aniq aytamiz
     if (!name.trim()) { setBad('name'); return setErr('Ismingizni kiriting'); }
-    if (!phone.replace(/\D/g, '')) { setBad('phone'); return setErr('Telefon raqamini kiriting'); }
-    if (!telefonToOgri(phone)) { setBad('phone'); return setErr('Telefon raqami noto‘g‘ri. +998 va 9 ta raqam kiriting'); }
+
+    // Telefon YOKI pochta — kamida bittasi
+    const pochtaBor = !!email.trim();
+    if (!telefonBor && !pochtaBor) {
+      setBad('phone');
+      return setErr('Telefon raqami yoki pochta manzilini kiriting');
+    }
+    if (telefonBor && !telefonToOgri(phone)) {
+      setBad('phone');
+      return setErr('Telefon raqami noto‘g‘ri. +998 va 9 ta raqam kiriting');
+    }
+    if (pochtaBor && !pochtaToOgri(email)) {
+      setBad('email');
+      return setErr('Pochta manzili noto‘g‘ri. Namuna: ism@example.com');
+    }
+
     if (!password) { setBad('password'); return setErr('Parol kiriting'); }
     if (password.length < 4) { setBad('password'); return setErr('Parol kamida 4 ta belgidan iborat bo‘lsin'); }
     if (!confirm) { setBad('confirm'); return setErr('Parolni tasdiqlang'); }
@@ -36,7 +53,7 @@ export default function Register({ onAuthed }: { onAuthed: () => void }) {
 
     setBusy(true);
     try {
-      const r = await api.register(name, phone, password);
+      const r = await api.register(name, telefonBor ? phone : '', password, email.trim());
       setToken(r.token);
       onAuthed();
       nav('/', { replace: true });
@@ -57,8 +74,15 @@ export default function Register({ onAuthed }: { onAuthed: () => void }) {
           value={name} onChange={(e) => { setName(e.target.value); setBad(''); }} />
 
         <label className="auth-lab">Telefon <span className="auth-req">*</span></label>
-        <input className={inpClass('phone')} type="tel" name="phone" autoComplete="username" inputMode="tel" required
+        <input className={inpClass('phone')} type="tel" name="phone" autoComplete="tel" inputMode="tel"
           placeholder="+998 90 123 45 67" value={phone} onChange={(e) => { setPhone(e.target.value); setBad(''); }} />
+
+        <div className="auth-or">yoki</div>
+
+        <label className="auth-lab">Pochta <span className="auth-req">*</span></label>
+        <input className={inpClass('email')} type="email" name="email" autoComplete="email" inputMode="email"
+          placeholder="ism@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setBad(''); }} />
+        <div className="auth-hint">Telefon yoki pochta — kamida bittasi to‘ldirilishi shart.</div>
 
         <label className="auth-lab">Yangi parol <span className="auth-req">*</span></label>
         <input className={inpClass('password')} type="password" name="new-password" autoComplete="new-password" required

@@ -5,7 +5,8 @@ import '../auth.css';
 
 export default function Login({ onAuthed }: { onAuthed: () => void }) {
   const nav = useNavigate();
-  const [phone, setPhone] = useState('+998');
+  // Telefon yoki pochta — bittasi yetadi
+  const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -13,9 +14,11 @@ export default function Login({ onAuthed }: { onAuthed: () => void }) {
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setErr('');
+    if (!login.trim()) return setErr('Telefon yoki pochta manzilini kiriting');
+    if (!password) return setErr('Parolni kiriting');
     setBusy(true);
     try {
-      const r = await api.login(phone, password);
+      const r = await api.login(login.trim(), password);
       setToken(r.token);
       onAuthed();
       nav('/', { replace: true });
@@ -31,16 +34,15 @@ export default function Login({ onAuthed }: { onAuthed: () => void }) {
       <form className="auth-card" onSubmit={submit}>
         <h1 className="auth-title">Tizimga kirish</h1>
 
-        <label className="auth-lab">Telefon raqam</label>
+        <label className="auth-lab">Telefon yoki pochta</label>
         <input
           className="auth-inp"
-          type="tel"
-          name="phone"
+          type="text"
+          name="login"
           autoComplete="username"
-          inputMode="tel"
-          placeholder="+998 90 123 45 67"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          placeholder="+998 90 123 45 67  yoki  ism@example.com"
+          value={login}
+          onChange={(e) => setLogin(e.target.value)}
         />
 
         <label className="auth-lab">Parol</label>

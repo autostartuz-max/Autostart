@@ -95,6 +95,9 @@ model User {
   id           Int          @id @default(autoincrement())
   tgId         String?      @unique
   phone        String?      @unique
+  // Telefon o'rniga pochta bilan ham ro'yxatdan o'tish mumkin.
+  // Kamida bittasi (telefon yoki pochta) bo'lishi shart — buni API tekshiradi.
+  email        String?      @unique
   passwordHash String?
   firstName    String       @default("Foydalanuvchi")
   // owner | admin | user

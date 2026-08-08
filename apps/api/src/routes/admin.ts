@@ -55,7 +55,7 @@ adminRouter.use(requireAdmin);
 // owner — to'liq huquq, admin — faqat savollar, user — oddiy talaba
 const ROLES = ['owner', 'admin', 'user'] as const;
 const userSelect = {
-  id: true, firstName: true, phone: true, tgId: true, role: true, createdAt: true,
+  id: true, firstName: true, phone: true, email: true, tgId: true, role: true, createdAt: true,
   // passwordHash ATAYLAB yo'q — parol hashi hech qachon javobga tushmasin
 };
 
@@ -70,6 +70,7 @@ adminRouter.get(
           OR: [
             { firstName: { contains: q, mode: 'insensitive' as const } },
             { phone: { contains: q } },
+            { email: { contains: q, mode: 'insensitive' as const } },
           ],
         }
       : {};

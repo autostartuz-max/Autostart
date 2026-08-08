@@ -316,6 +316,13 @@
   color: var(--db-muted); font-size: 13px; font-weight: 600; font-family: inherit; white-space: nowrap; }
 .ud-seg-b:hover { color: var(--db-text); }
 .ud-seg-b.on { background: var(--db-blue); color: #fff; }
+.ud-seg-b:disabled { opacity: .6; cursor: default; }
+/* Profildagi havola qatori */
+.pf-link { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 16px;
+  background: var(--db-card); border: 1px solid var(--db-border); border-radius: 12px; padding: 14px 18px;
+  color: var(--db-text); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.pf-link:hover { border-color: var(--db-blue); background: var(--db-card2); }
+.pf-link > span { display: inline-flex; align-items: center; gap: 10px; }
 .ud-namuna { font-size: 11.5px; color: var(--db-muted); max-width: 300px; line-height: 1.4; }
 .ud-xato { font-size: 11.5px; color: #f87171; max-width: 300px; line-height: 1.4; font-weight: 600; }
 @media (max-width: 560px) { .ud-inp { max-width: none; } }

@@ -459,12 +459,16 @@ button { font-family: inherit; cursor: pointer; }
 .tp2-body { display: flex; gap: 22px; padding: 4px 22px 12px; align-items: flex-start; }
 .tp2-left { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .tp2-opts { display: flex; flex-direction: column; gap: 14px; }
-.io { display: flex; align-items: center; width: 100%; height: 56px; background: #fff; border: none;
+/* min-height — qat'iy height EMAS. Avval height:56px + overflow:hidden edi va
+   uzun javob matni (yoki A+ bilan kattalashtirilgan shrift, yoki tor oyna)
+   qutiga sig'may tepasi-pasti qirqilib qolardi. */
+.io { display: flex; align-items: center; width: 100%; min-height: 56px; background: #fff; border: none;
   border-radius: 8px; overflow: hidden; cursor: pointer; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
 .io-f { width: 44px; align-self: stretch; display: flex; align-items: center; justify-content: center;
   background: #33445f; color: #cdd7e5; font-weight: 800; font-size: 14px; flex-shrink: 0; }
 .io-radio { width: 40px; text-align: center; font-size: 19px; color: #64748b; flex-shrink: 0; }
-.io-text { flex: 1; padding: 0 14px 0 2px; font-size: calc(15.5px * var(--fs, 1)); font-weight: 600; color: #1f2937; }
+.io-text { flex: 1; padding: 11px 14px 11px 2px; font-size: calc(15.5px * var(--fs, 1)); line-height: 1.4;
+  font-weight: 600; color: #1f2937; overflow-wrap: anywhere; }
 .io.sel { background: #ffe600; }
 .io.sel .io-radio { color: #161616; }
 .io.sel .io-text { color: #161616; }

@@ -22,8 +22,19 @@ const ROLE_IZOH: Record<Role, string> = {
 const ROLE_IC: Record<Role, typeof ShieldCheck> = {
   owner: ShieldCheck, admin: ClipboardList, user: GraduationCap,
 };
-const TIL: Record<string, string> = { uz: 'O‘zbek', ru: 'Rus' };
-const ALIFBO: Record<string, string> = { lat: 'Lotin', cyr: 'Kirill' };
+/**
+ * Ilovada til uchta: O'zbek (lotin), Kirill, Rus. Bazada esa ikki ustunga
+ * bo'lingan — lang (uz|ru) va alphabet (lat|cyr). Ekranda ular bitta "Til"
+ * qatori sifatida ko'rsatiladi, saqlashda yana ikkiga ajratiladi.
+ */
+type Til = 'uz' | 'cyr' | 'rus';
+const TIL_NOM: Record<Til, string> = { uz: 'O‘zbek', cyr: 'Kirill', rus: 'Rus' };
+const tilniAniqla = (lang?: string, alphabet?: string): Til =>
+  lang === 'ru' ? 'rus' : alphabet === 'cyr' ? 'cyr' : 'uz';
+const tilniYoy = (t: Til) =>
+  t === 'rus' ? { lang: 'ru', alphabet: 'lat' }
+    : t === 'cyr' ? { lang: 'uz', alphabet: 'cyr' }
+      : { lang: 'uz', alphabet: 'lat' };
 
 const sana = (s: string | null) => {
   if (!s) return '—';
@@ -34,6 +45,14 @@ const sanaVaqt = (s: string | null) => {
   try { return new Date(s).toLocaleString('uz-UZ'); } catch { return '—'; }
 };
 const roleOf = (r: string): Role => (r === 'owner' || r === 'admin' ? r : 'user');
+
+// Maydon ostida turadigan namuna — qanday yozish kerakligini ko'rsatadi
+const NAMUNA: Record<string, string> = {
+  tel: 'Namuna: +998901234567 (yoki 901234567)',
+  pochta: 'Namuna: ism@example.com',
+  parol: 'Bo‘sh qoldirilsa parol o‘zgarmaydi. Kamida 4 ta belgi.',
+  imtihon: 'Bo‘sh qoldirilsa sana o‘chiriladi',
+};
 
 export default function AdminUserDetailScreen() {
   const nav = useNavigate();
@@ -57,10 +76,11 @@ export default function AdminUserDetailScreen() {
   const [fPochta, setFPochta] = useState('');
   const [fParol, setFParol] = useState('');
   const [fToifa, setFToifa] = useState('B');
-  const [fTil, setFTil] = useState('uz');
-  const [fAlifbo, setFAlifbo] = useState('lat');
+  const [fTil, setFTil] = useState<Til>('uz');
   const [fImtihon, setFImtihon] = useState('');
   const [toifalar, setToifalar] = useState<string[]>([]);
+  // Qaysi maydonda xato va nima deyish kerak — xabar o'sha qator ostida chiqadi
+  const [xato, setXato] = useState<{ f: string; m: string } | null>(null);
 
   // <input type="date"> uchun YYYY-MM-DD
   const sanaInput = (s: string | null) => {
@@ -75,8 +95,7 @@ export default function AdminUserDetailScreen() {
     setFPochta(data.user.email || '');
     setFParol('');
     setFToifa(data.user.category || 'B');
-    setFTil(data.user.lang || 'uz');
-    setFAlifbo(data.user.alphabet || 'lat');
+    setFTil(tilniAniqla(data.user.lang, data.user.alphabet));
     setFImtihon(sanaInput(data.user.examDate));
     setErr('');
     setTahrir(true);
@@ -87,14 +106,30 @@ export default function AdminUserDetailScreen() {
         .catch(() => setToifalar(['B', 'C']));
     }
   };
-  const tahrirBekor = () => { setTahrir(false); setFParol(''); setErr(''); };
+  const tahrirBekor = () => { setTahrir(false); setFParol(''); setErr(''); setXato(null); };
+
+  // Telefon/pochta formatini serverdagi qoidalar bilan bir xil tekshiramiz
+  const telOk = (p: string) => {
+    const d = p.replace(/\D/g, '');
+    return d.length === 9 || (d.length === 12 && d.startsWith('998'));
+  };
+  const pochtaOk = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
 
   const tahrirSaqla = async () => {
     if (!data) return;
     setErr('');
-    if (!fIsm.trim()) return setErr('Ismni kiriting');
-    if (!fTel.trim() && !fPochta.trim()) return setErr('Telefon yoki pochtadan kamida bittasini kiriting');
-    if (fParol && fParol.length < 4) return setErr('Yangi parol kamida 4 ta belgidan iborat bo‘lsin');
+    setXato(null);
+
+    // Xatoni maydonning yonida ko'rsatamiz — tepadagi umumiy xabar emas
+    if (!fIsm.trim()) return setXato({ f: 'ism', m: 'Ismni kiriting' });
+    if (!fTel.trim() && !fPochta.trim())
+      return setXato({ f: 'tel', m: 'Telefon yoki pochtadan kamida bittasini to‘ldiring' });
+    if (fTel.trim() && !telOk(fTel))
+      return setXato({ f: 'tel', m: 'Telefon +998 va 9 ta raqamdan iborat bo‘lsin. Namuna: +998901234567' });
+    if (fPochta.trim() && !pochtaOk(fPochta))
+      return setXato({ f: 'pochta', m: 'Pochtada @ va nuqtali domen bo‘lishi kerak. Namuna: ism@example.com' });
+    if (fParol && fParol.length < 4)
+      return setXato({ f: 'parol', m: 'Yangi parol kamida 4 ta belgidan iborat bo‘lsin' });
 
     setBusy(true);
     try {
@@ -103,8 +138,7 @@ export default function AdminUserDetailScreen() {
         phone: fTel.trim(),
         email: fPochta.trim(),
         category: fToifa,
-        lang: fTil,
-        alphabet: fAlifbo,
+        ...tilniYoy(fTil), // bitta tanlov -> lang + alphabet
         examDate: fImtihon,
         ...(fParol ? { password: fParol } : {}),
       });
@@ -112,7 +146,13 @@ export default function AdminUserDetailScreen() {
       setTahrir(false);
       setFParol('');
     } catch (e: any) {
-      setErr(e?.message || 'Saqlab bo‘lmadi');
+      // Server xatosini ham tegishli maydonga bog'laymiz
+      const m = String(e?.message || 'Saqlab bo‘lmadi');
+      const f = /pochta/i.test(m) ? 'pochta' : /telefon|raqam/i.test(m) ? 'tel'
+        : /parol/i.test(m) ? 'parol' : /ism/i.test(m) ? 'ism'
+          : /toifa/i.test(m) ? 'toifa' : /sana/i.test(m) ? 'imtihon' : '';
+      if (f) setXato({ f, m });
+      else setErr(m);
     } finally {
       setBusy(false);
     }
@@ -184,6 +224,8 @@ export default function AdminUserDetailScreen() {
       setBusy(false);
     }
   };
+
+  const inpCls = (f: string) => 'ud-inp' + (xato?.f === f ? ' bad' : '');
 
   const u = data?.user;
   const s = data?.stats;
@@ -311,55 +353,65 @@ export default function AdminUserDetailScreen() {
                     { Ic: Lock, k: 'Parol', parol: true, edit: 'parol' },
                     { Ic: CalendarDays, k: 'Ro‘yxatdan o‘tgan', v: sanaVaqt(u.createdAt) },
                     { Ic: Bookmark, k: 'Toifa', v: u.category || '—', edit: 'toifa' },
-                    { Ic: Globe, k: 'Til', v: TIL[u.lang] || u.lang || '—', edit: 'til' },
-                    { Ic: Type, k: 'Alifbo', v: ALIFBO[u.alphabet] || u.alphabet || '—', edit: 'alifbo' },
+                    { Ic: Globe, k: 'Til', v: TIL_NOM[tilniAniqla(u.lang, u.alphabet)], edit: 'til' },
                     { Ic: CalendarCheck, k: 'Imtihon sanasi', v: sana(u.examDate), edit: 'imtihon' },
                     { Ic: TrendingUp, k: 'Birinchi faollik', v: sanaVaqt(s.firstActive) },
                     { Ic: Clock, k: 'Oxirgi faollik', v: sanaVaqt(s.lastActive) },
                   ].map((x: any) => (
-                    <div className={'ud-row' + (tahrir && x.edit ? ' ud-editing' : '')} key={x.k}>
+                    <div
+                      className={'ud-row' + (tahrir && x.edit ? ' ud-editing' : '') + (xato?.f === x.edit ? ' ud-xatoli' : '')}
+                      key={x.k}
+                    >
                       <span className="ud-k"><x.Ic size={16} /> {x.k}</span>
 
-                      {tahrir && x.edit === 'ism' && (
-                        <input className="ud-inp" value={fIsm} placeholder="Ism"
-                          onChange={(e) => setFIsm(e.target.value)} />
-                      )}
-                      {tahrir && x.edit === 'tel' && (
-                        <input className="ud-inp" type="tel" inputMode="tel" value={fTel} placeholder="+998 90 123 45 67"
-                          onChange={(e) => setFTel(e.target.value)} />
-                      )}
-                      {tahrir && x.edit === 'pochta' && (
-                        <input className="ud-inp" type="email" inputMode="email" value={fPochta} placeholder="ism@example.com"
-                          onChange={(e) => setFPochta(e.target.value)} />
-                      )}
-                      {tahrir && x.edit === 'parol' && (
-                        <input className="ud-inp" type="password" value={fParol}
-                          placeholder="Bo‘sh qoldirilsa parol o‘zgarmaydi"
-                          onChange={(e) => setFParol(e.target.value)} />
-                      )}
-                      {tahrir && x.edit === 'toifa' && (
-                        <select className="ud-inp" value={fToifa} onChange={(e) => setFToifa(e.target.value)}>
-                          {/* Foydalanuvchining hozirgi toifasi ro'yxatda bo'lmasa ham yo'qolmasin */}
-                          {[...new Set([...(toifalar.length ? toifalar : ['B', 'C']), fToifa])].map((c) => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </select>
-                      )}
-                      {tahrir && x.edit === 'til' && (
-                        <select className="ud-inp" value={fTil} onChange={(e) => setFTil(e.target.value)}>
-                          <option value="uz">O‘zbek</option>
-                          <option value="ru">Rus</option>
-                        </select>
-                      )}
-                      {tahrir && x.edit === 'alifbo' && (
-                        <select className="ud-inp" value={fAlifbo} onChange={(e) => setFAlifbo(e.target.value)}>
-                          <option value="lat">Lotin</option>
-                          <option value="cyr">Kirill</option>
-                        </select>
-                      )}
-                      {tahrir && x.edit === 'imtihon' && (
-                        <input className="ud-inp" type="date" value={fImtihon}
-                          onChange={(e) => setFImtihon(e.target.value)} />
+                      {tahrir && x.edit && (
+                        <div className="ud-vwrap">
+                          {x.edit === 'ism' && (
+                            <input className={inpCls('ism')} value={fIsm} placeholder="Ism"
+                              onChange={(e) => { setFIsm(e.target.value); setXato(null); }} />
+                          )}
+                          {x.edit === 'tel' && (
+                            <input className={inpCls('tel')} type="tel" inputMode="tel" value={fTel}
+                              placeholder="+998901234567"
+                              onChange={(e) => { setFTel(e.target.value); setXato(null); }} />
+                          )}
+                          {x.edit === 'pochta' && (
+                            <input className={inpCls('pochta')} type="email" inputMode="email" value={fPochta}
+                              placeholder="ism@example.com"
+                              onChange={(e) => { setFPochta(e.target.value); setXato(null); }} />
+                          )}
+                          {x.edit === 'parol' && (
+                            <input className={inpCls('parol')} type="password" value={fParol}
+                              placeholder="Yangi parol"
+                              onChange={(e) => { setFParol(e.target.value); setXato(null); }} />
+                          )}
+                          {x.edit === 'toifa' && (
+                            <select className={inpCls('toifa')} value={fToifa}
+                              onChange={(e) => { setFToifa(e.target.value); setXato(null); }}>
+                              {/* Foydalanuvchining hozirgi toifasi ro'yxatda bo'lmasa ham yo'qolmasin */}
+                              {[...new Set([...(toifalar.length ? toifalar : ['B', 'C']), fToifa])].map((c) => (
+                                <option key={c} value={c}>{c}</option>
+                              ))}
+                            </select>
+                          )}
+                          {x.edit === 'til' && (
+                            <select className={inpCls('til')} value={fTil}
+                              onChange={(e) => { setFTil(e.target.value as Til); setXato(null); }}>
+                              <option value="uz">O‘zbek</option>
+                              <option value="rus">Rus</option>
+                              <option value="cyr">Kirill</option>
+                            </select>
+                          )}
+                          {x.edit === 'imtihon' && (
+                            <input className={inpCls('imtihon')} type="date" value={fImtihon}
+                              onChange={(e) => { setFImtihon(e.target.value); setXato(null); }} />
+                          )}
+
+                          {/* Xato — aynan shu maydon ostida; xato bo'lmasa namuna ko'rsatiladi */}
+                          {xato && xato.f === x.edit
+                            ? <span className="ud-xato">{xato.m}</span>
+                            : NAMUNA[x.edit] && <span className="ud-namuna">{NAMUNA[x.edit]}</span>}
+                        </div>
                       )}
 
                       {!tahrir && (

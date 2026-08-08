@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Menu, Trophy } from 'lucide-react';
-import { api, type RatingRow } from '../api';
+import { ChevronLeft, Menu, Trophy, ChevronRight } from 'lucide-react';
+import { api, canManageQuestions, hasAdmin, type RatingRow } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
@@ -12,6 +12,8 @@ export default function Rating() {
   const [meId, setMeId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
+  // Talaba sahifasiga faqat Owner va Admin kira oladi
+  const huquqli = canManageQuestions() || hasAdmin();
 
   useEffect(() => {
     api
@@ -41,7 +43,7 @@ export default function Rating() {
           </div>
 
           <p className="xt-lead">
-            Tartib <b>to‘g‘ri javoblar soni</b> bo‘yicha, teng bo‘lsa aniqlik bo‘yicha.
+            Tartib <b>aniqlik (foiz)</b> bo‘yicha, teng foizda ko‘proq savol yechgani yuqori turadi.
             Har savolning oxirgi javobi hisoblanadi. Mehmon hisoblari reytingga kirmaydi.
           </p>
 
@@ -52,7 +54,12 @@ export default function Rating() {
 
           <div className="adm-list">
             {list.map((x) => (
-              <div className={'adm-row rt-row' + (meId === x.userId ? ' me' : '')} key={x.userId}>
+              <div
+                className={'adm-row rt-row' + (meId === x.userId ? ' me' : '') + (huquqli ? ' rt-ochiladi' : '')}
+                key={x.userId}
+                title={huquqli ? 'Batafsil' : ''}
+                onClick={huquqli ? () => nav('/foydalanuvchilar/' + x.userId) : undefined}
+              >
                 <span className={'rt-rank' + (x.rank <= 3 ? ' top' : '')}>{x.rank}</span>
                 <span className="rt-av">{(x.firstName || '?')[0].toUpperCase()}</span>
                 <div className="adm-u-main">
@@ -60,6 +67,7 @@ export default function Rating() {
                   <span>{x.correct} ta to‘g‘ri · {x.solved} ta savol</span>
                 </div>
                 <span className="rt-pct">{x.accuracy}%</span>
+                {huquqli && <ChevronRight size={17} className="rt-arrow" />}
               </div>
             ))}
           </div>

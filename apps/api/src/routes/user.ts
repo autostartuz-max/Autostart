@@ -270,12 +270,32 @@ userRouter.get(
     });
     const bookmarks = await prisma.bookmark.count({ where: { userId } });
     const totalQuestions = await prisma.question.count({ where: { status: 'published' } });
+
+    // Ketma-ketlik: bugundan (yoki kechadan) orqaga qarab, har kuni kamida bitta
+    // javob berilgan kunlar soni. Avval bu raqam kodda "15 kun" deb qotirilgandi.
+    const kunlar = await prisma.userAnswer.findMany({
+      where: { userId },
+      select: { answeredAt: true },
+      orderBy: { answeredAt: 'desc' },
+      take: 2000,
+    });
+    const kunSet = new Set(kunlar.map((k) => k.answeredAt.toISOString().slice(0, 10)));
+    let streak = 0;
+    const d = new Date();
+    // Bugun hali yechmagan bo'lsa, ketma-ketlik kechadan boshlanadi
+    if (!kunSet.has(d.toISOString().slice(0, 10))) d.setDate(d.getDate() - 1);
+    while (kunSet.has(d.toISOString().slice(0, 10))) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    }
+
     res.json({
       user: user ? safeUser(user) : user,
       stats: {
         answered: total,
         correct,
         wrong: total - correct,
+        streak,
         solvedQuestions: solvedQuestions.length,
         bookmarks,
         totalQuestions,
@@ -485,8 +505,9 @@ async function getMistakes(userId: number) {
  * - Har savol bo'yicha OXIRGI javob hisoblanadi (bir savolga qayta-qayta javob
  *   berish natijani shishirmasin).
  * - Mehmon (qurilma bo'yicha vaqtinchalik) hisoblar chiqarilmaydi.
- * - Tartib: to'g'ri javoblar soni, keyin aniqlik. Faqat foiz bo'yicha saralasak,
- *   1 ta savolga to'g'ri javob bergan odam 100% bilan birinchi chiqib qolardi.
+ * - Tartib: ANIQLIK (foiz) bo'yicha. Teng foizda ko'proq savol yechgani yuqori
+ *   turadi — shunda 1 ta savolga to'g'ri javob bergan odam 100% bilan
+ *   o'nlab savol yechgandan o'tib ketmaydi.
  */
 async function getRating(limit = 100) {
   const answers = await prisma.userAnswer.findMany({
@@ -524,7 +545,7 @@ async function getRating(limit = 100) {
         accuracy: g.total ? Math.round((g.correct / g.total) * 100) : 0,
       };
     })
-    .sort((a, b) => b.correct - a.correct || b.accuracy - a.accuracy || a.firstName.localeCompare(b.firstName))
+    .sort((a, b) => b.accuracy - a.accuracy || b.correct - a.correct || a.firstName.localeCompare(b.firstName))
     .slice(0, limit)
     .map((x, i) => ({ ...x, rank: i + 1 }));
 }

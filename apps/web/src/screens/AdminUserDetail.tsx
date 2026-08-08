@@ -100,6 +100,9 @@ export default function AdminUserDetailScreen() {
   const [xato, setXato] = useState<{ f: string; m: string } | null>(null);
   const [parolKorin, setParolKorin] = useState(false); // parol ochiq ko'rinsinmi
   const [nusxa, setNusxa] = useState(false);
+  // Admin bu sahifani KO'RA oladi (reytingdan kirish uchun), lekin tahrirlash,
+  // o'chirish va rol o'zgartirish faqat Owner qo'lida — server ham shunday.
+  const ownerHuquqi = isOwner() || hasAdmin();
 
   // <input type="date"> uchun YYYY-MM-DD
   const sanaInput = (s: string | null) => {
@@ -284,7 +287,7 @@ export default function AdminUserDetailScreen() {
                         <Check size={16} /> {busy ? 'Saqlanmoqda…' : 'Saqlash'}
                       </button>
                     </>
-                  ) : (
+                  ) : ownerHuquqi ? (
                     <>
                       <button className="adm-btn sec" onClick={tahrirBoshla}>
                         <Pencil size={16} /> Tahrirlash
@@ -298,7 +301,7 @@ export default function AdminUserDetailScreen() {
                         <Trash2 size={16} /> O‘chirish
                       </button>
                     </>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <div className="adm-d-sec">Faollik</div>
@@ -425,9 +428,11 @@ export default function AdminUserDetailScreen() {
                                 ko‘rinmaydi
                               </i>
                             )}
-                            <button className="adm-mini" onClick={tahrirBoshla}>
-                              <KeyRound size={13} /> Almashtirish
-                            </button>
+                            {ownerHuquqi && (
+                              <button className="adm-mini" onClick={tahrirBoshla}>
+                                <KeyRound size={13} /> Almashtirish
+                              </button>
+                            )}
                           </span>
                         ) : x.link ? (
                           <a className="ud-v lnk" href={x.link}>{x.v}</a>

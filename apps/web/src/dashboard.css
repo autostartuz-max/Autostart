@@ -353,6 +353,8 @@
   border: 1px solid var(--db-border); display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 13px; color: var(--db-muted); }
 .rt-pct { flex-shrink: 0; font-size: 15px; font-weight: 800; color: #4ade80; }
+.rt-ochiladi { cursor: pointer; }
+.rt-arrow { flex-shrink: 0; color: var(--db-muted); }
 .db-rempty { color: var(--db-muted); font-size: 13.5px; padding: 18px 4px; text-align: center; }
 .xt-lead { font-size: 13.5px; color: var(--db-muted); margin: -8px 0 18px; max-width: 720px; line-height: 1.6; }
 .xt-lead b { color: var(--db-text); }

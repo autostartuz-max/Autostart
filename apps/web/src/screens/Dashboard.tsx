@@ -27,6 +27,11 @@ export default function Dashboard() {
   const name = me?.user?.firstName || 'Foydalanuvchi';
   const total = me?.stats?.totalQuestions ?? 0;
   const acc = me?.stats?.accuracy ?? 0;
+  // Har kim o'ziga tegishli raqamlarni ko'radi
+  const solved = me?.stats?.solvedQuestions ?? 0;
+  const correct = me?.stats?.correct ?? 0;
+  const answered = me?.stats?.answered ?? 0;
+  const streak = me?.stats?.streak ?? 0;
   const wrong = me?.stats?.wrong ?? 0;
 
   const chartPts = CHART.map((v, i) => `${(i / (CHART.length - 1)) * 100},${100 - v}`).join(' ');
@@ -83,10 +88,10 @@ export default function Dashboard() {
 
           {/* Stat cards */}
           <div className="db-stats">
-            <div className="db-stat"><div className="si p"><FileText size={24} /></div><div><div className="sl">Jami testlar</div><div className="sv">{total.toLocaleString()}</div><div className="sd">+128 bu hafta</div></div></div>
-            <div className="db-stat"><div className="si b"><Check size={24} /></div><div><div className="sl">To‘g‘ri javoblar</div><div className="sv">{acc}%</div><div className="sd">+5.2% o‘sish</div></div></div>
-            <div className="db-stat"><div className="si g"><TrendingUp size={24} /></div><div><div className="sl">O‘rtacha natija</div><div className="sv">{acc}%</div><div className="sd">Zo‘r natija! 🔥</div></div></div>
-            <div className="db-stat"><div className="si o"><Flame size={24} /></div><div><div className="sl">Ketma-ketlik</div><div className="sv">15 kun</div><div className="sd">Davom eting! 💪</div></div></div>
+            <div className="db-stat"><div className="si p"><FileText size={24} /></div><div><div className="sl">Yechilgan testlar</div><div className="sv">{solved.toLocaleString()}</div><div className="sd">jami {total.toLocaleString()} tadan</div></div></div>
+            <div className="db-stat"><div className="si b"><Check size={24} /></div><div><div className="sl">To‘g‘ri javoblar</div><div className="sv">{correct.toLocaleString()}</div><div className="sd">{answered.toLocaleString()} ta javobdan</div></div></div>
+            <div className="db-stat"><div className="si g"><TrendingUp size={24} /></div><div><div className="sl">O‘rtacha natija</div><div className="sv">{acc}%</div><div className="sd">{answered ? (acc >= 90 ? 'Zo‘r natija! 🔥' : acc >= 70 ? 'Yaxshi ketyapti 👍' : 'Mashq qiling 💪') : 'Hali test yechilmagan'}</div></div></div>
+            <div className="db-stat"><div className="si o"><Flame size={24} /></div><div><div className="sl">Ketma-ketlik</div><div className="sv">{streak} kun</div><div className="sd">{streak > 0 ? 'Davom eting! 💪' : 'Bugun boshlang'}</div></div></div>
           </div>
 
           {/* 3 panel */}

@@ -259,10 +259,12 @@ adminRouter.delete(
   })
 );
 
-// Bitta foydalanuvchi — batafsil ma'lumot va statistika
+// Bitta foydalanuvchi — batafsil ma'lumot va statistika.
+// requireAdmin: Owner ham, Admin ham ko'ra oladi (reyting ro'yxatidan kirish uchun).
+// Tahrirlash/o'chirish/rol esa quyida requireOwner bilan — ular faqat Owner qo'lida.
 adminRouter.get(
   '/users/:id',
-  requireOwner,
+  requireAdmin,
   ah(async (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID noto‘g‘ri' });

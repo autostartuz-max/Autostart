@@ -6,14 +6,10 @@ import {
   Search, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
   LogOut, User, Shuffle, ChevronDown,
 } from 'lucide-react';
-import { api, clearToken, forgetAdmin, isOwner } from '../api';
+import { api, clearToken, forgetAdmin, isOwner, type RatingRow } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
-const RANK = [
-  { n: 'Asadbek', p: '98.7%' }, { n: 'Malika', p: '97.2%' },
-  { n: 'Javohir', p: '96.1%' }, { n: 'Sardor', p: '95.4%' },
-];
 const CHART = [72, 74, 68, 76, 73, 82, 80, 88, 90];
 
 export default function Dashboard() {
@@ -21,7 +17,12 @@ export default function Dashboard() {
   const [open, setOpen] = useState(false);
   const [umenu, setUmenu] = useState(false);
   const [me, setMe] = useState<any>(null);
-  useEffect(() => { api.me().then(setMe).catch(() => {}); }, []);
+  // Reyting — haqiqiy foydalanuvchilar (avval bu yerda qo'lda yozilgan ismlar turardi)
+  const [reyting, setReyting] = useState<RatingRow[]>([]);
+  useEffect(() => {
+    api.me().then(setMe).catch(() => {});
+    api.rating(50).then((r) => setReyting(r.list || [])).catch(() => {});
+  }, []);
 
   const name = me?.user?.firstName || 'Foydalanuvchi';
   const total = me?.stats?.totalQuestions ?? 0;
@@ -34,6 +35,7 @@ export default function Dashboard() {
   // qolganlar oddiy profilga tushadi — /foydalanuvchilar ular uchun 403.
   const ozId = (me as any)?.user?.id as number | undefined;
   const ozSahifa = isOwner() && ozId ? '/foydalanuvchilar/' + ozId : '/profil';
+  const ozOrni = reyting.find((r) => r.userId === ozId);
 
   return (
     <div className="db">
@@ -123,20 +125,27 @@ export default function Dashboard() {
 
             <div className="db-panel">
               <div className="db-ph"><h3>Reyting</h3><div className="db-tabs"><button className="db-tab on">Umumiy</button><button className="db-tab">Do‘stlar</button></div></div>
-              {RANK.map((r, i) => (
-                <div className="db-ri" key={r.n}>
-                  <div className="db-rank">{i + 1}</div>
-                  <div className="db-riav">{r.n[0]}</div>
-                  <div className="db-riname">{r.n}</div>
-                  <div className="db-ripct">{r.p}</div>
+              {reyting.length === 0 ? (
+                <div className="db-rempty">Hali hech kim test yechmagan.</div>
+              ) : (
+                reyting.slice(0, 5).map((r) => (
+                  <div className={'db-ri' + (r.userId === ozId ? ' me' : '')} key={r.userId}>
+                    <div className="db-rank">{r.rank}</div>
+                    <div className="db-riav">{(r.firstName || '?')[0].toUpperCase()}</div>
+                    <div className="db-riname">{r.firstName}</div>
+                    <div className="db-ripct">{r.accuracy}%</div>
+                  </div>
+                ))
+              )}
+              {/* O'zi birinchi beshlikka kirmasa — pastda alohida ko'rsatamiz */}
+              {ozOrni && ozOrni.rank > 5 && (
+                <div className="db-ri me">
+                  <div className="db-rank">{ozOrni.rank}</div>
+                  <div className="db-riav">{(ozOrni.firstName || '?')[0].toUpperCase()}</div>
+                  <div className="db-riname">{ozOrni.firstName}</div>
+                  <div className="db-ripct">{ozOrni.accuracy}%</div>
                 </div>
-              ))}
-              <div className="db-ri me">
-                <div className="db-rank">5</div>
-                <div className="db-riav">{name[0]}</div>
-                <div className="db-riname">{name}</div>
-                <div className="db-ripct">{acc}%</div>
-              </div>
+              )}
               <button className="db-full" onClick={() => nav('/reyting')}>To‘liq reyting →</button>
             </div>
           </div>

@@ -11,6 +11,7 @@ import RandomTests from './screens/RandomTests';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
 import Mistakes from './screens/Mistakes';
+import Rating from './screens/Rating';
 import TestPlayer from './screens/TestPlayer';
 import Signs from './screens/Signs';
 import Profile from './screens/Profile';
@@ -101,7 +102,7 @@ export default function App() {
         <Route path="/savollar/yangi" element={<AdminQuestionForm />} />
         <Route path="/savollar/:id" element={<AdminQuestionForm />} />
         <Route path="/oktagon" element={<Placeholder title="Oktagon" emoji="⚔️" text="Bellashuv rejimi tez orada qo‘shiladi." />} />
-        <Route path="/reyting" element={<Placeholder title="Reyting" emoji="🏆" text="Reyting va liga tizimi tez orada qo‘shiladi." />} />
+        <Route path="/reyting" element={<Rating />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

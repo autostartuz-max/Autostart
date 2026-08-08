@@ -478,6 +478,67 @@ async function getMistakes(userId: number) {
   });
 }
 
+/* ---------- Reyting ---------- */
+/**
+ * Haqiqiy foydalanuvchilar reytingi.
+ *
+ * - Har savol bo'yicha OXIRGI javob hisoblanadi (bir savolga qayta-qayta javob
+ *   berish natijani shishirmasin).
+ * - Mehmon (qurilma bo'yicha vaqtinchalik) hisoblar chiqarilmaydi.
+ * - Tartib: to'g'ri javoblar soni, keyin aniqlik. Faqat foiz bo'yicha saralasak,
+ *   1 ta savolga to'g'ri javob bergan odam 100% bilan birinchi chiqib qolardi.
+ */
+async function getRating(limit = 100) {
+  const answers = await prisma.userAnswer.findMany({
+    select: { userId: true, questionId: true, isCorrect: true },
+    orderBy: { answeredAt: 'desc' },
+  });
+
+  const korilgan = new Set<string>();
+  const jam = new Map<number, { total: number; correct: number }>();
+  for (const a of answers) {
+    const k = a.userId + ':' + a.questionId;
+    if (korilgan.has(k)) continue; // faqat oxirgi javob
+    korilgan.add(k);
+    const g = jam.get(a.userId) || { total: 0, correct: 0 };
+    g.total++;
+    if (a.isCorrect) g.correct++;
+    jam.set(a.userId, g);
+  }
+  if (!jam.size) return [];
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: [...jam.keys()] } },
+    select: { id: true, firstName: true, tgId: true },
+  });
+
+  return users
+    .filter((u) => !u.tgId?.startsWith('guest-')) // mehmonlar reytingga kirmaydi
+    .map((u) => {
+      const g = jam.get(u.id)!;
+      return {
+        userId: u.id,
+        firstName: u.firstName,
+        solved: g.total,
+        correct: g.correct,
+        accuracy: g.total ? Math.round((g.correct / g.total) * 100) : 0,
+      };
+    })
+    .sort((a, b) => b.correct - a.correct || b.accuracy - a.accuracy || a.firstName.localeCompare(b.firstName))
+    .slice(0, limit)
+    .map((x, i) => ({ ...x, rank: i + 1 }));
+}
+
+userRouter.get(
+  '/rating',
+  requireUser,
+  ah(async (req, res) => {
+    const limit = Math.min(Number(req.query.limit) || 100, 200);
+    const list = await getRating(limit);
+    res.json({ list, meId: (req as any).userId as number });
+  })
+);
+
 userRouter.get(
   '/mistakes',
   requireUser,

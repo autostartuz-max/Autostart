@@ -90,6 +90,8 @@ export const api = {
   answer: (body: { questionId: number; chosen: number[]; timeMs: number }) =>
     req('/answers', { method: 'POST', body: JSON.stringify(body) }),
   mistakes: () => req('/mistakes'),
+  rating: (limit = 100): Promise<{ list: RatingRow[]; meId: number }> =>
+    req('/rating?limit=' + limit),
   bookmarks: (): Promise<number[]> => req('/bookmarks'),
   toggleBookmark: (id: number) => req('/bookmarks/' + id, { method: 'POST' }),
   signs: () => req('/signs'),
@@ -243,6 +245,15 @@ export const adminApi = {
   setUserRole: (id: number, role: Role): Promise<{ user: AdminUserRow }> =>
     areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
 };
+
+export interface RatingRow {
+  userId: number;
+  firstName: string;
+  solved: number;
+  correct: number;
+  accuracy: number;
+  rank: number;
+}
 
 export interface AdminUserRow {
   id: number;

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap, Pencil, Trash2, KeyRound,
+  CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare,
+  User, Phone, Mail, Lock, CalendarDays, CalendarCheck, Bookmark, Globe, Type, TrendingUp, Clock,
 } from 'lucide-react';
 import {
   adminApi, hasAdmin, isOwner, clearAdmin, ROLE_LABEL,
@@ -137,11 +139,16 @@ export default function AdminUserDetailScreen() {
             !err && <div className="adm-empty">Foydalanuvchi topilmadi.</div>
           ) : (
             <>
-              <div className="adm-head">
-                <div className="adm-head-l">
-                  <span className={'adm-role-ic ' + r}><Ic size={20} /></span>
-                  <h1 className="adm-title">{u.firstName}{ozi ? ' (siz)' : ''}</h1>
-                  <span className={'adm-badge ' + r}>{ROLE_LABEL[r]}</span>
+              <div className="adm-head ud-head">
+                <div className="ud-id">
+                  <span className={'ud-ava ' + r}><Ic size={26} /></span>
+                  <div className="ud-id-t">
+                    <div className="ud-nom">
+                      <h1>{u.firstName}{ozi ? ' (siz)' : ''}</h1>
+                      <span className={'adm-badge ' + r}>{ROLE_LABEL[r]}</span>
+                    </div>
+                    <div className="ud-izoh">{ROLE_LABEL[r]} — {ROLE_IZOH[r]}</div>
+                  </div>
                 </div>
                 <div className="adm-head-btns">
                   <div className="adm-rolebox">
@@ -185,41 +192,62 @@ export default function AdminUserDetailScreen() {
                   </button>
                 </div>
               </div>
-              <div className="adm-d-sub">{ROLE_LABEL[r]} — {ROLE_IZOH[r]}</div>
-
               <div className="adm-d-sec">Faollik</div>
-              <div className="adm-d-stats">
-                <div className="adm-d-stat"><b>{s.answered}</b><span>Javob berilgan</span></div>
-                <div className="adm-d-stat ok"><b>{s.correct}</b><span>To‘g‘ri</span></div>
-                <div className="adm-d-stat no"><b>{s.wrong}</b><span>Xato</span></div>
-                <div className="adm-d-stat"><b>{s.accuracy}%</b><span>Aniqlik</span></div>
-                <div className="adm-d-stat"><b>{s.solvedQuestions}</b><span>Yechilgan savol</span></div>
-                <div className="adm-d-stat"><b>{s.bookmarks}</b><span>Saqlangan</span></div>
-                <div className="adm-d-stat"><b>{s.complaints}</b><span>Shikoyat</span></div>
+              <div className="ud-stats">
+                {[
+                  { Ic: ClipboardList, c: 'v', n: s.answered, t: 'Javob berilgan' },
+                  { Ic: CircleCheck, c: 'g', n: s.correct, t: 'To‘g‘ri' },
+                  { Ic: CircleX, c: 'q', n: s.wrong, t: 'Xato' },
+                  { Ic: PieChart, c: 'k', n: s.accuracy + '%', t: 'Aniqlik' },
+                  { Ic: CircleHelp, c: 's', n: s.solvedQuestions, t: 'Yechilgan savol' },
+                  { Ic: FileText, c: 'p', n: s.bookmarks, t: 'Saqlangan' },
+                  { Ic: MessageSquare, c: 'f', n: s.complaints, t: 'Shikoyat' },
+                ].map((x) => (
+                  <div className="ud-stat" key={x.t}>
+                    <span className={'ud-stat-ic ' + x.c}><x.Ic size={20} /></span>
+                    <div>
+                      <b>{x.n}</b>
+                      <span>{x.t}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div className="adm-d-sec">Hisob</div>
-              <dl className="adm-d-list adm-d-card">
-                <div><dt>Ism</dt><dd>{u.firstName}</dd></div>
-                <div><dt>Telefon</dt><dd>{u.phone || '—'}</dd></div>
-                <div><dt>Pochta</dt><dd>{u.email || '—'}</dd></div>
-                <div>
-                  <dt>Parol</dt>
-                  <dd className="adm-parol">
-                    <span title="Parollar bir tomonlama shifrlangan — ochib bo‘lmaydi">••••••••</span>
-                    <button className="adm-mini" onClick={() => nav('/foydalanuvchilar/' + u.id + '/tahrir')}>
-                      <KeyRound size={14} /> Almashtirish
-                    </button>
-                  </dd>
+              <div className="ud-card">
+                <div className="ud-card-h">Hisob ma’lumotlari</div>
+                <div className="ud-grid">
+                  {[
+                    { Ic: User, k: 'Ism', v: u.firstName },
+                    { Ic: Phone, k: 'Telefon', v: u.phone || '—', link: u.phone ? 'tel:' + u.phone : '' },
+                    { Ic: Mail, k: 'Pochta', v: u.email || '—', link: u.email ? 'mailto:' + u.email : '' },
+                    { Ic: Lock, k: 'Parol', parol: true },
+                    { Ic: CalendarDays, k: 'Ro‘yxatdan o‘tgan', v: sanaVaqt(u.createdAt) },
+                    { Ic: Bookmark, k: 'Toifa', v: u.category || '—' },
+                    { Ic: Globe, k: 'Til', v: TIL[u.lang] || u.lang || '—' },
+                    { Ic: Type, k: 'Alifbo', v: ALIFBO[u.alphabet] || u.alphabet || '—' },
+                    { Ic: CalendarCheck, k: 'Imtihon sanasi', v: sana(u.examDate) },
+                    { Ic: TrendingUp, k: 'Birinchi faollik', v: sanaVaqt(s.firstActive) },
+                    { Ic: Clock, k: 'Oxirgi faollik', v: sanaVaqt(s.lastActive) },
+                  ].map((x: any) => (
+                    <div className="ud-row" key={x.k}>
+                      <span className="ud-k"><x.Ic size={16} /> {x.k}</span>
+                      {x.parol ? (
+                        <span className="ud-v ud-parol">
+                          <i title="Parol bir tomonlama shifrlangan — ochib bo‘lmaydi">••••••••</i>
+                          <button className="adm-mini" onClick={() => nav('/foydalanuvchilar/' + u.id + '/tahrir')}>
+                            <KeyRound size={13} /> Almashtirish
+                          </button>
+                        </span>
+                      ) : x.link ? (
+                        <a className="ud-v lnk" href={x.link}>{x.v}</a>
+                      ) : (
+                        <span className="ud-v">{x.v}</span>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                <div><dt>Ro‘yxatdan o‘tgan</dt><dd>{sanaVaqt(u.createdAt)}</dd></div>
-                <div><dt>Toifa</dt><dd>{u.category || '—'}</dd></div>
-                <div><dt>Til</dt><dd>{TIL[u.lang] || u.lang || '—'}</dd></div>
-                <div><dt>Alifbo</dt><dd>{ALIFBO[u.alphabet] || u.alphabet || '—'}</dd></div>
-                <div><dt>Imtihon sanasi</dt><dd>{sana(u.examDate)}</dd></div>
-                <div><dt>Birinchi faollik</dt><dd>{sanaVaqt(s.firstActive)}</dd></div>
-                <div><dt>Oxirgi faollik</dt><dd>{sanaVaqt(s.lastActive)}</dd></div>
-              </dl>
+              </div>
+
               <div className="adm-f-hint">
                 Parol bazada bir tomonlama shifrlangan holda saqlanadi va ochib bo‘lmaydi —
                 bu baza o‘g‘irlansa ham parollar oshkor bo‘lmasligi uchun. Foydalanuvchi parolini

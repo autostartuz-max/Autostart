@@ -58,6 +58,10 @@ const userSelect = {
   id: true, firstName: true, phone: true, email: true, tgId: true, role: true, createdAt: true,
   // passwordHash ATAYLAB yo'q — parol hashi hech qachon javobga tushmasin
 };
+// Batafsil ko'rinish va tahrirlash javobi uchun — sozlamalar ham qo'shiladi
+const userDetailSelect = {
+  ...userSelect, lang: true, alphabet: true, category: true, examDate: true,
+};
 
 // Ro'yxat (ism yoki telefon bo'yicha qidiruv)
 adminRouter.get(
@@ -180,6 +184,37 @@ adminRouter.patch(
       data.passwordHash = bcrypt.hashSync(p, 10);
     }
 
+    // Sozlamalar: til, alifbo, toifa, imtihon sanasi
+    if (req.body?.lang !== undefined) {
+      const l = String(req.body.lang);
+      if (!['uz', 'ru'].includes(l)) return res.status(400).json({ error: 'Til noto‘g‘ri' });
+      data.lang = l;
+    }
+    if (req.body?.alphabet !== undefined) {
+      const a = String(req.body.alphabet);
+      if (!['lat', 'cyr'].includes(a)) return res.status(400).json({ error: 'Alifbo noto‘g‘ri' });
+      data.alphabet = a;
+    }
+    if (req.body?.category !== undefined) {
+      const c = String(req.body.category).trim().toUpperCase();
+      // Bazadagi toifalar + foydalanuvchining hozirgi qiymati (eski yozuvlar
+      // ro'yxatda bo'lmasligi mumkin — ularni saqlab qolamiz)
+      const kodlar = (await prisma.category.findMany({ select: { code: true } })).map((x) => x.code);
+      if (!c || (!kodlar.includes(c) && c !== target.category)) {
+        return res.status(400).json({ error: `Toifa noto‘g‘ri. Mavjud: ${kodlar.join(', ')}` });
+      }
+      data.category = c;
+    }
+    if (req.body?.examDate !== undefined) {
+      const raw = String(req.body.examDate).trim();
+      if (!raw) data.examDate = null;
+      else {
+        const d = new Date(raw);
+        if (isNaN(d.getTime())) return res.status(400).json({ error: 'Imtihon sanasi noto‘g‘ri' });
+        data.examDate = d;
+      }
+    }
+
     // Telefon ham, pochta ham qolmasa — hisobga kirib bo'lmay qoladi
     const yangiPhone = 'phone' in data ? data.phone : target.phone;
     const yangiEmail = 'email' in data ? data.email : target.email;
@@ -189,7 +224,7 @@ adminRouter.patch(
 
     if (!Object.keys(data).length) return res.status(400).json({ error: 'O‘zgartirish yo‘q' });
 
-    const user = await prisma.user.update({ where: { id }, data, select: userSelect });
+    const user = await prisma.user.update({ where: { id }, data, select: userDetailSelect });
     res.json({ user });
   })
 );
@@ -226,10 +261,7 @@ adminRouter.get(
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID noto‘g‘ri' });
 
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: { ...userSelect, lang: true, alphabet: true, category: true, examDate: true },
-    });
+    const user = await prisma.user.findUnique({ where: { id }, select: userDetailSelect });
     if (!user) return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
 
     const [answered, correct, solved, bookmarks, complaints, oxirgi, birinchi] = await Promise.all([

@@ -235,7 +235,8 @@ export const adminApi = {
     areq('/admin/users', { method: 'POST', body: JSON.stringify(data) }),
   updateUser: (id: number, data: {
     firstName?: string; phone?: string; email?: string; password?: string;
-  }): Promise<{ user: AdminUserRow }> =>
+    lang?: string; alphabet?: string; category?: string; examDate?: string;
+  }): Promise<{ user: AdminUserDetail }> =>
     areq('/admin/users/' + id, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteUser: (id: number): Promise<{ ok: boolean; id: number }> =>
     areq('/admin/users/' + id, { method: 'DELETE' }),

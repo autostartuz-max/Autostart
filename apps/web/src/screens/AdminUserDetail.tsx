@@ -56,6 +56,17 @@ export default function AdminUserDetailScreen() {
   const [fTel, setFTel] = useState('');
   const [fPochta, setFPochta] = useState('');
   const [fParol, setFParol] = useState('');
+  const [fToifa, setFToifa] = useState('B');
+  const [fTil, setFTil] = useState('uz');
+  const [fAlifbo, setFAlifbo] = useState('lat');
+  const [fImtihon, setFImtihon] = useState('');
+  const [toifalar, setToifalar] = useState<string[]>([]);
+
+  // <input type="date"> uchun YYYY-MM-DD
+  const sanaInput = (s: string | null) => {
+    if (!s) return '';
+    try { return new Date(s).toISOString().slice(0, 10); } catch { return ''; }
+  };
 
   const tahrirBoshla = () => {
     if (!data) return;
@@ -63,8 +74,18 @@ export default function AdminUserDetailScreen() {
     setFTel(data.user.phone || '');
     setFPochta(data.user.email || '');
     setFParol('');
+    setFToifa(data.user.category || 'B');
+    setFTil(data.user.lang || 'uz');
+    setFAlifbo(data.user.alphabet || 'lat');
+    setFImtihon(sanaInput(data.user.examDate));
     setErr('');
     setTahrir(true);
+    // Toifalar ro'yxatini bazadan olamiz (bir marta)
+    if (!toifalar.length) {
+      adminApi.categories()
+        .then((c) => setToifalar(c.map((x: any) => x.code)))
+        .catch(() => setToifalar(['B', 'C']));
+    }
   };
   const tahrirBekor = () => { setTahrir(false); setFParol(''); setErr(''); };
 
@@ -81,6 +102,10 @@ export default function AdminUserDetailScreen() {
         firstName: fIsm.trim(),
         phone: fTel.trim(),
         email: fPochta.trim(),
+        category: fToifa,
+        lang: fTil,
+        alphabet: fAlifbo,
+        examDate: fImtihon,
         ...(fParol ? { password: fParol } : {}),
       });
       setData((d) => (d ? { ...d, user: { ...d.user, ...r.user } } : d));
@@ -285,10 +310,10 @@ export default function AdminUserDetailScreen() {
                     { Ic: Mail, k: 'Pochta', v: u.email || '—', link: u.email ? 'mailto:' + u.email : '', edit: 'pochta' },
                     { Ic: Lock, k: 'Parol', parol: true, edit: 'parol' },
                     { Ic: CalendarDays, k: 'Ro‘yxatdan o‘tgan', v: sanaVaqt(u.createdAt) },
-                    { Ic: Bookmark, k: 'Toifa', v: u.category || '—' },
-                    { Ic: Globe, k: 'Til', v: TIL[u.lang] || u.lang || '—' },
-                    { Ic: Type, k: 'Alifbo', v: ALIFBO[u.alphabet] || u.alphabet || '—' },
-                    { Ic: CalendarCheck, k: 'Imtihon sanasi', v: sana(u.examDate) },
+                    { Ic: Bookmark, k: 'Toifa', v: u.category || '—', edit: 'toifa' },
+                    { Ic: Globe, k: 'Til', v: TIL[u.lang] || u.lang || '—', edit: 'til' },
+                    { Ic: Type, k: 'Alifbo', v: ALIFBO[u.alphabet] || u.alphabet || '—', edit: 'alifbo' },
+                    { Ic: CalendarCheck, k: 'Imtihon sanasi', v: sana(u.examDate), edit: 'imtihon' },
                     { Ic: TrendingUp, k: 'Birinchi faollik', v: sanaVaqt(s.firstActive) },
                     { Ic: Clock, k: 'Oxirgi faollik', v: sanaVaqt(s.lastActive) },
                   ].map((x: any) => (
@@ -311,6 +336,30 @@ export default function AdminUserDetailScreen() {
                         <input className="ud-inp" type="password" value={fParol}
                           placeholder="Bo‘sh qoldirilsa parol o‘zgarmaydi"
                           onChange={(e) => setFParol(e.target.value)} />
+                      )}
+                      {tahrir && x.edit === 'toifa' && (
+                        <select className="ud-inp" value={fToifa} onChange={(e) => setFToifa(e.target.value)}>
+                          {/* Foydalanuvchining hozirgi toifasi ro'yxatda bo'lmasa ham yo'qolmasin */}
+                          {[...new Set([...(toifalar.length ? toifalar : ['B', 'C']), fToifa])].map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                      )}
+                      {tahrir && x.edit === 'til' && (
+                        <select className="ud-inp" value={fTil} onChange={(e) => setFTil(e.target.value)}>
+                          <option value="uz">O‘zbek</option>
+                          <option value="ru">Rus</option>
+                        </select>
+                      )}
+                      {tahrir && x.edit === 'alifbo' && (
+                        <select className="ud-inp" value={fAlifbo} onChange={(e) => setFAlifbo(e.target.value)}>
+                          <option value="lat">Lotin</option>
+                          <option value="cyr">Kirill</option>
+                        </select>
+                      )}
+                      {tahrir && x.edit === 'imtihon' && (
+                        <input className="ud-inp" type="date" value={fImtihon}
+                          onChange={(e) => setFImtihon(e.target.value)} />
                       )}
 
                       {!tahrir && (

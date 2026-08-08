@@ -72,23 +72,7 @@ export default function AdminUsers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
 
-  const almashtir = async (u: AdminUserRow, yangi: Role) => {
-    const eski = roleOf(u.role);
-    if (yangi === eski) return;
-    const savol = `${u.firstName} uchun rol "${ROLE_LABEL[yangi]}" qilinsinmi?\n\n${ROLE_LABEL[yangi]} — ${ROLE_IZOH[yangi]}.`;
-    if (!window.confirm(savol)) return;
-    setBusyId(u.id);
-    setErr('');
-    try {
-      const r = await adminApi.setUserRole(u.id, yangi);
-      setList((l) => l.map((x) => (x.id === u.id ? { ...x, role: r.user.role } : x)));
-    } catch (e: any) {
-      setErr(e?.message || 'Rolni o‘zgartirib bo‘lmadi');
-    } finally {
-      setBusyId(null);
-    }
-  };
-
+  // Rolni o'zgartirish — faqat foydalanuvchi sahifasida (ro'yxatda emas)
   const ochir = async (u: AdminUserRow) => {
     const savol = `${u.firstName} o‘chirilsinmi?\n\nUning barcha javoblari, saqlangan savollari va shikoyatlari ham o‘chadi. Buni qaytarib bo‘lmaydi.`;
     if (!window.confirm(savol)) return;
@@ -172,21 +156,6 @@ export default function AdminUsers() {
                         </span>
                       </div>
                       <span className={'adm-badge ' + r}>{ROLE_LABEL[r]}</span>
-                      <select
-                        className="adm-role-sel"
-                        value={r}
-                        disabled={busyId === u.id || ozi}
-                        title={ozi ? 'O‘z rolingizni o‘zgartira olmaysiz' : ''}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={(e) => almashtir(u, e.target.value as Role)}
-                      >
-                        {ROLES.map((x) => (
-                          // Mehmon hisobiga huquq berib bo'lmaydi — server ham buni rad etadi
-                          <option key={x} value={x} disabled={g && x !== 'user'}>
-                            {ROLE_LABEL[x]}
-                          </option>
-                        ))}
-                      </select>
                       <button
                         className="adm-mini"
                         title="Tahrirlash"

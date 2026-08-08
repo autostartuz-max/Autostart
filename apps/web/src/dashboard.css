@@ -295,6 +295,13 @@
 .ud-v.lnk:hover { text-decoration: underline; }
 .ud-parol { display: inline-flex; align-items: center; gap: 10px; }
 .ud-parol i { font-style: normal; letter-spacing: 2px; color: var(--db-muted); }
+/* Inline tahrirlash — qator o'rniga kiritish maydoni */
+.ud-row.ud-editing { background: rgba(124, 108, 245, .05); }
+.ud-inp { flex: 1; min-width: 0; max-width: 280px; background: var(--db-card2); border: 1px solid var(--db-border);
+  border-radius: 9px; padding: 8px 11px; color: var(--db-text); font-size: 13.5px; font-family: inherit;
+  outline: none; text-align: right; transition: border-color .15s; }
+.ud-inp:focus { border-color: var(--db-blue); }
+.ud-inp::placeholder { color: var(--db-muted); opacity: .7; }
 @media (max-width: 1100px) { .ud-stats { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 820px) {
   .ud-stats { grid-template-columns: repeat(2, 1fr); }

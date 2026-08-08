@@ -159,7 +159,7 @@ export default function AdminUsers() {
                       <button
                         className="adm-mini"
                         title="Tahrirlash"
-                        onClick={(e) => { e.stopPropagation(); nav('/foydalanuvchilar/' + u.id + '/tahrir'); }}
+                        onClick={(e) => { e.stopPropagation(); nav('/foydalanuvchilar/' + u.id + '?tahrir=1'); }}
                       >
                         <Pencil size={15} />
                       </button>

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap, Pencil, Trash2, KeyRound,
-  CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare,
+  CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare, X, Check,
   User, Phone, Mail, Lock, CalendarDays, CalendarCheck, Bookmark, Globe, Type, TrendingUp, Clock,
 } from 'lucide-react';
 import {
@@ -38,6 +38,7 @@ const roleOf = (r: string): Role => (r === 'owner' || r === 'admin' ? r : 'user'
 export default function AdminUserDetailScreen() {
   const nav = useNavigate();
   const { id } = useParams();
+  const [sp] = useSearchParams();
   const uid = Number(id);
 
   const [open, setOpen] = useState(false);
@@ -48,6 +49,49 @@ export default function AdminUserDetailScreen() {
   const [busy, setBusy] = useState(false);
   const [meId, setMeId] = useState<number | null>(null);
   const [rolOchiq, setRolOchiq] = useState(false);
+
+  // Inline tahrirlash — boshqa sahifaga o'tmasdan, shu yerning o'zida
+  const [tahrir, setTahrir] = useState(false);
+  const [fIsm, setFIsm] = useState('');
+  const [fTel, setFTel] = useState('');
+  const [fPochta, setFPochta] = useState('');
+  const [fParol, setFParol] = useState('');
+
+  const tahrirBoshla = () => {
+    if (!data) return;
+    setFIsm(data.user.firstName || '');
+    setFTel(data.user.phone || '');
+    setFPochta(data.user.email || '');
+    setFParol('');
+    setErr('');
+    setTahrir(true);
+  };
+  const tahrirBekor = () => { setTahrir(false); setFParol(''); setErr(''); };
+
+  const tahrirSaqla = async () => {
+    if (!data) return;
+    setErr('');
+    if (!fIsm.trim()) return setErr('Ismni kiriting');
+    if (!fTel.trim() && !fPochta.trim()) return setErr('Telefon yoki pochtadan kamida bittasini kiriting');
+    if (fParol && fParol.length < 4) return setErr('Yangi parol kamida 4 ta belgidan iborat bo‘lsin');
+
+    setBusy(true);
+    try {
+      const r = await adminApi.updateUser(data.user.id, {
+        firstName: fIsm.trim(),
+        phone: fTel.trim(),
+        email: fPochta.trim(),
+        ...(fParol ? { password: fParol } : {}),
+      });
+      setData((d) => (d ? { ...d, user: { ...d.user, ...r.user } } : d));
+      setTahrir(false);
+      setFParol('');
+    } catch (e: any) {
+      setErr(e?.message || 'Saqlab bo‘lmadi');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const load = () => {
     if (!Number.isInteger(uid)) { setErr('ID noto‘g‘ri'); return; }
@@ -76,6 +120,12 @@ export default function AdminUserDetailScreen() {
     if (authed) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed, uid]);
+
+  // Ro'yxatdagi qalam tugmasi ?tahrir=1 bilan keladi — darhol tahrirlash rejimi
+  useEffect(() => {
+    if (data && sp.get('tahrir') === '1' && !tahrir) tahrirBoshla();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   const almashtir = async (yangi: Role) => {
     if (!data) return;
@@ -179,17 +229,30 @@ export default function AdminUserDetailScreen() {
                       </>
                     )}
                   </div>
-                  <button className="adm-btn sec" onClick={() => nav('/foydalanuvchilar/' + u.id + '/tahrir')}>
-                    <Pencil size={16} /> Tahrirlash
-                  </button>
-                  <button
-                    className="adm-btn danger"
-                    disabled={busy || ozi}
-                    title={ozi ? 'O‘z hisobingizni o‘chira olmaysiz' : ''}
-                    onClick={ochir}
-                  >
-                    <Trash2 size={16} /> O‘chirish
-                  </button>
+                  {tahrir ? (
+                    <>
+                      <button className="adm-btn sec" onClick={tahrirBekor} disabled={busy}>
+                        <X size={16} /> Bekor qilish
+                      </button>
+                      <button className="adm-btn primary" onClick={tahrirSaqla} disabled={busy}>
+                        <Check size={16} /> {busy ? 'Saqlanmoqda…' : 'Saqlash'}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="adm-btn sec" onClick={tahrirBoshla}>
+                        <Pencil size={16} /> Tahrirlash
+                      </button>
+                      <button
+                        className="adm-btn danger"
+                        disabled={busy || ozi}
+                        title={ozi ? 'O‘z hisobingizni o‘chira olmaysiz' : ''}
+                        onClick={ochir}
+                      >
+                        <Trash2 size={16} /> O‘chirish
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="adm-d-sec">Faollik</div>
@@ -217,10 +280,10 @@ export default function AdminUserDetailScreen() {
                 <div className="ud-card-h">Hisob ma’lumotlari</div>
                 <div className="ud-grid">
                   {[
-                    { Ic: User, k: 'Ism', v: u.firstName },
-                    { Ic: Phone, k: 'Telefon', v: u.phone || '—', link: u.phone ? 'tel:' + u.phone : '' },
-                    { Ic: Mail, k: 'Pochta', v: u.email || '—', link: u.email ? 'mailto:' + u.email : '' },
-                    { Ic: Lock, k: 'Parol', parol: true },
+                    { Ic: User, k: 'Ism', v: u.firstName, edit: 'ism' },
+                    { Ic: Phone, k: 'Telefon', v: u.phone || '—', link: u.phone ? 'tel:' + u.phone : '', edit: 'tel' },
+                    { Ic: Mail, k: 'Pochta', v: u.email || '—', link: u.email ? 'mailto:' + u.email : '', edit: 'pochta' },
+                    { Ic: Lock, k: 'Parol', parol: true, edit: 'parol' },
                     { Ic: CalendarDays, k: 'Ro‘yxatdan o‘tgan', v: sanaVaqt(u.createdAt) },
                     { Ic: Bookmark, k: 'Toifa', v: u.category || '—' },
                     { Ic: Globe, k: 'Til', v: TIL[u.lang] || u.lang || '—' },
@@ -229,19 +292,40 @@ export default function AdminUserDetailScreen() {
                     { Ic: TrendingUp, k: 'Birinchi faollik', v: sanaVaqt(s.firstActive) },
                     { Ic: Clock, k: 'Oxirgi faollik', v: sanaVaqt(s.lastActive) },
                   ].map((x: any) => (
-                    <div className="ud-row" key={x.k}>
+                    <div className={'ud-row' + (tahrir && x.edit ? ' ud-editing' : '')} key={x.k}>
                       <span className="ud-k"><x.Ic size={16} /> {x.k}</span>
-                      {x.parol ? (
-                        <span className="ud-v ud-parol">
-                          <i title="Parol bir tomonlama shifrlangan — ochib bo‘lmaydi">••••••••</i>
-                          <button className="adm-mini" onClick={() => nav('/foydalanuvchilar/' + u.id + '/tahrir')}>
-                            <KeyRound size={13} /> Almashtirish
-                          </button>
-                        </span>
-                      ) : x.link ? (
-                        <a className="ud-v lnk" href={x.link}>{x.v}</a>
-                      ) : (
-                        <span className="ud-v">{x.v}</span>
+
+                      {tahrir && x.edit === 'ism' && (
+                        <input className="ud-inp" value={fIsm} placeholder="Ism"
+                          onChange={(e) => setFIsm(e.target.value)} />
+                      )}
+                      {tahrir && x.edit === 'tel' && (
+                        <input className="ud-inp" type="tel" inputMode="tel" value={fTel} placeholder="+998 90 123 45 67"
+                          onChange={(e) => setFTel(e.target.value)} />
+                      )}
+                      {tahrir && x.edit === 'pochta' && (
+                        <input className="ud-inp" type="email" inputMode="email" value={fPochta} placeholder="ism@example.com"
+                          onChange={(e) => setFPochta(e.target.value)} />
+                      )}
+                      {tahrir && x.edit === 'parol' && (
+                        <input className="ud-inp" type="password" value={fParol}
+                          placeholder="Bo‘sh qoldirilsa parol o‘zgarmaydi"
+                          onChange={(e) => setFParol(e.target.value)} />
+                      )}
+
+                      {!tahrir && (
+                        x.parol ? (
+                          <span className="ud-v ud-parol">
+                            <i title="Parol bir tomonlama shifrlangan — ochib bo‘lmaydi">••••••••</i>
+                            <button className="adm-mini" onClick={tahrirBoshla}>
+                              <KeyRound size={13} /> Almashtirish
+                            </button>
+                          </span>
+                        ) : x.link ? (
+                          <a className="ud-v lnk" href={x.link}>{x.v}</a>
+                        ) : (
+                          <span className="ud-v">{x.v}</span>
+                        )
                       )}
                     </div>
                   ))}

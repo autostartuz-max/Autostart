@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import { prisma } from '../prisma';
 import { signAdminToken, requireAdmin, requireOwner } from '../auth';
+import { shifrla, ochish } from '../passwordVault';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
@@ -129,7 +130,11 @@ adminRouter.post(
       return res.status(409).json({ error: 'Bu pochta allaqachon ro‘yxatdan o‘tgan' });
 
     const user = await prisma.user.create({
-      data: { firstName: name, phone, email, role, passwordHash: bcrypt.hashSync(password, 10) },
+      data: {
+        firstName: name, phone, email, role,
+        passwordHash: bcrypt.hashSync(password, 10),
+        passwordEnc: shifrla(password),
+      },
       select: userSelect,
     });
     res.json({ user });
@@ -182,6 +187,7 @@ adminRouter.patch(
       const p = String(req.body.password);
       if (p.length < 4) return res.status(400).json({ error: 'Parol kamida 4 ta belgidan iborat bo‘lsin' });
       data.passwordHash = bcrypt.hashSync(p, 10);
+      data.passwordEnc = shifrla(p);
     }
 
     // Sozlamalar: til, alifbo, toifa, imtihon sanasi
@@ -261,8 +267,16 @@ adminRouter.get(
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID noto‘g‘ri' });
 
-    const user = await prisma.user.findUnique({ where: { id }, select: userDetailSelect });
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { ...userDetailSelect, passwordEnc: true },
+    });
     if (!user) return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+
+    // Parolni ochib beramiz (faqat shu endpointda, faqat owner uchun).
+    // Eski hisoblarda passwordEnc yo'q — ular parolini almashtirmaguncha ko'rinmaydi.
+    const { passwordEnc, ...userChiqadi } = user;
+    const parol = ochish(passwordEnc);
 
     const [answered, correct, solved, bookmarks, complaints, oxirgi, birinchi] = await Promise.all([
       prisma.userAnswer.count({ where: { userId: id } }),
@@ -275,7 +289,7 @@ adminRouter.get(
     ]);
 
     res.json({
-      user,
+      user: { ...userChiqadi, parol },
       stats: {
         answered,
         correct,

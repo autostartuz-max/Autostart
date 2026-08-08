@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap, Pencil, Trash2, KeyRound,
-  CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare, X, Check, ChevronDown,
+  CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare, X, Check, Eye, EyeOff, Copy,
   User, Phone, Mail, Lock, CalendarDays, CalendarCheck, Bookmark, TrendingUp, Clock,
 } from 'lucide-react';
 import {
@@ -98,6 +98,8 @@ export default function AdminUserDetailScreen() {
   const [toifalar, setToifalar] = useState<string[]>([]);
   // Qaysi maydonda xato va nima deyish kerak — xabar o'sha qator ostida chiqadi
   const [xato, setXato] = useState<{ f: string; m: string } | null>(null);
+  const [parolKorin, setParolKorin] = useState(false); // parol ochiq ko'rinsinmi
+  const [nusxa, setNusxa] = useState(false);
 
   // <input type="date"> uchun YYYY-MM-DD
   const sanaInput = (s: string | null) => {
@@ -404,7 +406,25 @@ export default function AdminUserDetailScreen() {
                       {(!tahrir || !x.edit) && (
                         x.parol ? (
                           <span className="ud-v ud-parol">
-                            <i title="Parol bir tomonlama shifrlangan — ochib bo‘lmaydi">••••••••</i>
+                            {u.parol ? (
+                              <>
+                                <i className={parolKorin ? 'ochiq' : ''}>
+                                  {parolKorin ? u.parol : '•'.repeat(Math.min(u.parol.length, 14))}
+                                </i>
+                                <button className="adm-mini" title={parolKorin ? 'Yashirish' : 'Ko‘rsatish'}
+                                  onClick={() => setParolKorin((v) => !v)}>
+                                  {parolKorin ? <EyeOff size={13} /> : <Eye size={13} />}
+                                </button>
+                                <button className="adm-mini" title="Nusxalash"
+                                  onClick={() => { navigator.clipboard?.writeText(u.parol || ''); setNusxa(true); setTimeout(() => setNusxa(false), 1500); }}>
+                                  {nusxa ? <Check size={13} /> : <Copy size={13} />}
+                                </button>
+                              </>
+                            ) : (
+                              <i title="Bu hisob parol ko'rinishi qo'shilishidan oldin yaratilgan">
+                                ko‘rinmaydi
+                              </i>
+                            )}
                             <button className="adm-mini" onClick={tahrirBoshla}>
                               <KeyRound size={13} /> Almashtirish
                             </button>
@@ -421,9 +441,10 @@ export default function AdminUserDetailScreen() {
               </div>
 
               <div className="adm-f-hint">
-                Parol bazada bir tomonlama shifrlangan holda saqlanadi va ochib bo‘lmaydi —
-                bu baza o‘g‘irlansa ham parollar oshkor bo‘lmasligi uchun. Foydalanuvchi parolini
-                unutgan bo‘lsa, «Almashtirish» orqali yangi parol qo‘yib bering.
+                Parol serverdagi kalit bilan shifrlangan holda saqlanadi va shu sahifada ochiladi —
+                bu bo‘lim faqat Owner uchun. Bu sahifadan oldin yaratilgan hisoblarda parol
+                «ko‘rinmaydi» deb turadi: eski parollar faqat bir tomonlama hash bo‘lib saqlangan,
+                ularni tiklab bo‘lmaydi. «Almashtirish» orqali yangi parol qo‘ysangiz — ko‘rinadi.
               </div>
             </>
           )}

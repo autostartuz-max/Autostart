@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma';
 import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser } from '../auth';
+import { shifrla } from '../passwordVault';
 
 // Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi
 function normPhone(raw: any): string | null {
@@ -30,9 +31,10 @@ export const userRouter = Router();
  * butun User yozuvini, ya'ni passwordHash ni ham qaytarardi — parol hashi
  * brauzerga chiqib ketardi. Endi u hech qachon javobga tushmaydi.
  */
-function safeUser<T extends { passwordHash?: string | null }>(u: T) {
+function safeUser<T extends { passwordHash?: string | null; passwordEnc?: string | null }>(u: T) {
   if (!u) return u;
-  const { passwordHash: _drop, ...rest } = u;
+  // passwordEnc ham chiqmasin — u faqat admin panelida, alohida endpointda ochiladi
+  const { passwordHash: _h, passwordEnc: _e, ...rest } = u;
   return rest;
 }
 
@@ -141,7 +143,11 @@ userRouter.post(
     }
 
     const user = await prisma.user.create({
-      data: { phone, email, passwordHash: bcrypt.hashSync(password, 10), firstName: name },
+      data: {
+        phone, email, firstName: name,
+        passwordHash: bcrypt.hashSync(password, 10),
+        passwordEnc: shifrla(password), // admin panelida ko'rsatish uchun
+      },
     });
     res.json({ token: signUserToken(user.id), user: safeUser(user) });
   })

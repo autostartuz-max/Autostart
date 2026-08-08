@@ -293,8 +293,10 @@
   text-align: left; overflow-wrap: anywhere; }
 .ud-v.lnk { color: #60a5fa; text-decoration: none; }
 .ud-v.lnk:hover { text-decoration: underline; }
-.ud-parol { display: inline-flex; align-items: center; gap: 10px; }
+.ud-parol { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .ud-parol i { font-style: normal; letter-spacing: 2px; color: var(--db-muted); }
+.ud-parol i.ochiq { letter-spacing: 0; color: var(--db-text); font-weight: 700;
+  font-family: ui-monospace, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
 /* Inline tahrirlash — qator o'rniga kiritish maydoni */
 .ud-row.ud-editing { background: rgba(124, 108, 245, .05); align-items: flex-start; }
 .ud-row.ud-editing .ud-k { padding-top: 9px; }

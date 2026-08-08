@@ -259,6 +259,8 @@ export interface AdminUserDetail extends AdminUserRow {
   alphabet: string;
   category: string;
   examDate: string | null;
+  /** Ochilgan parol. Eski hisoblarda null — bcrypt hashdan tiklab bo'lmaydi. */
+  parol?: string | null;
 }
 
 export interface AdminUserStats {

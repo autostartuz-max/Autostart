@@ -99,6 +99,10 @@ model User {
   // Kamida bittasi (telefon yoki pochta) bo'lishi shart — buni API tekshiradi.
   email        String?      @unique
   passwordHash String?
+  // Admin panelida parolni ko'rsatish uchun shifrlangan nusxa (AES-256-GCM).
+  // Kirish tekshiruvi baribir passwordHash bo'yicha — bu faqat ko'rsatish uchun.
+  // Eski hisoblarda bo'sh: bcrypt hashdan asl parolni tiklab bo'lmaydi.
+  passwordEnc  String?
   firstName    String       @default("Foydalanuvchi")
   // owner | admin | user
   //   owner — to'liq huquq: savollar + rollarni tayinlash

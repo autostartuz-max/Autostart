@@ -414,7 +414,9 @@ export default function AdminUserDetailScreen() {
                         </div>
                       )}
 
-                      {!tahrir && (
+                      {/* Tahrirlanmaydigan qatorlar (sana, faollik) tahrirlash paytida ham
+                          qiymatini ko'rsatib tursin — avval bo'sh bo'lib qolardi */}
+                      {(!tahrir || !x.edit) && (
                         x.parol ? (
                           <span className="ud-v ud-parol">
                             <i title="Parol bir tomonlama shifrlangan — ochib bo‘lmaydi">••••••••</i>

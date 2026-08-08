@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle,
-  Search, Bell, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
-  LogOut, User, Shuffle,
+  Search, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
+  LogOut, User, Shuffle, ChevronDown,
 } from 'lucide-react';
-import { api, clearToken, forgetAdmin } from '../api';
+import { api, clearToken, forgetAdmin, isOwner } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
@@ -30,6 +30,11 @@ export default function Dashboard() {
 
   const chartPts = CHART.map((v, i) => `${(i / (CHART.length - 1)) * 100},${100 - v}`).join(' ');
 
+  // Owner o'z sahifasini admin ko'rinishida (statistika bilan) ko'radi,
+  // qolganlar oddiy profilga tushadi — /foydalanuvchilar ular uchun 403.
+  const ozId = (me as any)?.user?.id as number | undefined;
+  const ozSahifa = isOwner() && ozId ? '/foydalanuvchilar/' + ozId : '/profil';
+
   return (
     <div className="db">
       <AppSidebar active="/" open={open} onClose={() => setOpen(false)} wrong={wrong} />
@@ -39,18 +44,21 @@ export default function Dashboard() {
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
           <div className="db-search"><Search size={17} /><input placeholder="Qidirish…" /></div>
           <div className="db-top-right">
-            <div className="db-chip">UZ</div>
-            <div className="db-chip"><Bell size={17} /><span className="nb">3</span></div>
             <div className="db-userwrap">
-              <div className="db-userchip" onClick={() => setUmenu((v) => !v)}>
+              {/* Ism ustiga bosilsa — o'sha foydalanuvchi sahifasiga o'tadi.
+                  Owner uchun admin ko'rinishi, qolganlar uchun o'z profili. */}
+              <div className="db-userchip" onClick={() => nav(ozSahifa)} title="Mening sahifam">
                 <span className="db-uava"><ShieldCheck size={18} /></span>
                 <span className="db-uname"><b>{name}</b><span>Pro</span></span>
               </div>
+              <button className="db-uarrow" onClick={() => setUmenu((v) => !v)} title="Menyu">
+                <ChevronDown size={16} />
+              </button>
               {umenu && (
                 <>
                   <div className="db-umenu-ov" onClick={() => setUmenu(false)} />
                   <div className="db-umenu">
-                    <button onClick={() => { setUmenu(false); nav('/profil'); }}><User size={15} /> Profil</button>
+                    <button onClick={() => { setUmenu(false); nav(ozSahifa); }}><User size={15} /> Mening sahifam</button>
                     <button className="danger" onClick={() => { clearToken(); forgetAdmin(); localStorage.removeItem('yhq_entered'); window.location.href = '/'; }}><LogOut size={15} /> Chiqish</button>
                   </div>
                 </>

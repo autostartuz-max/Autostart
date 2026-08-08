@@ -53,7 +53,10 @@
 .db-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--db-card); border: 1px solid var(--db-border);
   border-radius: 10px; padding: 9px 12px; font-size: 13px; font-weight: 600; color: var(--db-muted); position: relative; }
 .db-chip .nb { position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; border-radius: 20px; padding: 1px 6px; }
-.db-userwrap { position: relative; }
+.db-userwrap { position: relative; display: flex; align-items: center; gap: 4px; }
+.db-uarrow { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 34px;
+  background: none; border: none; color: var(--db-muted); border-radius: 9px; cursor: pointer; }
+.db-uarrow:hover { background: var(--db-card2); color: var(--db-text); }
 .db-userchip { display: inline-flex; align-items: center; gap: 9px; background: var(--db-card); border: 1px solid var(--db-border); border-radius: 12px; padding: 5px 12px 5px 6px; cursor: pointer; }
 .db-userchip:hover { border-color: var(--db-blue); }
 .db-umenu-ov { position: fixed; inset: 0; z-index: 40; }

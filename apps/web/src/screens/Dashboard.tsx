@@ -87,6 +87,7 @@ export default function Dashboard() {
                 { Icon: FileText, c: 'p', t: 'Shablon testlar', s: '63 ta imtihon bileti', b: '63 ta', to: '/shablon' },
                 { Icon: Shuffle, c: 'g', t: 'Random testlar', s: 'Barcha shablonlardan aralash', b: '20–200', to: '/random' },
                 { Icon: Grid3x3, c: 'g', t: "Mavzular bo'yicha", s: 'Mavzular kesimida', b: '10 mavzu', to: '/mavzular' },
+                { Icon: HeartCrack, c: 'o', t: 'Xato qilgan savollarim', s: 'Xatolar ustida ishlash', b: 'Shaxsiy', to: '/xatolarim' },
                 { Icon: CircleAlert, c: 'o', t: 'Qiyin savollar', s: 'Ko‘p xato qilinadigan', b: 'Tricky', to: '/test?mode=tricky' },
                 { Icon: ClipboardCheck, c: 'b', t: 'Imtihon simulyatori', s: 'Real imtihon sharoiti', b: '20 savol', to: '/shablon' },
               ].map((x) => (

@@ -10,6 +10,7 @@ import Shablon from './screens/Shablon';
 import RandomTests from './screens/RandomTests';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
+import Mistakes from './screens/Mistakes';
 import TestPlayer from './screens/TestPlayer';
 import Signs from './screens/Signs';
 import Profile from './screens/Profile';
@@ -86,6 +87,7 @@ export default function App() {
         <Route path="/shablon" element={<Shablon />} />
         <Route path="/random" element={<RandomTests />} />
         <Route path="/mavzular" element={<Topics />} />
+        <Route path="/xatolarim" element={<Mistakes />} />
         <Route path="/biletlar" element={<Tickets />} />
         <Route path="/test" element={<TestPlayer />} />
         <Route path="/belgilar" element={<Signs />} />

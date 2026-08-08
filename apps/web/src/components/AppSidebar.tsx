@@ -13,8 +13,8 @@ const TESTLAR = [
   { Icon: FileText, label: 'Shablon testlar', to: '/shablon' },
   { Icon: Shuffle, label: 'Random testlar', to: '/random' },
   { Icon: BookOpen, label: "Mavzular bo'yicha", to: '/mavzular' },
+  { Icon: HeartCrack, label: 'Xato qilgan savollarim', to: '/xatolarim', badge: true },
   { Icon: CircleAlert, label: 'Qiyin savollar', to: '/test?mode=tricky' },
-  { Icon: HeartCrack, label: 'Xatolarim', to: '/test?mode=mistakes', badge: true },
   { Icon: Heart, label: 'Sevimlilar', to: '/test?mode=saved' },
 ];
 const ORGANISH = [
@@ -36,7 +36,8 @@ const BOSHQA = [
 ];
 
 // Menyu soddalashtirilgan holati (xozircha). Barcha bo'limlarni qaytarish uchun -> false qiling.
-// Ko'rinadi: Bosh sahifa, Shablon testlar, Random testlar, Mavzular bo'yicha, Savollar, Boshqa.
+// Ko'rinadi: Bosh sahifa, Shablon testlar, Random testlar, Mavzular bo'yicha,
+// Xato qilgan savollarim, Savollar, Boshqa.
 const MENU_MINIMAL = true;
 
 interface Props {
@@ -98,7 +99,7 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
           <Home size={18} /> <span>Bosh sahifa</span>
         </button>
         <div className="db-sec">Testlar</div>
-        {navi(MENU_MINIMAL ? TESTLAR.slice(0, 3) : TESTLAR)}
+        {navi(MENU_MINIMAL ? TESTLAR.slice(0, 4) : TESTLAR)}
         {!MENU_MINIMAL && <>
           <div className="db-sec">O‘rganish</div>
           {navi(ORGANISH)}

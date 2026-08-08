@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap, Pencil, Trash2 } from 'lucide-react';
+import {
+  ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap, Pencil, Trash2, KeyRound,
+} from 'lucide-react';
 import {
   adminApi, hasAdmin, isOwner, clearAdmin, ROLE_LABEL,
   type AdminUserDetail as UserDetail, type AdminUserStats, type Role,
@@ -43,6 +45,7 @@ export default function AdminUserDetailScreen() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [meId, setMeId] = useState<number | null>(null);
+  const [rolOchiq, setRolOchiq] = useState(false);
 
   const load = () => {
     if (!Number.isInteger(uid)) { setErr('ID noto‘g‘ri'); return; }
@@ -111,11 +114,6 @@ export default function AdminUserDetailScreen() {
   const Ic = ROLE_IC[r];
   const ozi = meId != null && u != null && meId === u.id;
   const mehmon = !!u?.tgId?.startsWith('guest-');
-  const hisobTuri =
-    u?.phone && u?.email ? 'Telefon + pochta'
-      : u?.phone ? 'Telefon + parol'
-        : u?.email ? 'Pochta + parol'
-          : mehmon ? 'Mehmon (qurilma)' : 'Telegram';
 
   return (
     <div className="db">
@@ -146,19 +144,34 @@ export default function AdminUserDetailScreen() {
                   <span className={'adm-badge ' + r}>{ROLE_LABEL[r]}</span>
                 </div>
                 <div className="adm-head-btns">
-                  <select
-                    className="adm-role-sel"
-                    value={r}
-                    disabled={busy || ozi}
-                    title={ozi ? 'O‘z rolingizni o‘zgartira olmaysiz' : 'Rolni o‘zgartirish'}
-                    onChange={(e) => almashtir(e.target.value as Role)}
-                  >
-                    {ROLES.map((x) => (
-                      <option key={x} value={x} disabled={mehmon && x !== 'user'}>
-                        {ROLE_LABEL[x]}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="adm-rolebox">
+                    <button
+                      className="adm-btn sec"
+                      disabled={busy || ozi}
+                      title={ozi ? 'O‘z rolingizni o‘zgartira olmaysiz' : 'Rolni o‘zgartirish'}
+                      onClick={() => setRolOchiq((v) => !v)}
+                    >
+                      <ShieldCheck size={16} /> Rolni o‘zgartirish
+                    </button>
+                    {rolOchiq && (
+                      <>
+                        <div className="adm-rolebg" onClick={() => setRolOchiq(false)} />
+                        <div className="adm-rolemenu">
+                          {ROLES.map((x) => (
+                            <button
+                              key={x}
+                              className={'adm-rolemi' + (x === r ? ' on' : '')}
+                              disabled={mehmon && x !== 'user'}
+                              onClick={() => { setRolOchiq(false); almashtir(x); }}
+                            >
+                              <b>{ROLE_LABEL[x]}</b>
+                              <span>{ROLE_IZOH[x]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
                   <button className="adm-btn sec" onClick={() => nav('/foydalanuvchilar/' + u.id + '/tahrir')}>
                     <Pencil size={16} /> Tahrirlash
                   </button>
@@ -187,11 +200,18 @@ export default function AdminUserDetailScreen() {
 
               <div className="adm-d-sec">Hisob</div>
               <dl className="adm-d-list adm-d-card">
-                <div><dt>ID</dt><dd>{u.id}</dd></div>
                 <div><dt>Ism</dt><dd>{u.firstName}</dd></div>
                 <div><dt>Telefon</dt><dd>{u.phone || '—'}</dd></div>
                 <div><dt>Pochta</dt><dd>{u.email || '—'}</dd></div>
-                <div><dt>Hisob turi</dt><dd>{hisobTuri}</dd></div>
+                <div>
+                  <dt>Parol</dt>
+                  <dd className="adm-parol">
+                    <span title="Parollar bir tomonlama shifrlangan — ochib bo‘lmaydi">••••••••</span>
+                    <button className="adm-mini" onClick={() => nav('/foydalanuvchilar/' + u.id + '/tahrir')}>
+                      <KeyRound size={14} /> Almashtirish
+                    </button>
+                  </dd>
+                </div>
                 <div><dt>Ro‘yxatdan o‘tgan</dt><dd>{sanaVaqt(u.createdAt)}</dd></div>
                 <div><dt>Toifa</dt><dd>{u.category || '—'}</dd></div>
                 <div><dt>Til</dt><dd>{TIL[u.lang] || u.lang || '—'}</dd></div>
@@ -200,6 +220,11 @@ export default function AdminUserDetailScreen() {
                 <div><dt>Birinchi faollik</dt><dd>{sanaVaqt(s.firstActive)}</dd></div>
                 <div><dt>Oxirgi faollik</dt><dd>{sanaVaqt(s.lastActive)}</dd></div>
               </dl>
+              <div className="adm-f-hint">
+                Parol bazada bir tomonlama shifrlangan holda saqlanadi va ochib bo‘lmaydi —
+                bu baza o‘g‘irlansa ham parollar oshkor bo‘lmasligi uchun. Foydalanuvchi parolini
+                unutgan bo‘lsa, «Almashtirish» orqali yangi parol qo‘yib bering.
+              </div>
             </>
           )}
         </div>

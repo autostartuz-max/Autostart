@@ -2,6 +2,12 @@ import 'dotenv/config';
 import { readFileSync } from 'fs';
 
 export const PORT = Number(process.env.PORT || 4000);
+// XAVFSIZLIK: API faqat serverning ichida tinglaydi — tashqaridan to'g'ridan-to'g'ri
+// ulanib bo'lmaydi, hamma so'rov nginx orqali keladi. Avval 0.0.0.0 da turardi va
+// faqat firewall to'sib turardi; firewall o'chsa API ochilib qolardi.
+// Lokal ishlab chiqishda ham 127.0.0.1 yetarli (vite proxy shu yerga uradi).
+// Boshqa mashinadan kirish kerak bo'lsa: HOST=0.0.0.0
+export const HOST = process.env.HOST || '127.0.0.1';
 export const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 export const BOT_TOKEN = process.env.BOT_TOKEN || '';
 // DEV_AUTH: brauzerda soxta foydalanuvchi bilan ishlash (Telegram tokeni shart emas)

@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
-import { PORT, DEV_AUTH } from './env';
+import { PORT, HOST, DEV_AUTH } from './env';
 import { userRouter } from './routes/user';
 import { adminRouter } from './routes/admin';
 import { rateLimit } from './rateLimit';
@@ -10,6 +10,9 @@ import { rateLimit } from './rateLimit';
 const app = express();
 // nginx reverse-proxy orqasida — haqiqiy foydalanuvchi IP'sini bilish uchun
 app.set('trust proxy', 1);
+// XAVFSIZLIK: "X-Powered-By: Express" sarlavhasi qaysi texnologiya
+// ishlatilayotganini oshkor qiladi — hujumchiga kerakli ma'lumot.
+app.disable('x-powered-by');
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
@@ -53,7 +56,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: err?.message || 'Server xatosi' });
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Autostart API ishga tushdi: http://localhost:${PORT}  (DEV_AUTH=${DEV_AUTH})`);
+app.listen(PORT, HOST, () => {
+  console.log(`✅ Autostart API ishga tushdi: http://${HOST}:${PORT}  (DEV_AUTH=${DEV_AUTH})`);
   if (fs.existsSync(webDist)) console.log('   Frontend (web + admin) shu serverdan xizmat qilinmoqda.');
 });

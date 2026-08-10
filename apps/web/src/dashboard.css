@@ -365,6 +365,29 @@
 .xt-num.no { background: rgba(239, 68, 68, .14); color: #f87171; }
 .rt-arrow { flex-shrink: 0; color: var(--db-muted); }
 .db-rempty { color: var(--db-muted); font-size: 13.5px; padding: 18px 4px; text-align: center; }
+
+/* ===== Huquqiy hujjatlar ===== */
+.lg-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; background: rgba(59, 130, 246, .16); color: #7fb0ff; }
+.lg-tabs { display: inline-flex; gap: 3px; padding: 3px; border-radius: 10px; background: var(--db-card2);
+  border: 1px solid var(--db-border); margin-bottom: 18px; flex-wrap: wrap; }
+.lg-doc { background: var(--db-card); border: 1px solid var(--db-border); border-radius: 14px;
+  padding: 24px 26px; max-width: 860px; color: var(--db-text); font-size: 14.5px; line-height: 1.75; }
+.lg-sana { color: var(--db-muted); font-size: 12.5px; margin-bottom: 18px; }
+.lg-doc h3 { font-size: 15.5px; font-weight: 800; margin: 24px 0 10px; color: var(--db-text); }
+.lg-doc p { margin: 0 0 12px; color: #c8d2e6; }
+.lg-doc ul { margin: 0 0 12px; padding-left: 20px; color: #c8d2e6; }
+.lg-doc li { margin-bottom: 7px; }
+.lg-doc b { color: var(--db-text); }
+.lg-bosh { background: rgba(245, 158, 11, .18); color: #fbbf24; border-radius: 5px; padding: 1px 7px;
+  font-weight: 700; font-size: 13px; }
+.lg-rek { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--db-border); }
+.ud-d-list { display: flex; flex-direction: column; margin: 0; }
+.ud-d-list > div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0;
+  border-bottom: 1px solid var(--db-border); }
+.ud-d-list > div:last-child { border-bottom: none; }
+.ud-d-list dt { color: var(--db-muted); font-size: 13px; flex-shrink: 0; }
+.ud-d-list dd { color: var(--db-text); font-size: 13.5px; margin: 0; text-align: right; overflow-wrap: anywhere; }
 .xt-lead { font-size: 13.5px; color: var(--db-muted); margin: -8px 0 18px; max-width: 720px; line-height: 1.6; }
 .xt-lead b { color: var(--db-text); }
 .xt-bosh { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 46px 20px;

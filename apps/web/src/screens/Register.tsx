@@ -12,6 +12,7 @@ export default function Register({ onAuthed }: { onAuthed: () => void }) {
   const [confirm, setConfirm] = useState('');
   const [err, setErr] = useState('');
   const [bad, setBad] = useState(''); // qaysi qator xato — o'sha ajratib ko'rsatiladi
+  const [rozi, setRozi] = useState(false);
   const [busy, setBusy] = useState(false);
   const inpClass = (f: string) => 'auth-inp' + (bad === f ? ' bad' : '');
 
@@ -50,6 +51,7 @@ export default function Register({ onAuthed }: { onAuthed: () => void }) {
     if (password.length < 4) { setBad('password'); return setErr('Parol kamida 4 ta belgidan iborat bo‘lsin'); }
     if (!confirm) { setBad('confirm'); return setErr('Parolni tasdiqlang'); }
     if (password !== confirm) { setBad('confirm'); return setErr('Parollar mos kelmadi'); }
+    if (!rozi) return setErr('Davom etish uchun shartlarga rozilik bildiring');
 
     setBusy(true);
     try {
@@ -91,6 +93,22 @@ export default function Register({ onAuthed }: { onAuthed: () => void }) {
         <label className="auth-lab">Parolni tasdiqlang <span className="auth-req">*</span></label>
         <input className={inpClass('confirm')} type="password" name="confirm-password" autoComplete="new-password" required
           placeholder="Tasdiqlash parolini kiriting" value={confirm} onChange={(e) => { setConfirm(e.target.value); setBad(''); }} />
+
+        {/* Rozilik: ma'lumot reklama/xabarnoma uchun ham ishlatilgani sababli majburiy */}
+        <label className="auth-rozi">
+          <input
+            type="checkbox"
+            checked={rozi}
+            onChange={(e) => { setRozi(e.target.checked); setBad(''); }}
+          />
+          <span>
+            Men <a href="/hujjat/maxfiylik" target="_blank" rel="noopener noreferrer">maxfiylik siyosati</a>,{' '}
+            <a href="/hujjat/shartlar" target="_blank" rel="noopener noreferrer">foydalanish shartlari</a> va{' '}
+            <a href="/hujjat/oferta" target="_blank" rel="noopener noreferrer">ommaviy oferta</a> bilan
+            tanishdim va rozilik bildiraman. Xizmat yangiliklari va takliflari haqida xabar
+            yuborilishiga roziman.
+          </span>
+        </label>
 
         {err && <div className="auth-err">{err}</div>}
 

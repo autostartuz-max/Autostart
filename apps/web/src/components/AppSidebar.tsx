@@ -5,7 +5,7 @@ import LangTheme from './LangTheme';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
-  ClipboardList, Shuffle, ShieldCheck,
+  ClipboardList, Shuffle, ShieldCheck, ScrollText,
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -33,6 +33,7 @@ const BOSHQA = [
   { Icon: Settings, label: 'Sozlamalar', to: '/profil' },
   { Icon: LifeBuoy, label: 'Yordam / FAQ', to: '/oktagon' },
   { Icon: MessageCircle, label: "Biz bilan bog'lanish", to: '/oktagon' },
+  { Icon: ScrollText, label: 'Hujjatlar', to: '/hujjat/maxfiylik' },
 ];
 
 // Menyu soddalashtirilgan holati (xozircha). Barcha bo'limlarni qaytarish uchun -> false qiling.

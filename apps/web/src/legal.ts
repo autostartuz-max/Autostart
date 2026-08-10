@@ -8,24 +8,26 @@
  * shunda nima qolganini darrov ko'rasiz.
  */
 export const TASHKILOT = {
-  /** To'liq nomi, masalan: «AUTOSTART EDU» MChJ */
-  nom: '',
+  /** To'liq nomi */
+  nom: '«Mingchinor avto ustoz» MCHJ o‘quv korxonasi',
   /** Soliq to'lovchining identifikatsiya raqami */
-  stir: '',
+  stir: '302 938 261',
   /** Yuridik manzil */
-  manzil: '',
+  manzil: 'Farg‘ona viloyati, Quva shahri, Yorqin ko‘chasi, 81-uy',
   /** Aloqa uchun pochta */
-  pochta: '',
+  pochta: 'autostart.uz@gmail.com',
   /** Aloqa uchun telefon */
-  telefon: '',
+  telefon: '+998 78 555 07 17',
   /** Bank nomi */
-  bank: '',
-  /** Hisob raqami */
-  hisob: '',
+  bank: '«O‘zmilliybank» AJ, Quva filiali',
+  /** Hisob raqami (x/r) */
+  hisob: '20208000800314608002',
   /** MFO */
-  mfo: '',
+  mfo: '00450',
+  /** IFUT (faoliyat turi kodi) */
+  ifut: '85320',
   /** Direktor F.I.Sh. */
-  rahbar: '',
+  rahbar: 'A.B.Alijonov',
   /** Sayt manzili */
   sayt: 'autostart.uz',
   /** Hujjat oxirgi yangilangan sana */

@@ -27,10 +27,11 @@ function Rekvizitlar() {
       <dl className="ud-d-list">
         <div><dt>Tashkilot</dt><dd><R v={T.nom} /></dd></div>
         <div><dt>STIR</dt><dd><R v={T.stir} /></dd></div>
+        <div><dt>IFUT</dt><dd><R v={T.ifut} /></dd></div>
         <div><dt>Manzil</dt><dd><R v={T.manzil} /></dd></div>
         <div><dt>Rahbar</dt><dd><R v={T.rahbar} /></dd></div>
         <div><dt>Bank</dt><dd><R v={T.bank} /></dd></div>
-        <div><dt>Hisob raqami</dt><dd><R v={T.hisob} /></dd></div>
+        <div><dt>Hisob raqami (x/r)</dt><dd><R v={T.hisob} /></dd></div>
         <div><dt>MFO</dt><dd><R v={T.mfo} /></dd></div>
         <div><dt>Telefon</dt><dd><R v={T.telefon} /></dd></div>
         <div><dt>Pochta</dt><dd><R v={T.pochta} /></dd></div>

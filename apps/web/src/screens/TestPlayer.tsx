@@ -600,11 +600,6 @@ export default function TestPlayer() {
       <div className="tp2-tools">
         <button className="tp2-az" onClick={fontUp}>A+</button>
         <button className="tp2-az" onClick={fontDown}>A-</button>
-        {answered && (
-          <div className={'tp2-state' + (ans!.isCorrect ? ' ok' : ' no')}>
-            {ans!.isCorrect ? '✓ To‘g‘ri javob' : '✗ Noto‘g‘ri javob'}
-          </div>
-        )}
       </div>
 
       <div className="tp2-body">

@@ -71,6 +71,14 @@ export default function TestPlayer() {
   const [elapsed, setElapsed] = useState(0);
   const startRef = useRef<number>(Date.now());
   const curRef = useRef<HTMLButtonElement | null>(null);
+  // Javobdan keyin keyingi savolga o'tish taymeri (qo'lda o'tsa bekor qilinadi)
+  const nextRef = useRef<number | null>(null);
+  const clearNext = () => {
+    if (nextRef.current != null) {
+      clearTimeout(nextRef.current);
+      nextRef.current = null;
+    }
+  };
 
   // ---- Ovozli pleyer ----
   const voiceRef = useRef<HTMLAudioElement | null>(null);
@@ -236,6 +244,7 @@ export default function TestPlayer() {
 
   useEffect(() => {
     startRef.current = Date.now();
+    clearNext(); // qo'lda boshqa savolga o'tilsa, kutilayotgan avto-o'tish bekor
     stopVoice(); // savol almashganda ovozni to'xtatadi
     setShowPlayer(false);
     setSel(null); // yangi savolda tanlovni tozalaymiz
@@ -245,7 +254,7 @@ export default function TestPlayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx]);
 
-  useEffect(() => () => stopVoice(), []); // ekrandan chiqqanda to'xtatadi
+  useEffect(() => () => { stopVoice(); clearNext(); }, []); // ekrandan chiqqanda to'xtatadi
 
   // F tugmasi — rasmni kattalashtirish (lightbox), Esc — yopish
   useEffect(() => {
@@ -526,20 +535,31 @@ export default function TestPlayer() {
   const fontUp = () => setS('fontScale', Math.min(fscale + 0.12, 4));
   const fontDown = () => setS('fontScale', Math.max(fscale - 0.12, 0.7));
 
-  const selectOpt = (optId: number) => { if (!locked) setSel(optId); };
-  kbRef.current = { opts: displayOpts, select: selectOpt }; // klaviatura (F1-F5) uchun eng so'nggi holat
-  const confirm = async () => {
-    if (locked || sel == null) return;
+  // Variant tanlanishi = javob berish. Alohida "tasdiqlash" bosqichi yo'q:
+  // to'g'ri/noto'g'ri darrov ko'rinadi va 2 sekunddan keyin keyingi savolga o'tadi.
+  const selectOpt = async (optId: number) => {
+    if (locked || sel != null) return; // sel != null — javob yuborilayotgan payt ikkinchi bosishni to'sadi
+    setSel(optId);
     haptic();
     const timeMs = Date.now() - startRef.current;
+    let r: { isCorrect: boolean };
     try {
-      const r = await api.answer({ questionId: q.id, chosen: [sel], timeMs });
-      haptic(r.isCorrect ? 'success' : 'error');
-      setAnswers((a) => ({ ...a, [q.id]: { chosen: [sel], isCorrect: r.isCorrect } }));
+      r = await api.answer({ questionId: q.id, chosen: [optId], timeMs });
     } catch {
-      /* ignore */
+      setSel(null); // yuborilmadi — qayta tanlash mumkin
+      return;
     }
+    haptic(r.isCorrect ? 'success' : 'error');
+    setAnswers((a) => ({ ...a, [q.id]: { chosen: [optId], isCorrect: r.isCorrect } }));
+    const last = idx >= questions.length - 1;
+    clearNext();
+    nextRef.current = window.setTimeout(() => {
+      nextRef.current = null;
+      if (last) setFinished(true);
+      else setIdx(idx + 1);
+    }, 2000);
   };
+  kbRef.current = { opts: displayOpts, select: selectOpt }; // klaviatura (F1-F5) uchun eng so'nggi holat
   const optClass = (o: Option) => {
     if (reveal && o.isCorrect) return 'io ok';
     if (reveal && answered && ans!.chosen.includes(o.id) && !o.isCorrect) return 'io no';
@@ -580,10 +600,11 @@ export default function TestPlayer() {
       <div className="tp2-tools">
         <button className="tp2-az" onClick={fontUp}>A+</button>
         <button className="tp2-az" onClick={fontDown}>A-</button>
-        <button className={'tp2-confirm' + (sel != null && !locked ? ' ready' : '')} disabled={locked || sel == null} onClick={confirm}>
-          Javobni tasdiqlash
-          {sel != null && !locked && <span className="tp2-fbadge">F{displayOpts.findIndex((o) => o.id === sel) + 1}</span>}
-        </button>
+        <div className={'tp2-state' + (answered ? (ans!.isCorrect ? ' ok' : ' no') : '')}>
+          {answered
+            ? ans!.isCorrect ? '✓ To‘g‘ri javob' : '✗ Noto‘g‘ri javob'
+            : `Javobni tanlang (F1–F${displayOpts.length})`}
+        </div>
       </div>
 
       <div className="tp2-body">

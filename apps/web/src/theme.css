@@ -450,12 +450,12 @@ button { font-family: inherit; cursor: pointer; }
 .tp2-tools { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 20px; }
 .tp2-az { width: 46px; height: 40px; background: #26344c; border: 1px solid #33465f; color: #e8eef7;
   border-radius: 9px; font-size: 15px; font-weight: 800; cursor: pointer; }
-.tp2-confirm { position: relative; background: #d7dde6; border: none; color: #1f2937; border-radius: 9px; padding: 11px 22px;
-  font-size: 14.5px; font-weight: 700; cursor: pointer; }
-.tp2-confirm:disabled { opacity: .5; cursor: default; }
-.tp2-confirm.ready { background: #22c55e; color: #fff; opacity: 1; }
-.tp2-fbadge { position: absolute; top: -9px; right: -9px; background: #ef4444; color: #fff; font-size: 11px;
-  font-weight: 800; border-radius: 10px; padding: 2px 7px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); }
+/* Javob holati: variant tanlangach darrov to'g'ri/noto'g'ri ko'rsatiladi
+   (avval shu joyda "Javobni tasdiqlash" tugmasi turardi). */
+.tp2-state { background: #26344c; border: 1px solid #33465f; color: #aebbcd; border-radius: 9px; padding: 11px 22px;
+  font-size: 14.5px; font-weight: 700; }
+.tp2-state.ok { background: #22c55e; border-color: #22c55e; color: #fff; }
+.tp2-state.no { background: #ef4444; border-color: #ef4444; color: #fff; }
 .tp2-body { display: flex; gap: 22px; padding: 4px 22px 12px; align-items: flex-start; }
 .tp2-left { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .tp2-opts { display: flex; flex-direction: column; gap: 14px; }

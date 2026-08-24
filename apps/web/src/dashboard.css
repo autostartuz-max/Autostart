@@ -649,11 +649,13 @@
 .ct-ok button { margin-top: 8px; }
 
 .ct-why { margin-bottom: 16px; }
-.ct-why-h { text-align: center; font-size: 13px; font-weight: 800; letter-spacing: .5px;
-  text-transform: uppercase; color: var(--db-text); margin-bottom: 16px; }
-.ct-why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 26px; }
-.ct-why-i { display: flex; align-items: center; gap: 10px; color: var(--db-muted); font-size: 13.5px; }
-.ct-why-i > svg { color: #4ade80; flex-shrink: 0; }
+.ct-why-h { text-align: center; font-size: 14.5px; font-weight: 800; letter-spacing: .6px;
+  text-transform: uppercase; color: #eef2fa; margin-bottom: 20px; }
+.ct-why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 40px; max-width: 780px;
+  margin: 0 auto; }
+.ct-why-i { display: flex; align-items: center; gap: 11px; color: #c8d2e6; font-size: 13.5px; }
+.ct-why-i > svg { flex-shrink: 0; color: #facc15; border: 1.5px solid #facc15; border-radius: 50%;
+  padding: 2px; width: 20px; height: 20px; }
 
 .ct-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
 .ct-info-c { display: flex; gap: 13px; background: var(--db-card); border: 1px solid var(--db-border);
@@ -663,21 +665,19 @@
 .ct-info-c span { color: var(--db-muted); font-size: 13px; line-height: 1.55; }
 .ct-info-ic { width: 40px; height: 40px; flex-shrink: 0; border-radius: 11px; display: flex;
   align-items: center; justify-content: center; }
-.ct-info-ic.k { background: rgba(59, 130, 246, .16); color: #60a5fa; }
-.ct-info-ic.s { background: rgba(245, 158, 11, .16); color: #fbbf24; }
-.ct-info-ic.v { background: rgba(124, 108, 245, .18); color: #b3a6ff; }
-.ct-info-c:nth-child(1) b { color: #60a5fa; }
-.ct-info-c:nth-child(2) b { color: #fbbf24; }
-.ct-info-c:nth-child(3) b { color: #b3a6ff; }
+.ct-info-ic.k { background: rgba(148, 163, 184, .14); color: #cbd5e1; }
+.ct-info-ic.s { background: rgba(250, 204, 21, .16); color: #facc15; }
+.ct-info-ic.v { background: rgba(59, 130, 246, .18); color: #7fb0ff; }
+.ct-info-c b { color: #facc15; }
 
-.ct-cta { display: flex; align-items: center; gap: 18px; border-radius: 16px; padding: 22px 26px;
-  border: 1px solid var(--db-border);
-  background: linear-gradient(100deg, rgba(239, 68, 68, .16), rgba(124, 108, 245, .12) 60%, transparent); }
-.ct-cta-ic { width: 58px; height: 58px; flex-shrink: 0; border-radius: 14px; display: flex;
-  align-items: center; justify-content: center; background: rgba(239, 68, 68, .18); color: #f87171; }
+.ct-cta { display: flex; align-items: center; gap: 22px; border-radius: 16px; padding: 20px 26px;
+  border: 1px solid var(--db-border); background: var(--db-card); }
+.ct-cta-ic { width: 96px; height: 62px; flex-shrink: 0; border-radius: 12px; display: flex;
+  align-items: center; justify-content: center; color: #ef4444;
+  background: linear-gradient(135deg, rgba(239, 68, 68, .22), rgba(239, 68, 68, .06)); }
 .ct-cta > div { display: flex; flex-direction: column; gap: 4px; }
-.ct-cta span { color: var(--db-muted); font-size: 14.5px; }
-.ct-cta b { color: #fbbf24; font-size: 19px; font-weight: 800; }
+.ct-cta span { color: #eef2fa; font-size: 16px; font-weight: 600; }
+.ct-cta b { color: #facc15; font-size: 19px; font-weight: 800; }
 
 @media (max-width: 900px) {
   .ct-grid { grid-template-columns: 1fr; }
@@ -710,3 +710,26 @@
   white-space: pre-wrap; overflow-wrap: anywhere; }
 .xb-btns { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
 .xb-btns .adm-mini { width: auto; padding: 0 12px; gap: 6px; font-size: 12.5px; font-weight: 600; }
+
+/* Onlayn ro'yxati (Owner va Admin uchun) */
+.db-onlwrap { position: relative; }
+.db-online { font-family: inherit; }
+.db-online.bosiladi { cursor: pointer; }
+.db-online.bosiladi:hover { border-color: var(--db-blue); }
+.db-onlmenu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 41; min-width: 250px;
+  max-height: 340px; overflow-y: auto; background: var(--db-card); border: 1px solid var(--db-border);
+  border-radius: 12px; padding: 6px; box-shadow: 0 14px 36px rgba(0, 0, 0, .35); }
+.db-onlmenu-h { font-size: 11.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+  color: var(--db-muted); padding: 8px 10px 10px; }
+.db-onli { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; }
+.db-onli:hover { background: var(--db-card2); }
+.db-onli-av { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; background: var(--db-card2);
+  border: 1px solid var(--db-border); display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: var(--db-muted); }
+.db-onli-t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.db-onli-t b { color: var(--db-text); font-size: 13.5px; font-weight: 700; overflow-wrap: anywhere; }
+.db-onli-t > span { color: var(--db-muted); font-size: 11.5px; }
+.db-onli-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+
+/* Aloqa kartalari soniga moslashsin (uchtadan kam bo'lishi mumkin) */
+

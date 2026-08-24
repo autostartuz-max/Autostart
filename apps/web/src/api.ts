@@ -94,7 +94,7 @@ export const api = {
     req('/rating?limit=' + limit),
   solved: () => req('/solved'),
   /** Hozir nechta foydalanuvchi ishlayapti (oxirgi 5 daqiqada faol) */
-  online: (): Promise<{ count: number; minutes: number }> => req('/online'),
+  online: (): Promise<{ count: number; minutes: number; list?: OnlineRow[] }> => req('/online'),
   /** Aloqa formasi — kirmagan mehmon ham yubora oladi */
   contact: (b: { name: string; phone: string; subject: string; text: string }) =>
     req('/contact', { method: 'POST', body: JSON.stringify(b) }),
@@ -266,6 +266,15 @@ export interface DailyStat {
   correct: number;
   /** Javob berilmagan kunda null — grafikda nuqta qo'yilmaydi */
   accuracy: number | null;
+}
+
+/** Onlayn foydalanuvchi — ro'yxat faqat Owner va Adminga qaytariladi */
+export interface OnlineRow {
+  id: number;
+  firstName: string;
+  role: Role;
+  lastSeen: string | null;
+  mehmon: boolean;
 }
 
 export type MessageStatus = 'new' | 'read' | 'done';

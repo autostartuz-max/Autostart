@@ -6,7 +6,7 @@ import {
   Search, Moon, Menu, Play, ClipboardCheck, Grid3x3, Flame, Check, Zap, Award, ShieldCheck,
   LogOut, User, Shuffle, ChevronDown,
 } from 'lucide-react';
-import { api, clearToken, forgetAdmin, isOwner, type RatingRow, type DailyStat } from '../api';
+import { api, clearToken, forgetAdmin, isOwner, ROLE_LABEL, type RatingRow, type DailyStat, type OnlineRow } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
@@ -21,12 +21,17 @@ export default function Dashboard() {
   const [kunlik, setKunlik] = useState<{ list: DailyStat[]; best: number | null; worst: number | null } | null>(null);
   // Hozir nechta odam ishlayapti — har 60 soniyada yangilanadi
   const [onlayn, setOnlayn] = useState<number | null>(null);
+  const [onlaynList, setOnlaynList] = useState<OnlineRow[]>([]);
+  const [onlaynOchiq, setOnlaynOchiq] = useState(false);
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
     api.rating(50).then((r) => setReyting(r.list || [])).catch(() => {});
     api.dailyStats(7).then(setKunlik).catch(() => {});
 
-    const onlaynYukla = () => api.online().then((r) => setOnlayn(r.count)).catch(() => {});
+    const onlaynYukla = () =>
+      api.online()
+        .then((r) => { setOnlayn(r.count); setOnlaynList(r.list || []); })
+        .catch(() => {});
     onlaynYukla();
     const t = setInterval(onlaynYukla, 60_000);
     return () => clearInterval(t);
@@ -65,9 +70,33 @@ export default function Dashboard() {
           <div className="db-search"><Search size={17} /><input placeholder="Qidirish…" /></div>
           <div className="db-top-right">
             {onlayn != null && (
-              <div className="db-online" title="Oxirgi 5 daqiqada faol foydalanuvchilar">
-                <span className="db-online-dot" />
-                <b>{onlayn}</b> <span>onlayn</span>
+              <div className="db-onlwrap">
+                <button
+                  className={'db-online' + (onlaynList.length ? ' bosiladi' : '')}
+                  title={onlaynList.length ? 'Kimlar onlayn — ko‘rish' : 'Oxirgi 5 daqiqada faol foydalanuvchilar'}
+                  onClick={() => onlaynList.length && setOnlaynOchiq((v) => !v)}
+                >
+                  <span className="db-online-dot" />
+                  <b>{onlayn}</b> <span>onlayn</span>
+                </button>
+                {onlaynOchiq && onlaynList.length > 0 && (
+                  <>
+                    <div className="db-umenu-ov" onClick={() => setOnlaynOchiq(false)} />
+                    <div className="db-onlmenu">
+                      <div className="db-onlmenu-h">Hozir onlayn ({onlaynList.length})</div>
+                      {onlaynList.map((u) => (
+                        <div className="db-onli" key={u.id}>
+                          <span className="db-onli-av">{(u.firstName || '?')[0].toUpperCase()}</span>
+                          <span className="db-onli-t">
+                            <b>{u.firstName}{u.id === ozId ? ' (siz)' : ''}</b>
+                            <span>{u.mehmon ? 'Mehmon' : ROLE_LABEL[u.role]}</span>
+                          </span>
+                          <span className="db-onli-dot" />
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
             <div className="db-userwrap">

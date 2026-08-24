@@ -630,10 +630,34 @@ const ONLAYN_DAQIQA = 5;
 userRouter.get(
   '/online',
   requireUser,
-  ah(async (_req, res) => {
+  ah(async (req, res) => {
     const chegara = new Date(Date.now() - ONLAYN_DAQIQA * 60 * 1000);
-    const count = await prisma.user.count({ where: { lastSeen: { gte: chegara } } });
-    res.json({ count, minutes: ONLAYN_DAQIQA });
+    const where = { lastSeen: { gte: chegara } };
+    const count = await prisma.user.count({ where });
+
+    // Owner va Admin KIMLIGINI ham ko'radi; oddiy talabaga faqat son.
+    const meId = (req as any).userId as number;
+    const men = await prisma.user.findUnique({ where: { id: meId }, select: { role: true } });
+    const huquqli = men?.role === 'owner' || men?.role === 'admin';
+    if (!huquqli) return res.json({ count, minutes: ONLAYN_DAQIQA });
+
+    const list = await prisma.user.findMany({
+      where,
+      select: { id: true, firstName: true, role: true, lastSeen: true, tgId: true },
+      orderBy: { lastSeen: 'desc' },
+      take: 100,
+    });
+    res.json({
+      count,
+      minutes: ONLAYN_DAQIQA,
+      list: list.map((u) => ({
+        id: u.id,
+        firstName: u.firstName,
+        role: u.role,
+        lastSeen: u.lastSeen,
+        mehmon: !!u.tgId?.startsWith('guest-'),
+      })),
+    });
   })
 );
 

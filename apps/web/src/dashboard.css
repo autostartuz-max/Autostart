@@ -733,3 +733,12 @@
 
 /* Aloqa kartalari soniga moslashsin (uchtadan kam bo'lishi mumkin) */
 
+
+/* Aloqa sarlavhasi: matn chapda, 3D tasvir o'ngda */
+.ct-hero { display: flex; align-items: center; gap: 24px; }
+.ct-hero-t { flex: 1; min-width: 0; }
+.ct-hero-lead { color: #c8d2e6 !important; font-size: 15px !important; margin-bottom: 14px !important; }
+.ct-hero-img { width: 300px; max-width: 38%; height: auto; flex-shrink: 0; border-radius: 16px;
+  /* Rasm foni sahifa foniga qo'shilib ketsin */
+  mix-blend-mode: lighten; }
+@media (max-width: 820px) { .ct-hero-img { display: none; } }

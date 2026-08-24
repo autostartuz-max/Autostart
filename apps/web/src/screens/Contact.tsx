@@ -59,12 +59,23 @@ export default function Contact() {
 
         <div className="db-content">
           <div className="ct-hero">
-            <h1>Biz bilan <span>bog‘laning</span></h1>
-            <p>
-              Savollaringiz bormi? Biz sizga yordam berishga tayyormiz!
-              Quyidagi telefon raqamlar yoki manzil orqali biz bilan bog‘lanishingiz mumkin.
-              Yoki pastdagi formani to‘ldirib, bizga xabar yuboring.
-            </p>
+            <div className="ct-hero-t">
+              <h1>Biz bilan <span>bog‘laning</span></h1>
+              <p className="ct-hero-lead">Savollaringiz bormi? Biz sizga yordam berishga tayyormiz!</p>
+              <p>
+                Quyidagi telefon raqamlar yoki manzil orqali biz bilan bog‘lanishingiz mumkin.
+                Yoki pastdagi formani to‘ldirib, bizga xabar yuboring.
+              </p>
+            </div>
+            {/* 3D tasvir — matn HTML bo'lib qoladi, shuning uchun tarjima va
+                kichik ekranda ham to'g'ri ko'rinadi */}
+            <img
+              className="ct-hero-img"
+              src="/aloqa-3d.jpg"
+              alt=""
+              loading="lazy"
+              onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
+            />
           </div>
 
           <div className="ct-grid">

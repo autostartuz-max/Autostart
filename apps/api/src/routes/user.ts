@@ -5,6 +5,7 @@ import { prisma } from '../prisma';
 import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } from '../auth';
 import { shifrla } from '../passwordVault';
+import { telegramgaYubor, esc } from '../notify';
 
 // Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi
 function normPhone(raw: any): string | null {
@@ -663,8 +664,19 @@ userRouter.post(
     // Kirgan bo'lsa — kimligini ham yozib qo'yamiz (majburiy emas)
     const userId = optionalUserId(req);
 
-    await prisma.message.create({ data: { name, phone, subject, text, userId } });
-    res.json({ ok: true });
+    const saqlangan = await prisma.message.create({ data: { name, phone, subject, text, userId } });
+
+    // Telegramga xabarnoma — javobni kutmaymiz, yuborilmasa ham xabar saqlangan
+    telegramgaYubor(
+      '\u{1F4E9} <b>Yangi xabar</b>\n\n' +
+        '<b>Ism:</b> ' + esc(name) + '\n' +
+        '<b>Telefon:</b> ' + esc(phone) + '\n' +
+        (subject ? '<b>Mavzu:</b> ' + esc(subject) + '\n' : '') +
+        '\n' + esc(text) + '\n\n' +
+        '<a href="https://autostart.uz/xabarlar">Admin panelda ochish</a>'
+    ).catch(() => { /* xabarnoma muhim emas */ });
+
+    res.json({ ok: true, id: saqlangan.id });
   })
 );
 

@@ -29,3 +29,8 @@ export const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.6-
 // OpenAI (vision) — aniqroq (pullik). Bor bo'lsa asosiy, Groq zaxira.
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY || fileKey('/home/ubuntu/openai-key.txt');
 export const OPENAI_VISION_MODEL = process.env.OPENAI_VISION_MODEL || 'gpt-4o';
+
+// Telegram xabarnomasi (yangi bog'lanish xabari kelganda). Ikkalasi ham
+// bo'lmasa — xabarnoma o'chiq, ilova normal ishlayveradi.
+export const NOTIFY_BOT_TOKEN = process.env.NOTIFY_BOT_TOKEN || '';
+export const NOTIFY_CHAT_ID = process.env.NOTIFY_CHAT_ID || '';

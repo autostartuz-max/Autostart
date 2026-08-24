@@ -31,7 +31,7 @@ const STAT = [
 ];
 const BOSHQA = [
   { Icon: Settings, label: 'Sozlamalar', to: '/profil' },
-  { Icon: MessageCircle, label: "Biz bilan bog'lanish", to: '/oktagon' },
+  { Icon: MessageCircle, label: "Biz bilan bog'lanish", to: '/aloqa' },
   { Icon: ScrollText, label: 'Hujjatlar', to: '/hujjat/maxfiylik' },
 ];
 
@@ -111,6 +111,9 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
             <div className="db-sec">Admin</div>
             <button className={'db-navi' + (active === '/savollar' ? ' active' : '')} onClick={() => go('/savollar')}>
               <ClipboardList size={18} /> <span>Savollar</span>
+            </button>
+            <button className={'db-navi' + (active === '/xabarlar' ? ' active' : '')} onClick={() => go('/xabarlar')}>
+              <MessageCircle size={18} /> <span>Xabarlar</span>
             </button>
             {owner && (
               <button className={'db-navi' + (active === '/foydalanuvchilar' ? ' active' : '')} onClick={() => go('/foydalanuvchilar')}>

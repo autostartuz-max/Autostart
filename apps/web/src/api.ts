@@ -95,6 +95,9 @@ export const api = {
   solved: () => req('/solved'),
   /** Hozir nechta foydalanuvchi ishlayapti (oxirgi 5 daqiqada faol) */
   online: (): Promise<{ count: number; minutes: number }> => req('/online'),
+  /** Aloqa formasi — kirmagan mehmon ham yubora oladi */
+  contact: (b: { name: string; phone: string; subject: string; text: string }) =>
+    req('/contact', { method: 'POST', body: JSON.stringify(b) }),
   dailyStats: (days = 7): Promise<{ list: DailyStat[]; best: number | null; worst: number | null }> =>
     req('/stats/daily?days=' + days),
   bookmarks: (): Promise<number[]> => req('/bookmarks'),
@@ -247,6 +250,12 @@ export const adminApi = {
     areq('/admin/users/' + id, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteUser: (id: number): Promise<{ ok: boolean; id: number }> =>
     areq('/admin/users/' + id, { method: 'DELETE' }),
+  messages: (status = ''): Promise<{ list: MessageRow[]; yangi: number }> =>
+    areq('/admin/messages' + (status ? '?status=' + status : '')),
+  setMessageStatus: (id: number, status: MessageStatus): Promise<{ message: MessageRow }> =>
+    areq('/admin/messages/' + id, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  deleteMessage: (id: number): Promise<{ ok: boolean; id: number }> =>
+    areq('/admin/messages/' + id, { method: 'DELETE' }),
   setUserRole: (id: number, role: Role): Promise<{ user: AdminUserRow }> =>
     areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
 };
@@ -257,6 +266,18 @@ export interface DailyStat {
   correct: number;
   /** Javob berilmagan kunda null — grafikda nuqta qo'yilmaydi */
   accuracy: number | null;
+}
+
+export type MessageStatus = 'new' | 'read' | 'done';
+export interface MessageRow {
+  id: number;
+  name: string;
+  phone: string;
+  subject: string;
+  text: string;
+  status: MessageStatus;
+  userId: number | null;
+  createdAt: string;
 }
 
 export interface RatingRow {

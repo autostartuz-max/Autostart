@@ -3,7 +3,7 @@ import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma';
 import { BOT_TOKEN, DEV_AUTH } from '../env';
-import { verifyTelegramInitData, signUserToken, requireUser } from '../auth';
+import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } from '../auth';
 import { shifrla } from '../passwordVault';
 
 // Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi
@@ -587,6 +587,35 @@ userRouter.get(
       best: bor.length ? Math.max(...bor) : null,
       worst: bor.length ? Math.min(...bor) : null,
     });
+  })
+);
+
+/* ---------- Bog'lanish xabari ---------- */
+/**
+ * Aloqa formasidan kelgan xabar. Kirmagan mehmon ham yubora oladi, shuning
+ * uchun requireUser YO'Q — lekin rate limiter (/api umumiy chegarasi) amal qiladi
+ * va uzunliklar qat'iy cheklangan.
+ */
+userRouter.post(
+  '/contact',
+  ah(async (req, res) => {
+    const name = String(req.body?.name || '').trim().slice(0, 80);
+    const phoneRaw = String(req.body?.phone || '').trim().slice(0, 30);
+    const subject = String(req.body?.subject || '').trim().slice(0, 120);
+    const text = String(req.body?.text || '').trim().slice(0, 2000);
+
+    if (!name) return res.status(400).json({ error: 'Ismingizni kiriting' });
+    if (!phoneRaw) return res.status(400).json({ error: 'Telefon raqamingizni kiriting' });
+    if (text.length < 5) return res.status(400).json({ error: 'Xabar juda qisqa' });
+
+    // Telefonni imkon qadar +998... ko'rinishiga keltiramiz, bo'lmasa borini saqlaymiz
+    const phone = normPhone(phoneRaw) || phoneRaw;
+
+    // Kirgan bo'lsa — kimligini ham yozib qo'yamiz (majburiy emas)
+    const userId = optionalUserId(req);
+
+    await prisma.message.create({ data: { name, phone, subject, text, userId } });
+    res.json({ ok: true });
   })
 );
 

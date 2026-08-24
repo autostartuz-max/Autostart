@@ -173,3 +173,18 @@ model AdminUser {
   passwordHash String
   role         String @default("admin")
 }
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  subject   String   @default("")
+  text      String
+  // new = o'qilmagan, read = o'qilgan, done = javob berilgan
+  status    String   @default("new")
+  // Kim yuborgani (kirgan bo'lsa). Mehmon yuborsa null.
+  userId    Int?
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+}

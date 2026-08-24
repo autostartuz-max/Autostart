@@ -63,6 +63,21 @@ function faollikniBelgila(userId: number) {
     .catch(() => { /* faollik yozuvi muhim emas, xato bo'lsa e'tiborsiz qoldiramiz */ });
 }
 
+/**
+ * Token bo'lsa — foydalanuvchi id'sini qaytaradi, bo'lmasa null.
+ * Kirish MAJBURIY bo'lmagan joylarda (masalan aloqa formasi) ishlatiladi.
+ */
+export function optionalUserId(req: Request): number | null {
+  const header = req.headers.authorization || '';
+  if (!header.startsWith('Bearer ')) return null;
+  try {
+    const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
+    return payload?.kind === 'user' ? (payload.userId as number) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function requireUser(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';

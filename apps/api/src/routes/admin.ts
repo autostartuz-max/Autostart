@@ -51,6 +51,49 @@ adminRouter.post(
 
 adminRouter.use(requireAdmin);
 
+/* ---------- Bog'lanish xabarlari ---------- */
+// Owner ham, Admin ham o'qiy oladi (requireAdmin adminRouter darajasida qo'llangan)
+const MSG_STATUS = ['new', 'read', 'done'] as const;
+
+adminRouter.get(
+  '/messages',
+  ah(async (req, res) => {
+    const status = String(req.query.status || '');
+    const where = MSG_STATUS.includes(status as any) ? { status } : {};
+    const [list, yangi] = await Promise.all([
+      prisma.message.findMany({ where, orderBy: { createdAt: 'desc' }, take: 300 }),
+      prisma.message.count({ where: { status: 'new' } }),
+    ]);
+    res.json({ list, yangi });
+  })
+);
+
+adminRouter.patch(
+  '/messages/:id',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const status = String(req.body?.status || '');
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID noto‘g‘ri' });
+    if (!MSG_STATUS.includes(status as any)) return res.status(400).json({ error: 'Holat noto‘g‘ri' });
+    const bor = await prisma.message.findUnique({ where: { id }, select: { id: true } });
+    if (!bor) return res.status(404).json({ error: 'Xabar topilmadi' });
+    const message = await prisma.message.update({ where: { id }, data: { status } });
+    res.json({ message });
+  })
+);
+
+adminRouter.delete(
+  '/messages/:id',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID noto‘g‘ri' });
+    const bor = await prisma.message.findUnique({ where: { id }, select: { id: true } });
+    if (!bor) return res.status(404).json({ error: 'Xabar topilmadi' });
+    await prisma.message.delete({ where: { id } });
+    res.json({ ok: true, id });
+  })
+);
+
 /* ---------- Foydalanuvchilar va rollar (FAQAT owner) ---------- */
 
 // owner — to'liq huquq, admin — faqat savollar, user — oddiy talaba

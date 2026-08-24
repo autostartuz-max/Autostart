@@ -14,6 +14,8 @@ import Mistakes from './screens/Mistakes';
 import Rating from './screens/Rating';
 import Solved from './screens/Solved';
 import Legal from './screens/Legal';
+import Contact from './screens/Contact';
+import AdminMessages from './screens/AdminMessages';
 import TestPlayer from './screens/TestPlayer';
 import Signs from './screens/Signs';
 import Profile from './screens/Profile';
@@ -85,6 +87,7 @@ export default function App() {
           <Route path="/royxat" element={<Register onAuthed={() => setAuthed(true)} onHome={boshSahifa} />} />
           {/* Huquqiy hujjatlar kirmasdan ham ochilishi kerak */}
           <Route path="/hujjat/:doc" element={<Legal />} />
+          <Route path="/aloqa" element={<Contact />} />
           <Route path="*" element={<Login onAuthed={() => setAuthed(true)} onHome={boshSahifa} />} />
         </Routes>
       </div>
@@ -101,6 +104,8 @@ export default function App() {
         <Route path="/xatolarim" element={<Mistakes />} />
         <Route path="/yechilgan" element={<Solved />} />
         <Route path="/hujjat/:doc" element={<Legal />} />
+        <Route path="/aloqa" element={<Contact />} />
+        <Route path="/xabarlar" element={<AdminMessages />} />
         <Route path="/biletlar" element={<Tickets />} />
         <Route path="/test" element={<TestPlayer />} />
         <Route path="/belgilar" element={<Signs />} />

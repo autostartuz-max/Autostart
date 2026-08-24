@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { api, hasToken } from '../api';
 import AppSidebar from '../components/AppSidebar';
+import Aloqa3D from '../components/Aloqa3D';
 import { TELEFONLAR, MANZIL, AFZALLIKLAR, KARTALAR, CTA } from '../contact';
 import '../dashboard.css';
 
@@ -67,15 +68,8 @@ export default function Contact() {
                 Yoki pastdagi formani to‘ldirib, bizga xabar yuboring.
               </p>
             </div>
-            {/* 3D tasvir — matn HTML bo'lib qoladi, shuning uchun tarjima va
-                kichik ekranda ham to'g'ri ko'rinadi */}
-            <img
-              className="ct-hero-img"
-              src="/aloqa-3d.webp"
-              alt=""
-              loading="lazy"
-              onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
-            />
+            {/* Tasvir SVG bo'lib chizilgan: foni yo'q, har qanday o'lchamda aniq */}
+            <Aloqa3D />
           </div>
 
           <div className="ct-grid">

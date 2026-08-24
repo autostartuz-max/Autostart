@@ -590,6 +590,24 @@ userRouter.get(
   })
 );
 
+/* ---------- Hozir onlayn ---------- */
+/**
+ * Bir vaqtning o'zida nechta foydalanuvchi ishlayotgani.
+ * lastSeen requireUser ichida daqiqada bir marta yangilanadi, shuning uchun
+ * "onlayn" deb oxirgi 5 daqiqada faol bo'lganlarni hisoblaymiz.
+ */
+const ONLAYN_DAQIQA = 5;
+
+userRouter.get(
+  '/online',
+  requireUser,
+  ah(async (_req, res) => {
+    const chegara = new Date(Date.now() - ONLAYN_DAQIQA * 60 * 1000);
+    const count = await prisma.user.count({ where: { lastSeen: { gte: chegara } } });
+    res.json({ count, minutes: ONLAYN_DAQIQA });
+  })
+);
+
 /* ---------- Reyting ---------- */
 /**
  * Haqiqiy foydalanuvchilar reytingi.

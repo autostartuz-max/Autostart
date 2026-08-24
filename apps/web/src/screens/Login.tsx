@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 import { api, setToken } from '../api';
 import '../auth.css';
 
-export default function Login({ onAuthed }: { onAuthed: () => void }) {
+export default function Login({ onAuthed, onHome }: { onAuthed: () => void; onHome?: () => void }) {
   const nav = useNavigate();
   // Telefon yoki pochta — bittasi yetadi
   const [login, setLogin] = useState('');
@@ -32,6 +33,12 @@ export default function Login({ onAuthed }: { onAuthed: () => void }) {
   return (
     <div className="auth-wrap">
       <form className="auth-card" onSubmit={submit}>
+        {onHome && (
+          <button type="button" className="auth-back" onClick={onHome}>
+            <ChevronLeft size={17} /> Bosh sahifa
+          </button>
+        )}
+
         <h1 className="auth-title">Tizimga kirish</h1>
 
         <label className="auth-lab">Telefon yoki pochta</label>

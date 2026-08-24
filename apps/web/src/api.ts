@@ -93,6 +93,8 @@ export const api = {
   rating: (limit = 100): Promise<{ list: RatingRow[]; meId: number }> =>
     req('/rating?limit=' + limit),
   solved: () => req('/solved'),
+  /** Hozir nechta foydalanuvchi ishlayapti (oxirgi 5 daqiqada faol) */
+  online: (): Promise<{ count: number; minutes: number }> => req('/online'),
   dailyStats: (days = 7): Promise<{ list: DailyStat[]; best: number | null; worst: number | null }> =>
     req('/stats/daily?days=' + days),
   bookmarks: (): Promise<number[]> => req('/bookmarks'),

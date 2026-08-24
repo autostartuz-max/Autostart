@@ -96,3 +96,22 @@
   cursor: pointer;
 }
 .auth-link:hover { text-decoration: underline; }
+
+/* Bosh sahifaga qaytish tugmasi (kirish/ro'yxat kartochkasida) */
+.auth-back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+  padding: 7px 12px 7px 8px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid #2a3a54;
+  border-radius: 9px;
+  color: #aebbd0;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.auth-back:hover { color: #eaf1fb; border-color: #3a4d6d; }

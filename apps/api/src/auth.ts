@@ -44,6 +44,25 @@ export function signAdminToken(adminId: number, role: string): string {
   return jwt.sign({ adminId, role, kind: 'admin' }, JWT_SECRET, { expiresIn: '30d' });
 }
 
+/**
+ * Oxirgi faollikni belgilash — "hozir nechta odam ishlayapti" uchun.
+ * Har so'rovda bazaga yozmaymiz: foydalanuvchi uchun daqiqada bir marta yetadi.
+ * Xotiradagi jadval bitta jarayon uchun (ilova bitta pm2 jarayoni sifatida ishlaydi).
+ */
+const oxirgiYozuv = new Map<number, number>();
+const YOZUV_ORALIGI = 60 * 1000;
+
+function faollikniBelgila(userId: number) {
+  const now = Date.now();
+  const oldingi = oxirgiYozuv.get(userId) || 0;
+  if (now - oldingi < YOZUV_ORALIGI) return;
+  oxirgiYozuv.set(userId, now);
+  // Fon rejimida — so'rov javobini kutib turmaydi
+  prisma.user
+    .update({ where: { id: userId }, data: { lastSeen: new Date() } })
+    .catch(() => { /* faollik yozuvi muhim emas, xato bo'lsa e'tiborsiz qoldiramiz */ });
+}
+
 export function requireUser(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';
@@ -51,7 +70,9 @@ export function requireUser(req: Request, res: Response, next: NextFunction) {
   try {
     const payload = jwt.verify(token, JWT_SECRET) as any;
     if (payload.kind !== 'user') return res.status(401).json({ error: 'Noto‘g‘ri token' });
-    (req as any).userId = payload.userId as number;
+    const userId = payload.userId as number;
+    (req as any).userId = userId;
+    faollikniBelgila(userId);
     next();
   } catch {
     return res.status(401).json({ error: 'Token yaroqsiz' });

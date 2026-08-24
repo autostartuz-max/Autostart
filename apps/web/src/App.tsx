@@ -62,6 +62,12 @@ export default function App() {
       </div>
     );
 
+  // Kirish/Ro'yxat sahifasidan Landing (bosh sahifa) ga qaytish
+  const boshSahifa = () => {
+    try { localStorage.removeItem('yhq_entered'); } catch { /* ignore */ }
+    setEntered(false);
+  };
+
   // Login shart — token yo'q bo'lsa: Landing → Kirish/Ro'yxat
   if (!authed) {
     if (!entered)
@@ -76,10 +82,10 @@ export default function App() {
     return (
       <div className="app">
         <Routes>
-          <Route path="/royxat" element={<Register onAuthed={() => setAuthed(true)} />} />
+          <Route path="/royxat" element={<Register onAuthed={() => setAuthed(true)} onHome={boshSahifa} />} />
           {/* Huquqiy hujjatlar kirmasdan ham ochilishi kerak */}
           <Route path="/hujjat/:doc" element={<Legal />} />
-          <Route path="*" element={<Login onAuthed={() => setAuthed(true)} />} />
+          <Route path="*" element={<Login onAuthed={() => setAuthed(true)} onHome={boshSahifa} />} />
         </Routes>
       </div>
     );

@@ -19,10 +19,17 @@ export default function Dashboard() {
   const [reyting, setReyting] = useState<RatingRow[]>([]);
   // 7 kunlik statistika — avval bu yerda qotirib yozilgan raqamlar turardi
   const [kunlik, setKunlik] = useState<{ list: DailyStat[]; best: number | null; worst: number | null } | null>(null);
+  // Hozir nechta odam ishlayapti — har 60 soniyada yangilanadi
+  const [onlayn, setOnlayn] = useState<number | null>(null);
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
     api.rating(50).then((r) => setReyting(r.list || [])).catch(() => {});
     api.dailyStats(7).then(setKunlik).catch(() => {});
+
+    const onlaynYukla = () => api.online().then((r) => setOnlayn(r.count)).catch(() => {});
+    onlaynYukla();
+    const t = setInterval(onlaynYukla, 60_000);
+    return () => clearInterval(t);
   }, []);
 
   const name = me?.user?.firstName || 'Foydalanuvchi';
@@ -57,6 +64,12 @@ export default function Dashboard() {
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
           <div className="db-search"><Search size={17} /><input placeholder="Qidirish…" /></div>
           <div className="db-top-right">
+            {onlayn != null && (
+              <div className="db-online" title="Oxirgi 5 daqiqada faol foydalanuvchilar">
+                <span className="db-online-dot" />
+                <b>{onlayn}</b> <span>onlayn</span>
+              </div>
+            )}
             <div className="db-userwrap">
               {/* Ism ustiga bosilsa — o'sha foydalanuvchi sahifasiga o'tadi.
                   Owner uchun admin ko'rinishi, qolganlar uchun o'z profili. */}

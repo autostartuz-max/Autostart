@@ -71,7 +71,7 @@ export default function Contact() {
                 kichik ekranda ham to'g'ri ko'rinadi */}
             <img
               className="ct-hero-img"
-              src="/aloqa-3d.jpg"
+              src="/aloqa-3d.webp"
               alt=""
               loading="lazy"
               onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}

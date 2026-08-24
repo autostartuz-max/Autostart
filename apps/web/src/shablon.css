@@ -112,3 +112,9 @@
   .wl-content { padding: 14px; }
   .wl-user span:last-child { display: none; }
 }
+
+/* Shablon kartasi: progress doirasi va boshlangan holat */
+.wl-ring-fg { transition: stroke-dashoffset .4s ease; }
+.wl-ring-fg.mid { stroke: #facc15; }
+.wl-ring-fg.ok { stroke: #22c55e; }
+.wl-card.boshlangan { border-color: #33507d; }

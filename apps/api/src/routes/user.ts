@@ -590,6 +590,55 @@ userRouter.get(
   })
 );
 
+/* ---------- Shablonlar bo'yicha progress ---------- */
+/**
+ * Har shablon uchun: nechta savol bor, nechtasiga javob berilgan, nechtasi
+ * to'g'ri. Har savolda OXIRGI javob hisoblanadi — qayta yechib to'g'irlasa,
+ * natija yaxshilanadi.
+ */
+userRouter.get(
+  '/progress/shablon',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+
+    const answers = await prisma.userAnswer.findMany({
+      where: { userId },
+      orderBy: { answeredAt: 'desc' },
+      select: { questionId: true, isCorrect: true },
+    });
+    const oxirgi = new Map<number, boolean>();
+    for (const a of answers) if (!oxirgi.has(a.questionId)) oxirgi.set(a.questionId, a.isCorrect);
+
+    const savollar = await prisma.question.findMany({
+      where: { status: 'published', shablon: { not: null } },
+      select: { id: true, shablon: true },
+    });
+
+    const jam = new Map<number, { total: number; answered: number; correct: number }>();
+    for (const q of savollar) {
+      const sh = q.shablon as number;
+      const g = jam.get(sh) || { total: 0, answered: 0, correct: 0 };
+      g.total++;
+      if (oxirgi.has(q.id)) {
+        g.answered++;
+        if (oxirgi.get(q.id)) g.correct++;
+      }
+      jam.set(sh, g);
+    }
+
+    const list = [...jam.entries()]
+      .map(([shablon, g]) => ({
+        shablon,
+        ...g,
+        percent: g.total ? Math.round((g.correct / g.total) * 100) : 0,
+      }))
+      .sort((a, b) => a.shablon - b.shablon);
+
+    res.json({ list });
+  })
+);
+
 /* ---------- Bog'lanish xabari ---------- */
 /**
  * Aloqa formasidan kelgan xabar. Kirmagan mehmon ham yubora oladi, shuning

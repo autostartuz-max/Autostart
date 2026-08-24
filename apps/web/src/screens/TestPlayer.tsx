@@ -56,6 +56,8 @@ export default function TestPlayer() {
   // Imtihon me'yori: 20 savolga 25 daqiqa (1.25 daq/savol). Shablon/imtihon uchun
   // avvalgidek qat'iy 25 daqiqa, random uchun savol soniga qarab o'sadi.
   const examSecondsFor = (n: number) => (randomMode ? Math.round(n * 1.25) : 25) * 60;
+  // Ruxsat etilgan xato: shablon imtihonida 3 ta; random testda savol soniga nisbatan (15%)
+  const maxXato = randomMode ? Math.max(3, Math.round((Number(limit) || 20) * 0.15)) : 3;
 
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [idx, setIdx] = useState(0);
@@ -63,6 +65,8 @@ export default function TestPlayer() {
   const [learned, setLearned] = useState<Set<number>>(new Set());
   const [bmarks, setBmarks] = useState<Set<number>>(new Set());
   const [finished, setFinished] = useState(false);
+  // Test nima uchun tugadi: '' (odatdagidek), 'xato' (chegaradan oshdi), 'vaqt'
+  const [tugashSabab, setTugashSabab] = useState<'' | 'xato' | 'vaqt'>('');
   const [showRule, setShowRule] = useState(false);
   const [sel, setSel] = useState<number | null>(null); // tanlangan (hali tasdiqlanmagan) variant
   const kbRef = useRef<{ opts: { id: number }[]; select: (id: number) => void }>({ opts: [], select: () => {} });
@@ -176,6 +180,7 @@ export default function TestPlayer() {
     setQuestions(null);
     setIdx(0);
     setFinished(false);
+    setTugashSabab('');
     setAnswers({});
     const params: Record<string, string> = { mode };
     if (topicId) params.topicId = topicId;
@@ -230,6 +235,7 @@ export default function TestPlayer() {
       if (examMode) {
         setSeconds((s) => {
           if (s <= 1) {
+            setTugashSabab('vaqt');
             setFinished(true);
             return 0;
           }
@@ -320,13 +326,13 @@ export default function TestPlayer() {
               <>
                 <b>{cfgCount} ta savol — barcha shablonlardan tasodifiy tanlanadi.</b> Har safar yangi to‘plam
                 tuziladi. Natija (javob holati) har bir javobdan so‘ng ko‘rinadi.
-                <b> {Math.max(3, Math.round(cfgCount * 0.15))} tadan ortiq xato</b> javobda imtihondan yiqilgan hisoblanasiz.
+                <b> {Math.max(3, Math.round(cfgCount * 0.15))} ta xato</b> javob berilsa imtihon to‘xtatiladi.
               </>
             ) : (
               <>
                 <b>20 ta aralash savoldan iborat imtihon bileti.</b> Barcha mavzulardan tasodifiy tuzilgan testlar bilan tanishib,
                 REAL IMTIHON JARAYONIGA tayyorlaning. Natija (javob holati) har bir javobdan so‘ng ko‘rinadi.
-                <b> 3 tadan ortiq xato</b> javobda imtihondan yiqilgan hisoblanasiz.
+                <b> 3 ta xato</b> javob berilsa imtihon to‘xtatiladi va yiqilgan hisoblanasiz.
               </>
             )}
           </div>
@@ -407,6 +413,7 @@ export default function TestPlayer() {
 
   const retry = () => {
     setFinished(false);
+    setTugashSabab('');
     setIdx(0);
     setAnswers({});
     setLearned(new Set());
@@ -421,8 +428,9 @@ export default function TestPlayer() {
   const rPct = rTotal ? Math.round((rCorrect / rTotal) * 100) : 0;
   // Imtihon: 20 savolga 3 xato (15%). Random testda savol soni turlicha —
   // shu nisbat saqlanadi (50→8, 100→15, 200→30).
-  const rMaxWrong = randomMode ? Math.max(3, Math.round(rTotal * 0.15)) : 3;
-  const rPass = examMode ? rWrong <= rMaxWrong : rPct >= 90;
+  const rMaxWrong = randomMode ? Math.max(3, Math.round(rTotal * 0.15)) : maxXato;
+  // maxXato ta xato = imtihon to'xtaydi va yiqilgan hisoblanadi
+  const rPass = examMode ? rWrong < rMaxWrong : rPct >= 90;
   const RING_C = 2 * Math.PI * 52;
 
   const q = questions[idx];
@@ -550,13 +558,25 @@ export default function TestPlayer() {
       return;
     }
     haptic(r.isCorrect ? 'success' : 'error');
-    setAnswers((a) => ({ ...a, [q.id]: { chosen: [optId], isCorrect: r.isCorrect } }));
+    const yangi = { ...answers, [q.id]: { chosen: [optId], isCorrect: r.isCorrect } };
+    setAnswers(yangi);
+
+    // IMTIHON QOIDASI: xatolar chegarasidan oshsa — test shu yerda tugaydi
+    const xatolar = questions.filter((qq) => yangi[qq.id] && !yangi[qq.id].isCorrect).length;
+    const chegaradanOshdi = examMode && xatolar >= maxXato;
+
     const last = idx >= questions.length - 1;
     clearNext();
     nextRef.current = window.setTimeout(() => {
       nextRef.current = null;
-      if (last) setFinished(true);
-      else setIdx(idx + 1);
+      if (chegaradanOshdi) {
+        setTugashSabab('xato');
+        setFinished(true);
+      } else if (last) {
+        setFinished(true);
+      } else {
+        setIdx(idx + 1);
+      }
     }, 2000);
   };
   kbRef.current = { opts: displayOpts, select: selectOpt }; // klaviatura (F1-F5) uchun eng so'nggi holat
@@ -740,6 +760,14 @@ export default function TestPlayer() {
           <div className="sheet result-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="grip" />
             <h3 className="rtitle">Natijalar</h3>
+            {tugashSabab === 'xato' && (
+              <div className="rsabab no">
+                {maxXato} ta xato — imtihon to‘xtatildi
+              </div>
+            )}
+            {tugashSabab === 'vaqt' && (
+              <div className="rsabab no">Vaqt tugadi</div>
+            )}
             <div className="ring-wrap">
               <svg viewBox="0 0 120 120" className="ring">
                 <circle cx="60" cy="60" r="52" className="ring-bg" />
@@ -773,6 +801,11 @@ export default function TestPlayer() {
                 <div className="rs-n">{rSkip}</div>
                 <div className="rs-l">Javobsiz</div>
               </div>
+            </div>
+            <div className="rxulosa">
+              {rTotal} ta savoldan <b>{rCorrect + rWrong}</b> tasiga javob berdingiz:
+              <b className="ok"> {rCorrect} to‘g‘ri</b>, <b className="no">{rWrong} xato</b>.
+              {examMode && <> {rMaxWrong} ta xatoda imtihon to‘xtaydi.</>}
             </div>
             <div className="rgrid-label">Savollar</div>
             <div className="rgrid">

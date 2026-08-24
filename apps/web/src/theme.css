@@ -524,3 +524,12 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 11px; background: none; border: none; padding: 4px 10px; }
 .tab.active { color: var(--green); }
 .tab .tic { font-size: 20px; }
+
+/* Natija: tugash sababi va xulosa */
+.rsabab { margin: -4px 0 14px; text-align: center; font-size: 13.5px; font-weight: 700;
+  border-radius: 10px; padding: 9px 14px; }
+.rsabab.no { background: rgba(239, 68, 68, .14); border: 1px solid rgba(239, 68, 68, .35); color: #fca5a5; }
+.rxulosa { margin-top: 14px; text-align: center; font-size: 13.5px; line-height: 1.7; color: #9fb2cc; }
+.rxulosa b { color: #e8eef7; }
+.rxulosa b.ok { color: #86efac; }
+.rxulosa b.no { color: #fca5a5; }

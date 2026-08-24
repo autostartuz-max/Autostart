@@ -93,6 +93,8 @@ export const api = {
   rating: (limit = 100): Promise<{ list: RatingRow[]; meId: number }> =>
     req('/rating?limit=' + limit),
   solved: () => req('/solved'),
+  /** Har shablon bo'yicha progress (yechilgan va to'g'ri javoblar) */
+  shablonProgress: (): Promise<{ list: ShablonProgress[] }> => req('/progress/shablon'),
   /** Hozir nechta foydalanuvchi ishlayapti (oxirgi 5 daqiqada faol) */
   online: (): Promise<{ count: number; minutes: number; list?: OnlineRow[] }> => req('/online'),
   /** Aloqa formasi — kirmagan mehmon ham yubora oladi */
@@ -259,6 +261,14 @@ export const adminApi = {
   setUserRole: (id: number, role: Role): Promise<{ user: AdminUserRow }> =>
     areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
 };
+
+export interface ShablonProgress {
+  shablon: number;
+  total: number;
+  answered: number;
+  correct: number;
+  percent: number;
+}
 
 export interface DailyStat {
   date: string;

@@ -3,11 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Bookmark, ChevronLeft, Bell, Search, Moon, Globe, User, Menu, X,
 } from 'lucide-react';
-import { api } from '../api';
+import { api, type ShablonProgress } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../shablon.css';
 
 const COUNT = 63;
+// Progress doirasi uzunligi (r=18)
+const RING = 2 * Math.PI * 18;
 const LANGS: [string, string, 'uz' | 'ru'][] = [
   ['lat', 'O‘zbek', 'uz'],
   ['cyr', 'Кирилл', 'uz'],
@@ -46,8 +48,18 @@ export default function Shablon() {
   const [selected, setSelected] = useState<number | null>(null); // ochilgan shablon (modal)
   const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus' | null>(null);
 
+  // Har shablon bo'yicha progress — avval kartalarda 0% qotirib yozilgandi
+  const [progress, setProgress] = useState<Record<number, ShablonProgress>>({});
+
   useEffect(() => {
     api.me().then((m: any) => setName(m?.user?.firstName || 'Mehmon')).catch(() => {});
+    api.shablonProgress()
+      .then((r) => {
+        const x: Record<number, ShablonProgress> = {};
+        for (const p of r.list || []) x[p.shablon] = p;
+        setProgress(x);
+      })
+      .catch(() => {});
   }, []);
 
   // ?open=N — shablon modalini avtomatik ochish
@@ -92,8 +104,10 @@ export default function Shablon() {
         <div className="wl-content">
           <h1 className="wl-h1">Shablon testlar (Imtihon)</h1>
           <div className="wl-grid">
-            {Array.from({ length: COUNT }, (_, i) => i + 1).map((n) => (
-              <div className="wl-card" key={n} onClick={() => { setSelected(n); setCfgLang(null); }}>
+            {Array.from({ length: COUNT }, (_, i) => i + 1).map((n) => {
+              const pr = progress[n] || { shablon: n, total: 0, answered: 0, correct: 0, percent: 0 };
+              return (
+              <div className={'wl-card' + (pr.answered ? ' boshlangan' : '')} key={n} onClick={() => { setSelected(n); setCfgLang(null); }}>
                 <button className={'wl-bm' + (saved.has(n) ? ' on' : '')} onClick={(e) => toggleSave(n, e)} title="Saqlash">
                   <Bookmark size={18} fill={saved.has(n) ? 'currentColor' : 'none'} />
                 </button>
@@ -102,17 +116,24 @@ export default function Shablon() {
                   <div className="wl-ring">
                     <svg viewBox="0 0 44 44">
                       <circle cx="22" cy="22" r="18" className="wl-ring-bg" />
-                      <circle cx="22" cy="22" r="18" className="wl-ring-fg" strokeDasharray="113" strokeDashoffset="113" />
+                      <circle
+                        cx="22" cy="22" r="18"
+                        className={'wl-ring-fg' + (pr.percent >= 90 ? ' ok' : pr.percent > 0 ? ' mid' : '')}
+                        strokeDasharray={RING}
+                        strokeDashoffset={RING * (1 - pr.percent / 100)}
+                      />
                     </svg>
-                    <span>0%</span>
+                    <span>{pr.percent}%</span>
                   </div>
                   <div className="wl-cinfo">
-                    <div>To‘g‘ri javoblar soni: <b>0</b></div>
+                    <div>To‘g‘ri javoblar: <b>{pr.correct}</b>{pr.total ? ` / ${pr.total}` : ''}</div>
+                    <div>Yechilgan: <b>{pr.answered}</b>{pr.total ? ` / ${pr.total}` : ''}</div>
                     <div>Vaqt: <b>25 daqiqa</b></div>
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -144,7 +165,7 @@ export default function Shablon() {
                 <b>20 ta savollarga ajratilgan aralash savollar mavjud bo‘lgan biletlar.</b> Ushbu bo‘limda barcha fanlardan aralash
                 va tasodifiy shaklda tuzilgan testlar bilan tanishib, testlarga javob berish orqali REAL IMTIHON JARAYONIGA
                 tayyorlaning. Natijalar (berilgan javobning holati) har bir javob berilgandan so‘ng ko‘rinadi.
-                <b> 3 tadan ortiq xato</b> javob berilganda imtihondan yiqilgan hisoblanasiz.
+                <b> 3 ta xato</b> javob berilsa imtihon to‘xtatiladi va yiqilgan hisoblanasiz.
               </div>
             </div>
           </div>

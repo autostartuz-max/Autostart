@@ -4,7 +4,7 @@ import { SAVOLLAR_PUBLIC, hasAdmin, canManageQuestions, isOwner, ADMIN_CHANGED }
 import LangTheme from './LangTheme';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
-  Video, Info, ChartBar, TrendingUp, Trophy, Settings, LifeBuoy, MessageCircle, Moon,
+  Video, Info, ChartBar, TrendingUp, Trophy, Settings, MessageCircle, Moon,
   ClipboardList, Shuffle, ShieldCheck, ScrollText,
 } from 'lucide-react';
 import '../dashboard.css';
@@ -31,7 +31,6 @@ const STAT = [
 ];
 const BOSHQA = [
   { Icon: Settings, label: 'Sozlamalar', to: '/profil' },
-  { Icon: LifeBuoy, label: 'Yordam / FAQ', to: '/oktagon' },
   { Icon: MessageCircle, label: "Biz bilan bog'lanish", to: '/oktagon' },
   { Icon: ScrollText, label: 'Hujjatlar', to: '/hujjat/maxfiylik' },
 ];

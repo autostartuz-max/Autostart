@@ -430,7 +430,10 @@ export default function TestPlayer() {
   // shu nisbat saqlanadi (50→8, 100→15, 200→30).
   const rMaxWrong = randomMode ? Math.max(3, Math.round(rTotal * 0.15)) : maxXato;
   // maxXato ta xato = imtihon to'xtaydi va yiqilgan hisoblanadi
-  const rPass = examMode ? rWrong < rMaxWrong : rPct >= 90;
+  // Doira rangi natijaga qarab: past foizda yashil turishi chalg'itardi.
+  // "O'tdi/O'tmadi" yozuvi olib tashlandi — test yarmida to'xtatilganda
+  // "o'tdi" deb ko'rsatish noto'g'ri edi.
+  const ringRang = rPct >= 90 ? 'pass' : rPct >= 70 ? 'mid' : 'fail';
   const RING_C = 2 * Math.PI * 52;
 
   const q = questions[idx];
@@ -794,14 +797,13 @@ export default function TestPlayer() {
                   cx="60"
                   cy="60"
                   r="52"
-                  className={'ring-fg ' + (rPass ? 'pass' : 'fail')}
+                  className={'ring-fg ' + ringRang}
                   strokeDasharray={RING_C}
                   strokeDashoffset={RING_C * (1 - rPct / 100)}
                 />
               </svg>
               <div className="ring-txt">
-                <div className={'ring-pct ' + (rPass ? 'pass' : 'fail')}>{rPct}%</div>
-                <div className="ring-st">{rPass ? "O‘tdi" : "O‘tmadi"}</div>
+                <div className={'ring-pct ' + ringRang}>{rPct}%</div>
               </div>
             </div>
             <div className="rstats">

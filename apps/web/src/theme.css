@@ -536,3 +536,7 @@ button { font-family: inherit; cursor: pointer; }
 
 /* To'xtatilgan test — neytral rangdagi sabab */
 .rsabab { background: rgba(148, 163, 184, .14); border: 1px solid rgba(148, 163, 184, .3); color: #b9c6da; }
+
+/* Natija doirasi: o'rtacha natija uchun sariq */
+.ring-fg.mid { stroke: #facc15; }
+.ring-pct.mid { color: #facc15; }

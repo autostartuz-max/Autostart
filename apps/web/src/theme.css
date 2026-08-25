@@ -533,3 +533,6 @@ button { font-family: inherit; cursor: pointer; }
 .rxulosa b { color: #e8eef7; }
 .rxulosa b.ok { color: #86efac; }
 .rxulosa b.no { color: #fca5a5; }
+
+/* To'xtatilgan test — neytral rangdagi sabab */
+.rsabab { background: rgba(148, 163, 184, .14); border: 1px solid rgba(148, 163, 184, .3); color: #b9c6da; }

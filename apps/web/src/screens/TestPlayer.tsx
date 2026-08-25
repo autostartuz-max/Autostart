@@ -66,7 +66,7 @@ export default function TestPlayer() {
   const [bmarks, setBmarks] = useState<Set<number>>(new Set());
   const [finished, setFinished] = useState(false);
   // Test nima uchun tugadi: '' (odatdagidek), 'xato' (chegaradan oshdi), 'vaqt'
-  const [tugashSabab, setTugashSabab] = useState<'' | 'xato' | 'vaqt'>('');
+  const [tugashSabab, setTugashSabab] = useState<'' | 'xato' | 'vaqt' | 'toxtatildi'>('');
   const [showRule, setShowRule] = useState(false);
   const [sel, setSel] = useState<number | null>(null); // tanlangan (hali tasdiqlanmagan) variant
   const kbRef = useRef<{ opts: { id: number }[]; select: (id: number) => void }>({ opts: [], select: () => {} });
@@ -593,7 +593,23 @@ export default function TestPlayer() {
     if (i === idx) c += ' cur';
     return c;
   };
-  const exit = () => { localStorage.removeItem(SESSION_KEY); nav(randomMode ? '/random' : '/shablon'); };
+  // Test qachon to'xtatilishidan qat'i nazar — avval NATIJA ko'rsatiladi.
+  // Avval ESC to'g'ridan-to'g'ri chiqarib yuborardi va natija ko'rinmasdi.
+  const exit = () => {
+    clearNext();
+    if (!finished) {
+      setTugashSabab('toxtatildi');
+      setFinished(true);
+      return;
+    }
+    localStorage.removeItem(SESSION_KEY);
+    nav(randomMode ? '/random' : '/shablon');
+  };
+  // Natija oynasidagi "Yakunlash" — shu yerda haqiqatan chiqiladi
+  const yakunla = () => {
+    localStorage.removeItem(SESSION_KEY);
+    nav(randomMode ? '/random' : '/shablon');
+  };
 
   return (
     <div className={`tp2 ff-${settings.fontStyle}`} style={{ ['--fs' as any]: fscale }}>
@@ -756,7 +772,7 @@ export default function TestPlayer() {
       )}
 
       {finished && (
-        <div className="modal" onClick={() => setFinished(false)}>
+        <div className="modal" onClick={() => tugashSabab === '' && setFinished(false)}>
           <div className="sheet result-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="grip" />
             <h3 className="rtitle">Natijalar</h3>
@@ -767,6 +783,9 @@ export default function TestPlayer() {
             )}
             {tugashSabab === 'vaqt' && (
               <div className="rsabab no">Vaqt tugadi</div>
+            )}
+            {tugashSabab === 'toxtatildi' && (
+              <div className="rsabab">Test to‘xtatildi — shu paytgacha bo‘lgan natija</div>
             )}
             <div className="ring-wrap">
               <svg viewBox="0 0 120 120" className="ring">
@@ -828,7 +847,7 @@ export default function TestPlayer() {
             </div>
             <div className="rbtns">
               <button className="rbtn sec" onClick={retry}>↺ Qayta</button>
-              <button className="rbtn main" onClick={() => { localStorage.removeItem(SESSION_KEY); nav('/'); }}>Yakunlash</button>
+              <button className="rbtn main" onClick={yakunla}>Yakunlash</button>
             </div>
           </div>
         </div>

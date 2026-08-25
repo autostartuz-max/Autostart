@@ -50,3 +50,24 @@ export const CTA = {
   yuqori: 'Kelajakdagi kasbingiz sari birinchi qadamni',
   past: '«AUTOSTART» bilan boshlang!',
 };
+
+/** Futer: tezkor havolalar */
+export const FUTER_HAVOLALAR: { t: string; to: string }[] = [
+  { t: 'Bosh sahifa', to: '/' },
+  { t: 'Shablon testlar', to: '/shablon' },
+  { t: 'Random testlar', to: '/random' },
+  { t: 'Hujjatlar', to: '/hujjat/maxfiylik' },
+];
+
+/** Futerdagi qisqa tavsif */
+export const FUTER_TAVSIF =
+  'Sifatli ta’lim, amaliyot va kafolat bilan kelajagingizni biz bilan boshlang.';
+
+/**
+ * Ijtimoiy tarmoqlar. Bo'sh qoldirilsa belgisi ko'rsatilmaydi —
+ * havolangiz bo'lsa shu yerga yozing.
+ */
+export const IJTIMOIY = {
+  telegram: '',
+  instagram: '',
+};

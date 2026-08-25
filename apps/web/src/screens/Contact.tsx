@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, Menu, Phone, MapPin, Send, Mail, Check, MessageCircle,
-  Users, Wallet, CreditCard, Car,
+  Users, Wallet, CreditCard, Car, Camera,
 } from 'lucide-react';
 import { api, hasToken } from '../api';
 import AppSidebar from '../components/AppSidebar';
-import { TELEFONLAR, MANZIL, AFZALLIKLAR, KARTALAR, CTA } from '../contact';
+import {
+  TELEFONLAR, MANZIL, AFZALLIKLAR, KARTALAR, CTA,
+  FUTER_HAVOLALAR, FUTER_TAVSIF, IJTIMOIY,
+} from '../contact';
 import '../dashboard.css';
 
 const KARTA_IC = { k: Users, s: Wallet, v: CreditCard };
@@ -71,9 +74,9 @@ export default function Contact() {
             <img className="ct-hero-img" src="/aloqa-3d.webp" alt="" loading="lazy" />
           </div>
 
-          <div className="ct-grid">
+          <div className="ct-panel">
             {/* Chap: aloqa ma'lumotlari */}
-            <div className="ct-card">
+            <div className="ct-col ct-col-l">
               <div className="ct-h"><Phone size={15} /> To‘liq ma’lumot</div>
 
               {TELEFONLAR.map((t) => (
@@ -95,7 +98,7 @@ export default function Contact() {
             </div>
 
             {/* O'ng: xabar yuborish */}
-            <form className="ct-card" onSubmit={yubor}>
+            <form className="ct-col" onSubmit={yubor}>
               <div className="ct-h"><Mail size={15} /> Bizga xabar yuboring</div>
 
               {yuborildi ? (
@@ -162,6 +165,55 @@ export default function Contact() {
               <b>{CTA.past}</b>
             </div>
           </div>
+
+          {/* Futer */}
+          <footer className="ct-footer">
+            <div className="ct-f-grid">
+              <div className="ct-f-brand">
+                <div className="ct-f-logo">
+                  <img src="/mark.png" alt="" />
+                  <span><b>AUTO</b><i>START</i><small>Avtomaktab</small></span>
+                </div>
+                <p>{FUTER_TAVSIF}</p>
+              </div>
+
+              <div>
+                <div className="ct-f-h">Tezkor havolalar</div>
+                {FUTER_HAVOLALAR.map((h) => (
+                  <button key={h.to} className="ct-f-link" onClick={() => nav(h.to)}>{h.t}</button>
+                ))}
+              </div>
+
+              <div>
+                <div className="ct-f-h">Biz bilan bog‘laning</div>
+                {TELEFONLAR.map((t) => (
+                  <a key={t.raqam} className="ct-f-row" href={'tel:' + t.raqam.replace(/[^\d+]/g, '')}>
+                    {t.whatsapp ? <MessageCircle size={14} /> : <Phone size={14} />}
+                    <span><b>{t.raqam}</b> {t.izoh}</span>
+                  </a>
+                ))}
+                <div className="ct-f-row"><MapPin size={14} /> <span>{MANZIL}</span></div>
+              </div>
+            </div>
+
+            <div className="ct-f-bottom">
+              <span>© {new Date().getFullYear()} AUTOSTART Avtomaktabi. Barcha huquqlar himoyalangan.</span>
+              {(IJTIMOIY.telegram || IJTIMOIY.instagram) && (
+                <div className="ct-f-soc">
+                  {IJTIMOIY.telegram && (
+                    <a href={IJTIMOIY.telegram} target="_blank" rel="noopener noreferrer" title="Telegram">
+                      <Send size={16} />
+                    </a>
+                  )}
+                  {IJTIMOIY.instagram && (
+                    <a href={IJTIMOIY.instagram} target="_blank" rel="noopener noreferrer" title="Instagram">
+                      <Camera size={16} />
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          </footer>
         </div>
       </div>
     </div>

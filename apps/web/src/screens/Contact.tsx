@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, Menu, Phone, MapPin, Send, Mail, Check, MessageCircle,
-  Users, Wallet, CreditCard, Car, Camera,
+  Users, Wallet, CreditCard, Camera,
 } from 'lucide-react';
 import { api, hasToken } from '../api';
 import AppSidebar from '../components/AppSidebar';
@@ -61,6 +61,7 @@ export default function Contact() {
         </header>
 
         <div className="db-content">
+         <div className="ct-wrap">
           <div className="ct-hero">
             <div className="ct-hero-t">
               <h1>Biz bilan <span>bog‘laning</span></h1>
@@ -77,12 +78,12 @@ export default function Contact() {
           <div className="ct-panel">
             {/* Chap: aloqa ma'lumotlari */}
             <div className="ct-col ct-col-l">
-              <div className="ct-h"><Phone size={15} /> To‘liq ma’lumot</div>
+              <div className="ct-h"><Phone size={18} /> To‘liq ma’lumot</div>
 
               {TELEFONLAR.map((t) => (
                 <a className="ct-tel" key={t.raqam} href={'tel:' + t.raqam.replace(/[^\d+]/g, '')}>
                   <span className={'ct-tel-ic' + (t.whatsapp ? ' wa' : '')}>
-                    {t.whatsapp ? <MessageCircle size={17} /> : <Phone size={17} />}
+                    {t.whatsapp ? <MessageCircle size={22} /> : <Phone size={22} />}
                   </span>
                   <span className="ct-tel-t">
                     <b>{t.raqam}</b>
@@ -92,18 +93,18 @@ export default function Contact() {
               ))}
 
               <div className="ct-manzil">
-                <span className="ct-manzil-h"><MapPin size={15} /> Manzil:</span>
+                <span className="ct-manzil-h"><MapPin size={18} /> Manzil:</span>
                 <span>{MANZIL}</span>
               </div>
             </div>
 
             {/* O'ng: xabar yuborish */}
             <form className="ct-col" onSubmit={yubor}>
-              <div className="ct-h"><Mail size={15} /> Bizga xabar yuboring</div>
+              <div className="ct-h"><Mail size={18} /> Bizga xabar yuboring</div>
 
               {yuborildi ? (
                 <div className="ct-ok">
-                  <Check size={30} />
+                  <Check size={38} />
                   <b>Xabaringiz yuborildi</b>
                   <span>Tez orada siz bilan bog‘lanamiz.</span>
                   <button type="button" className="adm-btn sec" onClick={() => setYuborildi(false)}>
@@ -124,7 +125,7 @@ export default function Contact() {
                   {err && <div className="adm-err ct-err">{err}</div>}
 
                   <button className="ct-btn" type="submit" disabled={busy}>
-                    {busy ? 'Yuborilmoqda…' : 'Xabarni yuborish'} <Send size={16} />
+                    {busy ? 'Yuborilmoqda…' : 'Xabarni yuborish'} <Send size={20} />
                   </button>
                 </>
               )}
@@ -136,7 +137,7 @@ export default function Contact() {
             <div className="ct-why-h">Nima uchun «AUTOSTART» avtomaktabi?</div>
             <div className="ct-why-grid">
               {AFZALLIKLAR.map((a) => (
-                <div className="ct-why-i" key={a}><Check size={16} /> <span>{a}</span></div>
+                <div className="ct-why-i" key={a}><Check size={18} /> <span>{a}</span></div>
               ))}
             </div>
           </div>
@@ -147,7 +148,7 @@ export default function Contact() {
               const Ic = KARTA_IC[k.rang];
               return (
                 <div className="ct-info-c" key={k.sarlavha}>
-                  <span className={'ct-info-ic ' + k.rang}><Ic size={20} /></span>
+                  <span className={'ct-info-ic ' + k.rang}><Ic size={24} /></span>
                   <div>
                     <b>{k.sarlavha}:</b>
                     <span>{k.matn}</span>
@@ -159,7 +160,8 @@ export default function Contact() {
 
           {/* Chaqiruv */}
           <div className="ct-cta">
-            <span className="ct-cta-ic"><Car size={30} /></span>
+            <img className="ct-cta-img" src="/car.jpg" alt="" loading="lazy"
+              onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
             <div>
               <span>{CTA.yuqori}</span>
               <b>{CTA.past}</b>
@@ -214,6 +216,7 @@ export default function Contact() {
               )}
             </div>
           </footer>
+         </div>
         </div>
       </div>
     </div>

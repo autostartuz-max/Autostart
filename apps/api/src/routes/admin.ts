@@ -51,6 +51,81 @@ adminRouter.post(
 
 adminRouter.use(requireAdmin);
 
+/* ---------- Tahlil: eng ko'p xato qilinadigan savollar ---------- */
+/**
+ * Owner va Admin uchun: qaysi savollarda talabalar ko'proq adashadi.
+ *
+ * Har foydalanuvchining har savolga bergan OXIRGI javobi hisoblanadi —
+ * qayta yechib to'g'irlagan bo'lsa, u endi xato hisoblanmaydi.
+ * Mehmon (guest) hisoblari tahlilga kirmaydi.
+ */
+adminRouter.get(
+  '/analytics/mistakes',
+  ah(async (req, res) => {
+    const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const shablon = req.query.shablon ? Number(req.query.shablon) : undefined;
+    // Kamida shuncha kishi javob bergan savollar (tasodifiy natijalarni chiqarib tashlash)
+    const minJavob = Math.max(1, Number(req.query.min) || 1);
+
+    // Mehmonlarni chiqarib tashlaymiz
+    const mehmonlar = await prisma.user.findMany({
+      where: { tgId: { startsWith: 'guest-' } },
+      select: { id: true },
+    });
+    const mehmonId = new Set(mehmonlar.map((u) => u.id));
+
+    const answers = await prisma.userAnswer.findMany({
+      orderBy: { answeredAt: 'desc' },
+      select: { userId: true, questionId: true, isCorrect: true },
+    });
+
+    // (foydalanuvchi, savol) bo'yicha faqat oxirgi javob
+    const korilgan = new Set<string>();
+    const jam = new Map<number, { total: number; wrong: number }>();
+    for (const a of answers) {
+      if (mehmonId.has(a.userId)) continue;
+      const k = a.userId + ':' + a.questionId;
+      if (korilgan.has(k)) continue;
+      korilgan.add(k);
+      const g = jam.get(a.questionId) || { total: 0, wrong: 0 };
+      g.total++;
+      if (!a.isCorrect) g.wrong++;
+      jam.set(a.questionId, g);
+    }
+    if (!jam.size) return res.json({ list: [], jamiSavol: 0 });
+
+    const savollar = await prisma.question.findMany({
+      where: { id: { in: [...jam.keys()] }, ...(shablon ? { shablon } : {}) },
+      select: {
+        id: true, textLat: true, shablon: true, order: true,
+        topic: { select: { name: true } },
+        options: { where: { isCorrect: true }, select: { textLat: true }, take: 1 },
+      },
+    });
+
+    const list = savollar
+      .map((q) => {
+        const g = jam.get(q.id)!;
+        return {
+          id: q.id,
+          textLat: q.textLat,
+          shablon: q.shablon,
+          order: q.order,
+          topic: q.topic?.name || null,
+          correctText: q.options[0]?.textLat || null,
+          total: g.total,
+          wrong: g.wrong,
+          rate: Math.round((g.wrong / g.total) * 100),
+        };
+      })
+      .filter((x) => x.wrong > 0 && x.total >= minJavob)
+      .sort((a, b) => b.wrong - a.wrong || b.rate - a.rate)
+      .slice(0, limit);
+
+    res.json({ list, jamiSavol: jam.size });
+  })
+);
+
 /* ---------- Bog'lanish xabarlari ---------- */
 // Owner ham, Admin ham o'qiy oladi (requireAdmin adminRouter darajasida qo'llangan)
 const MSG_STATUS = ['new', 'read', 'done'] as const;

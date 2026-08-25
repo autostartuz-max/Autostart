@@ -16,6 +16,7 @@ import Solved from './screens/Solved';
 import Legal from './screens/Legal';
 import Contact from './screens/Contact';
 import AdminMessages from './screens/AdminMessages';
+import AdminAnalytics from './screens/AdminAnalytics';
 import TestPlayer from './screens/TestPlayer';
 import Signs from './screens/Signs';
 import Profile from './screens/Profile';
@@ -106,6 +107,7 @@ export default function App() {
         <Route path="/hujjat/:doc" element={<Legal />} />
         <Route path="/aloqa" element={<Contact />} />
         <Route path="/xabarlar" element={<AdminMessages />} />
+        <Route path="/tahlil" element={<AdminAnalytics />} />
         <Route path="/biletlar" element={<Tickets />} />
         <Route path="/test" element={<TestPlayer />} />
         <Route path="/belgilar" element={<Signs />} />

@@ -269,6 +269,18 @@ userRouter.get(
       distinct: ['questionId'],
       select: { questionId: true },
     });
+    // Menyudagi nishon "Xato qilgan savollarim" sahifasidagi son bilan bir xil
+    // bo'lishi uchun: har savolning OXIRGI javobi xato bo'lganlar soni.
+    // (stats.wrong esa umuman xato javoblar soni — qayta urinishlar bilan.)
+    const barchaJavoblar = await prisma.userAnswer.findMany({
+      where: { userId },
+      orderBy: { answeredAt: 'desc' },
+      select: { questionId: true, isCorrect: true },
+    });
+    const oxirgiJavob = new Map<number, boolean>();
+    for (const a of barchaJavoblar) if (!oxirgiJavob.has(a.questionId)) oxirgiJavob.set(a.questionId, a.isCorrect);
+    const mistakes = [...oxirgiJavob.values()].filter((ok) => !ok).length;
+
     const bookmarks = await prisma.bookmark.count({ where: { userId } });
     const totalQuestions = await prisma.question.count({ where: { status: 'published' } });
 
@@ -296,6 +308,7 @@ userRouter.get(
         answered: total,
         correct,
         wrong: total - correct,
+        mistakes,
         streak,
         solvedQuestions: solvedQuestions.length,
         bookmarks,

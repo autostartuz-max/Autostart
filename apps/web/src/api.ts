@@ -260,7 +260,34 @@ export const adminApi = {
     areq('/admin/messages/' + id, { method: 'DELETE' }),
   setUserRole: (id: number, role: Role): Promise<{ user: AdminUserRow }> =>
     areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
+  /** Tahlil: barcha talabalar bo'yicha eng ko'p xato qilinadigan savollar */
+  mistakeAnalytics: (opts: { shablon?: number; min?: number; limit?: number } = {}):
+    Promise<{ list: MistakeStatRow[]; jamiSavol: number }> => {
+    const p = new URLSearchParams();
+    if (opts.shablon) p.set('shablon', String(opts.shablon));
+    if (opts.min) p.set('min', String(opts.min));
+    if (opts.limit) p.set('limit', String(opts.limit));
+    const qs = p.toString();
+    return areq('/admin/analytics/mistakes' + (qs ? '?' + qs : ''));
+  },
 };
+
+/** Bitta savol bo'yicha umumiy xato statistikasi (Owner/Admin tahlili) */
+export interface MistakeStatRow {
+  id: number;
+  textLat: string;
+  shablon: number | null;
+  order: number;
+  topic: string | null;
+  /** To'g'ri javob matni — tahlilda darhol ko'rinishi uchun */
+  correctText: string | null;
+  /** Nechta talaba bu savolga javob bergan */
+  total: number;
+  /** Shulardan nechtasi (oxirgi urinishida) xato qilgan */
+  wrong: number;
+  /** wrong / total, foizda */
+  rate: number;
+}
 
 export interface ShablonProgress {
   shablon: number;

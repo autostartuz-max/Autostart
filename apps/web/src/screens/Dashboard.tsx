@@ -45,7 +45,10 @@ export default function Dashboard() {
   const correct = me?.stats?.correct ?? 0;
   const answered = me?.stats?.answered ?? 0;
   const streak = me?.stats?.streak ?? 0;
-  const wrong = me?.stats?.wrong ?? 0;
+  // Menyudagi nishon — "Xato qilgan savollarim" sahifasidagi son bilan bir xil:
+  // har savolning OXIRGI javobi xato bo'lganlar soni (stats.wrong esa qayta
+  // urinishlarni ham sanaydi, shuning uchun u bu yerga to'g'ri kelmaydi).
+  const wrong = me?.stats?.mistakes ?? 0;
 
   // Grafik: javob berilgan kunlargina nuqta bo'ladi
   const kunList = kunlik?.list ?? [];

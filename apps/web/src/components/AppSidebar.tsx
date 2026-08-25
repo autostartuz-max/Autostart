@@ -115,6 +115,9 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
             <button className={'db-navi' + (active === '/xabarlar' ? ' active' : '')} onClick={() => go('/xabarlar')}>
               <MessageCircle size={18} /> <span>Xabarlar</span>
             </button>
+            <button className={'db-navi' + (active === '/tahlil' ? ' active' : '')} onClick={() => go('/tahlil')}>
+              <TrendingUp size={18} /> <span>Tahlil</span>
+            </button>
             {owner && (
               <button className={'db-navi' + (active === '/foydalanuvchilar' ? ' active' : '')} onClick={() => go('/foydalanuvchilar')}>
                 <ShieldCheck size={18} /> <span>Foydalanuvchilar</span>

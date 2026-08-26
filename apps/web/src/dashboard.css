@@ -706,28 +706,34 @@
 .ct-cta { position: relative; overflow: hidden; border-radius: 20px; min-height: 196px;
   display: flex; flex-direction: column; justify-content: center; padding: 26px 28px;
   border: 1px solid var(--db-border);
-  background:
-    radial-gradient(420px 220px at 14% 20%, rgba(239, 68, 68, .26), transparent 62%),
-    radial-gradient(440px 240px at 20% 96%, rgba(34, 197, 94, .22), transparent 64%),
-    radial-gradient(520px 280px at 78% 44%, rgba(245, 158, 11, .22), transparent 66%),
-    linear-gradient(120deg, #150f0b 0%, #0f1512 52%, #0c100d 100%); }
-.ct-cta-img { position: absolute; right: 0; top: 0; z-index: 1; width: 64%; height: 100%;
+  background: linear-gradient(120deg, #150f0b 0%, #0f1512 52%, #0c100d 100%); }
+.ct-cta-img { position: absolute; right: 0; top: 0; z-index: 1; width: 78%; height: 100%;
   object-fit: cover; object-position: left center;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 46%);
-  mask-image: linear-gradient(90deg, transparent, #000 46%); }
-.ct-cta > div { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 6px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 34%);
+  mask-image: linear-gradient(90deg, transparent, #000 34%); }
+/* Yagona parda: chapdan o'ngga so'nadi va rasmni fon bilan bitta qiladi */
+.ct-cta::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    linear-gradient(90deg, #0d1210 0%, rgba(13, 18, 16, .94) 22%, rgba(13, 18, 16, .58) 46%,
+      rgba(13, 18, 16, .18) 68%, rgba(13, 18, 16, 0) 86%),
+    radial-gradient(360px 200px at 12% 24%, rgba(239, 68, 68, .30), transparent 66%),
+    radial-gradient(380px 220px at 18% 96%, rgba(34, 197, 94, .26), transparent 68%); }
+.ct-cta > div { position: relative; z-index: 3; display: flex; flex-direction: column; gap: 6px;
   max-width: 58%; }
 .ct-cta span { color: #eaf1ff; font-size: 15.5px; font-weight: 600; line-height: 1.4; }
 .ct-cta b { color: #facc15; font-size: 20px; font-weight: 800; line-height: 1.25; }
 
 /* Yorug' mavzu — bosh sahifadagi banner bilan bir xil yechim */
 :root[data-theme="light"] .ct-cta {
-  background:
-    radial-gradient(420px 220px at 14% 18%, rgba(239, 68, 68, .13), transparent 60%),
-    radial-gradient(460px 240px at 55% 94%, rgba(34, 197, 94, .13), transparent 62%),
-    radial-gradient(540px 280px at 84% 34%, rgba(245, 158, 11, .15), transparent 64%),
-    linear-gradient(120deg, #eef3fb 0%, #e8eef8 52%, #f1f5fc 100%);
+  background: linear-gradient(120deg, #eef3fb 0%, #e8eef8 52%, #f1f5fc 100%);
   border-color: #dbe4f0;
+}
+:root[data-theme="light"] .ct-cta::after {
+  background:
+    linear-gradient(90deg, #eef3fb 0%, rgba(238, 243, 251, .94) 22%, rgba(238, 243, 251, .58) 46%,
+      rgba(238, 243, 251, .18) 68%, rgba(238, 243, 251, 0) 86%),
+    radial-gradient(360px 200px at 12% 22%, rgba(239, 68, 68, .12), transparent 66%),
+    radial-gradient(380px 220px at 18% 96%, rgba(34, 197, 94, .12), transparent 68%);
 }
 :root[data-theme="light"] .ct-cta span { color: #16233f; }
 :root[data-theme="light"] .ct-cta b { color: #b45309; }

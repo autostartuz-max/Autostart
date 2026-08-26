@@ -60,7 +60,7 @@ export default function Contact() {
           </button>
         </header>
 
-        <div className="db-content">
+        <div className="db-content ct-page">
          <div className="ct-wrap">
           <div className="ct-hero">
             <div className="ct-hero-t">

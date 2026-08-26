@@ -7,7 +7,7 @@ import {
 import { api, hasToken } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import {
-  TELEFONLAR, MANZIL, AFZALLIKLAR, KARTALAR, CTA,
+  TELEFONLAR, MANZIL, AFZALLIKLAR, KARTALAR,
   FUTER_HAVOLALAR, FUTER_TAVSIF, IJTIMOIY,
 } from '../contact';
 import '../dashboard.css';
@@ -80,9 +80,9 @@ export default function Contact() {
 
         <div className="db-content ct-page">
          <div className="ct-wrap">
-          {/* Sarlavha va avtomobil — bitta yaxlit banner ichida */}
-          <div className="ct-hero">
-            <img className="ct-hero-car" src="/car.jpg" alt="" loading="lazy"
+          {/* Sarlavha banneri: matn chapda, avtomobil o'ngda — bitta yaxlit fon */}
+          <section className="ct-hero">
+            <img className="ct-hero-car" src="/car-banner.webp" alt="AUTOSTART avtomaktabi" loading="eager"
               onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
             <div className="ct-hero-t">
               <h1>Biz bilan <span>bog‘laning</span></h1>
@@ -91,12 +91,8 @@ export default function Contact() {
                 Quyidagi telefon raqamlar yoki manzil orqali biz bilan bog‘lanishingiz mumkin.
                 Yoki pastdagi formani to‘ldirib, bizga xabar yuboring.
               </p>
-              <div className="ct-hero-cta">
-                <span>{CTA.yuqori}</span>
-                <b>{CTA.past}</b>
-              </div>
             </div>
-          </div>
+          </section>
 
           <div className="ct-panel">
             {/* Chap: aloqa ma'lumotlari */}

@@ -612,49 +612,31 @@
 .ct-wrap { max-width: 1760px; margin: 0 auto; padding: 26px 22px 40px; }
 
 /* --- Sarlavha: matn chapda, 3D tasvir o'ngda --- */
-/* --- Sarlavha banneri: matn va avtomobil BITTA fonda (bosh sahifadagidek) --- */
-.ct-hero { position: relative; overflow: hidden; border-radius: 20px; min-height: 268px;
-  display: flex; flex-direction: column; justify-content: center; padding: 38px 40px;
-  margin-bottom: 22px; border: 1px solid var(--db-border);
-  background: linear-gradient(120deg, #150f0b 0%, #0f1512 52%, #0c100d 100%); }
+/* --- Sarlavha banneri (maket bo'yicha): matn chapda, avtomobil o'ngda ---
+   Banner ikkala mavzuda ham qorong'i qoladi: rasm to'q navy fonda chizilgan,
+   uni yorug' mavzuga o'tkazib bo'lmaydi. Fon rangi rasmnikiga AYNAN teng
+   (#050a17) — shuning uchun rasm chekkasida hech qanday chegara ko'rinmaydi. */
+.ct-hero { position: relative; overflow: hidden; border-radius: 20px;
+  min-height: clamp(340px, 38vw, 660px); display: flex; flex-direction: column;
+  justify-content: center; padding: clamp(24px, 3.6vw, 68px); margin-bottom: 22px;
+  background: #050a17; border: 1px solid #131c33; }
 .ct-hero-car { position: absolute; right: 0; top: 0; z-index: 1; width: 58%; height: 100%;
-  object-fit: cover; object-position: left center;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 34%);
-  mask-image: linear-gradient(90deg, transparent, #000 34%); }
-/* Yagona parda — rasm bilan matn tomoni bir xil rangda bo'lsin */
+  object-fit: contain; object-position: right center; }
+/* Yumshoq nur — rasmning ham, fonning ham USTIDAN tushadi, shuning uchun
+   ikkalasi bir xil rangda qoladi va chok chiqmaydi */
 .ct-hero::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background:
-    linear-gradient(90deg, #0d1210 0%, rgba(13, 18, 16, .94) 24%, rgba(13, 18, 16, .58) 48%,
-      rgba(13, 18, 16, .18) 70%, rgba(13, 18, 16, 0) 88%),
-    radial-gradient(520px 280px at 10% 22%, rgba(239, 68, 68, .28), transparent 66%),
-    radial-gradient(540px 300px at 16% 96%, rgba(34, 197, 94, .24), transparent 68%); }
-.ct-hero-t { position: relative; z-index: 3; max-width: min(56%, 720px); min-width: 0; }
-.ct-hero h1 { font-size: clamp(34px, 3.4vw, 54px); line-height: 1.08; font-weight: 800;
-  letter-spacing: -1.2px; color: #f2f6ff; margin: 0 0 16px; }
-.ct-hero h1 span { background: linear-gradient(95deg, #ffb800, #ffc83d);
-  -webkit-background-clip: text; background-clip: text; color: transparent; }
-.ct-hero p { color: #b9c6da; font-size: 16.5px; line-height: 1.68; margin: 0; }
-.ct-hero .ct-hero-lead { color: #eaf1ff; font-size: 18px; line-height: 1.55; margin-bottom: 14px; }
-.ct-hero-cta { margin-top: 22px; display: flex; flex-direction: column; gap: 4px; }
-.ct-hero-cta span { color: #eaf1ff; font-size: 16px; font-weight: 600; line-height: 1.35; }
-.ct-hero-cta b { color: #facc15; font-size: 21px; font-weight: 800; line-height: 1.3; }
+    radial-gradient(60% 70% at 72% 52%, rgba(56, 96, 168, .16), transparent 68%),
+    linear-gradient(90deg, rgba(2, 5, 12, .55) 0%, rgba(2, 5, 12, .18) 34%, transparent 58%); }
 
-/* Yorug' mavzu — bosh sahifadagi banner bilan bir xil yechim */
-:root[data-theme="light"] .ct-hero {
-  background: linear-gradient(120deg, #eef3fb 0%, #e8eef8 52%, #f1f5fc 100%);
-  border-color: #dbe4f0; }
-:root[data-theme="light"] .ct-hero::after {
-  background:
-    linear-gradient(90deg, #eef3fb 0%, rgba(238, 243, 251, .94) 24%, rgba(238, 243, 251, .58) 48%,
-      rgba(238, 243, 251, .18) 70%, rgba(238, 243, 251, 0) 88%),
-    radial-gradient(520px 280px at 10% 20%, rgba(239, 68, 68, .12), transparent 66%),
-    radial-gradient(540px 300px at 16% 96%, rgba(34, 197, 94, .12), transparent 68%); }
-:root[data-theme="light"] .ct-hero h1 { color: #16233f; }
-:root[data-theme="light"] .ct-hero p { color: #46566f; }
-:root[data-theme="light"] .ct-hero .ct-hero-lead { color: #1f2c48; }
-:root[data-theme="light"] .ct-hero-cta span { color: #16233f; }
-:root[data-theme="light"] .ct-hero-cta b { color: #b45309; }
-:root[data-theme="light"] .ct-hero-car { opacity: .72; }
+.ct-hero-t { position: relative; z-index: 3; max-width: min(42%, 620px); min-width: 0; }
+.ct-hero h1 { font-size: clamp(32px, 3.4vw, 58px); line-height: 1.08; font-weight: 800;
+  letter-spacing: -1.2px; color: #ffffff; margin: 0 0 clamp(12px, 1.1vw, 22px); }
+.ct-hero h1 span { color: #ffb800; }
+.ct-hero .ct-hero-lead { color: #ffffff; font-weight: 500;
+  font-size: clamp(18px, 1.7vw, 31px); line-height: 1.4;
+  margin: 0 0 clamp(14px, 1.4vw, 28px); }
+.ct-hero p { color: #9fb0c8; font-size: clamp(15px, 1.15vw, 21px); line-height: 1.6; margin: 0; }
 
 /* --- Aloqa + forma: bitta katta karta ichida ikki ustun --- */
 .ct-panel { display: grid; grid-template-columns: minmax(0, .54fr) minmax(0, 1fr);
@@ -765,8 +747,7 @@
 /* Noutbukda biroz ixchamlashadi, lekin maketdagi nisbat saqlanadi */
 @media (max-width: 1200px) {
   .ct-wrap { padding: 22px 22px 32px; }
-  .ct-hero { min-height: 232px; padding: 30px 28px; }
-  .ct-hero-t { max-width: 62%; }
+  .ct-hero-t { max-width: 46%; }
   .ct-col { padding: 26px; }
   .ct-card { padding: 28px 26px; }
   .ct-why-grid { gap: 18px 36px; }
@@ -774,12 +755,12 @@
 }
 @media (max-width: 900px) {
   .ct-wrap { padding: 16px 14px 26px; }
-  .ct-hero { min-height: 0; padding: 24px 20px; margin-bottom: 18px; }
-  .ct-hero-t { max-width: 100%; }
-  .ct-hero-car { display: none; }
+  /* Telefonda: matn tepada, avtomobil ostida */
+  .ct-hero { min-height: 0; padding: 26px 20px 0; margin-bottom: 18px; }
+  .ct-hero-t { max-width: 100%; order: 1; }
+  .ct-hero-car { position: static; order: 2; height: auto; margin: 18px -20px 0;
+    width: calc(100% + 40px); max-width: none; }
   .ct-hero::after { background: none; }
-  .ct-hero-cta { margin-top: 18px; }
-  .ct-hero-cta b { font-size: 19px; }
   .ct-hero h1 { font-size: 34px; }
   .ct-hero .ct-hero-lead { font-size: 17px; }
   .ct-hero p { font-size: 15.5px; }

@@ -80,7 +80,10 @@ export default function Contact() {
 
         <div className="db-content ct-page">
          <div className="ct-wrap">
+          {/* Sarlavha va avtomobil — bitta yaxlit banner ichida */}
           <div className="ct-hero">
+            <img className="ct-hero-car" src="/car.jpg" alt="" loading="lazy"
+              onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
             <div className="ct-hero-t">
               <h1>Biz bilan <span>bog‘laning</span></h1>
               <p className="ct-hero-lead">Savollaringiz bormi? Biz sizga yordam berishga tayyormiz!</p>
@@ -88,13 +91,7 @@ export default function Contact() {
                 Quyidagi telefon raqamlar yoki manzil orqali biz bilan bog‘lanishingiz mumkin.
                 Yoki pastdagi formani to‘ldirib, bizga xabar yuboring.
               </p>
-            </div>
-
-            {/* Chaqiruv banneri — sarlavhaning o'ng tomonida */}
-            <div className="ct-cta">
-              <img className="ct-cta-img" src="/car.jpg" alt="" loading="lazy"
-                onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
-              <div>
+              <div className="ct-hero-cta">
                 <span>{CTA.yuqori}</span>
                 <b>{CTA.past}</b>
               </div>

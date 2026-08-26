@@ -27,7 +27,25 @@ export default function Contact() {
   const [err, setErr] = useState('');
   const [yuborildi, setYuborildi] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [nusxa, setNusxa] = useState('');
   const inp = (f: string) => 'ct-inp' + (bad === f ? ' bad' : '');
+
+  // Kompyuterda "tel:" havolasi begona dasturni (Skype, brauzer so'rovi) ochib
+  // yuboradi — bu chalkash. Shuning uchun u yerda raqam buferga nusxalanadi.
+  // Telefon/planshetda (pointer: coarse) esa odatdagidek qo'ng'iroqqa o'tadi.
+  const telBos = (e: React.MouseEvent, raqam: string) => {
+    let teginish = false;
+    try { teginish = window.matchMedia('(pointer: coarse)').matches; } catch { /* ignore */ }
+    if (teginish || !navigator.clipboard) return; // havola o'z ishini qilsin
+    e.preventDefault();
+    navigator.clipboard
+      .writeText(raqam)
+      .then(() => {
+        setNusxa(raqam);
+        setTimeout(() => setNusxa((r) => (r === raqam ? '' : r)), 1600);
+      })
+      .catch(() => { /* bufer ishlamasa — jim qolamiz */ });
+  };
 
   const yubor = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -71,8 +89,6 @@ export default function Contact() {
                 Yoki pastdagi formani to‘ldirib, bizga xabar yuboring.
               </p>
             </div>
-            {/* Chetlari faylning o'zida shaffof qilingan — chegara chiqmaydi */}
-            <img className="ct-hero-img" src="/aloqa-3d.webp" alt="" loading="lazy" />
           </div>
 
           <div className="ct-panel">
@@ -81,13 +97,16 @@ export default function Contact() {
               <div className="ct-h"><Phone size={18} /> To‘liq ma’lumot</div>
 
               {TELEFONLAR.map((t) => (
-                <a className="ct-tel" key={t.raqam} href={'tel:' + t.raqam.replace(/[^\d+]/g, '')}>
+                <a className="ct-tel" key={t.raqam} href={'tel:' + t.raqam.replace(/[^\d+]/g, '')}
+                  onClick={(e) => telBos(e, t.raqam)} title="Bosing: raqamdan nusxa olinadi">
                   <span className={'ct-tel-ic' + (t.whatsapp ? ' wa' : '')}>
                     {t.whatsapp ? <MessageCircle size={22} /> : <Phone size={22} />}
                   </span>
                   <span className="ct-tel-t">
                     <b>{t.raqam}</b>
-                    <span>{t.izoh}</span>
+                    <span className={nusxa === t.raqam ? 'ct-nusxa' : ''}>
+                      {nusxa === t.raqam ? 'Nusxa olindi' : t.izoh}
+                    </span>
                   </span>
                 </a>
               ))}
@@ -189,7 +208,8 @@ export default function Contact() {
               <div>
                 <div className="ct-f-h">Biz bilan bog‘laning</div>
                 {TELEFONLAR.map((t) => (
-                  <a key={t.raqam} className="ct-f-row" href={'tel:' + t.raqam.replace(/[^\d+]/g, '')}>
+                  <a key={t.raqam} className="ct-f-row" href={'tel:' + t.raqam.replace(/[^\d+]/g, '')}
+                    onClick={(e) => telBos(e, t.raqam)} title="Bosing: raqamdan nusxa olinadi">
                     {t.whatsapp ? <MessageCircle size={14} /> : <Phone size={14} />}
                     <span><b>{t.raqam}</b> {t.izoh}</span>
                   </a>

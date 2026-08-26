@@ -609,9 +609,10 @@
 .ct-wrap { max-width: 1280px; margin: 0 auto; padding: 32px 48px 40px; }
 
 /* --- Sarlavha: matn chapda, 3D tasvir o'ngda --- */
-.ct-hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  align-items: center; gap: 0; margin-bottom: 20px; }
-.ct-hero-t { min-width: 0; }
+/* Sarlavha faqat matndan iborat — 3D tasvir sahifa foniga mos tushmagani uchun
+   olib tashlandi (fayl public/aloqa-3d.webp da qoldi). */
+.ct-hero { margin-bottom: 22px; }
+.ct-hero-t { max-width: 780px; }
 .ct-hero h1 { font-size: clamp(34px, 3.4vw, 54px); line-height: 1.08; font-weight: 800;
   letter-spacing: -1.2px; color: var(--db-text); margin: 0 0 16px; }
 .ct-hero h1 span { background: linear-gradient(95deg, #ffb800, #ffc83d);
@@ -619,8 +620,6 @@
 .ct-hero p { color: var(--db-muted); font-size: 16.5px; line-height: 1.68; margin: 0; }
 .ct-hero .ct-hero-lead { color: var(--db-text); font-size: 18px; line-height: 1.55; margin-bottom: 16px; }
 /* Chetlari faylning o'zida shaffof — chegara chiqmaydi */
-.ct-hero-img { width: 100%; max-width: 560px; height: auto; justify-self: end;
-  margin: -48px -26px -48px -70px; }
 
 /* --- Aloqa + forma: bitta katta karta ichida ikki ustun --- */
 .ct-panel { display: grid; grid-template-columns: minmax(0, .54fr) minmax(0, 1fr);
@@ -644,6 +643,7 @@
 .ct-tel-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .ct-tel-t b { color: var(--db-text); font-size: 19px; font-weight: 700; }
 .ct-tel-t span { color: var(--db-muted); font-size: 14px; }
+.ct-tel-t span.ct-nusxa { color: #4ade80; font-weight: 700; }
 .ct-manzil { margin-top: auto; padding-top: 22px; display: flex; flex-direction: column; gap: 8px; }
 .ct-manzil-h { display: inline-flex; align-items: center; gap: 9px; color: #ffb800; font-size: 13px;
   font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
@@ -740,7 +740,6 @@
 /* Noutbukda biroz ixchamlashadi, lekin maketdagi nisbat saqlanadi */
 @media (max-width: 1200px) {
   .ct-wrap { padding: 24px 26px 32px; }
-  .ct-hero-img { margin: -38px -18px -38px -50px; }
   .ct-col { padding: 26px; }
   .ct-card { padding: 28px 26px; }
   .ct-why-grid { gap: 18px 36px; }
@@ -749,8 +748,7 @@
 }
 @media (max-width: 900px) {
   .ct-wrap { padding: 16px 14px 26px; }
-  .ct-hero { grid-template-columns: 1fr; margin-bottom: 20px; }
-  .ct-hero-img { display: none; }
+  .ct-hero { margin-bottom: 18px; }
   .ct-hero h1 { font-size: 34px; }
   .ct-hero .ct-hero-lead { font-size: 17px; }
   .ct-hero p { font-size: 15.5px; }
@@ -770,13 +768,6 @@
   .ct-f-grid { grid-template-columns: 1fr; gap: 26px; }
 }
 
-/* Yorug' mavzuda 3D tasvir qorong'i kartada turadi — so'nayotgan chetlari
-   kartaga singadi, oq fonda dog' bo'lib qolmaydi. */
-:root[data-theme="light"] .ct-hero-img {
-  border-radius: 22px; background: #0b1220; box-shadow: 0 18px 40px rgba(15, 23, 42, .18);
-  /* Pastdan manfiy chekka yo'q — karta quyidagi panelga tegib turmasin */
-  margin: -30px 0 0 -40px;
-}
 
 /* ===== Admin: xabarlar ===== */
 .xb-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; display: flex; align-items: center;

@@ -14,7 +14,7 @@ export const TELEFONLAR: Telefon[] = [
   { raqam: '94 039 11 11', izoh: 'Quva sh' },
   { raqam: '91 108 86 68', izoh: 'Quva' },
   { raqam: '(33) 051-58-58', izoh: 'Farg‘ona', whatsapp: true },
-  { raqam: '(95) 838-07-17', izoh: 'Toshkent' },
+  { raqam: '(95) 838-07-17', izoh: 'Toshloq' },
 ];
 
 export const MANZIL = 'Quva shahri, soliq avtobaza binosi';

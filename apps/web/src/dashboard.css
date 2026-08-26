@@ -606,7 +606,10 @@
 /* Sahifa markazda turadi — ultra-keng monitorda cho'zilib ketmaydi */
 /* Sahifa o'z paddingini o'zi beradi — db-content'niki nolga tushiriladi */
 .ct-page { padding: 0; }
-.ct-wrap { max-width: 1280px; margin: 0 auto; padding: 32px 48px 40px; }
+/* Sahifa boshqa sahifalar bilan bir tekisda turadi — sidebardan ajralib
+   qolmasligi uchun markazlashtiruvchi katta bo'shliq yo'q. Cheklov faqat
+   juda keng (4K) monitorlar uchun. */
+.ct-wrap { max-width: 1760px; margin: 0 auto; padding: 26px 22px 40px; }
 
 /* --- Sarlavha: matn chapda, 3D tasvir o'ngda --- */
 /* Sarlavha chapda, chaqiruv banneri o'ngda — bo'sh joy qolmaydi.
@@ -762,7 +765,7 @@
 
 /* Noutbukda biroz ixchamlashadi, lekin maketdagi nisbat saqlanadi */
 @media (max-width: 1200px) {
-  .ct-wrap { padding: 24px 26px 32px; }
+  .ct-wrap { padding: 22px 22px 32px; }
   .ct-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: 24px; }
   .ct-cta { min-height: 176px; padding: 22px 24px; }
   .ct-col { padding: 26px; }

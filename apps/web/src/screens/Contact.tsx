@@ -89,6 +89,16 @@ export default function Contact() {
                 Yoki pastdagi formani to‘ldirib, bizga xabar yuboring.
               </p>
             </div>
+
+            {/* Chaqiruv banneri — sarlavhaning o'ng tomonida */}
+            <div className="ct-cta">
+              <img className="ct-cta-img" src="/car.jpg" alt="" loading="lazy"
+                onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
+              <div>
+                <span>{CTA.yuqori}</span>
+                <b>{CTA.past}</b>
+              </div>
+            </div>
           </div>
 
           <div className="ct-panel">
@@ -175,16 +185,6 @@ export default function Contact() {
                 </div>
               );
             })}
-          </div>
-
-          {/* Chaqiruv */}
-          <div className="ct-cta">
-            <img className="ct-cta-img" src="/car.jpg" alt="" loading="lazy"
-              onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')} />
-            <div>
-              <span>{CTA.yuqori}</span>
-              <b>{CTA.past}</b>
-            </div>
           </div>
 
           {/* Futer */}

@@ -26,7 +26,14 @@ app.use('/api/auth', authLimiter);
 // 2) Savol/rasm — ommaviy ko'chirishga qarshi (bitta test ~20 savol/rasm)
 app.use('/api/questions', rateLimit({ windowMs: 5 * 60 * 1000, max: 240, message: 'Savol/rasm so‘rovlari cheklandi. Biroz kuting.' }));
 // 3) Umumiy chegara — har qanday IP uchun
-app.use('/api', rateLimit({ windowMs: 5 * 60 * 1000, max: 1000 }));
+const umumiyLimit = rateLimit({ windowMs: 5 * 60 * 1000, max: 1000 });
+app.use('/api', (req, res, next) => {
+  // Amaliy mashg'ulot videosi chegaradan tashqarida: bitta darsni ko'rish
+  // o'nlab Range so'rovi qiladi va bitta sinf bitta IP dan kirsa, hammasi
+  // 429 bilan to'xtab qolardi. Fayl statik kontent — cheklash foyda bermaydi.
+  if (/^\/lessons\/\d+\/video$/.test(req.path)) return next();
+  umumiyLimit(req, res, next);
+});
 
 app.use('/api', userRouter);
 app.use('/api/admin', adminRouter);

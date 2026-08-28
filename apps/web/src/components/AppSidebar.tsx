@@ -21,7 +21,7 @@ const ORGANISH = [
   { Icon: TriangleAlert, label: 'Yo‘l harakati qoidalari', to: '/belgilar' },
   { Icon: SignpostBig, label: 'Belgilar', to: '/belgilar' },
   { Icon: SignpostBig, label: "Yo'l belgilari", to: '/belgilar' },
-  { Icon: Video, label: 'Videodarslar', to: '/oktagon' },
+  { Icon: Video, label: 'Amaliy mashg‘ulotlar', to: '/amaliy' },
   { Icon: Info, label: "Foydali ma'lumotlar", to: '/oktagon' },
 ];
 const STAT = [
@@ -100,9 +100,12 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         </button>
         <div className="db-sec">Testlar</div>
         {navi(MENU_MINIMAL ? TESTLAR.slice(0, 4) : TESTLAR)}
+        <div className="db-sec">O‘rganish</div>
+        <button className={'db-navi' + (active === '/amaliy' ? ' active' : '')} onClick={() => go('/amaliy')}>
+          <Video size={18} /> <span>Amaliy mashg‘ulotlar</span>
+        </button>
         {!MENU_MINIMAL && <>
-          <div className="db-sec">O‘rganish</div>
-          {navi(ORGANISH)}
+          {navi(ORGANISH.filter((o) => o.to !== '/amaliy'))}
           <div className="db-sec">Statistika</div>
           {navi(STAT)}
         </>}
@@ -111,6 +114,9 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
             <div className="db-sec">Admin</div>
             <button className={'db-navi' + (active === '/savollar' ? ' active' : '')} onClick={() => go('/savollar')}>
               <ClipboardList size={18} /> <span>Savollar</span>
+            </button>
+            <button className={'db-navi' + (active === '/amaliy/boshqaruv' ? ' active' : '')} onClick={() => go('/amaliy/boshqaruv')}>
+              <Video size={18} /> <span>Video joylash</span>
             </button>
             <button className={'db-navi' + (active === '/xabarlar' ? ' active' : '')} onClick={() => go('/xabarlar')}>
               <MessageCircle size={18} /> <span>Xabarlar</span>

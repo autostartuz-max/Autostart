@@ -23,10 +23,19 @@ export default function Dashboard() {
   const [onlayn, setOnlayn] = useState<number | null>(null);
   const [onlaynList, setOnlaynList] = useState<OnlineRow[]>([]);
   const [onlaynOchiq, setOnlaynOchiq] = useState(false);
+  // Oxirgi 2 haftada qo'shilgan amaliy mashg'ulotlar — sarlavhadagi tabletka uchun
+  const [yangiDars, setYangiDars] = useState(0);
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
     api.rating(50).then((r) => setReyting(r.list || [])).catch(() => {});
-    api.dailyStats(7).then(setKunlik).catch(() => {});
+    // 14 kun so'raymiz: grafik oxirgi 7 kunni, mikro-ustunlar esa hammasini ko'rsatadi
+    api.dailyStats(14).then(setKunlik).catch(() => {});
+    api.lessons()
+      .then((r) => {
+        const chegara = Date.now() - 14 * 864e5;
+        setYangiDars((r.list || []).filter((l) => new Date(l.createdAt).getTime() > chegara).length);
+      })
+      .catch(() => {});
 
     const onlaynYukla = () =>
       api.online()
@@ -50,12 +59,47 @@ export default function Dashboard() {
   // urinishlarni ham sanaydi, shuning uchun u bu yerga to'g'ri kelmaydi).
   const wrong = me?.stats?.mistakes ?? 0;
 
-  // Grafik: javob berilgan kunlargina nuqta bo'ladi
+  // Grafik: javob berilgan kunlargina nuqta bo'ladi.
+  // 14 kunlik oynani ikkiga bo'lamiz — shu hafta va o'tgan hafta ustma-ust chiziladi.
   const kunList = kunlik?.list ?? [];
-  const nuqtalar = kunList
-    .map((d, i) => ({ ...d, x: kunList.length > 1 ? (i / (kunList.length - 1)) * 100 : 50 }))
-    .filter((d) => d.accuracy != null);
-  const chartPts = nuqtalar.map((d) => `${d.x},${100 - (d.accuracy as number)}`).join(' ');
+  const hafta = kunList.slice(-7);
+  const oldingi = kunList.slice(0, Math.max(0, kunList.length - 7));
+
+  const nuqtalash = (rows: DailyStat[]) =>
+    rows
+      .map((d, i) => ({ ...d, x: rows.length > 1 ? (i / (rows.length - 1)) * 100 : 50 }))
+      .filter((d) => d.accuracy != null);
+
+  const nuqtalar = nuqtalash(hafta);
+  const oldingiNuqta = nuqtalash(oldingi);
+  // Y o'qi 0–100 emas, ma'lumot oralig'iga moslanadi: 60–80% oralig'idagi
+  // natijalar to'liq balandlikda ochiladi, aks holda chiziq tep-tekis ko'rinardi.
+  const barchaFoiz = [...nuqtalar, ...oldingiNuqta].map((d) => d.accuracy as number).concat(acc || 0);
+  const yMin = Math.max(0, Math.min(...barchaFoiz) - 8);
+  const yMax = Math.min(100, Math.max(...barchaFoiz) + 8);
+  const Y = (v: number) => ((yMax - v) / Math.max(1, yMax - yMin)) * 100;
+  const chiziq = (pts: typeof nuqtalar) => pts.map((d) => `${d.x},${Y(d.accuracy as number)}`).join(' ');
+  const chartPts = chiziq(nuqtalar);
+  const oldingiPts = chiziq(oldingiNuqta);
+
+  // Eng yaxshi/yomon — grafikda ko'rinayotgan 7 kun bo'yicha (API 14 kunni qaytaradi)
+  const haftaFoiz = nuqtalar.map((d) => d.accuracy as number);
+  const engYaxshi = haftaFoiz.length ? Math.max(...haftaFoiz) : null;
+  const engYomon = haftaFoiz.length ? Math.min(...haftaFoiz) : null;
+
+  const kunBelgi = (d: string) => { try { return new Date(d).getDate() + '-kun'; } catch { return ''; } };
+
+  /** Stat kartochkasidagi mikro-ustunlar — 14 kunlik haqiqiy qiymatlar */
+  const spark = (vals: number[], cls: string) => {
+    const oxirgi = vals.slice(-10);
+    if (!oxirgi.some((v) => v > 0)) return null;
+    const max = Math.max(1, ...oxirgi);
+    return (
+      <div className={'db-spark ' + cls} aria-hidden>
+        {oxirgi.map((v, i) => <i key={i} style={{ height: Math.max(3, Math.round((v / max) * 42)) + 'px' }} />)}
+      </div>
+    );
+  };
 
   // Owner o'z sahifasini admin ko'rinishida (statistika bilan) ko'radi,
   // qolganlar oddiy profilga tushadi — /foydalanuvchilar ular uchun 403.
@@ -72,6 +116,11 @@ export default function Dashboard() {
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
           <div className="db-search"><Search size={17} /><input placeholder="Qidirish…" /></div>
           <div className="db-top-right">
+            {yangiDars > 0 && (
+              <button className="db-newles" onClick={() => nav('/amaliy')} title="Amaliy mashg‘ulotlar">
+                <Video size={16} /> <span>Yangi darsliklar:</span> <b>{yangiDars} ta</b>
+              </button>
+            )}
             {onlayn != null && (
               <div className="db-onlwrap">
                 <button
@@ -139,10 +188,26 @@ export default function Dashboard() {
 
           {/* Stat cards */}
           <div className="db-stats">
-            <div className="db-stat db-stat-link" onClick={() => nav('/yechilgan')} title="Yechilgan savollarni ko‘rish"><div className="si p"><FileText size={24} /></div><div><div className="sl">Yechilgan testlar</div><div className="sv">{solved.toLocaleString()}</div><div className="sd">jami {total.toLocaleString()} tadan</div></div></div>
-            <div className="db-stat"><div className="si b"><Check size={24} /></div><div><div className="sl">To‘g‘ri javoblar</div><div className="sv">{correct.toLocaleString()}</div><div className="sd">{answered.toLocaleString()} ta javobdan</div></div></div>
-            <div className="db-stat"><div className="si g"><TrendingUp size={24} /></div><div><div className="sl">O‘rtacha natija</div><div className="sv">{acc}%</div><div className="sd">{answered ? (acc >= 90 ? 'Zo‘r natija! 🔥' : acc >= 70 ? 'Yaxshi ketyapti 👍' : 'Mashq qiling 💪') : 'Hali test yechilmagan'}</div></div></div>
-            <div className="db-stat"><div className="si o"><Flame size={24} /></div><div><div className="sl">Ketma-ketlik</div><div className="sv">{streak} kun</div><div className="sd">{streak > 0 ? 'Davom eting! 💪' : 'Bugun boshlang'}</div></div></div>
+            <div className="db-stat db-stat-link" onClick={() => nav('/yechilgan')} title="Yechilgan savollarni ko‘rish">
+              <div className="si p"><FileText size={24} /></div>
+              <div className="db-stat-in"><div className="sl">Yechilgan testlar</div><div className="sv">{solved.toLocaleString()}</div><div className="sd">jami {total.toLocaleString()} tadan</div></div>
+              {spark(kunList.map((d) => d.answered), 'gr')}
+            </div>
+            <div className="db-stat">
+              <div className="si b"><Check size={24} /></div>
+              <div className="db-stat-in"><div className="sl">To‘g‘ri javoblar</div><div className="sv">{correct.toLocaleString()}</div><div className="sd">{answered.toLocaleString()} ta javobdan</div></div>
+              {spark(kunList.map((d) => d.correct), 'gr')}
+            </div>
+            <div className="db-stat">
+              <div className="si g"><TrendingUp size={24} /></div>
+              <div className="db-stat-in"><div className="sl">O‘rtacha natija</div><div className="sv">{acc}%</div><div className="sd">{answered ? (acc >= 90 ? 'Zo‘r natija! 🔥' : acc >= 70 ? 'Yaxshi ketyapti 👍' : 'Mashq qiling 💪') : 'Hali test yechilmagan'}</div></div>
+              {spark(kunList.map((d) => d.accuracy ?? 0), 'ye')}
+            </div>
+            <div className="db-stat">
+              <div className="si o"><Flame size={24} /></div>
+              <div className="db-stat-in"><div className="sl">Ketma-ketlik</div><div className="sv">{streak} kun</div><div className="sd">{streak > 0 ? 'Davom eting! 💪' : 'Bugun boshlang'}</div></div>
+              {spark(kunList.map((d) => (d.answered > 0 ? 1 : 0)), 're')}
+            </div>
           </div>
 
           {/* 3 panel */}
@@ -170,27 +235,61 @@ export default function Dashboard() {
               {nuqtalar.length === 0 ? (
                 <div className="db-rempty">Oxirgi 7 kunda test yechilmagan.</div>
               ) : (
-                <svg className="db-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  {[0, 25, 50, 75, 100].map((y) => <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="rgba(124,108,245,.14)" strokeWidth="0.5" />)}
-                  {nuqtalar.length > 1 && (
-                    <polyline points={chartPts} fill="none" stroke="#7c6cf5" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
+                <>
+                  <div className="db-legend">
+                    <span><i style={{ background: 'var(--db-green)' }} /> O‘z natijam</span>
+                    {oldingiNuqta.length > 0 && <span><i style={{ background: 'var(--db-yellow)' }} /> O‘tgan hafta</span>}
+                    <span><i style={{ background: 'var(--db-red)' }} /> Umumiy o‘rtacha</span>
+                  </div>
+                  <svg className="db-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    {[0, 25, 50, 75, 100].map((y) => (
+                      <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="var(--db-grid)" strokeWidth="0.5" />
+                    ))}
+                    {/* Umumiy o'rtacha — solishtirish uchun tekis chiziq */}
+                    <line x1="0" y1={Y(acc)} x2="100" y2={Y(acc)} stroke="var(--db-red)" strokeWidth="1.2" strokeDasharray="3 3" opacity=".75" />
+                    {oldingiNuqta.length > 1 && (
+                      <polyline points={oldingiPts} fill="none" stroke="var(--db-yellow)" strokeWidth="1.6"
+                        strokeLinejoin="round" strokeLinecap="round" opacity=".8" />
+                    )}
+                    {nuqtalar.length > 1 && (
+                      <polyline points={chartPts} fill="none" stroke="var(--db-green)" strokeWidth="2.2"
+                        strokeLinejoin="round" strokeLinecap="round" />
+                    )}
+                    {nuqtalar.map((d) => (
+                      <circle key={d.date} cx={d.x} cy={Y(d.accuracy as number)} r="1.6" fill="var(--db-green)">
+                        <title>{d.date}: {d.accuracy}% ({d.correct}/{d.answered})</title>
+                      </circle>
+                    ))}
+                  </svg>
+                  {hafta.length > 1 && (
+                    <div className="db-xaxis">
+                      <span>{kunBelgi(hafta[0].date)}</span>
+                      <span>{kunBelgi(hafta[Math.floor(hafta.length / 2)].date)}</span>
+                      <span>{kunBelgi(hafta[hafta.length - 1].date)}</span>
+                    </div>
                   )}
-                  {nuqtalar.map((d) => (
-                    <circle key={d.date} cx={d.x} cy={100 - (d.accuracy as number)} r="1.6" fill="#b3a6ff">
-                      <title>{d.date}: {d.accuracy}% ({d.correct}/{d.answered})</title>
-                    </circle>
-                  ))}
-                </svg>
+                </>
               )}
               <div className="db-cstats">
-                <div className="db-cstat"><b style={{ color: '#4ade80' }}>{kunlik?.best != null ? kunlik.best + '%' : '—'}</b><span>Eng yaxshi</span></div>
-                <div className="db-cstat"><b style={{ color: '#fb7185' }}>{kunlik?.worst != null ? kunlik.worst + '%' : '—'}</b><span>Eng yomon</span></div>
-                <div className="db-cstat"><b>{acc}%</b><span>O‘rtacha</span></div>
+                <div className="db-cstat"><b style={{ color: 'var(--db-green)' }}>{engYaxshi != null ? engYaxshi + '%' : '—'}</b><span>Eng yaxshi</span></div>
+                <div className="db-cstat"><b style={{ color: 'var(--db-red)' }}>{engYomon != null ? engYomon + '%' : '—'}</b><span>Eng yomon</span></div>
+                <div className="db-cstat"><b style={{ color: 'var(--db-yellow)' }}>{acc}%</b><span>O‘rtacha</span></div>
               </div>
             </div>
 
             <div className="db-panel">
               <div className="db-ph"><h3>Reyting</h3><div className="db-tabs"><button className="db-tab on">Umumiy</button><button className="db-tab">Do‘stlar</button></div></div>
+              {reyting.length >= 3 && (
+                <div className="db-podium">
+                  {reyting.slice(0, 3).map((r, i) => (
+                    <div className={'db-pod p' + (i + 1)} key={r.userId}>
+                      <div className="db-pod-av">{(r.firstName || '?')[0].toUpperCase()}</div>
+                      <b>{r.firstName}</b>
+                      <span>{r.rank}-o‘rin · {r.accuracy}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               {reyting.length === 0 ? (
                 <div className="db-rempty">Hali hech kim test yechmagan.</div>
               ) : (

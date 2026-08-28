@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import fs from 'fs';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma';
@@ -6,6 +7,7 @@ import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } from '../auth';
 import { shifrla } from '../passwordVault';
 import { telegramgaYubor, esc } from '../notify';
+import { lessonFilePath, TOIFALAR } from '../uploads';
 
 // Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi
 function normPhone(raw: any): string | null {
@@ -848,5 +850,66 @@ userRouter.post(
     const reason = String(req.body?.reason || 'Sabab ko‘rsatilmagan');
     await prisma.complaint.create({ data: { userId, questionId, reason } });
     res.json({ ok: true });
+  })
+);
+
+/* ---------- Amaliy mashg'ulotlar (video darsliklar) ---------- */
+/**
+ * Foydalanuvchi faqat KO'RADI — joylash admin panelida (POST /admin/lessons).
+ * Ro'yxatga fayl nomi qo'shilmaydi: video faqat /lessons/:id/video orqali beriladi,
+ * shunda diskdagi tuzilma tashqariga oshkor bo'lmaydi.
+ */
+userRouter.get(
+  '/lessons',
+  ah(async (req, res) => {
+    const category = String(req.query.category || '').trim();
+    const where = { status: 'published', ...(category ? { category } : {}) };
+    const list = await prisma.lesson.findMany({
+      where,
+      orderBy: [{ category: 'asc' }, { order: 'asc' }, { id: 'desc' }],
+      select: {
+        id: true, title: true, description: true, category: true,
+        order: true, sizeBytes: true, createdAt: true,
+      },
+    });
+    // Toifa chiplarida "B (7)" ko'rinishi uchun — har toifada nechta dars bor
+    const guruh = await prisma.lesson.groupBy({
+      by: ['category'],
+      where: { status: 'published' },
+      _count: { _all: true },
+    });
+    const counts: Record<string, number> = {};
+    for (const g of guruh) counts[g.category] = g._count._all;
+    res.json({ list, counts, toifalar: TOIFALAR });
+  })
+);
+
+/**
+ * Videoning o'zi. Savol rasmi/ovozi kabi ochiq (token talab qilmaydi) —
+ * <video src> sarlavha yubora olmaydi, tokenni manzilga yozish esa uni
+ * server jurnallariga tushirib yuborardi.
+ *
+ * res.sendFile Range so'rovlarini o'zi uddalaydi — foydalanuvchi videoni
+ * o'rtasiga sura oladi va butun fayl birdan yuklanmaydi.
+ */
+userRouter.get(
+  '/lessons/:id/video',
+  ah(async (req, res) => {
+    const l = await prisma.lesson.findUnique({ where: { id: Number(req.params.id) } });
+    if (!l || l.status !== 'published') return res.status(404).json({ error: 'Video yo‘q' });
+    const fayl = lessonFilePath(l.fileName);
+    if (!fs.existsSync(fayl)) return res.status(404).json({ error: 'Video fayli topilmadi' });
+    res.sendFile(
+      fayl,
+      {
+        acceptRanges: true,
+        headers: { 'Content-Type': l.mime || 'video/mp4', 'Cache-Control': 'public, max-age=604800' },
+      },
+      (err) => {
+        // Foydalanuvchi videoni yopsa uzilish normal holat — faqat haqiqiy
+        // xatoda javob qaytaramiz (sarlavha hali ketmagan bo'lsa).
+        if (err && !res.headersSent) res.status(404).json({ error: 'Videoni o‘qib bo‘lmadi' });
+      }
+    );
   })
 );

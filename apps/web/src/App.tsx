@@ -27,6 +27,8 @@ import AdminUserDetail from './screens/AdminUserDetail';
 import AdminUserForm from './screens/AdminUserForm';
 import AdminQuestionForm from './screens/AdminQuestionForm';
 import AdminImport from './screens/AdminImport';
+import Lessons from './screens/Lessons';
+import AdminLessons from './screens/AdminLessons';
 
 export default function App() {
   const [checking, setChecking] = useState(true);
@@ -111,6 +113,8 @@ export default function App() {
         <Route path="/biletlar" element={<Tickets />} />
         <Route path="/test" element={<TestPlayer />} />
         <Route path="/belgilar" element={<Signs />} />
+        <Route path="/amaliy" element={<Lessons />} />
+        <Route path="/amaliy/boshqaruv" element={<AdminLessons />} />
         <Route path="/profil" element={<Profile />} />
         <Route path="/savollar" element={<AdminQuestions />} />
         <Route path="/foydalanuvchilar" element={<AdminUsers />} />

@@ -1,10 +1,13 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
+import path from 'path';
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import { prisma } from '../prisma';
 import { signAdminToken, requireAdmin, requireOwner } from '../auth';
 import { shifrla, ochish } from '../passwordVault';
+import { ensureLessonDir, lessonFileniOchir, TOIFALAR, toifaniTekshir } from '../uploads';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
@@ -952,5 +955,125 @@ adminRouter.post(
     }
 
     res.json({ inserted, total: rows.length, errors });
+  })
+);
+
+/* ---------- Amaliy mashg'ulotlar (video darsliklar) ---------- */
+/**
+ * Video bazaga EMAS, diskka yoziladi (multer diskStorage). memoryStorage bo'lsa
+ * 500 MB lik dars butunlay RAM'ga yig'ilardi va server bir necha yuklashdan keyin
+ * yiqilardi. Ro'yxatga faqat fayl nomi va meta ma'lumot tushadi.
+ */
+const VIDEO_LIMIT_MB = Number(process.env.VIDEO_LIMIT_MB || 512);
+
+const videoUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      try { cb(null, ensureLessonDir()); } catch (e: any) { cb(e, ''); }
+    },
+    filename: (_req, file, cb) => {
+      // Asl nom saqlanmaydi: unda bo'sh joy, kirill, `../` bo'lishi mumkin.
+      const ext = (path.extname(file.originalname) || '.mp4').toLowerCase().replace(/[^.a-z0-9]/g, '').slice(0, 6);
+      cb(null, `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext || '.mp4'}`);
+    },
+  }),
+  limits: { fileSize: VIDEO_LIMIT_MB * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!/^video\//.test(file.mimetype)) return cb(new Error('Faqat video fayl yuklash mumkin'));
+    cb(null, true);
+  },
+});
+
+/**
+ * Multer xatolarini 400 qilib qaytaradi. Bo'lmasa umumiy xato ushlagich
+ * "500 Server xatosi" deb yozadi va admin nima bo'lganini bilmaydi.
+ */
+const videoField = (req: Request, res: Response, next: NextFunction) =>
+  videoUpload.single('video')(req, res, (err: any) => {
+    if (!err) return next();
+    const xabar =
+      err?.code === 'LIMIT_FILE_SIZE'
+        ? `Video juda katta — eng ko'pi ${VIDEO_LIMIT_MB} MB`
+        : err?.message || 'Faylni yuklab bo‘lmadi';
+    res.status(400).json({ error: xabar });
+  });
+
+/** Admin ro'yxati — draft'lar ham ko'rinadi */
+adminRouter.get(
+  '/lessons',
+  ah(async (req, res) => {
+    const category = String(req.query.category || '').trim();
+    const list = await prisma.lesson.findMany({
+      where: category ? { category } : undefined,
+      orderBy: [{ category: 'asc' }, { order: 'asc' }, { id: 'desc' }],
+    });
+    res.json({ list, toifalar: TOIFALAR, limitMb: VIDEO_LIMIT_MB });
+  })
+);
+
+/** Yangi dars — video fayl + meta (multipart/form-data) */
+adminRouter.post(
+  '/lessons',
+  videoField,
+  ah(async (req, res) => {
+    const f = req.file;
+    if (!f) return res.status(400).json({ error: 'Video fayl tanlanmagan' });
+    const title = String(req.body.title || '').trim().slice(0, 200);
+    if (!title) {
+      // Yozuv yaratilmasa, diskda egasiz fayl qolib ketmasin
+      lessonFileniOchir(f.filename);
+      return res.status(400).json({ error: 'Sarlavha kiritilmagan' });
+    }
+    const lesson = await prisma.lesson.create({
+      data: {
+        title,
+        description: String(req.body.description || '').trim().slice(0, 2000),
+        category: toifaniTekshir(req.body.category),
+        order: Number(req.body.order) || 0,
+        status: req.body.status === 'draft' ? 'draft' : 'published',
+        fileName: f.filename,
+        origName: String(f.originalname || '').slice(0, 200),
+        mime: f.mimetype || 'video/mp4',
+        sizeBytes: Math.min(f.size, 2_000_000_000),
+      },
+    });
+    res.json({ lesson });
+  })
+);
+
+/** Meta tahriri — videoning o'zi almashmaydi (uni o'chirib qayta yuklash kerak) */
+adminRouter.patch(
+  '/lessons/:id',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const mavjud = await prisma.lesson.findUnique({ where: { id } });
+    if (!mavjud) return res.status(404).json({ error: 'Dars topilmadi' });
+
+    const data: any = {};
+    if (req.body.title !== undefined) {
+      const t = String(req.body.title).trim().slice(0, 200);
+      if (!t) return res.status(400).json({ error: 'Sarlavha bo‘sh bo‘lmasin' });
+      data.title = t;
+    }
+    if (req.body.description !== undefined) data.description = String(req.body.description).trim().slice(0, 2000);
+    if (req.body.category !== undefined) data.category = toifaniTekshir(req.body.category);
+    if (req.body.order !== undefined) data.order = Number(req.body.order) || 0;
+    if (req.body.status !== undefined) data.status = req.body.status === 'draft' ? 'draft' : 'published';
+
+    const lesson = await prisma.lesson.update({ where: { id }, data });
+    res.json({ lesson });
+  })
+);
+
+/** O'chirish — yozuv bilan birga diskdagi fayl ham ketadi */
+adminRouter.delete(
+  '/lessons/:id',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const mavjud = await prisma.lesson.findUnique({ where: { id } });
+    if (!mavjud) return res.status(404).json({ error: 'Dars topilmadi' });
+    await prisma.lesson.delete({ where: { id } });
+    lessonFileniOchir(mavjud.fileName);
+    res.json({ ok: true, id });
   })
 );

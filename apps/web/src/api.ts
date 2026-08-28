@@ -107,7 +107,27 @@ export const api = {
   signs: () => req('/signs'),
   complaint: (questionId: number, reason: string) =>
     req('/complaints', { method: 'POST', body: JSON.stringify({ questionId, reason }) }),
+  /** Amaliy mashg'ulotlar — faqat e'lon qilinganlari */
+  lessons: (category = ''): Promise<{ list: Lesson[]; counts: Record<string, number> }> =>
+    req('/lessons' + (category ? '?category=' + encodeURIComponent(category) : '')),
 };
+
+/** Video manzili — <video src> uchun. Token talab qilmaydi (savol rasmi kabi). */
+export const lessonVideoUrl = (id: number) => `${API}/lessons/${id}/video`;
+
+export interface Lesson {
+  id: number;
+  title: string;
+  description: string;
+  /** A | B | C | D | E | BC | CE | Boshqa */
+  category: string;
+  order: number;
+  status?: 'draft' | 'published';
+  /** Admin yuklagan asl fayl nomi — faqat admin ro'yxatida keladi */
+  origName?: string;
+  sizeBytes: number;
+  createdAt: string;
+}
 
 /* ---------- Admin (savol boshqaruvi — asosiy ilova ichida) ---------- */
 // XAVFSIZLIK: false. Avval true edi — bu har bir tashrifchini avtomat admin
@@ -260,6 +280,51 @@ export const adminApi = {
     areq('/admin/messages/' + id, { method: 'DELETE' }),
   setUserRole: (id: number, role: Role): Promise<{ user: AdminUserRow }> =>
     areq('/admin/users/' + id + '/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
+  /* ---- Amaliy mashg'ulotlar (video darsliklar) ---- */
+  lessons: (category = ''): Promise<{ list: Lesson[]; toifalar: string[]; limitMb: number }> =>
+    areq('/admin/lessons' + (category ? '?category=' + encodeURIComponent(category) : '')),
+  updateLesson: (
+    id: number,
+    data: { title?: string; description?: string; category?: string; order?: number; status?: string }
+  ): Promise<{ lesson: Lesson }> =>
+    areq('/admin/lessons/' + id, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteLesson: (id: number): Promise<{ ok: boolean; id: number }> =>
+    areq('/admin/lessons/' + id, { method: 'DELETE' }),
+  /**
+   * Video yuklash. fetch() yuklash jarayonini ko'rsata olmaydi, shuning uchun
+   * XMLHttpRequest — 500 MB lik fayl bir necha daqiqa ketadi va admin foizni
+   * ko'rmasa ilova qotib qolgandek tuyuladi.
+   */
+  uploadLesson: (
+    meta: { title: string; description: string; category: string; order: number; status: string },
+    file: File,
+    onProgress?: (percent: number) => void
+  ): Promise<{ lesson: Lesson }> =>
+    new Promise((resolve, reject) => {
+      const fd = new FormData();
+      fd.append('title', meta.title);
+      fd.append('description', meta.description);
+      fd.append('category', meta.category);
+      fd.append('order', String(meta.order));
+      fd.append('status', meta.status);
+      fd.append('video', file); // fayl OXIRIDA — server meta maydonlarini oldin o'qiydi
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', API + '/admin/lessons');
+      xhr.setRequestHeader('Authorization', 'Bearer ' + (adminToken() || authToken()));
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100));
+      };
+      xhr.onload = () => {
+        let body: any = {};
+        try { body = JSON.parse(xhr.responseText); } catch { /* javob JSON emas */ }
+        if (xhr.status >= 200 && xhr.status < 300) resolve(body);
+        else reject(Object.assign(new Error(body.error || 'Videoni yuklab bo‘lmadi'), { status: xhr.status }));
+      };
+      xhr.onerror = () => reject(new Error('Tarmoq uzildi — yuklash to‘xtadi'));
+      xhr.onabort = () => reject(new Error('Yuklash bekor qilindi'));
+      xhr.send(fd);
+    }),
+
   /** Tahlil: barcha talabalar bo'yicha eng ko'p xato qilinadigan savollar */
   mistakeAnalytics: (opts: { shablon?: number; min?: number; limit?: number } = {}):
     Promise<{ list: MistakeStatRow[]; jamiSavol: number }> => {

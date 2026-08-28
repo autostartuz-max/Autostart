@@ -21,16 +21,40 @@
   --text: #101828;
   --muted: #5a6b85;
 }
+/* Light temada brend ranglari TO'QLASHADI. #00E676 va #FFD600 to'q fon uchun
+   tanlangan — oq fonda ular deyarli ko'rinmaydi (ayniqsa sariq). Shuning uchun
+   bu yerda o'sha rollarni bajaradigan to'q variantlari ishlatiladi. */
 :root[data-theme="light"] .db {
-  --db-bg: #eef2f7; --db-side: #ffffff; --db-card: #ffffff; --db-card2: #f4f7fb;
-  --db-border: #e2e8f0; --db-text: #0f172a; --db-muted: #5a6b85;
+  --db-bg: #f1f4f9; --db-side: #ffffff; --db-card: #ffffff; --db-card2: #f7f9fc;
+  --db-border: #dbe2ec; --db-text: #0f172a; --db-muted: #5a6b85; --db-dim: #8a95a8;
+  --db-green: #00a352; --db-yellow: #b98900; --db-red: #dd3300; --db-orange: #c53000;
+  --db-blue: #00a352;
+  --db-grid: rgba(15, 23, 42, .09);
+  background: var(--db-bg);
 }
+/* Kartochkalar oq fonda "suzib" ketmasin — chegara + yengil soya */
+:root[data-theme="light"] .db-stat,
+:root[data-theme="light"] .db-panel,
+:root[data-theme="light"] .db-hero,
+:root[data-theme="light"] .xt-card,
+:root[data-theme="light"] .am-card,
+:root[data-theme="light"] .am-form { box-shadow: 0 1px 3px rgba(16, 24, 40, .07), 0 1px 2px rgba(16, 24, 40, .04); }
+/* Brend matn gradienti: oq fonda sariq yo'qolib ketardi.
+   MUHIM: `background` qisqartmasi emas, `background-image` — qisqartma
+   asosiy qoidadagi `background-clip: text` ni bekor qilib, so'z o'rniga
+   rangli to'rtburchak chizib qo'yardi. */
+:root[data-theme="light"] .hero-brand { background-image: linear-gradient(90deg, #00a352, #c79400 48%, #dd3300); }
 :root[data-theme="light"] .db-side {
   --db-side: #ffffff; --db-card: #ffffff; --db-card2: #f4f7fb;
-  --db-border: #e2e8f0; --db-text: #0f172a; --db-muted: #5a6b85;
+  --db-border: #e2e8f0; --db-text: #0f172a; --db-muted: #5a6b85; --db-dim: #8a95a8;
+  /* Yon menyu .db dan tashqarida ham turadi — brend ranglarini o'zi e'lon qiladi */
+  --db-blue: #00a352; --db-green: #00a352; --db-yellow: #b98900; --db-red: #dd3300; --db-orange: #c53000;
 }
 :root[data-theme="light"] .db-logo .lg-a { color: #0f172a; }
-:root[data-theme="light"] .db-navi.active { background: rgba(124, 108, 245, 0.13); color: #6d5efc; }
+/* Light temada ham brend tabletkasi — yashil->sariq gradient, matn to'q */
+:root[data-theme="light"] .db-navi.active { background: linear-gradient(90deg, #00e676, #ffd600); color: #06210f;
+  box-shadow: 0 6px 16px rgba(0, 230, 118, .28); }
+:root[data-theme="light"] .db-navi.active svg { color: #06210f; }
 :root[data-theme="light"] .db-uava { color: #fff; }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }

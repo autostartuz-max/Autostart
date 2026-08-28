@@ -188,3 +188,29 @@ model Message {
 
   @@index([status, createdAt])
 }
+
+/// Amaliy mashg'ulot — toifalar (A, B, C, E...) bo'yicha video darslik.
+/// Video faylning O'ZI bazada saqlanmaydi, diskda yotadi (apps/api/uploads/lessons).
+/// Sabab: bitta dars 50–500 MB bo'ladi; Postgres'ga solish bazani va har kunlik
+/// zaxira nusxani shishirib yuboradi, oqim (Range) bilan uzatish ham qiyinlashadi.
+model Lesson {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @default("")
+  /// Toifa kodi: A | B | C | D | E | BC | CE | Boshqa
+  category    String   @default("B")
+  /// Toifa ichidagi tartib — kichigi yuqorida turadi
+  order       Int      @default(0)
+  /// Diskdagi fayl nomi (uploads/lessons ichida). Manzil emas — faqat nom.
+  fileName    String
+  /// Admin yuklagan asl fayl nomi — ro'yxatda ko'rsatish uchun
+  origName    String   @default("")
+  mime        String   @default("video/mp4")
+  /// Fayl hajmi baytda (Int chegarasi ~2 GB — video limitidan ancha katta)
+  sizeBytes   Int      @default(0)
+  /// draft — faqat adminga ko'rinadi, published — foydalanuvchilarga ham
+  status      String   @default("published")
+  createdAt   DateTime @default(now())
+
+  @@index([category, order])
+}

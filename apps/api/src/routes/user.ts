@@ -8,6 +8,7 @@ import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } fr
 import { shifrla } from '../passwordVault';
 import { telegramgaYubor, esc } from '../notify';
 import { lessonFilePath, TOIFALAR } from '../uploads';
+import { xatoStatistikasi, qiyinSavolIdlari } from '../qiyinlik';
 
 // Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi
 function normPhone(raw: any): string | null {
@@ -386,7 +387,6 @@ userRouter.get(
     if (topicId) base.topicId = topicId;
     if (ticketId) base.ticketId = ticketId;
     if (shablon) base.shablon = shablon;
-    if (mode === 'tricky') base.isTricky = true;
     if (mode === 'numeric') base.isNumeric = true;
 
     // Saqlangan savollar
@@ -407,6 +407,36 @@ userRouter.get(
     // Mashq: xato qilgan YOKI hali to'g'ri yechilmagan savollar (Test yechish tugmasi)
     if (mode === 'practice') {
       return res.json(await getPractice(userId));
+    }
+
+    // Qiyin savollar — BARCHA talabalar eng ko'p xato qiladiganlari.
+    // Avval bu rejim `isTricky` qo'l belgisi bo'yicha filtrlardi; o'sha belgi
+    // hech bir savolga qo'yilmagani uchun oyna doim bo'sh ochilardi.
+    // Endi haqiqiy javoblardan hisoblanadi (Tahlil sahifasi bilan bir xil ta'rif).
+    if (mode === 'tricky') {
+      const n = Math.min(limit || 40, 120);
+      const jam = await xatoStatistikasi();
+      // Odatda kamida 2 talaba javob bergan savollar olinadi (bitta odamning
+      // bitta xatosi hali "qiyin" degani emas). Ammo ma'lumot hali kam bo'lsa
+      // shart bo'shashadi — oyna bo'sh ochilib qolmasligi kerak.
+      let statIdlar = qiyinSavolIdlari(jam, { minJavob: 2, limit: n });
+      if (!statIdlar.length) statIdlar = qiyinSavolIdlari(jam, { minJavob: 1, limit: n });
+      // Admin qo'lda "qiyin" deb belgilaganlari ham qoladi — belgi kuchini yo'qotmasin
+      const qolda = (
+        await prisma.question.findMany({ where: { ...base, isTricky: true }, select: { id: true } })
+      ).map((q) => q.id);
+
+      const idlar = [...new Set([...qolda, ...statIdlar])].slice(0, n);
+      if (!idlar.length) return res.json([]);
+
+      const topilgan = await prisma.question.findMany({
+        where: { ...base, id: { in: idlar } },
+        include: questionInclude,
+      });
+      // Bazadan kelgan tartib emas — eng ko'p xato qilinadigani birinchi tursin
+      const oriniga = new Map(idlar.map((id, i) => [id, i]));
+      topilgan.sort((a, b) => (oriniga.get(a.id) ?? 0) - (oriniga.get(b.id) ?? 0));
+      return res.json(topilgan);
     }
 
     let questions = await prisma.question.findMany({

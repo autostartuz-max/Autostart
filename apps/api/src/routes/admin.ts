@@ -8,6 +8,7 @@ import { prisma } from '../prisma';
 import { signAdminToken, requireAdmin, requireOwner } from '../auth';
 import { shifrla, ochish } from '../passwordVault';
 import { ensureLessonDir, lessonFileniOchir, TOIFALAR, toifaniTekshir } from '../uploads';
+import { xatoStatistikasi } from '../qiyinlik';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
@@ -70,31 +71,9 @@ adminRouter.get(
     // Kamida shuncha kishi javob bergan savollar (tasodifiy natijalarni chiqarib tashlash)
     const minJavob = Math.max(1, Number(req.query.min) || 1);
 
-    // Mehmonlarni chiqarib tashlaymiz
-    const mehmonlar = await prisma.user.findMany({
-      where: { tgId: { startsWith: 'guest-' } },
-      select: { id: true },
-    });
-    const mehmonId = new Set(mehmonlar.map((u) => u.id));
-
-    const answers = await prisma.userAnswer.findMany({
-      orderBy: { answeredAt: 'desc' },
-      select: { userId: true, questionId: true, isCorrect: true },
-    });
-
-    // (foydalanuvchi, savol) bo'yicha faqat oxirgi javob
-    const korilgan = new Set<string>();
-    const jam = new Map<number, { total: number; wrong: number }>();
-    for (const a of answers) {
-      if (mehmonId.has(a.userId)) continue;
-      const k = a.userId + ':' + a.questionId;
-      if (korilgan.has(k)) continue;
-      korilgan.add(k);
-      const g = jam.get(a.questionId) || { total: 0, wrong: 0 };
-      g.total++;
-      if (!a.isCorrect) g.wrong++;
-      jam.set(a.questionId, g);
-    }
+    // Hisoblash "Qiyin savollar" bilan umumiy modulda — ikki oyna bir xil
+    // ta'rifga tayanadi (oxirgi javob, mehmonlarsiz).
+    const jam = await xatoStatistikasi();
     if (!jam.size) return res.json({ list: [], jamiSavol: 0 });
 
     const savollar = await prisma.question.findMany({

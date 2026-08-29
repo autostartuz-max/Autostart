@@ -21,6 +21,10 @@ export interface Question {
   options: Option[];
   topic?: { id: number; name: string } | null;
   ticket?: { id: number; name: string } | null;
+  /* Faqat "Qiyin savollar" rejimida keladi — talabalarning xato ulushi */
+  xatoUlushi?: number;
+  xatoSoni?: number;
+  jamiJavob?: number;
 }
 
 export interface Catalog {

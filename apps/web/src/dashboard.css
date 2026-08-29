@@ -989,3 +989,10 @@
 .db-pod.p2 .db-pod-av { border-color: var(--db-yellow); color: var(--db-yellow); }
 .db-pod.p3 { border-color: rgba(255, 61, 0, .5); background: rgba(255, 61, 0, .06); }
 .db-pod.p3 .db-pod-av { border-color: var(--db-red); color: var(--db-orange); }
+
+/* "Qiyin savollar" rejimida savol ustidagi nishon — bu oyna oddiy testdan
+   farq qilishi, ya'ni statistikaga asoslangani ko'rinib turishi kerak. */
+.tp2-xato { display: inline-block; margin-left: 12px; vertical-align: middle;
+  background: rgba(255, 61, 0, .15); color: #ff6a33; border: 1px solid rgba(255, 61, 0, .35);
+  font-size: 12.5px; font-weight: 700; border-radius: 20px; padding: 3px 11px; white-space: nowrap; }
+:root[data-theme="light"] .tp2-xato { background: rgba(221, 51, 0, .10); color: #c53000; border-color: rgba(221, 51, 0, .3); }

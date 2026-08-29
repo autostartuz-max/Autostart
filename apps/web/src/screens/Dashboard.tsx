@@ -219,7 +219,7 @@ export default function Dashboard() {
                 { Icon: Shuffle, c: 'g', t: 'Random testlar', s: 'Barcha shablonlardan aralash', b: '20–200', to: '/random' },
                 { Icon: Grid3x3, c: 'g', t: "Mavzular bo'yicha", s: 'Mavzular kesimida', b: '10 mavzu', to: '/mavzular' },
                 { Icon: HeartCrack, c: 'o', t: 'Xato qilgan savollarim', s: 'Xatolar ustida ishlash', b: 'Shaxsiy', to: '/xatolarim' },
-                { Icon: CircleAlert, c: 'o', t: 'Qiyin savollar', s: 'Ko‘p xato qilinadigan', b: 'Tricky', to: '/test?mode=tricky' },
+                { Icon: CircleAlert, c: 'o', t: 'Qiyin savollar', s: 'Talabalar ko‘p xato qiladigan', b: 'Statistika', to: '/test?mode=tricky' },
                 { Icon: ClipboardCheck, c: 'b', t: 'Imtihon simulyatori', s: 'Real imtihon sharoiti', b: '20 savol', to: '/shablon' },
               ].map((x) => (
                 <div className="db-ti" key={x.t} onClick={() => nav(x.to)}>

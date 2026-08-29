@@ -634,7 +634,14 @@ export default function TestPlayer() {
         </div>
       </header>
 
-      <div className="tp2-qbar">{idx + 1}. {tx(q.textLat, q.textCyr, (q as any).textRus)}</div>
+      <div className="tp2-qbar">
+        {idx + 1}. {tx(q.textLat, q.textCyr, (q as any).textRus)}
+        {typeof q.xatoUlushi === 'number' && (
+          <span className="tp2-xato" title={`${q.xatoSoni} talaba ${q.jamiJavob} tadan xato qilgan`}>
+            Talabalarning {q.xatoUlushi}% i xato qilgan
+          </span>
+        )}
+      </div>
 
       <div className="tp2-tools">
         <button className="tp2-az" onClick={fontUp}>A+</button>

@@ -436,7 +436,17 @@ userRouter.get(
       // Bazadan kelgan tartib emas — eng ko'p xato qilinadigani birinchi tursin
       const oriniga = new Map(idlar.map((id, i) => [id, i]));
       topilgan.sort((a, b) => (oriniga.get(a.id) ?? 0) - (oriniga.get(b.id) ?? 0));
-      return res.json(topilgan);
+
+      // Statistikani savolga biriktiramiz — test oynasida "talabalarning N% i
+      // shu savolda xato qilgan" deb ko'rsatiladi. Busiz oyna oddiy testdan
+      // farq qilmasdi va o'zgarish umuman sezilmasdi.
+      return res.json(
+        topilgan.map((q) => {
+          const g = jam.get(q.id);
+          if (!g) return q;
+          return { ...q, xatoUlushi: Math.round((g.wrong / g.total) * 100), xatoSoni: g.wrong, jamiJavob: g.total };
+        })
+      );
     }
 
     let questions = await prisma.question.findMany({

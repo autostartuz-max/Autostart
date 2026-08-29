@@ -1009,3 +1009,16 @@
 .th-foiz-in input { width: 52px; background: none; border: none; outline: none; color: var(--db-text);
   font-family: inherit; font-size: 14px; font-weight: 700; }
 .th-foiz-in:focus-within { border-color: var(--db-green); }
+
+/* Tahlil: talabalar belgilagan noto'g'ri variantlar */
+.th-xatolar { margin-top: 10px; background: rgba(255, 61, 0, .07); border: 1px solid rgba(255, 61, 0, .22);
+  border-radius: 10px; padding: 9px 12px; }
+.th-xatolar-l { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700;
+  letter-spacing: .3px; text-transform: uppercase; color: var(--db-orange); margin-bottom: 7px; }
+.th-xato-j { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 13.5px; line-height: 1.45; }
+.th-xato-j + .th-xato-j { border-top: 1px solid rgba(255, 61, 0, .14); }
+.th-xato-t { flex: 1; min-width: 0; color: var(--db-text); }
+.th-xato-n { flex-shrink: 0; background: rgba(255, 61, 0, .16); color: var(--db-orange);
+  font-size: 12px; font-weight: 800; border-radius: 20px; padding: 2px 9px; }
+:root[data-theme="light"] .th-xatolar { background: rgba(221, 51, 0, .06); border-color: rgba(221, 51, 0, .2); }
+:root[data-theme="light"] .th-xato-n { background: rgba(221, 51, 0, .12); }

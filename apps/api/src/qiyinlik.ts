@@ -5,6 +5,8 @@ export interface SavolStat {
   total: number;
   /** Shulardan nechtasi OXIRGI urinishida xato qilgan */
   wrong: number;
+  /** Xato qilganlar qaysi variantni belgilagan: variant id -> necha marta */
+  tanlov: Map<number, number>;
 }
 
 /**
@@ -25,7 +27,8 @@ export async function xatoStatistikasi(): Promise<Map<number, SavolStat>> {
 
   const answers = await prisma.userAnswer.findMany({
     orderBy: { answeredAt: 'desc' },
-    select: { userId: true, questionId: true, isCorrect: true },
+    // `chosen` — talaba belgilagan variant id'lari (JSON massiv matn ko'rinishida)
+    select: { userId: true, questionId: true, isCorrect: true, chosen: true },
   });
 
   const korilgan = new Set<string>();
@@ -35,12 +38,26 @@ export async function xatoStatistikasi(): Promise<Map<number, SavolStat>> {
     const k = a.userId + ':' + a.questionId;
     if (korilgan.has(k)) continue; // eng yangisi birinchi keladi
     korilgan.add(k);
-    const g = jam.get(a.questionId) || { total: 0, wrong: 0 };
+    const g = jam.get(a.questionId) || { total: 0, wrong: 0, tanlov: new Map<number, number>() };
     g.total++;
-    if (!a.isCorrect) g.wrong++;
+    if (!a.isCorrect) {
+      g.wrong++;
+      // Xato javobda qaysi variant belgilangani — tahlilda ko'rsatiladi
+      for (const id of tanlovlar(a.chosen)) g.tanlov.set(id, (g.tanlov.get(id) || 0) + 1);
+    }
     jam.set(a.questionId, g);
   }
   return jam;
+}
+
+/** '[12,15]' -> [12, 15]. Buzuq yoki bo'sh qiymat xatoga olib kelmaydi. */
+function tanlovlar(chosen: string): number[] {
+  try {
+    const x = JSON.parse(chosen || '[]');
+    return Array.isArray(x) ? x.map(Number).filter((v) => Number.isFinite(v)) : [];
+  } catch {
+    return [];
+  }
 }
 
 /**

@@ -81,20 +81,32 @@ adminRouter.get(
       select: {
         id: true, textLat: true, shablon: true, order: true,
         topic: { select: { name: true } },
-        options: { where: { isCorrect: true }, select: { textLat: true }, take: 1 },
+        // Barcha variantlar kerak: talabalar qaysi NOTO'G'RI variantni
+        // belgilaganini ko'rsatish uchun id -> matn moslashuvi zarur.
+        options: { select: { id: true, textLat: true, isCorrect: true }, orderBy: { order: 'asc' } },
       },
     });
 
     const list = savollar
       .map((q) => {
         const g = jam.get(q.id)!;
+        // Talabalar belgilagan noto'g'ri variantlar — ko'p tanlangani birinchi.
+        // To'g'ri variant bu ro'yxatga kirmaydi (ko'p javobli savolda talaba
+        // to'g'ri variantni ham belgilagan bo'lishi mumkin, lekin bu yerda
+        // bizni xatoga olib kelgan tanlov qiziqtiradi).
+        const xatoJavoblar = q.options
+          .filter((o) => !o.isCorrect && (g.tanlov.get(o.id) || 0) > 0)
+          .map((o) => ({ text: o.textLat, count: g.tanlov.get(o.id) || 0 }))
+          .sort((a, b) => b.count - a.count);
+
         return {
           id: q.id,
           textLat: q.textLat,
           shablon: q.shablon,
           order: q.order,
           topic: q.topic?.name || null,
-          correctText: q.options[0]?.textLat || null,
+          correctText: q.options.find((o) => o.isCorrect)?.textLat || null,
+          xatoJavoblar,
           total: g.total,
           wrong: g.wrong,
           rate: Math.round((g.wrong / g.total) * 100),

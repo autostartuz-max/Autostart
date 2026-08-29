@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, ChevronLeft, TrendingUp, Pencil, Check } from 'lucide-react';
+import { Menu, ChevronLeft, TrendingUp, Pencil, Check, X } from 'lucide-react';
 import {
   adminApi, hasAdmin, canManageQuestions, clearAdmin, type MistakeStatRow,
 } from '../api';
@@ -137,6 +137,20 @@ export default function AdminAnalytics() {
                     </div>
 
                     <div className="th-bar"><i className={daraja(q.rate)} style={{ width: q.rate + '%' }} /></div>
+
+                    {/* Talabalar aynan qaysi noto'g'ri variantni belgilagani —
+                        tahlilning asosiy ma'nosi shu: qayerda adashishyapti. */}
+                    {q.xatoJavoblar && q.xatoJavoblar.length > 0 && (
+                      <div className="th-xatolar">
+                        <div className="th-xatolar-l"><X size={13} /> Talaba belgilagan javob</div>
+                        {q.xatoJavoblar.map((x, k) => (
+                          <div className="th-xato-j" key={k}>
+                            <span className="th-xato-t">{x.text}</span>
+                            <span className="th-xato-n">{x.count} ta</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     {q.correctText && (
                       <div className="th-togri"><Check size={14} /> To‘g‘ri javob: {q.correctText}</div>

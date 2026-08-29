@@ -346,6 +346,8 @@ export interface MistakeStatRow {
   topic: string | null;
   /** To'g'ri javob matni — tahlilda darhol ko'rinishi uchun */
   correctText: string | null;
+  /** Talabalar belgilagan NOTO'G'RI variantlar, ko'p tanlangani birinchi */
+  xatoJavoblar?: { text: string; count: number }[];
   /** Nechta talaba bu savolga javob bergan */
   total: number;
   /** Shulardan nechtasi (oxirgi urinishida) xato qilgan */

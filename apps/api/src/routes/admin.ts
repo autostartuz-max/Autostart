@@ -66,7 +66,7 @@ adminRouter.use(requireAdmin);
 adminRouter.get(
   '/analytics/mistakes',
   ah(async (req, res) => {
-    const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const limit = Math.min(Number(req.query.limit) || 50, 1000);
     const shablon = req.query.shablon ? Number(req.query.shablon) : undefined;
     // Kamida shuncha kishi javob bergan savollar (tasodifiy natijalarni chiqarib tashlash)
     const minJavob = Math.max(1, Number(req.query.min) || 1);
@@ -101,7 +101,7 @@ adminRouter.get(
         };
       })
       .filter((x) => x.wrong > 0 && x.total >= minJavob)
-      .sort((a, b) => b.wrong - a.wrong || b.rate - a.rate)
+      .sort((a, b) => b.rate - a.rate || b.wrong - a.wrong)
       .slice(0, limit);
 
     res.json({ list, jamiSavol: jam.size });

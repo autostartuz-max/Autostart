@@ -12,6 +12,10 @@ import '../dashboard.css';
 // tahlil uchun ma'lumot bermaydi, shuning uchun bo'sini kesib tashlash mumkin.
 const MIN_FILTR: [number, string][] = [[1, 'Hammasi'], [3, '3+ talaba'], [5, '5+ talaba'], [10, '10+ talaba']];
 
+// Xato foizi bo'yicha filtr: "kamida shuncha % talaba xato qilgan" savollar.
+// Aniq qiymat kerak bo'lsa yonidagi maydonga istalgan son yoziladi.
+const FOIZ_FILTR: [number, string][] = [[0, 'Hammasi'], [25, '25%+'], [50, '50%+'], [75, '75%+'], [100, '100%']];
+
 // Xato foiziga qarab rang: qizil (og'ir) → sariq → yashil
 const daraja = (r: number) => (r >= 60 ? 'yuqori' : r >= 30 ? 'orta' : 'past');
 
@@ -22,6 +26,7 @@ export default function AdminAnalytics() {
   const [list, setList] = useState<MistakeStatRow[]>([]);
   const [jamiSavol, setJamiSavol] = useState(0);
   const [min, setMin] = useState(1);
+  const [foiz, setFoiz] = useState(0); // xato ulushi bo'yicha eng kam chegara
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
 
@@ -30,7 +35,7 @@ export default function AdminAnalytics() {
     setLoading(true);
     setErr('');
     adminApi
-      .mistakeAnalytics({ min, limit: 100 })
+      .mistakeAnalytics({ min, limit: 1000 })
       .then((r) => { setList(r.list || []); setJamiSavol(r.jamiSavol || 0); })
       .catch((e: any) => {
         if (e?.status === 401) { clearAdmin(); setAuthed(false); setErr('Sessiya tugagan. Qaytadan kiring.'); }
@@ -39,6 +44,10 @@ export default function AdminAnalytics() {
       })
       .finally(() => setLoading(false));
   }, [authed, min]);
+
+  // Filtr brauzerda qo'llanadi — server xatosi bor barcha savollarni qaytaradi,
+  // shuning uchun chegarani surganda qayta so'rov ketmaydi.
+  const korinadigan = list.filter((q) => q.rate >= foiz);
 
   return (
     <div className="db">
@@ -59,35 +68,58 @@ export default function AdminAnalytics() {
               <div className="adm-head">
                 <div className="adm-head-l">
                   <span className="th-ic"><TrendingUp size={20} /></span>
-                  <h1 className="adm-title">Eng ko‘p xato qilinadigan savollar ({list.length})</h1>
+                  <h1 className="adm-title">Eng ko‘p xato qilinadigan savollar ({korinadigan.length})</h1>
                 </div>
-                <div className="ud-seg">
-                  {MIN_FILTR.map(([v, t]) => (
-                    <button key={v} type="button"
-                      className={'ud-seg-b' + (min === v ? ' on' : '')}
-                      onClick={() => setMin(v)}>{t}</button>
-                  ))}
+                <div className="th-filtrlar">
+                  <div className="th-filtr">
+                    <span className="th-filtr-l">Javob berganlar</span>
+                    <div className="ud-seg">
+                      {MIN_FILTR.map(([v, t]) => (
+                        <button key={v} type="button"
+                          className={'ud-seg-b' + (min === v ? ' on' : '')}
+                          onClick={() => setMin(v)}>{t}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="th-filtr">
+                    <span className="th-filtr-l">Xato foizi</span>
+                    <div className="ud-seg">
+                      {FOIZ_FILTR.map(([v, t]) => (
+                        <button key={v} type="button"
+                          className={'ud-seg-b' + (foiz === v ? ' on' : '')}
+                          onClick={() => setFoiz(v)}>{t}</button>
+                      ))}
+                    </div>
+                    <label className="th-foiz-in" title="Aniq chegara: shuncha va undan ko‘p foiz xato qilingan savollar">
+                      <input type="number" min={0} max={100} value={foiz}
+                        onChange={(e) => setFoiz(Math.max(0, Math.min(100, Number(e.target.value) || 0)))} />
+                      <span>%+</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
               <p className="xt-lead">
                 Barcha talabalar bo‘yicha umumiy tahlil. Har talabaning savolga bergan{' '}
                 <b>oxirgi</b> javobi hisoblanadi — qayta yechib to‘g‘irlagan bo‘lsa, u xato
-                hisoblanmaydi. Ro‘yxat xato qilganlar soni bo‘yicha saralangan.
+                hisoblanmaydi. Ro‘yxat <b>xato foizi</b> bo‘yicha saralangan — eng muammolisi yuqorida.
                 {jamiSavol > 0 && <> Jami <b>{jamiSavol}</b> ta savolga javob berilgan.</>}
               </p>
 
               {loading && <div className="adm-empty">Yuklanmoqda…</div>}
-              {!loading && !err && list.length === 0 && (
+              {!loading && !err && korinadigan.length === 0 && (
                 <div className="xt-bosh">
                   <Check size={34} />
                   <b>Xato topilmadi</b>
-                  <span>Tanlangan shart bo‘yicha xato qilingan savol yo‘q.</span>
+                  <span>
+                    Tanlangan shart bo‘yicha xato qilingan savol yo‘q.
+                    {list.length > 0 && <> Chegarani pasaytiring — jami <b>{list.length}</b> ta savolda xato bor.</>}
+                  </span>
                 </div>
               )}
 
               <div className="xt-list">
-                {list.map((q, i) => (
+                {korinadigan.map((q, i) => (
                   <div className="xt-card th-card" key={q.id}>
                     <div className="th-head">
                       <span className={'th-rate ' + daraja(q.rate)}>{q.rate}%</span>

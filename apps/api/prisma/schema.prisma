@@ -206,8 +206,9 @@ model Lesson {
   /// Admin yuklagan asl fayl nomi — ro'yxatda ko'rsatish uchun
   origName    String   @default("")
   mime        String   @default("video/mp4")
-  /// Fayl hajmi baytda (Int chegarasi ~2 GB — video limitidan ancha katta)
-  sizeBytes   Int      @default(0)
+  /// Fayl hajmi baytda. Int EMAS: uning chegarasi ~2 GB, darslar esa 1 GB dan
+  /// boshlanadi va undan katta bo'ladi. Float (double) 2^53 baytgacha aniq.
+  sizeBytes   Float    @default(0)
   /// draft — faqat adminga ko'rinadi, published — foydalanuvchilarga ham
   status      String   @default("published")
   createdAt   DateTime @default(now())

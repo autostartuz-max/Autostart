@@ -15,7 +15,7 @@ export default function AdminLessons() {
   const [open, setOpen] = useState(false);
   const [authed, setAuthed] = useState(() => canManageQuestions() || hasAdmin());
   const [list, setList] = useState<Lesson[]>([]);
-  const [limitMb, setLimitMb] = useState(512);
+  const [limitMb, setLimitMb] = useState(8192);
   const [filtr, setFiltr] = useState('');
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
@@ -130,6 +130,8 @@ export default function AdminLessons() {
   };
 
   const yuklanmoqda = foiz !== null;
+  // 8192 MB emas, "8 GB" — katta sonni odam o'qiy olmaydi
+  const limitYozuv = limitMb >= 1024 ? (limitMb / 1024).toFixed(0) + ' GB' : limitMb + ' MB';
 
   return (
     <div className="db">
@@ -224,7 +226,7 @@ export default function AdminLessons() {
                     <span>
                       {fayl
                         ? fayl.name + ' — ' + hajm(fayl.size)
-                        : 'Video fayl tanlash (eng ko‘pi ' + limitMb + ' MB)'}
+                        : 'Video fayl tanlash (eng ko‘pi ' + limitYozuv + ')'}
                     </span>
                   </label>
                   <label className="am-check">

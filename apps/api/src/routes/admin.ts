@@ -964,7 +964,10 @@ adminRouter.post(
  * 500 MB lik dars butunlay RAM'ga yig'ilardi va server bir necha yuklashdan keyin
  * yiqilardi. Ro'yxatga faqat fayl nomi va meta ma'lumot tushadi.
  */
-const VIDEO_LIMIT_MB = Number(process.env.VIDEO_LIMIT_MB || 512);
+// Amaliy darslar 1 GB dan boshlanadi, shuning uchun chegara keng. Butunlay
+// olib tashlanmadi: xato yoki suiiste'mol serverning diskini to'ldirib qo'ymasin.
+// O'zgartirish: .env da VIDEO_LIMIT_MB=16384
+const VIDEO_LIMIT_MB = Number(process.env.VIDEO_LIMIT_MB || 8192);
 
 const videoUpload = multer({
   storage: multer.diskStorage({
@@ -993,7 +996,7 @@ const videoField = (req: Request, res: Response, next: NextFunction) =>
     if (!err) return next();
     const xabar =
       err?.code === 'LIMIT_FILE_SIZE'
-        ? `Video juda katta — eng ko'pi ${VIDEO_LIMIT_MB} MB`
+        ? `Video juda katta — eng ko'pi ${(VIDEO_LIMIT_MB / 1024).toFixed(0)} GB`
         : err?.message || 'Faylni yuklab bo‘lmadi';
     res.status(400).json({ error: xabar });
   });
@@ -1034,7 +1037,7 @@ adminRouter.post(
         fileName: f.filename,
         origName: String(f.originalname || '').slice(0, 200),
         mime: f.mimetype || 'video/mp4',
-        sizeBytes: Math.min(f.size, 2_000_000_000),
+        sizeBytes: f.size,
       },
     });
     res.json({ lesson });

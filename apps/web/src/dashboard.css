@@ -682,16 +682,10 @@
 .ct-tel-ic { width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center;
   justify-content: center; color: #4d9fff; }
 .ct-tel-ic.wa { color: #25d366; }
-.ct-tel-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.ct-tel-t b { color: var(--db-text); font-size: 19px; font-weight: 700; }
+.ct-tel-t { display: block; min-width: 0; line-height: 1.5; }
+.ct-tel-t b { color: var(--db-text); font-size: 18px; font-weight: 700; }
 .ct-tel-t span { color: var(--db-muted); font-size: 14px; }
 .ct-tel-t span.ct-nusxa { color: #4ade80; font-weight: 700; }
-.ct-manzil { margin-top: auto; padding-top: 22px; display: flex; flex-direction: column; gap: 8px; }
-.ct-manzil-h { display: inline-flex; align-items: center; gap: 9px; color: #ffb800; font-size: 13px;
-  font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
-.ct-manzil-h > svg { color: #ef4444; }
-.ct-manzil-r { color: var(--db-text); font-size: 15px; line-height: 1.55; }
-.ct-manzil-r > b { font-weight: 800; }
 
 .ct-inp { background: var(--db-card2); border: 1px solid var(--db-border); border-radius: 12px;
   padding: 17px 20px; color: var(--db-text); font-size: 15.5px; font-family: inherit; outline: none;

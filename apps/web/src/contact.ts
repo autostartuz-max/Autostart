@@ -5,29 +5,17 @@
 
 export interface Telefon {
   raqam: string;
-  izoh: string;
+  /** Raqam yonida, shu qatorning o'zida chiqadigan manzil */
+  manzil: string;
   /** true bo'lsa yashil WhatsApp belgisi bilan ko'rsatiladi */
   whatsapp?: boolean;
 }
 
 export const TELEFONLAR: Telefon[] = [
-  { raqam: '94 039 11 11', izoh: 'Quva sh' },
-  { raqam: '91 108 86 68', izoh: 'Quva' },
-  { raqam: '(33) 051-58-58', izoh: 'Farg‘ona', whatsapp: true },
-  { raqam: '(95) 838-07-17', izoh: 'Toshloq' },
-];
-
-export interface Manzil {
-  /** Shahar / tuman nomi */
-  shahar: string;
-  /** Aniq joy */
-  joy: string;
-}
-
-export const MANZILLAR: Manzil[] = [
-  { shahar: 'Quva sh', joy: 'Sobiq avtobaza' },
-  { shahar: 'Farg‘ona sh', joy: 'O‘lkashunoslik muzeyi' },
-  { shahar: 'Toshloq tumani', joy: 'Pochta binosi, 2-qavat' },
+  { raqam: '94 039 11 11', manzil: 'Quva shahar sobiq avtobaza' },
+  { raqam: '91 108 86 68', manzil: 'Quva shahar sobiq avtobaza' },
+  { raqam: '(33) 051-58-58', manzil: 'Farg‘ona shahar O‘lkashunoslik muzeyi', whatsapp: true },
+  { raqam: '(95) 838-07-17', manzil: 'Toshloq tumani pochta binosi 2-qavat' },
 ];
 
 /** "Nima uchun AUTOSTART avtomaktabi?" bo'limi */

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ChevronLeft, Menu, Phone, MapPin, Send, Mail, Check, MessageCircle,
+  ChevronLeft, Menu, Phone, Send, Mail, Check, MessageCircle,
   Users, Wallet, CreditCard, Camera,
 } from 'lucide-react';
 import { api, hasToken } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import {
-  TELEFONLAR, MANZILLAR, AFZALLIKLAR, KARTALAR,
+  TELEFONLAR, AFZALLIKLAR, KARTALAR,
   FUTER_HAVOLALAR, FUTER_TAVSIF, IJTIMOIY,
 } from '../contact';
 import '../dashboard.css';
@@ -106,22 +106,13 @@ export default function Contact() {
                     {t.whatsapp ? <MessageCircle size={22} /> : <Phone size={22} />}
                   </span>
                   <span className="ct-tel-t">
-                    <b>{t.raqam}</b>
+                    <b>{t.raqam}</b>{' '}
                     <span className={nusxa === t.raqam ? 'ct-nusxa' : ''}>
-                      {nusxa === t.raqam ? 'Nusxa olindi' : t.izoh}
+                      {nusxa === t.raqam ? 'Nusxa olindi' : t.manzil}
                     </span>
                   </span>
                 </a>
               ))}
-
-              <div className="ct-manzil">
-                <span className="ct-manzil-h"><MapPin size={18} /> Manzillar:</span>
-                {MANZILLAR.map((m) => (
-                  <span className="ct-manzil-r" key={m.shahar}>
-                    <b>{m.shahar}</b> — {m.joy}
-                  </span>
-                ))}
-              </div>
             </div>
 
             {/* O'ng: xabar yuborish */}
@@ -208,13 +199,8 @@ export default function Contact() {
                   <a key={t.raqam} className="ct-f-row" href={'tel:' + t.raqam.replace(/[^\d+]/g, '')}
                     onClick={(e) => telBos(e, t.raqam)} title="Bosing: raqamdan nusxa olinadi">
                     {t.whatsapp ? <MessageCircle size={14} /> : <Phone size={14} />}
-                    <span><b>{t.raqam}</b> {t.izoh}</span>
+                    <span><b>{t.raqam}</b> {t.manzil}</span>
                   </a>
-                ))}
-                {MANZILLAR.map((m) => (
-                  <div className="ct-f-row" key={m.shahar}>
-                    <MapPin size={14} /> <span><b>{m.shahar}</b> {m.joy}</span>
-                  </div>
                 ))}
               </div>
             </div>

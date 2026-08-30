@@ -7,7 +7,7 @@ import {
 import { api, hasToken } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import {
-  TELEFONLAR, MANZIL, AFZALLIKLAR, KARTALAR,
+  TELEFONLAR, MANZILLAR, AFZALLIKLAR, KARTALAR,
   FUTER_HAVOLALAR, FUTER_TAVSIF, IJTIMOIY,
 } from '../contact';
 import '../dashboard.css';
@@ -115,8 +115,12 @@ export default function Contact() {
               ))}
 
               <div className="ct-manzil">
-                <span className="ct-manzil-h"><MapPin size={18} /> Manzil:</span>
-                <span>{MANZIL}</span>
+                <span className="ct-manzil-h"><MapPin size={18} /> Manzillar:</span>
+                {MANZILLAR.map((m) => (
+                  <span className="ct-manzil-r" key={m.shahar}>
+                    <b>{m.shahar}</b> — {m.joy}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -207,7 +211,11 @@ export default function Contact() {
                     <span><b>{t.raqam}</b> {t.izoh}</span>
                   </a>
                 ))}
-                <div className="ct-f-row"><MapPin size={14} /> <span>{MANZIL}</span></div>
+                {MANZILLAR.map((m) => (
+                  <div className="ct-f-row" key={m.shahar}>
+                    <MapPin size={14} /> <span><b>{m.shahar}</b> {m.joy}</span>
+                  </div>
+                ))}
               </div>
             </div>
 

@@ -17,7 +17,18 @@ export const TELEFONLAR: Telefon[] = [
   { raqam: '(95) 838-07-17', izoh: 'Toshloq' },
 ];
 
-export const MANZIL = 'Quva shahri, soliq avtobaza binosi';
+export interface Manzil {
+  /** Shahar / tuman nomi */
+  shahar: string;
+  /** Aniq joy */
+  joy: string;
+}
+
+export const MANZILLAR: Manzil[] = [
+  { shahar: 'Quva sh', joy: 'Sobiq avtobaza' },
+  { shahar: 'Farg‘ona sh', joy: 'O‘lkashunoslik muzeyi' },
+  { shahar: 'Toshloq tumani', joy: 'Pochta binosi, 2-qavat' },
+];
 
 /** "Nima uchun AUTOSTART avtomaktabi?" bo'limi */
 export const AFZALLIKLAR = [

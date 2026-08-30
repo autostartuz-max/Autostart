@@ -690,7 +690,8 @@
 .ct-manzil-h { display: inline-flex; align-items: center; gap: 9px; color: #ffb800; font-size: 13px;
   font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
 .ct-manzil-h > svg { color: #ef4444; }
-.ct-manzil > span:last-child { color: var(--db-text); font-size: 15px; line-height: 1.55; }
+.ct-manzil-r { color: var(--db-text); font-size: 15px; line-height: 1.55; }
+.ct-manzil-r > b { font-weight: 800; }
 
 .ct-inp { background: var(--db-card2); border: 1px solid var(--db-border); border-radius: 12px;
   padding: 17px 20px; color: var(--db-text); font-size: 15.5px; font-family: inherit; outline: none;

@@ -11,7 +11,7 @@ const HAMMASI = '';
 
 /**
  * Amaliy mashg'ulotlar — toifa (A, B, C, E...) bo'yicha video darsliklar.
- * Boshida hamma dars ko'rinadi — toifalarga bo'lingan holda; chip esa filtr.
+ * Boshida hamma dars bitta to'rda ko'rinadi (toifa tartibida); chip esa filtr.
  * Foydalanuvchi faqat ko'radi; joylash /amaliy/boshqaruv da (admin).
  */
 export default function Lessons() {
@@ -37,25 +37,16 @@ export default function Lessons() {
       .finally(() => setLoading(false));
   }, []);
 
-  const korinadigan = useMemo(
-    () => (toifa === HAMMASI ? list : list.filter((l) => l.category === toifa)),
-    [list, toifa],
-  );
-
-  // "Hammasi" da darslar toifalarga bo'lib chiqadi: [toifa, darslar].
-  // Tartib TOIFALAR bo'yicha, ro'yxatda yo'q toifalar oxirida.
-  const guruhlar = useMemo(() => {
-    const map = new Map<string, Lesson[]>();
-    for (const l of list) {
-      const k = l.category || 'Boshqa';
-      const bor = map.get(k);
-      if (bor) bor.push(l);
-      else map.set(k, [l]);
-    }
-    const tanish = TOIFALAR.filter((t) => map.has(t)) as string[];
-    const notanish = [...map.keys()].filter((k) => !tanish.includes(k));
-    return [...tanish, ...notanish].map((t) => [t, map.get(t)!] as const);
-  }, [list]);
+  const korinadigan = useMemo(() => {
+    const tanlangan = toifa === HAMMASI ? list : list.filter((l) => l.category === toifa);
+    // Bir toifadagi darslar yonma-yon tursin — to'r bitta bo'lgani uchun
+    // kartochkalar qatorni to'ldirib, keyin pastga o'tadi.
+    const tartib = (k: string) => {
+      const i = (TOIFALAR as readonly string[]).indexOf(k);
+      return i < 0 ? TOIFALAR.length : i;
+    };
+    return [...tanlangan].sort((a, b) => tartib(a.category) - tartib(b.category));
+  }, [list, toifa]);
 
   // Bo'sh toifalar ham ko'rsatiladi (0 bilan) — talaba o'z toifasini topa olsin
   const chiplar = TOIFALAR.filter((t) => counts[t] || t === toifa);
@@ -117,8 +108,8 @@ export default function Lessons() {
           </div>
 
           <p className="xt-lead">
-            Barcha toifalar uchun tayyorlangan <b>video darsliklar</b> — toifalarga bo‘lingan holda.
-            Bitta toifani ko‘rish uchun uni tanlang.
+            Barcha toifalar uchun tayyorlangan <b>video darsliklar</b> — toifalar bo‘yicha
+            tartiblangan. Bitta toifani ko‘rish uchun uni tanlang.
           </p>
 
           <div className="am-tabs">
@@ -156,19 +147,7 @@ export default function Lessons() {
             <div className="adm-empty">«{toifa}» toifasi uchun hali dars yo‘q. «Hammasi»ni tanlang.</div>
           )}
 
-          {toifa === HAMMASI ? (
-            guruhlar.map(([t, darslar]) => (
-              <section className="am-group" key={t}>
-                <h2 className="am-group-t">
-                  <b>{t}</b> {TOIFA_IZOH[t] || t}
-                  <i>{darslar.length}</i>
-                </h2>
-                <div className="am-grid">{darslar.map(karta)}</div>
-              </section>
-            ))
-          ) : (
-            <div className="am-grid">{korinadigan.map(karta)}</div>
-          )}
+          <div className="am-grid">{korinadigan.map(karta)}</div>
         </div>
       </div>
     </div>

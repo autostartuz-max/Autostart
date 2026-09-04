@@ -6,8 +6,12 @@ import { TOIFALAR, TOIFA_IZOH, hajm, sana } from '../lessons';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
+/** Bo'sh qiymat — "Hammasi", ya'ni barcha toifadagi darslar bir sahifada. */
+const HAMMASI = '';
+
 /**
  * Amaliy mashg'ulotlar — toifa (A, B, C, E...) bo'yicha video darsliklar.
+ * Boshida hamma dars ko'rinadi — toifalarga bo'lingan holda; chip esa filtr.
  * Foydalanuvchi faqat ko'radi; joylash /amaliy/boshqaruv da (admin).
  */
 export default function Lessons() {
@@ -15,7 +19,7 @@ export default function Lessons() {
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<Lesson[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
-  const [toifa, setToifa] = useState<string>('');
+  const [toifa, setToifa] = useState<string>(HAMMASI);
   const [ochilgan, setOchilgan] = useState<number | null>(null); // qaysi video ijro etilyapti
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
@@ -24,25 +28,67 @@ export default function Lessons() {
   useEffect(() => {
     // Hamma darsni bir marta olamiz va toifani brauzerda filtrlaymiz —
     // har chip bosilganda serverga qayta bormaymiz.
-    Promise.all([api.lessons(), api.me().catch(() => null)])
-      .then(([r, me]: [any, any]) => {
-        const darslar: Lesson[] = r?.list || [];
-        const c: Record<string, number> = r?.counts || {};
-        setList(darslar);
-        setCounts(c);
-        // Boshlang'ich toifa: foydalanuvchining o'z toifasi, unda dars bo'lsa.
-        const meniki = String(me?.user?.category || '').toUpperCase();
-        if (c[meniki]) setToifa(meniki);
-        else setToifa(Object.keys(c)[0] || 'B');
+    api.lessons()
+      .then((r: any) => {
+        setList(r?.list || []);
+        setCounts(r?.counts || {});
       })
       .catch((e: any) => setErr(e?.message || 'Darslarni yuklab bo‘lmadi'))
       .finally(() => setLoading(false));
   }, []);
 
-  const korinadigan = useMemo(() => list.filter((l) => l.category === toifa), [list, toifa]);
+  const korinadigan = useMemo(
+    () => (toifa === HAMMASI ? list : list.filter((l) => l.category === toifa)),
+    [list, toifa],
+  );
+
+  // "Hammasi" da darslar toifalarga bo'lib chiqadi: [toifa, darslar].
+  // Tartib TOIFALAR bo'yicha, ro'yxatda yo'q toifalar oxirida.
+  const guruhlar = useMemo(() => {
+    const map = new Map<string, Lesson[]>();
+    for (const l of list) {
+      const k = l.category || 'Boshqa';
+      const bor = map.get(k);
+      if (bor) bor.push(l);
+      else map.set(k, [l]);
+    }
+    const tanish = TOIFALAR.filter((t) => map.has(t)) as string[];
+    const notanish = [...map.keys()].filter((k) => !tanish.includes(k));
+    return [...tanish, ...notanish].map((t) => [t, map.get(t)!] as const);
+  }, [list]);
 
   // Bo'sh toifalar ham ko'rsatiladi (0 bilan) — talaba o'z toifasini topa olsin
   const chiplar = TOIFALAR.filter((t) => counts[t] || t === toifa);
+
+  const karta = (l: Lesson) => (
+    <article className="am-card" key={l.id}>
+      {ochilgan === l.id ? (
+        <video
+          className="am-video"
+          src={lessonVideoUrl(l.id)}
+          controls
+          autoPlay
+          playsInline
+          preload="metadata"
+        />
+      ) : (
+        <button className="am-poster" onClick={() => setOchilgan(l.id)} aria-label={l.title + ' — ko‘rish'}>
+          {/* preload="metadata" — birinchi kadr uchun butun fayl yuklanmaydi */}
+          <video className="am-poster-v" src={lessonVideoUrl(l.id) + '#t=1'} preload="metadata" muted />
+          <span className="am-play"><Play size={26} fill="currentColor" /></span>
+          <span className="am-badge">{l.category}</span>
+        </button>
+      )}
+      <div className="am-body">
+        <h3 className="am-title">{l.title}</h3>
+        {l.description && <p className="am-desc">{l.description}</p>}
+        <div className="am-meta">
+          <span><Clock size={13} /> {sana(l.createdAt)}</span>
+          {l.sizeBytes > 0 && <span>{hajm(l.sizeBytes)}</span>}
+        </div>
+      </div>
+    </article>
+  );
 
   return (
     <div className="db">
@@ -71,24 +117,31 @@ export default function Lessons() {
           </div>
 
           <p className="xt-lead">
-            Haydovchilik toifangizni tanlang — o‘sha toifa uchun tayyorlangan <b>video darsliklar</b> chiqadi.
+            Barcha toifalar uchun tayyorlangan <b>video darsliklar</b> — toifalarga bo‘lingan holda.
+            Bitta toifani ko‘rish uchun uni tanlang.
           </p>
 
-          {chiplar.length > 0 && (
-            <div className="am-tabs">
-              {chiplar.map((t) => (
-                <button
-                  key={t}
-                  className={'am-tab' + (toifa === t ? ' on' : '')}
-                  onClick={() => { setToifa(t); setOchilgan(null); }}
-                >
-                  <b>{t}</b>
-                  <span>{TOIFA_IZOH[t] || t}</span>
-                  <i>{counts[t] || 0}</i>
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="am-tabs">
+            <button
+              className={'am-tab' + (toifa === HAMMASI ? ' on' : '')}
+              onClick={() => { setToifa(HAMMASI); setOchilgan(null); }}
+            >
+              <b>Hammasi</b>
+              <span>Barcha toifalar</span>
+              <i>{list.length}</i>
+            </button>
+            {chiplar.map((t) => (
+              <button
+                key={t}
+                className={'am-tab' + (toifa === t ? ' on' : '')}
+                onClick={() => { setToifa(t); setOchilgan(null); }}
+              >
+                <b>{t}</b>
+                <span>{TOIFA_IZOH[t] || t}</span>
+                <i>{counts[t] || 0}</i>
+              </button>
+            ))}
+          </div>
 
           {loading && <div className="adm-empty">Yuklanmoqda…</div>}
 
@@ -100,40 +153,22 @@ export default function Lessons() {
           )}
 
           {!loading && list.length > 0 && korinadigan.length === 0 && (
-            <div className="adm-empty">«{toifa}» toifasi uchun hali dars yo‘q. Boshqa toifani tanlang.</div>
+            <div className="adm-empty">«{toifa}» toifasi uchun hali dars yo‘q. «Hammasi»ni tanlang.</div>
           )}
 
-          <div className="am-grid">
-            {korinadigan.map((l) => (
-              <article className="am-card" key={l.id}>
-                {ochilgan === l.id ? (
-                  <video
-                    className="am-video"
-                    src={lessonVideoUrl(l.id)}
-                    controls
-                    autoPlay
-                    playsInline
-                    preload="metadata"
-                  />
-                ) : (
-                  <button className="am-poster" onClick={() => setOchilgan(l.id)} aria-label={l.title + ' — ko‘rish'}>
-                    {/* preload="metadata" — birinchi kadr uchun butun fayl yuklanmaydi */}
-                    <video className="am-poster-v" src={lessonVideoUrl(l.id) + '#t=1'} preload="metadata" muted />
-                    <span className="am-play"><Play size={26} fill="currentColor" /></span>
-                    <span className="am-badge">{l.category}</span>
-                  </button>
-                )}
-                <div className="am-body">
-                  <h3 className="am-title">{l.title}</h3>
-                  {l.description && <p className="am-desc">{l.description}</p>}
-                  <div className="am-meta">
-                    <span><Clock size={13} /> {sana(l.createdAt)}</span>
-                    {l.sizeBytes > 0 && <span>{hajm(l.sizeBytes)}</span>}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+          {toifa === HAMMASI ? (
+            guruhlar.map(([t, darslar]) => (
+              <section className="am-group" key={t}>
+                <h2 className="am-group-t">
+                  <b>{t}</b> {TOIFA_IZOH[t] || t}
+                  <i>{darslar.length}</i>
+                </h2>
+                <div className="am-grid">{darslar.map(karta)}</div>
+              </section>
+            ))
+          ) : (
+            <div className="am-grid">{korinadigan.map(karta)}</div>
+          )}
         </div>
       </div>
     </div>

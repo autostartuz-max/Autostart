@@ -881,6 +881,14 @@
 .am-tab.on { border-color: #00e676; background: rgba(0, 230, 118, .12); color: var(--db-text); }
 .am-tab.on i { background: #00e676; color: #06210f; }
 
+/* "Hammasi" ko'rinishida toifa sarlavhasi */
+.am-group { margin: 0 0 26px; }
+.am-group-t { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600;
+  color: var(--db-muted); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 12px; }
+.am-group-t b { font-size: 15px; font-weight: 800; color: #00e676; text-transform: none; letter-spacing: 0; }
+.am-group-t i { font-style: normal; font-size: 11px; font-weight: 800; border-radius: 20px; padding: 2px 8px;
+  background: var(--db-card2); color: var(--db-muted); }
+
 /* Video kartochkalar to'ri */
 .am-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
 .am-card { background: var(--db-card); border: 1px solid var(--db-border); border-radius: 14px; overflow: hidden;

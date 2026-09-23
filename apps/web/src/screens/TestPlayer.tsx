@@ -211,10 +211,28 @@ export default function TestPlayer() {
     if (ticketId) params.ticketId = ticketId;
     if (shablon) params.shablon = shablon;
     if (limit) params.limit = limit;
+    // Rejim almashsa yoki sahifa yopilsa fondagi yuklash to'xtaydi
+    let bekor = false;
     api
       .questions(params)
       .then((qs: Question[]) => {
         setQuestions(qs);
+        // Ilovadagi "Barcha testlar": server bir so'rovda 120 tadan beradi —
+        // qolgan savollar fonda, bo'lib-bo'lib qo'shiladi (butun bank).
+        if (mobil && mode === 'all' && !limit && qs.length >= 120) {
+          (async () => {
+            let offset = qs.length;
+            for (let i = 0; i < 40 && !bekor; i++) {
+              const sahifa: Question[] = await api
+                .questions({ mode: 'all', offset: String(offset) })
+                .catch(() => []);
+              if (bekor || !sahifa.length) break;
+              setQuestions((eski) => (eski ? [...eski, ...sahifa] : eski));
+              offset += sahifa.length;
+              if (sahifa.length < 120) break;
+            }
+          })();
+        }
         if (examMode) setSeconds(examSecondsFor(qs.length));
         // Xatolar rejimida: oldin belgilangan xato javoblarni ko'rsatamiz
         if (mode === 'mistakes') {
@@ -250,6 +268,7 @@ export default function TestPlayer() {
     api.me().then((m: any) => setUserName(m?.user?.firstName || '')).catch(() => {});
     const sh = sp.get('shuffle');
     if (sh != null) setS('shuffle', sh === '1');
+    return () => { bekor = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, topicId, ticketId, shablon, limit]);
 

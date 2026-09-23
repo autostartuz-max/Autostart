@@ -519,9 +519,13 @@ userRouter.get(
       const n = Math.min(limit || (mode === '100' ? 100 : mode === '50' ? 50 : 20), cap);
       questions = shuffle(questions).slice(0, n);
     } else {
-      // mode=all / mavzu / bilet mashqi — baribir cheklanadi (butun bank emas)
+      // mode=all / mavzu / bilet mashqi — baribir cheklanadi (butun bank emas).
+      // Ilovadagi "Barcha testlar" butun bankni ko'rsatadi: MAX tadan bo'lib,
+      // `offset` bilan ketma-ket so'raydi. Har bir so'rov cheklovda qoladi,
+      // /api/questions uchun umumiy tezlik chegarasi ham amal qiladi.
+      const offset = mode === 'all' ? Math.max(0, Math.floor(Number(req.query.offset) || 0)) : 0;
       const n = Math.min(limit || MAX, MAX);
-      questions = questions.slice(0, n);
+      questions = questions.slice(offset, offset + n);
     }
 
     res.json(questions);

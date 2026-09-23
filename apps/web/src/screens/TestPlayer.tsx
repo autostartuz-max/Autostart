@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
-  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap, Eye,
+  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap, Eye, Clapperboard,
 } from 'lucide-react';
 import { api, mediaUrl } from '../api';
 import { haptic, getTelegram } from '../telegram';
@@ -74,6 +74,7 @@ export default function TestPlayer() {
   // Mobil ilovada test oynasi telefon uchun alohida chiziladi (saytga tegmaydi)
   const mobil = mobilIlova();
   const [fabOpen, setFabOpen] = useState(false); // "O'rganish" menyusi ochiqmi
+  const [showVideo, setShowVideo] = useState(false); // "Video" oynasi
   // Ilovada barmoq bilan surish: o'ngdan chapga — keyingi, chapdan o'ngga — oldingi savol
   const surish = useRef<{ x: number; y: number } | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
@@ -731,7 +732,7 @@ export default function TestPlayer() {
       )}
 
       <div className="tp2-qbar">
-        {idx + 1}. {tx(q.textLat, q.textCyr, (q as any).textRus)}
+        {!mobil && <>{idx + 1}. </>}{tx(q.textLat, q.textCyr, (q as any).textRus)}
         {typeof q.xatoUlushi === 'number' && (
           <span className="tp2-xato" title={`${q.xatoSoni} talaba ${q.jamiJavob} tadan xato qilgan`}>
             Talabalarning {q.xatoUlushi}% i xato qilgan
@@ -739,10 +740,12 @@ export default function TestPlayer() {
         )}
       </div>
 
-      <div className="tp2-tools" hidden={mobil}>
+      {!mobil && (
+      <div className="tp2-tools">
         <button className="tp2-az" onClick={fontUp}>A+</button>
         <button className="tp2-az" onClick={fontDown}>A-</button>
       </div>
+      )}
 
       <div className="tp2-body">
         <div className="tp2-left">
@@ -757,7 +760,7 @@ export default function TestPlayer() {
               </button>
             ))}
           </div>
-          {reveal && (
+          {reveal && !mobil && (
             <div className="tp2-legend">
               <span className="lg ok">⊙ To‘g‘ri javob</span>
               <span className="lg no">⊗ Nato‘g‘ri javob</span>
@@ -787,7 +790,7 @@ export default function TestPlayer() {
               <img src="/placeholder-car.jpg" alt="autostart.uz" className="tp2-noimg-img" />
             </div>
           )}
-          {showPlayer && (
+          {showPlayer && !mobil && (
             <div className="aplayer">
               <button className="pp" onClick={togglePlay}>
                 {playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
@@ -813,10 +816,10 @@ export default function TestPlayer() {
           ))}
         </div>
         )}
-        <div className="tp2-pn">
+        {!mobil && <div className="tp2-pn">
           <button disabled={idx === 0} onClick={() => setIdx(Math.max(0, idx - 1))}>‹ oldingi</button>
           <button onClick={() => (idx < questions.length - 1 ? setIdx(idx + 1) : setFinished(true))}>keyingi ›</button>
-        </div>
+        </div>}
       </div>
 
       {/* ===== Ilova: "O'rganish" menyusi (pastki o'ng burchak) ===== */}
@@ -824,17 +827,59 @@ export default function TestPlayer() {
         <div className={'tpm-fab' + (fabOpen ? ' open' : '')}>
           {fabOpen && (
             <>
-              <button className="tpm-fab-i" onClick={() => { setFabOpen(false); learn(); }}>
-                <Volume2 size={18} /> Ovozli
+              {showPlayer ? (
+                <div className="tpm-fab-i tpm-fab-player">
+                  <button className="tpm-pp" onClick={togglePlay}>
+                    {playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+                  </button>
+                  <div className={'tpm-wave' + (playing ? ' playing' : '')}>
+                    {Array.from({ length: 22 }).map((_, i) => (
+                      <i key={i} className={i / 22 <= aprog ? 'on' : ''} style={{ animationDelay: `${(i % 11) * 0.06}s` }} />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <button className="tpm-fab-i" onClick={learn}>
+                  <Play size={18} fill="currentColor" /> Ovozli
+                </button>
+              )}
+              <button className="tpm-fab-i" onClick={() => setShowVideo(true)}>
+                <Clapperboard size={18} /> Video
               </button>
-              <button className="tpm-fab-i" onClick={() => { setFabOpen(false); setShowRule(true); }}>
+              <button className="tpm-fab-i" onClick={() => setShowRule(true)}>
                 <Info size={18} /> Qoidasi
               </button>
             </>
           )}
-          <button className="tpm-fab-main" onClick={() => setFabOpen((v) => !v)}>
+          <button
+            className="tpm-fab-main"
+            onClick={() => {
+              // Menyu yopilsa ovoz ham to'xtaydi — pleyer menyuning ichida
+              if (fabOpen) closePlayer();
+              setFabOpen((v) => !v);
+            }}
+          >
             {fabOpen ? <X size={18} /> : <GraduationCap size={18} />} O‘rganish
           </button>
+        </div>
+      )}
+
+      {/* ===== Ilova: Video — savol mavzusi va video darsliklar ===== */}
+      {mobil && showVideo && (
+        <div className="modal" onClick={() => setShowVideo(false)}>
+          <div className="sheet tpm-video" onClick={(e) => e.stopPropagation()}>
+            <div className="grip" />
+            <div className="tpm-video-q">{tx(q.textLat, q.textCyr, (q as any).textRus)}</div>
+            {q.imageUrl && <img className="tpm-video-img" src={mediaUrl(q.imageUrl)} alt="" />}
+            {(q as any).topic?.name && (
+              <div className="tpm-video-t">
+                <b>Savol mavzusi:</b> <span>{(q as any).topic.name}</span>
+              </div>
+            )}
+            <button className="tpm-video-btn" onClick={() => { setShowVideo(false); nav('/amaliy'); }}>
+              <Clapperboard size={20} /> Mavzuni to‘liq ko‘rish
+            </button>
+          </div>
         </div>
       )}
 

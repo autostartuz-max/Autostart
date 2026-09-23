@@ -571,6 +571,9 @@ button { font-family: inherit; cursor: pointer; }
    "O'rganish" menyusi pastki o'ng burchakda. Saytga tegmaydi — hammasi
    `html.cap` yoki faqat ilovada chiziladigan `tpm-*` sinflari ichida. */
 .cap .tp2 { overflow-x: hidden; background: #0f1720; }
+/* .tp2 ustunli flex — sig'maganda bolalarini siqardi va raqamlar qatori
+   yarmigacha qirqilib, savol matni ostiga kirib qolardi */
+.cap .tp2 > * { flex-shrink: 0; }
 
 .tpm-top { display: flex; align-items: center; gap: 8px; padding: calc(10px + env(safe-area-inset-top)) 14px 10px; }
 .tpm-ic { width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; background: #1a2430; border: 1px solid #2a3644;
@@ -615,8 +618,17 @@ button { font-family: inherit; cursor: pointer; }
 .cap .io.ok::after { content: '✓'; color: #4ade80; }
 .cap .io.no::after { content: '✕'; color: #f87171; }
 
-/* Oldingi/keyingi — "O'rganish" tugmasi ostida qolmasin */
-.cap .tp2-nav { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+/* Pastda "O'rganish" tugmasi uchun joy — oxirgi variant uning ostida qolmasin */
+.cap .tp2-nav { margin-top: 0; padding: 0 0 calc(84px + env(safe-area-inset-bottom)); border: none; }
+
+/* Ovozli pleyer "O'rganish" menyusining ichida, "Ovozli" o'rnida */
+.tpm-fab-player { padding: 8px 14px 8px 8px; gap: 10px; }
+.tpm-pp { width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; border: none; background: #22c55e;
+  color: #04120a; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.tpm-wave { display: flex; align-items: center; gap: 3px; height: 30px; }
+.tpm-wave i { width: 3px; height: 22%; background: #56657f; border-radius: 2px; }
+.tpm-wave i.on { background: #4ade80; }
+.tpm-wave.playing i { background: #4ade80; animation: wv 0.85s ease-in-out infinite; }
 
 /* "O'rganish" menyusi */
 .tpm-fab { position: fixed; right: 14px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 40;
@@ -626,6 +638,17 @@ button { font-family: inherit; cursor: pointer; }
   font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: 0 4px 0 #0b1118, 0 8px 24px rgba(0, 0, 0, .35); }
 .tpm-fab-i { animation: tpmIn .16s ease; }
 @keyframes tpmIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Video oynasi */
+.tpm-video { padding-bottom: calc(18px + env(safe-area-inset-bottom)); text-align: center; }
+.tpm-video-q { font-size: 19px; font-weight: 800; line-height: 1.4; margin: 6px 4px 14px; }
+.tpm-video-img { width: 100%; border-radius: 14px; display: block; margin-bottom: 16px; }
+.tpm-video-t { font-size: 18px; line-height: 1.5; margin-bottom: 16px; }
+.tpm-video-t b { font-weight: 800; }
+.tpm-video-t span { color: #9fb2cc; }
+.tpm-video-btn { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  background: #1ea7f5; color: #fff; border: none; border-radius: 16px; padding: 17px; font-size: 17px;
+  font-weight: 800; font-family: inherit; box-shadow: 0 5px 0 #0f76b3; cursor: pointer; }
 
 /* Izoh (qoida) oynasi */
 .tpm-izoh { max-height: 78vh; overflow-y: auto; padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
@@ -638,8 +661,6 @@ button { font-family: inherit; cursor: pointer; }
 .tpm-izoh-x { display: block; margin: 20px auto 0; background: #334155; color: #e8eef7; border: none;
   border-radius: 22px; padding: 12px 40px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; }
 
-/* Ovozli pleyer "O'rganish" menyusi ustida turadi */
-.cap .aplayer { bottom: calc(86px + env(safe-area-inset-bottom)); }
 
 /* ===== Mobil ilova bosh sahifasi (Home) ===== */
 .hsec { font-size: 12px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;

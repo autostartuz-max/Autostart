@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SAVOLLAR_PUBLIC, hasAdmin, canManageQuestions, isOwner, ADMIN_CHANGED } from '../api';
 import LangTheme from './LangTheme';
+import { mobilIlova } from '../native';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, MessageCircle, Moon,
@@ -87,6 +88,11 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         {(it as any).badge && wrong > 0 && <span className="nb">{wrong}</span>}
       </button>
     ));
+
+  // MOBIL ILOVADA yon menyu umuman yo'q: u saytning ko'rinishi. Ilovada
+  // navigatsiya bosh sahifadagi plitkalar va telefonning "orqaga" tugmasi
+  // orqali bo'ladi.
+  if (mobilIlova()) return null;
 
   return (
     <>

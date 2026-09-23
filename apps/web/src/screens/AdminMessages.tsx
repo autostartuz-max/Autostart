@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Menu, MessageCircle, Check, Trash2, Phone, Clock, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Menu, MessageCircle, Check, Trash2, Phone, Clock, Eye, ChevronLeft } from 'lucide-react';
 import {
   adminApi, hasAdmin, canManageQuestions, clearAdmin,
   type MessageRow, type MessageStatus,
 } from '../api';
 import AppSidebar from '../components/AppSidebar';
+import { mobilIlova } from '../native';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
 
@@ -16,6 +18,7 @@ const sanaVaqt = (s: string) => {
 };
 
 export default function AdminMessages() {
+  const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const [authed, setAuthed] = useState(() => canManageQuestions() || hasAdmin());
   const [list, setList] = useState<MessageRow[]>([]);
@@ -78,6 +81,10 @@ export default function AdminMessages() {
       <div className="db-main">
         <header className="db-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
+          {/* Ilovada yon menyu yo'q — orqaga qaytish tugmasi kerak */}
+          {mobilIlova() && (
+            <button className="adm-back" onClick={() => nav('/')}><ChevronLeft size={18} /> Bosh sahifa</button>
+          )}
         </header>
 
         <div className="db-content">

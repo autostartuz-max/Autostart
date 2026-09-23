@@ -77,7 +77,9 @@ export default function App() {
 
   // Login shart — token yo'q bo'lsa: Landing → Kirish/Ro'yxat
   if (!authed) {
-    if (!entered)
+    // Landing — saytning reklama sahifasi. Ilovada u ko'rinmaydi:
+    // ilova ochilishi bilan Kirish oynasi chiqadi.
+    if (!entered && !mobilIlova())
       return (
         <Landing
           onStart={() => {

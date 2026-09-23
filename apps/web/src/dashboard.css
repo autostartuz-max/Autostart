@@ -1046,3 +1046,6 @@
 .ud-del:disabled { opacity: .6; cursor: default; }
 .ud-del-form { display: flex; flex-direction: column; gap: 12px; max-width: 420px; }
 .ud-del-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Ilovada yon menyu yo'q — uni ochadigan tugma ham ko'rinmasin */
+.cap .db-burger, .cap .wl-burger { display: none; }

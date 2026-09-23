@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Menu, Search, Bell, ShieldCheck, ChevronLeft } from 'lucide-react';
 import { api } from '../api';
 import AppSidebar from '../components/AppSidebar';
+import { mobilIlova } from '../native';
 import type { Catalog } from '../types';
 import '../dashboard.css';
 
@@ -28,6 +29,10 @@ export default function Topics() {
       <div className="db-main">
         <header className="db-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
+          {/* Ilovada yon menyu yo'q — orqaga qaytish tugmasi kerak */}
+          {mobilIlova() && (
+            <button className="adm-back" onClick={() => nav('/')}><ChevronLeft size={18} /> Bosh sahifa</button>
+          )}
           <div className="db-search"><Search size={17} /><input placeholder="Qidirish…" /></div>
           <div className="db-top-right">
             <div className="db-chip">UZ</div>

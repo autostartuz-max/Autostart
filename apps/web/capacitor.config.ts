@@ -19,6 +19,12 @@ const config: CapacitorConfig = {
     backgroundColor: '#0f1117',
   },
   plugins: {
+    // Android 15 dan boshlab ilova tizim tugmalari OSTIGA chiziladi
+    // (edge-to-edge majburiy). Bu plagin WebView'ni status bar va pastdagi
+    // navigatsiya chizig'i orasiga joylaydi — kontent ular ostida qolmaydi.
+    EdgeToEdge: {
+      backgroundColor: '#0f1117',
+    },
     SplashScreen: {
       backgroundColor: '#0f1117',
       showSpinner: false,

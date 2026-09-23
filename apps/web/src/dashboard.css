@@ -1023,7 +1023,14 @@
    va pastdagi navigatsiya chizig'i ostiga kontent kirib ketmasligi uchun. */
 .cap .db-top { padding-top: calc(12px + env(safe-area-inset-top)); }
 .cap .db-side { padding-top: calc(16px + env(safe-area-inset-top)); }
+.cap .db-side { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
 .cap .db-content { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
+/* Shablon testlar sahifasi (.wl o'rami) — bir xil muammo */
+.cap .wl-top { padding-top: calc(12px + env(safe-area-inset-top)); }
+.cap .wl-content { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
+/* Test yechish oynasi to'liq ekran — o'zi joy ajratishi kerak */
+.cap .tp2-top { padding-top: calc(11px + env(safe-area-inset-top)); }
+.cap .tp2 { padding-bottom: env(safe-area-inset-bottom); }
 /* Matnni uzoq bosganda chiqadigan tanlash/lupani o'chiramiz — ilovaga o'xshasin */
 .cap { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .cap input, .cap textarea { -webkit-user-select: text; user-select: text; }

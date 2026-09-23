@@ -80,6 +80,10 @@ export function siq(fileName: string): Promise<void> {
       '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '28',
       '-c:a', 'aac', '-b:a', '96k',
       '-movflags', '+faststart',
+      // Format ochiq ko'rsatiladi: chiqish fayli `.tmp` bilan tugagani uchun
+      // ffmpeg uni kengaytmasidan aniqlay olmaydi va "Unable to find a
+      // suitable output format" deb to'xtab qoladi.
+      '-f', 'mp4',
       vaqtinchalik,
     ]);
 

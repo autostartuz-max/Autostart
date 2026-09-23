@@ -8,6 +8,7 @@ import { prisma } from '../prisma';
 import { signAdminToken, requireAdmin, requireOwner } from '../auth';
 import { shifrla, ochish } from '../passwordVault';
 import { ensureLessonDir, lessonFileniOchir, TOIFALAR, toifaniTekshir } from '../uploads';
+import { mobilNusxaNavbatga } from '../video';
 import { xatoStatistikasi } from '../qiyinlik';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
@@ -1031,6 +1032,9 @@ adminRouter.post(
         sizeBytes: f.size,
       },
     });
+    // Mobil ilova uchun siqilgan nusxa fonda tayyorlanadi — admin kutib
+    // turmaydi, saytdagi asl videoga esa tegilmaydi.
+    mobilNusxaNavbatga(f.filename);
     res.json({ lesson });
   })
 );

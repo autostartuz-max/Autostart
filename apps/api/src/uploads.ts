@@ -30,9 +30,21 @@ export function lessonFilePath(fileName: string): string {
   return path.join(ensureLessonDir(), path.basename(fileName));
 }
 
+/**
+ * Mobil ilova uchun siqilgan nusxaning yo'li — asl fayl yonida turadi:
+ *   1788519069530-8910d77db6ba.mp4          ← sayt oladi (asl, tegilmaydi)
+ *   1788519069530-8910d77db6ba.mp4.mobil.mp4 ← ilova oladi (siqilgan)
+ * Alohida maydon bazaga qo'shilmadi: fayl bor-yo'qligi o'zi yetarli belgi.
+ */
+export function mobilFilePath(fileName: string): string {
+  return lessonFilePath(fileName) + '.mobil.mp4';
+}
+
 /** Faylni o'chiradi; yo'q bo'lsa ham xato bermaydi */
 export function lessonFileniOchir(fileName: string) {
   try { fs.unlinkSync(lessonFilePath(fileName)); } catch { /* fayl allaqachon yo'q */ }
+  // Siqilgan nusxa ham ketadi — aks holda diskda egasiz fayl qoladi
+  try { fs.unlinkSync(mobilFilePath(fileName)); } catch { /* bo'lmasligi ham mumkin */ }
 }
 
 /** Toifalar — admin va foydalanuvchi sahifalari shu ro'yxatga tayanadi */

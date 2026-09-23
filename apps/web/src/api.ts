@@ -237,7 +237,12 @@ export const api = {
 };
 
 /** Video manzili — <video src> uchun. Token talab qilmaydi (savol rasmi kabi). */
-export const lessonVideoUrl = (id: number) => `${API}/lessons/${id}/video`;
+/**
+ * Dars videosi. Mobil ilovada `?mobil=1` qo'shiladi — server siqilgan nusxani
+ * beradi (tayyor bo'lmasa aslini). Saytda manzil avvalgidek qoladi.
+ */
+export const lessonVideoUrl = (id: number) =>
+  `${API}/lessons/${id}/video` + (ilovaIchida ? '?mobil=1' : '');
 
 export interface Lesson {
   id: number;

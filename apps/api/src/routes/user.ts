@@ -7,7 +7,8 @@ import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } from '../auth';
 import { shifrla } from '../passwordVault';
 import { telegramgaYubor, esc } from '../notify';
-import { lessonFilePath, TOIFALAR } from '../uploads';
+import { lessonFilePath, mobilFilePath, TOIFALAR } from '../uploads';
+import { mobilNusxaBormi } from '../video';
 import { xatoStatistikasi, qiyinSavolIdlari } from '../qiyinlik';
 
 // Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi
@@ -983,13 +984,18 @@ userRouter.get(
   ah(async (req, res) => {
     const l = await prisma.lesson.findUnique({ where: { id: Number(req.params.id) } });
     if (!l || l.status !== 'published') return res.status(404).json({ error: 'Video yo‘q' });
-    const fayl = lessonFilePath(l.fileName);
+
+    // Mobil ilova `?mobil=1` bilan so'raydi — siqilgan nusxa tayyor bo'lsa
+    // o'shani beramiz (1.6 GB emas, ~200 MB). Tayyor bo'lmasa asl fayl ketadi,
+    // ya'ni ilova baribir ishlaydi. Saytda hech narsa o'zgarmaydi.
+    const mobil = req.query.mobil === '1' && mobilNusxaBormi(l.fileName);
+    const fayl = mobil ? mobilFilePath(l.fileName) : lessonFilePath(l.fileName);
     if (!fs.existsSync(fayl)) return res.status(404).json({ error: 'Video fayli topilmadi' });
     res.sendFile(
       fayl,
       {
         acceptRanges: true,
-        headers: { 'Content-Type': l.mime || 'video/mp4', 'Cache-Control': 'public, max-age=604800' },
+        headers: { 'Content-Type': mobil ? 'video/mp4' : (l.mime || 'video/mp4'), 'Cache-Control': 'public, max-age=604800' },
       },
       (err) => {
         // Foydalanuvchi videoni yopsa uzilish normal holat — faqat haqiqiy

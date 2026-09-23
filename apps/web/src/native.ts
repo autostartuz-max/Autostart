@@ -8,8 +8,21 @@
 import { Capacitor } from '@capacitor/core';
 import { navbatniYubor } from './api';
 
+/**
+ * Faqat ishlab chiqishda (npm run dev): brauzerda ilova ko'rinishini sinash.
+ * localStorage'da yhq_ilova_preview=1 bo'lsa brauzer o'zini ilova deb biladi.
+ * Production build'da import.meta.env.DEV = false — bu kod umuman ishlamaydi.
+ */
+const ilovaSinovi = () => {
+  try {
+    return !!(import.meta as any).env?.DEV && localStorage.getItem('yhq_ilova_preview') === '1';
+  } catch {
+    return false;
+  }
+};
+
 /** Ilova ichidamizmi (App Store / Play Market build'i) */
-export const mobilIlova = () => Capacitor.isNativePlatform();
+export const mobilIlova = () => Capacitor.isNativePlatform() || ilovaSinovi();
 
 export async function initNative() {
   // Tarmoq tiklanganda offline yechilgan javoblar serverga jo'natiladi.

@@ -740,19 +740,20 @@ export default function TestPlayer() {
       onTouchEnd={mobil ? onTouchEnd : undefined}
     >
       {mobil ? (
-        <>
+        <div className="tpm-head">
           <header className="tpm-top">
-            <button className="tpm-ic" onClick={exit} title="Chiqish"><ChevronLeft size={20} /></button>
+            <button className="tpm-ic" onClick={exit} title="Chiqish"><ChevronLeft size={24} /></button>
             <button className={'tpm-ic' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm} title="Saqlash">
-              <Bookmark size={18} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
+              <Bookmark size={22} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
             </button>
-            <button className="tpm-ic" onClick={share} title="Ulashish"><Share2 size={18} /></button>
-            <span className="tpm-timer"><Clock size={16} /> {mm}:{ss}</span>
-            <button className="tpm-ic" onClick={() => setShowSettings(true)} title="Sozlamalar"><Settings size={18} /></button>
+            <button className="tpm-ic" onClick={share} title="Ulashish"><Share2 size={22} /></button>
+            <span className="tpm-timer"><Clock size={20} /> {mm}:{ss}</span>
+            <button className="tpm-ic" onClick={() => setShowSettings(true)} title="Sozlamalar"><Settings size={22} /></button>
             <button className="tpm-ic" onClick={() => { clearNext(); setTugashSabab(''); setFinished(true); }} title="Natijalar">
-              <Flag size={18} />
+              <Flag size={22} />
             </button>
           </header>
+          <div className="tpm-sep" />
           {/* Savollar raqami — yuqorida, yon tomonga suriladi */}
           <div className="tpm-nums">
             {questions.map((qq, i) => (
@@ -761,7 +762,7 @@ export default function TestPlayer() {
               </button>
             ))}
           </div>
-        </>
+        </div>
       ) : (
       <header className="tp2-top">
         <div className="tp2-brand">
@@ -891,17 +892,17 @@ export default function TestPlayer() {
                 </div>
               ) : (
                 <button className="tpm-fab-i" onClick={learn}>
-                  <Play size={18} fill="currentColor" /> Ovozli
+                  <Play size={22} fill="currentColor" /> Ovozli
                 </button>
               )}
               <button className="tpm-fab-i" onClick={() => setShowVideo(true)}>
-                <Clapperboard size={18} /> Video
+                <Clapperboard size={22} /> Video
               </button>
               <button className="tpm-fab-i" onClick={() => setShowRule(true)}>
-                <Info size={18} /> Qoidasi
+                <Info size={22} /> Qoidasi
               </button>
               <button className="tpm-fab-i" onClick={muhokamaniOch}>
-                <MessageCircle size={18} /> Muhokama
+                <MessageCircle size={22} /> Muhokama
               </button>
             </>
           )}
@@ -913,7 +914,7 @@ export default function TestPlayer() {
               setFabOpen((v) => !v);
             }}
           >
-            {fabOpen ? <X size={18} /> : <GraduationCap size={18} />} O‘rganish
+            {fabOpen ? <X size={22} /> : <GraduationCap size={22} />} O‘rganish
           </button>
         </div>
       )}

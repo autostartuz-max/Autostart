@@ -190,6 +190,12 @@ export const api = {
   updateMe: (data: any) => req('/me', { method: 'PATCH', body: JSON.stringify(data) }),
   /** Akkauntni butunlay o'chirish (do'konlar talabi). Parol bo'lsa — tasdiq uchun. */
   deleteMe: (password = '') => req('/me', { method: 'DELETE', body: JSON.stringify({ password }) }),
+  /** Savol muhokamasi (ilova) */
+  comments: (questionId: number): Promise<CommentRow[]> => req(`/questions/${questionId}/comments`),
+  addComment: (questionId: number, text: string): Promise<CommentRow> =>
+    req(`/questions/${questionId}/comments`, { method: 'POST', body: JSON.stringify({ text }) }),
+  deleteComment: (id: number) => req(`/comments/${id}`, { method: 'DELETE' }),
+  reportComment: (id: number) => req(`/comments/${id}/report`, { method: 'POST' }),
   categories: () => req('/categories'),
   topics: () => req('/topics'),
   tickets: () => req('/tickets'),
@@ -258,6 +264,15 @@ export function mediaUrl(u?: string | null): string | undefined {
 
 export const lessonVideoUrl = (id: number) =>
   `${API}/lessons/${id}/video` + (ilovaIchida ? '?mobil=1' : '');
+
+export interface CommentRow {
+  id: number;
+  text: string;
+  createdAt: string;
+  userId: number;
+  name: string;
+  mine: boolean;
+}
 
 export interface Lesson {
   id: number;

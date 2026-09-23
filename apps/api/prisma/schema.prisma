@@ -57,6 +57,7 @@ model Question {
   answers     UserAnswer[]
   bookmarks   Bookmark[]
   complaints  Complaint[]
+  comments    QuestionComment[]
   audio       QuestionAudio?
   image       QuestionImage?
 }
@@ -123,6 +124,8 @@ model User {
   answers    UserAnswer[]
   bookmarks  Bookmark[]
   complaints Complaint[]
+  comments   QuestionComment[]
+  commentReports CommentReport[]
 }
 
 model UserAnswer {
@@ -214,4 +217,34 @@ model Lesson {
   createdAt   DateTime @default(now())
 
   @@index([category, order])
+}
+
+/// Savol muhokamasi (mobil ilovadagi "Muhokama").
+/// Foydalanuvchi yozadigan kontent — App Store/Play talabi bo'yicha shikoyat
+/// qilish mumkin; SHIKOYAT_CHEGARASI ta turli foydalanuvchi shikoyat qilsa
+/// izoh avtomat yashiriladi (hidden). Akkaunt o'chirilsa izohlari ham o'chadi.
+model QuestionComment {
+  id         Int             @id @default(autoincrement())
+  questionId Int
+  question   Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userId     Int
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text       String
+  hidden     Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  reports    CommentReport[]
+
+  @@index([questionId, createdAt])
+}
+
+/// Kim qaysi izohga shikoyat qilgan — bitta odam bitta izohga bir marta
+model CommentReport {
+  id        Int             @id @default(autoincrement())
+  commentId Int
+  comment   QuestionComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now())
+
+  @@unique([commentId, userId])
 }

@@ -650,6 +650,26 @@ button { font-family: inherit; cursor: pointer; }
   background: #1ea7f5; color: #fff; border: none; border-radius: 16px; padding: 17px; font-size: 17px;
   font-weight: 800; font-family: inherit; box-shadow: 0 5px 0 #0f76b3; cursor: pointer; }
 
+/* Muhokama oynasi */
+.tpm-muh { max-height: 82vh; display: flex; flex-direction: column; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+.tpm-muh-list { flex: 1; overflow-y: auto; min-height: 120px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.tpm-muh-bosh { text-align: center; color: #8ba0bd; padding: 28px 10px; font-size: 14.5px; }
+.tpm-muh-i { background: #0f1720; border: 1px solid #26344c; border-radius: 14px; padding: 12px 14px; }
+.tpm-muh-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px; }
+.tpm-muh-top b { font-size: 14.5px; }
+.tpm-muh-top span { font-size: 12px; color: #7f8ea8; }
+.tpm-muh-i p { margin: 0; font-size: 14.5px; line-height: 1.55; color: #dbe4ef; white-space: pre-wrap; overflow-wrap: anywhere; }
+.tpm-muh-act { display: flex; gap: 14px; margin-top: 8px; }
+.tpm-muh-act button { display: inline-flex; align-items: center; gap: 5px; background: none; border: none; padding: 0;
+  color: #7f8ea8; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.tpm-muh-xato { color: #f87171; font-size: 13px; margin-bottom: 8px; }
+.tpm-muh-yoz { display: flex; gap: 10px; align-items: flex-end; }
+.tpm-muh-yoz textarea { flex: 1; min-height: 46px; max-height: 120px; resize: none; background: #0f1720;
+  border: 1px solid #334155; border-radius: 14px; color: #e8eef7; padding: 12px 14px; font-size: 15px; font-family: inherit; }
+.tpm-muh-yoz button { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; border: none; background: #1ea7f5;
+  color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.tpm-muh-yoz button:disabled { opacity: .45; }
+
 /* Izoh (qoida) oynasi */
 .tpm-izoh { max-height: 78vh; overflow-y: auto; padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
 .tpm-izoh-h { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 19px;

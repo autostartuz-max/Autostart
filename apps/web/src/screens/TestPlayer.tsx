@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
-  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap, Eye, Clapperboard,
+  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap, Eye, Clapperboard, MessageCircle, Send, Trash2, Ban,
 } from 'lucide-react';
-import { api, mediaUrl } from '../api';
+import { api, mediaUrl, type CommentRow } from '../api';
 import { haptic, getTelegram } from '../telegram';
 import { latToCyr } from '../translit';
 import { mobilIlova } from '../native';
@@ -75,6 +75,16 @@ export default function TestPlayer() {
   const mobil = mobilIlova();
   const [fabOpen, setFabOpen] = useState(false); // "O'rganish" menyusi ochiqmi
   const [showVideo, setShowVideo] = useState(false); // "Video" oynasi
+  // "Muhokama" — savol bo'yicha izohlar
+  const [showMuh, setShowMuh] = useState(false);
+  const [izohlar, setIzohlar] = useState<CommentRow[] | null>(null);
+  const [yangiIzoh, setYangiIzoh] = useState('');
+  const [izohXato, setIzohXato] = useState('');
+  const [izohYuborilyapti, setIzohYuborilyapti] = useState(false);
+  // Bloklangan foydalanuvchilar — faqat shu qurilmada, ularning izohlari ko'rinmaydi
+  const [bloklangan, setBloklangan] = useState<number[]>(() => {
+    try { return JSON.parse(localStorage.getItem('yhq_bloklangan') || '[]'); } catch { return []; }
+  });
   // Ilovada barmoq bilan surish: o'ngdan chapga — keyingi, chapdan o'ngga — oldingi savol
   const surish = useRef<{ x: number; y: number } | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
@@ -559,6 +569,47 @@ export default function TestPlayer() {
     }
   };
 
+  // ===== Muhokama =====
+  const muhokamaniOch = () => {
+    setShowMuh(true);
+    setIzohlar(null);
+    setIzohXato('');
+    api.comments(q.id).then(setIzohlar).catch(() => setIzohlar([]));
+  };
+  const izohYubor = async () => {
+    const text = yangiIzoh.trim();
+    if (!text || izohYuborilyapti) return;
+    setIzohYuborilyapti(true);
+    setIzohXato('');
+    try {
+      const c = await api.addComment(q.id, text);
+      setIzohlar((l) => [c, ...(l || [])]);
+      setYangiIzoh('');
+    } catch (e: any) {
+      setIzohXato(e?.message || 'Yuborib bo‘lmadi');
+    } finally {
+      setIzohYuborilyapti(false);
+    }
+  };
+  const izohniOchir = async (c: CommentRow) => {
+    if (!window.confirm('Izohingiz o‘chirilsinmi?')) return;
+    await api.deleteComment(c.id).catch(() => {});
+    setIzohlar((l) => (l || []).filter((x) => x.id !== c.id));
+  };
+  const shikoyat = async (c: CommentRow) => {
+    if (!window.confirm('Bu izoh haqoratli yoki nomaqbulmi? Shikoyat yuborilsinmi?')) return;
+    await api.reportComment(c.id).catch(() => {});
+    // Shikoyat qilgan odamga u darhol ko'rinmaydi
+    setIzohlar((l) => (l || []).filter((x) => x.id !== c.id));
+    window.alert('Shikoyat yuborildi. Rahmat!');
+  };
+  const blokla = (c: CommentRow) => {
+    if (!window.confirm(c.name + ' bloklansinmi? Uning izohlari sizga ko‘rinmaydi.')) return;
+    const yangi = Array.from(new Set([...bloklangan, c.userId]));
+    setBloklangan(yangi);
+    try { localStorage.setItem('yhq_bloklangan', JSON.stringify(yangi)); } catch { /* ignore */ }
+  };
+
   const share = () => {
     const appUrl = 'https://t.me/Autostartuzbot';
     const text = `${q.textLat}\n\nAutostart test — YHQ imtihoniga tayyorlaning:`;
@@ -849,6 +900,9 @@ export default function TestPlayer() {
               <button className="tpm-fab-i" onClick={() => setShowRule(true)}>
                 <Info size={18} /> Qoidasi
               </button>
+              <button className="tpm-fab-i" onClick={muhokamaniOch}>
+                <MessageCircle size={18} /> Muhokama
+              </button>
             </>
           )}
           <button
@@ -879,6 +933,55 @@ export default function TestPlayer() {
             <button className="tpm-video-btn" onClick={() => { setShowVideo(false); nav('/amaliy'); }}>
               <Clapperboard size={20} /> Mavzuni to‘liq ko‘rish
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ===== Ilova: Muhokama ===== */}
+      {mobil && showMuh && (
+        <div className="modal" onClick={() => setShowMuh(false)}>
+          <div className="sheet tpm-muh" onClick={(e) => e.stopPropagation()}>
+            <div className="grip" />
+            <div className="tpm-izoh-h"><MessageCircle size={20} /> Muhokama</div>
+            <div className="tpm-muh-list">
+              {izohlar === null && <div className="tpm-muh-bosh">Yuklanmoqda…</div>}
+              {izohlar !== null && izohlar.filter((c) => !bloklangan.includes(c.userId)).length === 0 && (
+                <div className="tpm-muh-bosh">Hozircha izoh yo‘q. Birinchi bo‘lib yozing!</div>
+              )}
+              {(izohlar || [])
+                .filter((c) => !bloklangan.includes(c.userId))
+                .map((c) => (
+                  <div className="tpm-muh-i" key={c.id}>
+                    <div className="tpm-muh-top">
+                      <b>{c.name}</b>
+                      <span>{new Date(c.createdAt).toLocaleDateString('uz-UZ')}</span>
+                    </div>
+                    <p>{c.text}</p>
+                    <div className="tpm-muh-act">
+                      {c.mine ? (
+                        <button onClick={() => izohniOchir(c)}><Trash2 size={14} /> O‘chirish</button>
+                      ) : (
+                        <>
+                          <button onClick={() => shikoyat(c)}><Flag size={14} /> Shikoyat</button>
+                          <button onClick={() => blokla(c)}><Ban size={14} /> Bloklash</button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
+            {izohXato && <div className="tpm-muh-xato">{izohXato}</div>}
+            <div className="tpm-muh-yoz">
+              <textarea
+                value={yangiIzoh}
+                maxLength={500}
+                placeholder="Fikringizni yozing…"
+                onChange={(e) => setYangiIzoh(e.target.value)}
+              />
+              <button disabled={!yangiIzoh.trim() || izohYuborilyapti} onClick={izohYubor} title="Yuborish">
+                <Send size={18} />
+              </button>
+            </div>
           </div>
         </div>
       )}

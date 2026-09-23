@@ -944,6 +944,109 @@ userRouter.post(
   })
 );
 
+/* ---------- Savol muhokamasi (mobil ilova) ---------- */
+/**
+ * Foydalanuvchilar yozadigan kontent. App Store (1.2) va Google Play talabi:
+ * haqoratli yozuvga shikoyat qilish va uni yashirish imkoni bo'lishi shart.
+ * SHIKOYAT_CHEGARASI ta turli odam shikoyat qilsa izoh avtomat yashiriladi.
+ * Bloklash ilovaning o'zida (foydalanuvchi qurilmasida) — bloklangan
+ * odamning izohlari unga ko'rinmaydi.
+ */
+const SHIKOYAT_CHEGARASI = 3;
+const IZOH_MAX = 500;
+
+userRouter.get(
+  '/questions/:id/comments',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+    const questionId = Number(req.params.id);
+    const list = await prisma.questionComment.findMany({
+      where: { questionId, hidden: false },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+      include: { user: { select: { firstName: true } } },
+    });
+    res.json(
+      list.map((c) => ({
+        id: c.id,
+        text: c.text,
+        createdAt: c.createdAt,
+        userId: c.userId,
+        name: c.user?.firstName || 'Foydalanuvchi',
+        mine: c.userId === userId,
+      }))
+    );
+  })
+);
+
+userRouter.post(
+  '/questions/:id/comments',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+    const questionId = Number(req.params.id);
+    const text = String(req.body?.text || '').trim().slice(0, IZOH_MAX);
+    if (!text) return res.status(400).json({ error: 'Izoh bo‘sh bo‘lmasin' });
+    const savol = await prisma.question.findUnique({ where: { id: questionId }, select: { id: true } });
+    if (!savol) return res.status(404).json({ error: 'Savol topilmadi' });
+    // Spamga qarshi: bitta odam 15 soniyada bittadan ko'p yozolmaydi
+    const oxirgi = await prisma.questionComment.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    });
+    if (oxirgi && Date.now() - oxirgi.createdAt.getTime() < 15_000) {
+      return res.status(429).json({ error: 'Biroz kuting — juda tez yozyapsiz' });
+    }
+    const c = await prisma.questionComment.create({
+      data: { questionId, userId, text },
+      include: { user: { select: { firstName: true } } },
+    });
+    res.json({
+      id: c.id, text: c.text, createdAt: c.createdAt, userId: c.userId,
+      name: c.user?.firstName || 'Foydalanuvchi', mine: true,
+    });
+  })
+);
+
+/** O'z izohini o'chirish */
+userRouter.delete(
+  '/comments/:id',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+    const id = Number(req.params.id);
+    const c = await prisma.questionComment.findUnique({ where: { id }, select: { userId: true } });
+    if (!c) return res.status(404).json({ error: 'Izoh topilmadi' });
+    if (c.userId !== userId) return res.status(403).json({ error: 'Faqat o‘z izohingizni o‘chira olasiz' });
+    await prisma.questionComment.delete({ where: { id } });
+    res.json({ ok: true });
+  })
+);
+
+/** Shikoyat — chegaraga yetsa izoh yashiriladi */
+userRouter.post(
+  '/comments/:id/report',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+    const commentId = Number(req.params.id);
+    const c = await prisma.questionComment.findUnique({ where: { id: commentId }, select: { userId: true } });
+    if (!c) return res.status(404).json({ error: 'Izoh topilmadi' });
+    if (c.userId === userId) return res.status(400).json({ error: 'O‘z izohingizga shikoyat qilib bo‘lmaydi' });
+    await prisma.commentReport.upsert({
+      where: { commentId_userId: { commentId, userId } },
+      update: {},
+      create: { commentId, userId },
+    });
+    const soni = await prisma.commentReport.count({ where: { commentId } });
+    const yashirildi = soni >= SHIKOYAT_CHEGARASI;
+    if (yashirildi) await prisma.questionComment.update({ where: { id: commentId }, data: { hidden: true } });
+    res.json({ ok: true, hidden: yashirildi });
+  })
+);
+
 /* ---------- Amaliy mashg'ulotlar (video darsliklar) ---------- */
 /**
  * Foydalanuvchi faqat KO'RADI — joylash admin panelida (POST /admin/lessons).

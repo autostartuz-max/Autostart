@@ -5,8 +5,10 @@ import App from './App';
 import './theme.css';
 import { initTheme } from './theme';
 import { initI18n } from './i18n';
+import { initNative } from './native';
 
 initTheme();
+initNative(); // mobil ilovada status bar/splash/orqaga tugmasi
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

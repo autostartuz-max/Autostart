@@ -52,20 +52,116 @@ function rememberRole(role: unknown) {
   notifyAdminChanged(); // menyu darhol yangilansin
 }
 
-async function req(path: string, opts: RequestInit = {}) {
-  const res = await fetch(API + path, {
-    ...opts,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(opts.headers || {}),
-    },
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || res.statusText);
+/* ==================== OFFLINE ====================
+ * Mobil ilovada internet doim ham bo'lmaydi (metro, qishloq, trafik tugagan).
+ * Shuning uchun:
+ *   1) muvaffaqiyatli GET javoblari qurilmada saqlanadi va tarmoq ishlamaganda
+ *      o'shandan beriladi — test yechish davom etaveradi;
+ *   2) yuborilmagan javoblar navbatga tushadi va tarmoq tiklanganda jo'natiladi.
+ * Server javob bergan xatolar (401, 404...) bunga kirmaydi — ular oddiy xato.
+ */
+const KESH = 'yhq_kesh_';
+const NAVBAT = 'yhq_navbat';
+
+/** Server javob bergan xatomi (true) yoki internet yo'qmi (false) */
+const serverXatosi = (e: any) => !!e?.serverdan;
+
+function keshYoz(path: string, data: any) {
+  let matn = '';
+  try { matn = JSON.stringify(data); } catch { return; }
+  // Juda katta javob (masalan "barcha savollar") xotirani to'ldirib, token va
+  // sozlamalarni yozishga joy qoldirmasligi mumkin — uni keshlamaymiz.
+  if (matn.length > 2_000_000) return;
+  try {
+    localStorage.setItem(KESH + path, matn);
+  } catch {
+    // Joy tugadi — eski keshni tozalab bir marta qayta urinamiz
+    try {
+      for (const k of Object.keys(localStorage)) if (k.startsWith(KESH)) localStorage.removeItem(k);
+      localStorage.setItem(KESH + path, matn);
+    } catch { /* baribir sig'madi — keshsiz ishlayveramiz */ }
   }
-  return res.json();
+}
+function keshOqi(path: string): any | null {
+  try {
+    const r = localStorage.getItem(KESH + path);
+    return r ? JSON.parse(r) : null;
+  } catch { return null; }
+}
+
+/** Keshlangan savollar orasidan bittasini topish — offline baholash uchun */
+function keshdanSavol(id: number): any | null {
+  for (const k of Object.keys(localStorage)) {
+    if (!k.startsWith(KESH + '/questions')) continue;
+    try {
+      const arr = JSON.parse(localStorage.getItem(k) || 'null');
+      const q = Array.isArray(arr) ? arr.find((x: any) => x?.id === id) : null;
+      if (q) return q;
+    } catch { /* buzilgan yozuv */ }
+  }
+  return null;
+}
+
+function navbatniOqi(): any[] {
+  try { return JSON.parse(localStorage.getItem(NAVBAT) || '[]'); } catch { return []; }
+}
+function navbatgaQosh(body: any) {
+  const n = navbatniOqi();
+  n.push(body);
+  try { localStorage.setItem(NAVBAT, JSON.stringify(n.slice(-500))); } catch { /* ignore */ }
+}
+
+let yuborilyapti = false;
+/** Navbatda turgan javoblarni serverga jo'natish (tarmoq tiklanganda) */
+export async function navbatniYubor() {
+  if (yuborilyapti || !token) return;
+  const n = navbatniOqi();
+  if (!n.length) return;
+  yuborilyapti = true;
+  try {
+    const qolgan: any[] = [];
+    for (const body of n) {
+      try {
+        await req('/answers', { method: 'POST', body: JSON.stringify(body) });
+      } catch (e) {
+        // Internet yana uzilsa — qolganini keyingi safar yuboramiz
+        if (!serverXatosi(e)) { qolgan.push(body); break; }
+        // Server rad etgan javob (savol o'chirilgan bo'lsa) — tashlab ketamiz
+      }
+    }
+    localStorage.setItem(NAVBAT, JSON.stringify(qolgan));
+  } finally {
+    yuborilyapti = false;
+  }
+}
+
+async function req(path: string, opts: RequestInit = {}) {
+  const metod = String(opts.method || 'GET').toUpperCase();
+  try {
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(opts.headers || {}),
+      },
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const err: any = new Error(body.error || res.statusText);
+      err.serverdan = true; // server javob berdi — keshga tushmaymiz
+      throw err;
+    }
+    const data = await res.json();
+    if (metod === 'GET') keshYoz(path, data);
+    return data;
+  } catch (e) {
+    if (metod === 'GET' && !serverXatosi(e)) {
+      const k = keshOqi(path);
+      if (k !== null) return k; // internet yo'q — oxirgi nusxadan beramiz
+    }
+    throw e;
+  }
 }
 
 export const api = {
@@ -82,13 +178,31 @@ export const api = {
     return r;
   },
   updateMe: (data: any) => req('/me', { method: 'PATCH', body: JSON.stringify(data) }),
+  /** Akkauntni butunlay o'chirish (do'konlar talabi). Parol bo'lsa — tasdiq uchun. */
+  deleteMe: (password = '') => req('/me', { method: 'DELETE', body: JSON.stringify({ password }) }),
   categories: () => req('/categories'),
   topics: () => req('/topics'),
   tickets: () => req('/tickets'),
   questions: (params: Record<string, string>) =>
     req('/questions?' + new URLSearchParams(params).toString()),
-  answer: (body: { questionId: number; chosen: number[]; timeMs: number }) =>
-    req('/answers', { method: 'POST', body: JSON.stringify(body) }),
+  answer: async (body: { questionId: number; chosen: number[]; timeMs: number }) => {
+    try {
+      const r = await req('/answers', { method: 'POST', body: JSON.stringify(body) });
+      navbatniYubor(); // aloqa bor ekan, kutib turganlarini ham jo'natamiz
+      return r;
+    } catch (e) {
+      if (serverXatosi(e)) throw e;
+      // Internet yo'q: savol keshda bo'lsa o'zimiz baholaymiz, javob navbatga tushadi.
+      const q = keshdanSavol(body.questionId);
+      if (!q?.options) throw e;
+      const togri: number[] = q.options.filter((o: any) => o.isCorrect).map((o: any) => o.id);
+      const tanlangan = [...body.chosen].sort();
+      const isCorrect =
+        togri.length === tanlangan.length && [...togri].sort().every((id, i) => id === tanlangan[i]);
+      navbatgaQosh(body);
+      return { isCorrect, correctOptionIds: togri, offline: true };
+    }
+  },
   mistakes: () => req('/mistakes'),
   rating: (limit = 100): Promise<{ list: RatingRow[]; meId: number }> =>
     req('/rating?limit=' + limit),

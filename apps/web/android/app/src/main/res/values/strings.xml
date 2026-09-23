@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Autostart</string>
+    <string name="title_activity_main">Autostart</string>
+    <string name="package_name">uz.autostart.app</string>
+    <string name="custom_url_scheme">uz.autostart.app</string>
+</resources>

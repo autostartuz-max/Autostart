@@ -1017,3 +1017,25 @@
   font-size: 12px; font-weight: 800; border-radius: 20px; padding: 2px 9px; }
 :root[data-theme="light"] .th-xatolar { background: rgba(221, 51, 0, .06); border-color: rgba(221, 51, 0, .2); }
 :root[data-theme="light"] .th-xato-n { background: rgba(221, 51, 0, .12); }
+
+/* ===== Mobil ilova (Capacitor) =====
+   `html.cap` sinfini native.ts qo'yadi. Telefon "tirnog'i" (notch), status bar
+   va pastdagi navigatsiya chizig'i ostiga kontent kirib ketmasligi uchun. */
+.cap .db-top { padding-top: calc(12px + env(safe-area-inset-top)); }
+.cap .db-side { padding-top: calc(16px + env(safe-area-inset-top)); }
+.cap .db-content { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
+/* Matnni uzoq bosganda chiqadigan tanlash/lupani o'chiramiz — ilovaga o'xshasin */
+.cap { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.cap input, .cap textarea { -webkit-user-select: text; user-select: text; }
+
+/* Akkauntni o'chirish bo'limi (profil sahifasi) */
+.ud-danger { border-color: rgba(255, 61, 0, .35); }
+.ud-danger .ud-card-h { display: flex; align-items: center; gap: 8px; color: #ff6a33; }
+.ud-danger-p { font-size: 13.5px; color: var(--db-muted); line-height: 1.6; margin: 0 0 14px; }
+.ud-del { display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 61, 0, .12);
+  border: 1px solid rgba(255, 61, 0, .45); color: #ff6a33; border-radius: 10px; padding: 10px 16px;
+  font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.ud-del:hover { background: rgba(255, 61, 0, .2); }
+.ud-del:disabled { opacity: .6; cursor: default; }
+.ud-del-form { display: flex; flex-direction: column; gap: 12px; max-width: 420px; }
+.ud-del-row { display: flex; gap: 10px; flex-wrap: wrap; }

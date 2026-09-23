@@ -39,7 +39,9 @@ function safeUser<T extends { passwordHash?: string | null; passwordEnc?: string
   if (!u) return u;
   // passwordEnc ham chiqmasin — u faqat admin panelida, alohida endpointda ochiladi
   const { passwordHash: _h, passwordEnc: _e, ...rest } = u;
-  return rest;
+  // Parolning O'ZI emas, faqat bor-yo'qligi: akkauntni o'chirishda ilova
+  // parol so'rash kerakmi-yo'qmi shuni biladi (Telegram orqali kirganda parol yo'q).
+  return { ...rest, hasPassword: !!_h };
 }
 
 const ah =
@@ -340,6 +342,50 @@ userRouter.patch(
       },
     });
     res.json({ user: safeUser(user) });
+  })
+);
+
+/**
+ * Akkauntni butunlay o'chirish.
+ *
+ * App Store va Play Market talabi: ilovada ro'yxatdan o'tish bor ekan,
+ * foydalanuvchi akkauntini ilovaning O'ZIDA o'chira olishi shart. Aks holda
+ * ilova do'konga qo'yilmaydi.
+ *
+ * Javoblar, saqlangan savollar va shikoyatlar sxemada onDelete: Cascade —
+ * ularni baza o'zi o'chiradi. Xabarlar esa alohida o'chiriladi: ularda ism va
+ * telefon raqami bor, ya'ni shaxsiy ma'lumot.
+ */
+userRouter.delete(
+  '/me',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+
+    // Owner o'chib ketsa tizimni boshqaradigan odam qolmaydi.
+    if (user.role === 'owner') {
+      return res.status(403).json({ error: "Owner hisobini o'chirib bo'lmaydi. Avval boshqa hisobga owner rolini bering." });
+    }
+
+    // Parol bilan kirganlardan tasdiq so'raymiz — telefon boshqa qo'lga tushsa
+    // ham akkaunt bir bosishda o'chib ketmasin. Telegram orqali kirganlarda
+    // parol yo'q, ularda tasdiq ilova tomonida so'raladi.
+    if (user.passwordHash) {
+      const password = String(req.body?.password || '');
+      if (!password) return res.status(400).json({ error: 'Tasdiqlash uchun parolingizni kiriting' });
+      if (!bcrypt.compareSync(password, user.passwordHash)) {
+        return res.status(401).json({ error: "Parol noto'g'ri" });
+      }
+    }
+
+    await prisma.$transaction([
+      prisma.message.deleteMany({ where: { userId } }),
+      prisma.user.delete({ where: { id: userId } }),
+    ]);
+
+    res.json({ ok: true });
   })
 );
 

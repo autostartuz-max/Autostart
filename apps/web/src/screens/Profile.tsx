@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap,
   CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare,
-  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark,
+  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark, Trash2, TriangleAlert,
 } from 'lucide-react';
-import { api, ROLE_LABEL, type Role } from '../api';
+import { api, clearToken, ROLE_LABEL, type Role } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import '../dashboard.css';
 
@@ -26,6 +26,11 @@ export default function Profile() {
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const [me, setMe] = useState<any>(null);
+  // Akkauntni o'chirish (App Store/Play Market talabi) — ikki bosqichli tasdiq
+  const [ochirish, setOchirish] = useState(false);
+  const [parol, setParol] = useState('');
+  const [ochirXato, setOchirXato] = useState('');
+  const [ochirilmoqda, setOchirilmoqda] = useState(false);
 
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
@@ -33,6 +38,20 @@ export default function Profile() {
 
   // Sahifa faqat KO'RISH uchun: alifbo, toifa va rolni foydalanuvchi
   // o'zgartira olmaydi — ularni Owner admin panelidan qo'yadi.
+  async function akkauntniOchir() {
+    setOchirXato('');
+    setOchirilmoqda(true);
+    try {
+      await api.deleteMe(parol);
+      clearToken();
+      // Butun holat tozalansin — sahifani qaytadan ochamiz
+      window.location.href = '/';
+    } catch (e: any) {
+      setOchirXato(e?.message || "Akkauntni o'chirib bo'lmadi");
+      setOchirilmoqda(false);
+    }
+  }
+
   const u = me?.user;
   const s = me?.stats;
   const r = roleOf(u?.role);
@@ -101,6 +120,48 @@ export default function Profile() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* App Store va Play Market talabi: foydalanuvchi akkauntini
+                  ilovaning o'zida o'chira olishi kerak */}
+              <div className="ud-card ud-danger">
+                <div className="ud-card-h"><TriangleAlert size={16} /> Akkauntni o‘chirish</div>
+                <p className="ud-danger-p">
+                  Akkaunt o‘chirilsa — natijalaringiz, xato qilgan savollaringiz va
+                  saqlangan savollar <b>butunlay</b> yo‘qoladi. Buni qaytarib bo‘lmaydi.
+                </p>
+
+                {!ochirish ? (
+                  <button className="ud-del" onClick={() => setOchirish(true)}>
+                    <Trash2 size={16} /> Akkauntni o‘chirish
+                  </button>
+                ) : (
+                  <div className="ud-del-form">
+                    {u.hasPassword && (
+                      <input
+                        className="adm-inp"
+                        type="password"
+                        placeholder="Tasdiqlash uchun parolingiz"
+                        value={parol}
+                        onChange={(e) => setParol(e.target.value)}
+                        autoFocus
+                      />
+                    )}
+                    {ochirXato && <div className="adm-err">{ochirXato}</div>}
+                    <div className="ud-del-row">
+                      <button className="ud-del" disabled={ochirilmoqda} onClick={akkauntniOchir}>
+                        {ochirilmoqda ? 'O‘chirilmoqda…' : 'Ha, butunlay o‘chirilsin'}
+                      </button>
+                      <button
+                        className="adm-btn sec"
+                        disabled={ochirilmoqda}
+                        onClick={() => { setOchirish(false); setParol(''); setOchirXato(''); }}
+                      >
+                        Bekor qilish
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}

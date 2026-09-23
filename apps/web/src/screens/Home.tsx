@@ -4,11 +4,14 @@ import {
   ListChecks, HeartCrack, BookOpen, Ticket, ListOrdered, ClipboardCheck,
   CircleAlert, Bookmark, TriangleAlert, Hash, Swords, Play, Trophy, Search,
   Settings, Check, X, Zap, Pencil, ChevronRight, User, Layers,
+  GraduationCap, Video, MessageSquare, TrendingUp, ShieldCheck, ClipboardList,
 } from 'lucide-react';
-import { api } from '../api';
+import { api, canManageQuestions, hasAdmin } from '../api';
+import LangTheme from '../components/LangTheme';
 import type { Me } from '../types';
 
 const TILES = [
+  { to: '/amaliy', Icon: GraduationCap, cls: 'teal', title: 'Darslik' },
   { to: '/shablon', Icon: Layers, cls: 'blue', title: 'Shablon testlar' },
   { to: '/mavzular', Icon: BookOpen, cls: 'purple', title: 'Mavzular' },
   { to: '/biletlar', Icon: Ticket, cls: 'amber', title: 'Biletlar' },
@@ -18,6 +21,16 @@ const TILES = [
   { to: '/test?mode=saved', Icon: Bookmark, cls: 'amber', title: 'Saqlanganlar' },
   { to: '/belgilar', Icon: TriangleAlert, cls: 'blue', title: "Yo'l belgilari" },
   { to: '/test?mode=numeric', Icon: Hash, cls: 'purple', title: 'Raqamli savollar' },
+  { to: '/xatolarim', Icon: HeartCrack, cls: 'red', title: 'Xatolarim' },
+];
+
+/** Faqat admin va owner uchun — oddiy talabaga ko'rinmaydi */
+const ADMIN_TILES = [
+  { to: '/savollar', Icon: ClipboardList, cls: 'blue', title: 'Savollar' },
+  { to: '/amaliy/boshqaruv', Icon: Video, cls: 'purple', title: 'Video joylash' },
+  { to: '/xabarlar', Icon: MessageSquare, cls: 'amber', title: 'Xabarlar' },
+  { to: '/tahlil', Icon: TrendingUp, cls: 'green', title: 'Tahlil' },
+  { to: '/foydalanuvchilar', Icon: ShieldCheck, cls: 'teal', title: 'Foydalanuvchilar' },
 ];
 
 function daysLeft(d?: string | null) {
@@ -29,6 +42,7 @@ function daysLeft(d?: string | null) {
 export default function Home() {
   const nav = useNavigate();
   const [me, setMe] = useState<Me | null>(null);
+  const admin = canManageQuestions() || hasAdmin();
 
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
@@ -126,6 +140,23 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      {admin && (
+        <>
+          <div className="hsec">Admin</div>
+          <div className="tiles wide">
+            {ADMIN_TILES.map((t) => (
+              <div key={t.to} className="tcard" onClick={() => nav(t.to)}>
+                <div className={'ci ' + t.cls}><t.Icon size={22} /></div>
+                <div className="bt">{t.title}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Til va mavzu — ilovada yon menyu yo'q, shuning uchun shu yerda */}
+      <div className="hlt"><LangTheme /></div>
     </div>
   );
 }

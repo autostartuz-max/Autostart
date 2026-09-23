@@ -583,3 +583,11 @@ button { font-family: inherit; cursor: pointer; }
 .cap .tp2-body { padding: 4px 12px 12px; }
 .cap .tp2-tools { padding: 12px; gap: 8px; }
 .cap .tp2-under { gap: 8px; }
+
+/* ===== Mobil ilova bosh sahifasi (Home) ===== */
+.hsec { font-size: 12px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+  color: var(--muted); margin: 22px 4px 10px; }
+.hlt { margin-top: 26px; display: flex; justify-content: center; }
+/* Notch va pastki chiziq — ilovada `.app` o'rami ishlatiladi (`.db` emas) */
+.cap .app { padding-top: calc(14px + env(safe-area-inset-top));
+  padding-bottom: calc(24px + env(safe-area-inset-bottom)); }

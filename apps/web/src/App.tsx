@@ -6,6 +6,8 @@ import Landing from './screens/Landing';
 import Login from './screens/Login';
 import Register from './screens/Register';
 import Dashboard from './screens/Dashboard';
+import Home from './screens/Home';
+import { mobilIlova } from './native';
 import Shablon from './screens/Shablon';
 import RandomTests from './screens/RandomTests';
 import Topics from './screens/Topics';
@@ -100,7 +102,9 @@ export default function App() {
   return (
     <div className="app">
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        {/* Mobil ilovada telefon uchun yasalgan bosh sahifa (plitkalar),
+            saytda esa avvalgidek Dashboard — sayt o'zgarmaydi. */}
+        <Route path="/" element={mobilIlova() ? <Home /> : <Dashboard />} />
         <Route path="/shablon" element={<Shablon />} />
         <Route path="/random" element={<RandomTests />} />
         <Route path="/mavzular" element={<Topics />} />

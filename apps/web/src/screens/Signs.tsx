@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api';
+import { api, mediaUrl } from '../api';
 import type { Sign } from '../types';
 
 export default function Signs() {
@@ -18,7 +18,7 @@ export default function Signs() {
       <div className="list">
         {items.map((s) => (
           <div key={s.id} className="sign">
-            <div className="sic">{s.imageUrl ? <img src={s.imageUrl} width={44} /> : '⚠️'}</div>
+            <div className="sic">{s.imageUrl ? <img src={mediaUrl(s.imageUrl)} width={44} /> : '⚠️'}</div>
             <div>
               <div className="scat">{s.category}</div>
               <div className="sname">{s.name}</div>

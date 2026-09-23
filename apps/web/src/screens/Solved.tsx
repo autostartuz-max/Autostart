@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, ChevronLeft, FileText, Check, X, Info } from 'lucide-react';
-import { api } from '../api';
+import { api, mediaUrl } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import type { Question } from '../types';
 import '../dashboard.css';
@@ -115,7 +115,7 @@ export default function Solved() {
                     {sana(q.answeredAt)}
                   </div>
 
-                  {q.imageUrl && <img className="xt-rasm" src={q.imageUrl} alt="" loading="lazy" />}
+                  {q.imageUrl && <img className="xt-rasm" src={mediaUrl(q.imageUrl)} alt="" loading="lazy" />}
 
                   <div className="xt-opts">
                     {q.options.map((o) => {

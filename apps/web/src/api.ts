@@ -241,6 +241,21 @@ export const api = {
  * Dars videosi. Mobil ilovada `?mobil=1` qo'shiladi — server siqilgan nusxani
  * beradi (tayyor bo'lmasa aslini). Saytda manzil avvalgidek qoladi.
  */
+/**
+ * Serverdan kelgan nisbiy manzilni (masalan `/api/questions/5/image`) ilovada
+ * to'liq manzilga aylantiradi.
+ *
+ * Ilovada sahifa `https://localhost` dan ochiladi — nisbiy manzil serverga emas,
+ * ilovaning ichiga qarab ketadi va rasm/ovoz topilmaydi. Saytda esa manzil
+ * o'zgarishsiz qoladi.
+ */
+export function mediaUrl(u?: string | null): string | undefined {
+  if (!u) return undefined;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(u) || u.startsWith('//')) return u; // http(s):, data:, blob:
+  if (!ilovaIchida) return u;
+  return API.replace(/\/api\/?$/, '') + (u.startsWith('/') ? u : '/' + u);
+}
+
 export const lessonVideoUrl = (id: number) =>
   `${API}/lessons/${id}/video` + (ilovaIchida ? '?mobil=1' : '');
 

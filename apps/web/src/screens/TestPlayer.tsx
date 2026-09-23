@@ -4,7 +4,7 @@ import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
   Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag,
 } from 'lucide-react';
-import { api } from '../api';
+import { api, mediaUrl } from '../api';
 import { haptic, getTelegram } from '../telegram';
 import { latToCyr } from '../translit';
 import type { Question, Option } from '../types';
@@ -480,7 +480,7 @@ export default function TestPlayer() {
   // Tushuncha — javobni OVOZ bilan tushuntiradi (admin ovozi bo'lsa u, bo'lmasa TTS)
   const learn = () => {
     if (!answered) setLearned((s) => new Set(s).add(q.id));
-    if (q.hasAudio) playUrl(`/api/questions/${q.id}/audio`, spokenExplain());
+    if (q.hasAudio) playUrl(mediaUrl(`/api/questions/${q.id}/audio`)!, spokenExplain());
     else playVoice(spokenExplain());
   };
 
@@ -684,7 +684,7 @@ export default function TestPlayer() {
           {q.imageUrl ? (
             <div className="tp2-imgwrap">
               <button className="tp2-imgf" onClick={() => setShowImg(true)} title="Kattalashtirish (F)">F</button>
-              <img src={q.imageUrl} className="tp2-img" onClick={() => setShowImg(true)} />
+              <img src={mediaUrl(q.imageUrl)} className="tp2-img" onClick={() => setShowImg(true)} />
             </div>
           ) : (
             <div className="tp2-noimg">
@@ -724,7 +724,7 @@ export default function TestPlayer() {
       {/* Rasm lightbox (F tugmasi) */}
       {showImg && q.imageUrl && (
         <div className="tp2-lightbox" onClick={() => setShowImg(false)}>
-          <img src={q.imageUrl} onClick={(e) => e.stopPropagation()} />
+          <img src={mediaUrl(q.imageUrl)} onClick={(e) => e.stopPropagation()} />
           <button className="tp2-lightbox-x" onClick={() => setShowImg(false)}><X size={22} /></button>
         </div>
       )}

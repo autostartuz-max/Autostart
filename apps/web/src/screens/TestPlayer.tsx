@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
-  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap,
+  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap, Eye,
 } from 'lucide-react';
 import { api, mediaUrl } from '../api';
 import { haptic, getTelegram } from '../telegram';
 import { latToCyr } from '../translit';
 import { mobilIlova } from '../native';
+import { setLang } from '../i18n';
 import type { Question, Option } from '../types';
 
 interface Answered {
@@ -22,6 +23,7 @@ const SET_DEFAULTS = {
   autoNextWrong: false,
   noAnim: false,
   shuffle: true,
+  showCorrect: false, // to'g'ri javob belgilashdan oldin ham ko'rinib tursin
   fontSize: 'md', // sm | md | lg
   fontStyle: 'soft', // soft | classic
   lang: 'uz',
@@ -559,6 +561,14 @@ export default function TestPlayer() {
   const share = () => {
     const appUrl = 'https://t.me/Autostartuzbot';
     const text = `${q.textLat}\n\nAutostart test — YHQ imtihoniga tayyorlaning:`;
+    if (mobil) {
+      // Android WebView'da navigator.share yo'q — Capacitor plagini tizimning
+      // "Ulashish" oynasini ochadi (Telegram, WhatsApp, Gmail...)
+      import('@capacitor/share')
+        .then(({ Share }) => Share.share({ title: 'Autostart test', text, url: appUrl, dialogTitle: 'Ulashish' }))
+        .catch(() => {});
+      return;
+    }
     const link = `https://t.me/share/url?url=${encodeURIComponent(appUrl)}&text=${encodeURIComponent(text)}`;
     const tg = getTelegram();
     if (tg?.openTelegramLink) tg.openTelegramLink(link);
@@ -619,6 +629,12 @@ export default function TestPlayer() {
 
     const last = idx >= questions.length - 1;
     clearNext();
+    // Ilovada sozlamalar hisobga olinadi: to'g'ri/xato javobda avtomatik o'tish
+    // va animatsiyasiz (kutmasdan) o'tish. Saytda avvalgidek — har doim 2 s.
+    // Imtihonda xatolar chegarasi esa har qanday holatda testni tugatadi.
+    const avto = !mobil || (r.isCorrect ? settings.autoNextCorrect : settings.autoNextWrong);
+    if (!avto && !chegaradanOshdi) return;
+    const kutish = mobil && settings.noAnim ? 0 : 2000;
     nextRef.current = window.setTimeout(() => {
       nextRef.current = null;
       if (chegaradanOshdi) {
@@ -629,11 +645,12 @@ export default function TestPlayer() {
       } else {
         setIdx(idx + 1);
       }
-    }, 2000);
+    }, kutish);
   };
   kbRef.current = { opts: displayOpts, select: selectOpt }; // klaviatura (F1-F5) uchun eng so'nggi holat
   const optClass = (o: Option) => {
     if (reveal && o.isCorrect) return 'io ok';
+    if (mobil && settings.showCorrect && o.isCorrect) return 'io ok';
     if (reveal && answered && ans!.chosen.includes(o.id) && !o.isCorrect) return 'io no';
     if (!locked && sel === o.id) return 'io sel';
     return 'io';
@@ -680,7 +697,9 @@ export default function TestPlayer() {
             <button className="tpm-ic" onClick={share} title="Ulashish"><Share2 size={18} /></button>
             <span className="tpm-timer"><Clock size={16} /> {mm}:{ss}</span>
             <button className="tpm-ic" onClick={() => setShowSettings(true)} title="Sozlamalar"><Settings size={18} /></button>
-            <button className="tpm-ic" onClick={report} title="Xatolik haqida xabar"><Flag size={18} /></button>
+            <button className="tpm-ic" onClick={() => { clearNext(); setTugashSabab(''); setFinished(true); }} title="Natijalar">
+              <Flag size={18} />
+            </button>
           </header>
           {/* Savollar raqami — yuqorida, yon tomonga suriladi */}
           <div className="tpm-nums">
@@ -878,10 +897,23 @@ export default function TestPlayer() {
               <span className="set-label">Shrift uslubi</span>
               <span className="set-val">{FF_LABEL[settings.fontStyle]}</span>
             </div>
-            <div className="set-row">
+            <div
+              className="set-row"
+              onClick={() => {
+                // lotin → kirill → rus → lotin. Savol matni ham, ilova interfeysi ham almashadi.
+                const keyingi = cfgLang === 'lat' ? 'cyr' : cfgLang === 'cyr' ? 'rus' : 'lat';
+                setCfgLang(keyingi);
+                setLang(keyingi === 'lat' ? 'uz' : keyingi);
+              }}
+            >
               <span className="set-ic blue"><Globe size={18} /></span>
               <span className="set-label">Ilova tili</span>
-              <span className="set-val">O‘zbekcha</span>
+              <span className="set-val">{cfgLang === 'cyr' ? 'Кириллча' : cfgLang === 'rus' ? 'Русский' : 'O‘zbekcha'}</span>
+            </div>
+            <div className="set-row">
+              <span className="set-ic amber"><Eye size={18} /></span>
+              <span className="set-label">To‘g‘ri javoblarni ko‘rsatish</span>
+              <button className={'tog' + (settings.showCorrect ? ' on' : '')} onClick={() => setS('showCorrect', !settings.showCorrect)} />
             </div>
             <div className="set-row" onClick={() => { setShowSettings(false); report(); }}>
               <span className="set-ic red"><Flag size={18} /></span>

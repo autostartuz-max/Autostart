@@ -17,7 +17,7 @@ const TILES = [
   { to: '/test?mode=50&exam=1', Icon: ListOrdered, cls: 'green', title: '50/100 talik' },
   { to: '/test?mode=exam&exam=1', Icon: ClipboardCheck, cls: 'green', title: 'Real imtihon' },
   { to: '/test?mode=tricky', Icon: CircleAlert, cls: 'red', title: "Chalg'ituvchi" },
-  { to: '/test?mode=saved', Icon: Bookmark, cls: 'amber', title: 'Saqlanganlar' },
+  { to: '/test?mode=saved', Icon: Bookmark, cls: 'amber', title: 'Saralangan' },
   { to: '/belgilar', Icon: TriangleAlert, cls: 'blue', title: "Yo'l belgilari" },
   { to: '/test?mode=numeric', Icon: Hash, cls: 'purple', title: 'Raqamli savollar' },
   { to: '/xatolarim', Icon: HeartCrack, cls: 'red', title: 'Xatolarim' },

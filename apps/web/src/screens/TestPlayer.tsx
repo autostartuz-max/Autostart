@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
-  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag,
+  Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap,
 } from 'lucide-react';
 import { api, mediaUrl } from '../api';
 import { haptic, getTelegram } from '../telegram';
 import { latToCyr } from '../translit';
+import { mobilIlova } from '../native';
 import type { Question, Option } from '../types';
 
 interface Answered {
@@ -68,6 +69,29 @@ export default function TestPlayer() {
   // Test nima uchun tugadi: '' (odatdagidek), 'xato' (chegaradan oshdi), 'vaqt'
   const [tugashSabab, setTugashSabab] = useState<'' | 'xato' | 'vaqt' | 'toxtatildi'>('');
   const [showRule, setShowRule] = useState(false);
+  // Mobil ilovada test oynasi telefon uchun alohida chiziladi (saytga tegmaydi)
+  const mobil = mobilIlova();
+  const [fabOpen, setFabOpen] = useState(false); // "O'rganish" menyusi ochiqmi
+  // Ilovada barmoq bilan surish: o'ngdan chapga — keyingi, chapdan o'ngga — oldingi savol
+  const surish = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    // Raqamlar qatori o'zi yon tomonga suriladi — u yerdagi harakat savolni almashtirmasin
+    if ((e.target as HTMLElement).closest('.tpm-nums, .modal, .tp2-lightbox')) { surish.current = null; return; }
+    const t = e.touches[0];
+    surish.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const bosh = surish.current;
+    surish.current = null;
+    if (!bosh) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - bosh.x;
+    const dy = t.clientY - bosh.y;
+    // Asosan gorizontal va yetarlicha uzun harakat — aks holda bu oddiy vertikal skroll
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (dx < 0 && questions && idx < questions.length - 1) setIdx(idx + 1);
+    else if (dx > 0 && idx > 0) setIdx(idx - 1);
+  };
   const [sel, setSel] = useState<number | null>(null); // tanlangan (hali tasdiqlanmagan) variant
   const kbRef = useRef<{ opts: { id: number }[]; select: (id: number) => void }>({ opts: [], select: () => {} });
   const [showImg, setShowImg] = useState(false); // rasm lightbox (F tugmasi)
@@ -615,7 +639,34 @@ export default function TestPlayer() {
   };
 
   return (
-    <div className={`tp2 ff-${settings.fontStyle}`} style={{ ['--fs' as any]: fscale }}>
+    <div
+      className={`tp2 ff-${settings.fontStyle}`}
+      style={{ ['--fs' as any]: fscale }}
+      onTouchStart={mobil ? onTouchStart : undefined}
+      onTouchEnd={mobil ? onTouchEnd : undefined}
+    >
+      {mobil ? (
+        <>
+          <header className="tpm-top">
+            <button className="tpm-ic" onClick={exit} title="Chiqish"><ChevronLeft size={20} /></button>
+            <button className={'tpm-ic' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm} title="Saqlash">
+              <Bookmark size={18} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
+            </button>
+            <button className="tpm-ic" onClick={share} title="Ulashish"><Share2 size={18} /></button>
+            <span className="tpm-timer"><Clock size={16} /> {mm}:{ss}</span>
+            <button className="tpm-ic" onClick={() => setShowSettings(true)} title="Sozlamalar"><Settings size={18} /></button>
+            <button className="tpm-ic" onClick={report} title="Xatolik haqida xabar"><Flag size={18} /></button>
+          </header>
+          {/* Savollar raqami — yuqorida, yon tomonga suriladi */}
+          <div className="tpm-nums">
+            {questions.map((qq, i) => (
+              <button key={qq.id} ref={i === idx ? curRef : null} className={circleClass(i)} onClick={() => setIdx(i)}>
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
       <header className="tp2-top">
         <div className="tp2-brand">
           <img src="/mark.png" alt="" className="tp2-mark" />
@@ -633,6 +684,7 @@ export default function TestPlayer() {
           <button className="tp2-esc" onClick={exit} title="Chiqish">ESC</button>
         </div>
       </header>
+      )}
 
       <div className="tp2-qbar">
         {idx + 1}. {tx(q.textLat, q.textCyr, (q as any).textRus)}
@@ -643,7 +695,7 @@ export default function TestPlayer() {
         )}
       </div>
 
-      <div className="tp2-tools">
+      <div className="tp2-tools" hidden={mobil}>
         <button className="tp2-az" onClick={fontUp}>A+</button>
         <button className="tp2-az" onClick={fontDown}>A-</button>
       </div>
@@ -668,11 +720,11 @@ export default function TestPlayer() {
               <span className="lg sk">○ Belgilanmagan javob</span>
             </div>
           )}
-          <div className="tp2-under">
+          {!mobil && <div className="tp2-under">
             <button className={'pill' + (showRule ? ' active' : '')} onClick={() => setShowRule((v) => !v)}><Info size={16} /> Qoidasi</button>
             <button className="pill learn" onClick={learn}><Volume2 size={16} /> Tushuncha</button>
-          </div>
-          {showRule && (
+          </div>}
+          {!mobil && showRule && (
             <div className="tp2-rule">
               <p>{explainText()}</p>
               {q.ruleRef && <div className="tp2-rule-ref">Manba: {q.ruleRef}</div>}
@@ -708,6 +760,7 @@ export default function TestPlayer() {
       </div>
 
       <div className="tp2-nav">
+        {!mobil && (
         <div className="tp2-circles">
           {questions.map((qq, i) => (
             <button key={qq.id} ref={i === idx ? curRef : null} className={circleClass(i)} onClick={() => setIdx(i)}>
@@ -715,11 +768,44 @@ export default function TestPlayer() {
             </button>
           ))}
         </div>
+        )}
         <div className="tp2-pn">
           <button disabled={idx === 0} onClick={() => setIdx(Math.max(0, idx - 1))}>‹ oldingi</button>
           <button onClick={() => (idx < questions.length - 1 ? setIdx(idx + 1) : setFinished(true))}>keyingi ›</button>
         </div>
       </div>
+
+      {/* ===== Ilova: "O'rganish" menyusi (pastki o'ng burchak) ===== */}
+      {mobil && (
+        <div className={'tpm-fab' + (fabOpen ? ' open' : '')}>
+          {fabOpen && (
+            <>
+              <button className="tpm-fab-i" onClick={() => { setFabOpen(false); learn(); }}>
+                <Volume2 size={18} /> Ovozli
+              </button>
+              <button className="tpm-fab-i" onClick={() => { setFabOpen(false); setShowRule(true); }}>
+                <Info size={18} /> Qoidasi
+              </button>
+            </>
+          )}
+          <button className="tpm-fab-main" onClick={() => setFabOpen((v) => !v)}>
+            {fabOpen ? <X size={18} /> : <GraduationCap size={18} />} O‘rganish
+          </button>
+        </div>
+      )}
+
+      {/* ===== Ilova: Izoh (qoida) pastdan chiqadigan oynada ===== */}
+      {mobil && showRule && (
+        <div className="modal" onClick={closeRule}>
+          <div className="sheet tpm-izoh" onClick={(e) => e.stopPropagation()}>
+            <div className="grip" />
+            <div className="tpm-izoh-h"><Info size={20} /> Izoh</div>
+            <p className="tpm-izoh-p">{explainText()}</p>
+            {q.ruleRef && <div className="tpm-izoh-ref">{q.ruleRef}</div>}
+            <button className="tpm-izoh-x" onClick={closeRule}>Yopish</button>
+          </div>
+        </div>
+      )}
 
       {/* Rasm lightbox (F tugmasi) */}
       {showImg && q.imageUrl && (

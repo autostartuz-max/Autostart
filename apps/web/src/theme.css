@@ -566,23 +566,80 @@ button { font-family: inherit; cursor: pointer; }
 .ring-pct.mid { color: #facc15; }
 
 /* ===== Mobil ilova (Capacitor) — test yechish oynasi =====
-   Yuqori panel telefon ekraniga sig'masdi: logotip va o'ng tomondagi tugmalar
-   150px dan kichrayolmaydi, natijada sahifa yon tomonga surilib, chap tomoni
-   qirqilib qolardi. Endi panel o'ralib tushadi va yon surilish butunlay yopiq.
-   Saytga tegmaydi — qoidalar faqat `html.cap` (ya'ni ilova) ichida ishlaydi. */
-.cap .tp2 { overflow-x: hidden; }
-.cap .tp2-top { flex-wrap: wrap; gap: 8px 10px; padding: 9px 12px; }
-.cap .tp2-brand { min-width: 0; }
-.cap .tp2-mark { height: 24px; }
-.cap .tp2-word { font-size: 16px; }
-.cap .tp2-mid { gap: 8px; flex-wrap: wrap; }
-.cap .tp2-shab { font-size: 14px; }
-.cap .tp2-timer { font-size: 14px; padding: 5px 10px; }
-.cap .tp2-right { min-width: 0; gap: 6px; }
-.cap .tp2-qbar { margin: 10px 12px 0; padding: 12px 14px; }
-.cap .tp2-body { padding: 4px 12px 12px; }
-.cap .tp2-tools { padding: 12px; gap: 8px; }
-.cap .tp2-under { gap: 8px; }
+   Ilovada TestPlayer telefon uchun alohida chiziladi: yuqorida ikonka paneli
+   va savollar raqami, rasm savol ostida, variantlar qorong'i kartalarda,
+   "O'rganish" menyusi pastki o'ng burchakda. Saytga tegmaydi — hammasi
+   `html.cap` yoki faqat ilovada chiziladigan `tpm-*` sinflari ichida. */
+.cap .tp2 { overflow-x: hidden; background: #0f1720; }
+
+.tpm-top { display: flex; align-items: center; gap: 8px; padding: calc(10px + env(safe-area-inset-top)) 14px 10px; }
+.tpm-ic { width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; background: #1a2430; border: 1px solid #2a3644;
+  color: #cbd5e1; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.tpm-ic.on { color: #fbbf24; }
+.tpm-timer { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  font-size: 17px; font-weight: 800; color: #cbd5e1; white-space: nowrap; }
+.tpm-timer svg { color: #fbbf24; }
+
+.tpm-nums { display: flex; gap: 8px; overflow-x: auto; padding: 4px 14px 12px; scrollbar-width: none; }
+.tpm-nums::-webkit-scrollbar { display: none; }
+.tpm-nums .ic { flex: 0 0 48px; width: 48px; height: 48px; border-radius: 12px; background: #1a2430;
+  border: 1px solid #2a3644; color: #cbd5e1; font-size: 17px; font-weight: 700; font-family: inherit; }
+.tpm-nums .ic.ok { background: #22c55e; border-color: #22c55e; color: #fff; }
+.tpm-nums .ic.no { background: #ef4444; border-color: #ef4444; color: #fff; }
+.tpm-nums .ic.cur { border: 2px solid #38bdf8; color: #fff; }
+
+/* Savol matni, rasm, variantlar */
+.cap .tp2-qbar { background: none; border: none; margin: 0 14px; padding: 2px 0 12px;
+  font-size: calc(17px * var(--fs, 1)); text-align: center; }
+.cap .tp2-body { padding: 0 14px 12px; gap: 14px; }
+.cap .tp2-imgcol { order: -1; }
+.cap .tp2-imgwrap { border: none; border-radius: 18px; }
+.cap .tp2-imgf { display: none; }
+.cap .io { background: #16202b; border: 1px solid #2a3644; border-radius: 14px;
+  box-shadow: 0 3px 0 #0b1118; min-height: 58px; }
+.cap .io-f { width: 36px; height: 36px; align-self: center; border-radius: 50%; margin-left: 10px;
+  background: #243142; color: #94a3b8; font-size: 12.5px; }
+.cap .io-radio { display: none; }
+.cap .io-text { color: #e8eef7; padding: 12px 14px; }
+.cap .io.sel { background: #2e2a10; border-color: #eab308; }
+.cap .io.sel .io-text { color: #fde68a; }
+/* Javob berilgach: to'g'ri — yashil hoshiya va ✓, xato — qizil hoshiya va ✕ */
+.cap .io.ok, .cap .io.no { border-width: 2px; }
+.cap .io.ok { background: rgba(34, 197, 94, .12); border-color: #4ade80; }
+.cap .io.ok .io-text { color: #4ade80; }
+.cap .io.ok .io-f { background: rgba(34, 197, 94, .25); color: #4ade80; }
+.cap .io.no { background: rgba(239, 68, 68, .14); border-color: #f87171; }
+.cap .io.no .io-text { color: #f87171; }
+.cap .io.no .io-f { background: rgba(239, 68, 68, .25); color: #f87171; }
+.cap .io.ok::after, .cap .io.no::after { flex-shrink: 0; margin-right: 16px; font-size: 20px; font-weight: 800; }
+.cap .io.ok::after { content: '✓'; color: #4ade80; }
+.cap .io.no::after { content: '✕'; color: #f87171; }
+
+/* Oldingi/keyingi — "O'rganish" tugmasi ostida qolmasin */
+.cap .tp2-nav { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+
+/* "O'rganish" menyusi */
+.tpm-fab { position: fixed; right: 14px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 40;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.tpm-fab-main, .tpm-fab-i { display: inline-flex; align-items: center; gap: 9px; background: #1a2430;
+  border: 1px solid #334155; color: #e8eef7; border-radius: 16px; padding: 13px 18px; font-size: 16px;
+  font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: 0 4px 0 #0b1118, 0 8px 24px rgba(0, 0, 0, .35); }
+.tpm-fab-i { animation: tpmIn .16s ease; }
+@keyframes tpmIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Izoh (qoida) oynasi */
+.tpm-izoh { max-height: 78vh; overflow-y: auto; padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+.tpm-izoh-h { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 19px;
+  font-weight: 800; margin: 6px 0 14px; }
+.tpm-izoh-h svg { color: #38bdf8; }
+.tpm-izoh-p { font-size: 15.5px; line-height: 1.7; color: #dbe4ef; margin: 0; white-space: pre-line; }
+.tpm-izoh-ref { margin-top: 12px; display: inline-block; background: #0c2a3d; color: #38bdf8; border-radius: 8px;
+  padding: 4px 10px; font-size: 13.5px; font-weight: 700; }
+.tpm-izoh-x { display: block; margin: 20px auto 0; background: #334155; color: #e8eef7; border: none;
+  border-radius: 22px; padding: 12px 40px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; }
+
+/* Ovozli pleyer "O'rganish" menyusi ustida turadi */
+.cap .aplayer { bottom: calc(86px + env(safe-area-inset-bottom)); }
 
 /* ===== Mobil ilova bosh sahifasi (Home) ===== */
 .hsec { font-size: 12px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;

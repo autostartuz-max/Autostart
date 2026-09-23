@@ -114,22 +114,24 @@ export default function App() {
         <Route path="/yechilgan" element={<Solved />} />
         <Route path="/hujjat/:doc" element={<Legal />} />
         <Route path="/aloqa" element={<Contact />} />
-        <Route path="/xabarlar" element={<AdminMessages />} />
-        <Route path="/tahlil" element={<AdminAnalytics />} />
+        {/* Admin/owner paneli FAQAT saytda. Ilovada bu manzillar umuman
+            ro'yxatdan o'tmaydi — "*" qoidasi ularni bosh sahifaga qaytaradi. */}
+        {!mobilIlova() && <Route path="/xabarlar" element={<AdminMessages />} />}
+        {!mobilIlova() && <Route path="/tahlil" element={<AdminAnalytics />} />}
         <Route path="/biletlar" element={<Tickets />} />
         <Route path="/test" element={<TestPlayer />} />
         <Route path="/belgilar" element={<Signs />} />
         <Route path="/amaliy" element={<Lessons />} />
-        <Route path="/amaliy/boshqaruv" element={<AdminLessons />} />
+        {!mobilIlova() && <Route path="/amaliy/boshqaruv" element={<AdminLessons />} />}
         <Route path="/profil" element={<Profile />} />
-        <Route path="/savollar" element={<AdminQuestions />} />
-        <Route path="/foydalanuvchilar" element={<AdminUsers />} />
-        <Route path="/foydalanuvchilar/yangi" element={<AdminUserForm />} />
-        <Route path="/foydalanuvchilar/:id" element={<AdminUserDetail />} />
-        <Route path="/foydalanuvchilar/:id/tahrir" element={<AdminUserForm />} />
-        <Route path="/savollar/import" element={<AdminImport />} />
-        <Route path="/savollar/yangi" element={<AdminQuestionForm />} />
-        <Route path="/savollar/:id" element={<AdminQuestionForm />} />
+        {!mobilIlova() && <Route path="/savollar" element={<AdminQuestions />} />}
+        {!mobilIlova() && <Route path="/foydalanuvchilar" element={<AdminUsers />} />}
+        {!mobilIlova() && <Route path="/foydalanuvchilar/yangi" element={<AdminUserForm />} />}
+        {!mobilIlova() && <Route path="/foydalanuvchilar/:id" element={<AdminUserDetail />} />}
+        {!mobilIlova() && <Route path="/foydalanuvchilar/:id/tahrir" element={<AdminUserForm />} />}
+        {!mobilIlova() && <Route path="/savollar/import" element={<AdminImport />} />}
+        {!mobilIlova() && <Route path="/savollar/yangi" element={<AdminQuestionForm />} />}
+        {!mobilIlova() && <Route path="/savollar/:id" element={<AdminQuestionForm />} />}
         <Route path="/oktagon" element={<Placeholder title="Oktagon" emoji="⚔️" text="Bellashuv rejimi tez orada qo‘shiladi." />} />
         <Route path="/reyting" element={<Rating />} />
         <Route path="*" element={<Navigate to="/" replace />} />

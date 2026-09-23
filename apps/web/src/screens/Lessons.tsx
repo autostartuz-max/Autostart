@@ -4,6 +4,7 @@ import { Menu, ChevronLeft, Play, Video, Clock } from 'lucide-react';
 import { api, lessonVideoUrl, canManageQuestions, hasAdmin, type Lesson } from '../api';
 import { TOIFALAR, TOIFA_IZOH, hajm, sana } from '../lessons';
 import AppSidebar from '../components/AppSidebar';
+import { mobilIlova } from '../native';
 import '../dashboard.css';
 
 /** Bo'sh qiymat — "Hammasi", ya'ni barcha toifadagi darslar bir sahifada. */
@@ -23,7 +24,8 @@ export default function Lessons() {
   const [ochilgan, setOchilgan] = useState<number | null>(null); // qaysi video ijro etilyapti
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
-  const admin = canManageQuestions() || hasAdmin();
+  // Ilovada admin paneli yo'q — "Video joylash" tugmasi ham ko'rinmaydi
+  const admin = !mobilIlova() && (canManageQuestions() || hasAdmin());
 
   useEffect(() => {
     // Hamma darsni bir marta olamiz va toifani brauzerda filtrlaymiz —

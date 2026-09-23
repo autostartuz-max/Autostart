@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Search, ShieldCheck, ClipboardList, GraduationCap, Plus, Pencil, Trash2, ChevronLeft } from 'lucide-react';
+import { Menu, Search, ShieldCheck, ClipboardList, GraduationCap, Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   adminApi, hasAdmin, isOwner, clearAdmin, ROLE_LABEL,
   type AdminUserRow, type Role,
 } from '../api';
 import AppSidebar from '../components/AppSidebar';
-import { mobilIlova } from '../native';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
 
@@ -97,10 +96,6 @@ export default function AdminUsers() {
       <div className="db-main">
         <header className="db-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
-          {/* Ilovada yon menyu yo'q — orqaga qaytish tugmasi kerak */}
-          {mobilIlova() && (
-            <button className="adm-back" onClick={() => nav('/')}><ChevronLeft size={18} /> Bosh sahifa</button>
-          )}
           <div className="db-search">
             <Search size={17} />
             <input

@@ -222,12 +222,18 @@ export default function TestPlayer() {
         if (mobil && mode === 'all' && !limit && qs.length >= 120) {
           (async () => {
             let offset = qs.length;
+            const bor = new Set(qs.map((x) => x.id));
             for (let i = 0; i < 40 && !bekor; i++) {
               const sahifa: Question[] = await api
                 .questions({ mode: 'all', offset: String(offset) })
                 .catch(() => []);
               if (bekor || !sahifa.length) break;
-              setQuestions((eski) => (eski ? [...eski, ...sahifa] : eski));
+              // Server `offset`ni bilmasa (eski versiya) o'sha savollarni qayta
+              // beradi — takrorlarni tashlaymiz, yangisi bo'lmasa to'xtaymiz.
+              const yangi = sahifa.filter((x) => !bor.has(x.id));
+              if (!yangi.length) break;
+              yangi.forEach((x) => bor.add(x.id));
+              setQuestions((eski) => (eski ? [...eski, ...yangi] : eski));
               offset += sahifa.length;
               if (sahifa.length < 120) break;
             }

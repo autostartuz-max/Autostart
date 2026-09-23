@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { api, clearToken, ROLE_LABEL, type Role } from '../api';
 import AppSidebar from '../components/AppSidebar';
+import { mobilIlova } from '../native';
 import '../dashboard.css';
 
 const roleOf = (r?: string): Role => (r === 'owner' || r === 'admin' ? r : 'user');
@@ -123,7 +124,9 @@ export default function Profile() {
               </div>
 
               {/* App Store va Play Market talabi: foydalanuvchi akkauntini
-                  ilovaning o'zida o'chira olishi kerak */}
+                  ilovaning o'zida o'chira olishi kerak. Saytda ko'rinmaydi —
+                  u yerda hech narsa o'zgarmasligi kerak. */}
+              {mobilIlova() && (
               <div className="ud-card ud-danger">
                 <div className="ud-card-h"><TriangleAlert size={16} /> Akkauntni o‘chirish</div>
                 <p className="ud-danger-p">
@@ -163,6 +166,7 @@ export default function Profile() {
                   </div>
                 )}
               </div>
+              )}
             </>
           )}
         </div>

@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+
 const API = (import.meta as any).env?.VITE_API || '/api';
 
 let token = localStorage.getItem('yhq_token') || '';
@@ -63,10 +65,17 @@ function rememberRole(role: unknown) {
 const KESH = 'yhq_kesh_';
 const NAVBAT = 'yhq_navbat';
 
+/**
+ * Offline faqat MOBIL ILOVADA ishlaydi. Saytda hech narsa o'zgarmasin:
+ * brauzerda kesh ham, navbat ham yo'q — avvalgidek to'g'ridan-to'g'ri server.
+ */
+const ilovaIchida = Capacitor.isNativePlatform();
+
 /** Server javob bergan xatomi (true) yoki internet yo'qmi (false) */
 const serverXatosi = (e: any) => !!e?.serverdan;
 
 function keshYoz(path: string, data: any) {
+  if (!ilovaIchida) return;
   let matn = '';
   try { matn = JSON.stringify(data); } catch { return; }
   // Juda katta javob (masalan "barcha savollar") xotirani to'ldirib, token va
@@ -83,6 +92,7 @@ function keshYoz(path: string, data: any) {
   }
 }
 function keshOqi(path: string): any | null {
+  if (!ilovaIchida) return null;
   try {
     const r = localStorage.getItem(KESH + path);
     return r ? JSON.parse(r) : null;
@@ -114,7 +124,7 @@ function navbatgaQosh(body: any) {
 let yuborilyapti = false;
 /** Navbatda turgan javoblarni serverga jo'natish (tarmoq tiklanganda) */
 export async function navbatniYubor() {
-  if (yuborilyapti || !token) return;
+  if (!ilovaIchida || yuborilyapti || !token) return;
   const n = navbatniOqi();
   if (!n.length) return;
   yuborilyapti = true;
@@ -191,7 +201,7 @@ export const api = {
       navbatniYubor(); // aloqa bor ekan, kutib turganlarini ham jo'natamiz
       return r;
     } catch (e) {
-      if (serverXatosi(e)) throw e;
+      if (serverXatosi(e) || !ilovaIchida) throw e;
       // Internet yo'q: savol keshda bo'lsa o'zimiz baholaymiz, javob navbatga tushadi.
       const q = keshdanSavol(body.questionId);
       if (!q?.options) throw e;

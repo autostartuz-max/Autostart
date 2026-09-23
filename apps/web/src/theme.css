@@ -564,3 +564,22 @@ button { font-family: inherit; cursor: pointer; }
 /* Natija doirasi: o'rtacha natija uchun sariq */
 .ring-fg.mid { stroke: #facc15; }
 .ring-pct.mid { color: #facc15; }
+
+/* ===== Mobil ilova (Capacitor) — test yechish oynasi =====
+   Yuqori panel telefon ekraniga sig'masdi: logotip va o'ng tomondagi tugmalar
+   150px dan kichrayolmaydi, natijada sahifa yon tomonga surilib, chap tomoni
+   qirqilib qolardi. Endi panel o'ralib tushadi va yon surilish butunlay yopiq.
+   Saytga tegmaydi — qoidalar faqat `html.cap` (ya'ni ilova) ichida ishlaydi. */
+.cap .tp2 { overflow-x: hidden; }
+.cap .tp2-top { flex-wrap: wrap; gap: 8px 10px; padding: 9px 12px; }
+.cap .tp2-brand { min-width: 0; }
+.cap .tp2-mark { height: 24px; }
+.cap .tp2-word { font-size: 16px; }
+.cap .tp2-mid { gap: 8px; flex-wrap: wrap; }
+.cap .tp2-shab { font-size: 14px; }
+.cap .tp2-timer { font-size: 14px; padding: 5px 10px; }
+.cap .tp2-right { min-width: 0; gap: 6px; }
+.cap .tp2-qbar { margin: 10px 12px 0; padding: 12px 14px; }
+.cap .tp2-body { padding: 4px 12px 12px; }
+.cap .tp2-tools { padding: 12px; gap: 8px; }
+.cap .tp2-under { gap: 8px; }

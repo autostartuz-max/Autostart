@@ -566,9 +566,9 @@ button { font-family: inherit; cursor: pointer; }
 .ring-pct.mid { color: #facc15; }
 
 /* ===== Mobil ilova (Capacitor) — test yechish oynasi =====
-   Foydalanuvchi yuborgan skrinshot bo'yicha o'lchab qilingan (411px kenglik):
-   fon #141f25, tugmalar 42x44, raqam kataklari 46x44, variantlar 50px,
-   "O'rganish" menyusi 43px. Saytga tegmaydi — hammasi `html.cap` yoki faqat
+   Oson Prava skrinshoti bilan BIR TELEFONDA olingan Autostart skrinshotiga
+   solishtirib o'lchangan (telefon kengligi ~360px): tugmalar 36x39, raqam
+   kataklari 41x38, variantlar 45px, "O'rganish" 38px. Saytga tegmaydi — hammasi `html.cap` yoki faqat
    ilovada chiziladigan `tpm-*` sinflari ichida. Shrift — Nunito (ilova ichida). */
 .cap .tp2 { overflow-x: hidden; background: #141f25; color: #fff;
   font-family: 'Nunito', system-ui, -apple-system, Roboto, sans-serif; }
@@ -577,20 +577,20 @@ button { font-family: inherit; cursor: pointer; }
 
 /* Yuqori qism (tugmalar + raqamlar) — savol skroll qilinsa ham joyida turadi */
 .tpm-head { position: sticky; top: 0; z-index: 20; background: #141f25; }
-.tpm-top { display: flex; align-items: center; gap: 5px; padding: calc(13px + env(safe-area-inset-top)) 13px 0; }
-.tpm-ic { width: 42px; height: 44px; flex-shrink: 0; padding: 0; border-radius: 12px; background: #1a2636;
+.tpm-top { display: flex; align-items: center; gap: 4px; padding: calc(9px + env(safe-area-inset-top)) 12px 0; }
+.tpm-ic { width: 36px; height: 39px; flex-shrink: 0; padding: 0; border-radius: 10px; background: #1a2636;
   border: 1px solid #2a3746; border-bottom: 3px solid #283848; color: #96a2b2;
   display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .tpm-ic.on { color: #fbbf24; }
-.tpm-timer { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 13px;
-  font-size: 16px; font-weight: 800; color: #aeb2b8; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tpm-timer { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  font-size: 15px; font-weight: 800; color: #aeb2b8; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .tpm-timer svg { color: #b89c46; }
-.tpm-sep { height: 1px; background: #1c2935; margin-top: 11px; }
+.tpm-sep { height: 1px; background: #1c2935; margin-top: 10px; }
 
-.tpm-nums { display: flex; gap: 4px; overflow-x: auto; padding: 11px 16px 10px; scrollbar-width: none; }
+.tpm-nums { display: flex; gap: 3px; overflow-x: auto; padding: 10px 12px 9px; scrollbar-width: none; }
 .tpm-nums::-webkit-scrollbar { display: none; }
-.tpm-nums .ic { flex: 0 0 46px; width: 46px; height: 44px; padding: 0; border-radius: 10px; background: #1d2a3d;
-  border: 1px solid #334052; color: #95a4be; font-size: 17px; font-weight: 700; font-family: inherit; }
+.tpm-nums .ic { flex: 0 0 41px; width: 41px; height: 38px; padding: 0; border-radius: 9px; background: #1d2a3d;
+  border: 1px solid #334052; color: #95a4be; font-size: 15px; font-weight: 700; font-family: inherit; }
 .tpm-nums .ic.ok { background: #22c55e; border-color: #22c55e; color: #fff; }
 .tpm-nums .ic.no { background: #ef4444; border-color: #ef4444; color: #fff; }
 .tpm-nums .ic.cur { background: #132e39; border: 2px solid #23aef1; color: #eaf7fd;
@@ -599,26 +599,26 @@ button { font-family: inherit; cursor: pointer; }
 .tpm-nums .ic.cur.no { background: #ef4444; }
 
 /* Savol matni */
-.cap .tp2-qbar { background: none; border: none; margin: 0; padding: 6px 22px 0;
-  font-size: calc(17px * var(--fs, 1)); font-weight: 800; line-height: 1.35; text-align: center; color: #fff; }
+.cap .tp2-qbar { background: none; border: none; margin: 0; padding: 13px 18px 0;
+  font-size: calc(16px * var(--fs, 1)); font-weight: 800; line-height: 1.3; text-align: center; color: #fff; }
 
 /* Rasm — o'z nisbatida, kesilmaydi va cho'zilmaydi */
-.cap .tp2-body { flex-direction: column; align-items: stretch; padding: 22px 18px 0; gap: 18px; }
+.cap .tp2-body { flex-direction: column; align-items: stretch; padding: 20px 15px 0; gap: 15px; }
 .cap .tp2-left, .cap .tp2-imgcol { width: 100%; }
 .cap .tp2-imgcol { order: -1; }
-.cap .tp2-imgwrap { aspect-ratio: auto; border: none; border-radius: 18px; background: none; }
+.cap .tp2-imgwrap { aspect-ratio: auto; border: none; border-radius: 16px; background: none; }
 .cap .tp2-img { height: auto; }
 .cap .tp2-imgf { display: none; }
 .cap .tp2-noimg { display: none; }
 
 /* Javob variantlari */
-.cap .tp2-opts { gap: 7px; }
-.cap .io { min-height: 50px; padding: 0; border-radius: 12px; background: #172331;
+.cap .tp2-opts { gap: 5px; }
+.cap .io { min-height: 45px; padding: 0; border-radius: 11px; background: #172331;
   border: 1.5px solid #2a3949; border-bottom: 3px solid #334153; box-shadow: none; }
-.cap .io-f { width: 34px; height: 34px; margin: 0 12px 0 10px; align-self: center; border-radius: 50%;
-  background: #263344; color: #92a2bb; font-size: 15px; font-weight: 800; }
+.cap .io-f { width: 30px; height: 30px; margin: 0 11px 0 9px; align-self: center; border-radius: 50%;
+  background: #263344; color: #92a2bb; font-size: 13px; font-weight: 800; }
 .cap .io-radio { display: none; }
-.cap .io-text { padding: 11px 14px 11px 0; color: #e5eef7; font-size: calc(15px * var(--fs, 1));
+.cap .io-text { padding: 10px 12px 10px 0; color: #e5eef7; font-size: calc(14px * var(--fs, 1));
   font-weight: 700; line-height: 1.3; }
 .cap .io.sel { background: #2e2a10; border-color: #eab308; }
 .cap .io.sel .io-text { color: #fde68a; }
@@ -650,18 +650,18 @@ button { font-family: inherit; cursor: pointer; }
 .cap .tp2-nav { margin-top: 0; padding: 0 0 calc(80px + env(safe-area-inset-bottom)); border: none; }
 
 /* "O'rganish" menyusi — o'ng tomonda, variantlar ustida */
-.tpm-fab { position: fixed; right: 18px; bottom: calc(22px + env(safe-area-inset-bottom)); z-index: 40;
-  display: flex; flex-direction: column; align-items: flex-end; gap: 11px; }
-.tpm-fab-main, .tpm-fab-i { display: inline-flex; align-items: center; gap: 11px; height: 43px;
-  padding: 0 16px; border-radius: 14px; background: #1d2a3d; border: 1px solid #445468;
-  border-bottom: 3px solid #34455a; color: #ccdae7; font-size: 16px; font-weight: 700;
+.tpm-fab { position: fixed; right: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.tpm-fab-main, .tpm-fab-i { display: inline-flex; align-items: center; gap: 9px; height: 38px;
+  padding: 0 13px; border-radius: 12px; background: #1d2a3d; border: 1px solid #445468;
+  border-bottom: 3px solid #34455a; color: #ccdae7; font-size: 14px; font-weight: 700;
   font-family: inherit; cursor: pointer; box-shadow: none; }
 .tpm-fab-i { animation: tpmIn .16s ease; }
 @keyframes tpmIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* Ovozli pleyer menyu ichida, "Ovozli" o'rnida — skrinshotdagidek ixcham:
    boshqa tugmalar bilan bir xil quti (175x43), oq ▶/⏸ va ingichka to'lqin */
-.tpm-fab-player { width: 175px; padding: 0 12px 0 14px; gap: 8px; }
+.tpm-fab-player { width: 152px; padding: 0 11px 0 12px; gap: 7px; }
 .tpm-pp { width: 22px; height: 22px; flex-shrink: 0; padding: 0; border: none; background: none;
   color: #f1f5f9; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .tpm-wave { flex: 1; display: flex; align-items: center; justify-content: space-between; height: 28px; }

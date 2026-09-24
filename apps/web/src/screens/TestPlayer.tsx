@@ -880,15 +880,15 @@ export default function TestPlayer() {
       {mobil ? (
         <div className="tpm-head">
           <header className="tpm-top">
-            <button className="tpm-ic" onClick={exit} title="Chiqish"><ChevronLeft size={24} /></button>
+            <button className="tpm-ic" onClick={exit} title="Chiqish"><ChevronLeft size={21} /></button>
             <button className={'tpm-ic' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm} title="Saqlash">
-              <Bookmark size={22} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
+              <Bookmark size={19} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
             </button>
-            <button className="tpm-ic" onClick={share} title="Ulashish"><Share2 size={22} /></button>
-            <span className="tpm-timer"><Clock size={20} /> {mm}:{ss}</span>
-            <button className="tpm-ic" onClick={() => setShowSettings(true)} title="Sozlamalar"><Settings size={22} /></button>
+            <button className="tpm-ic" onClick={share} title="Ulashish"><Share2 size={19} /></button>
+            <span className="tpm-timer"><Clock size={18} /> {mm}:{ss}</span>
+            <button className="tpm-ic" onClick={() => setShowSettings(true)} title="Sozlamalar"><Settings size={19} /></button>
             <button className="tpm-ic" onClick={() => { clearNext(); setTugashSabab(''); setFinished(true); }} title="Natijalar">
-              <Flag size={22} />
+              <Flag size={19} />
             </button>
           </header>
           <div className="tpm-sep" />
@@ -1031,17 +1031,17 @@ export default function TestPlayer() {
                 </div>
               ) : (
                 <button className="tpm-fab-i" onClick={learn}>
-                  <Play size={22} fill="currentColor" /> Ovozli
+                  <Play size={19} fill="currentColor" /> Ovozli
                 </button>
               )}
               <button className="tpm-fab-i" onClick={() => setShowVideo(true)}>
-                <Clapperboard size={22} /> Video
+                <Clapperboard size={19} /> Video
               </button>
               <button className="tpm-fab-i" onClick={() => setShowRule(true)}>
-                <Info size={22} /> Qoidasi
+                <Info size={19} /> Qoidasi
               </button>
               <button className="tpm-fab-i" onClick={muhokamaniOch}>
-                <MessageCircle size={22} /> Muhokama
+                <MessageCircle size={19} /> Muhokama
               </button>
             </>
           )}
@@ -1053,7 +1053,7 @@ export default function TestPlayer() {
               setFabOpen((v) => !v);
             }}
           >
-            {fabOpen ? <X size={22} /> : <GraduationCap size={22} />} O‘rganish
+            {fabOpen ? <X size={19} /> : <GraduationCap size={19} />} O‘rganish
           </button>
         </div>
       )}

@@ -12,6 +12,8 @@ export interface Question {
   textLat: string;
   textCyr: string;
   imageUrl: string | null;
+  /** Video tushuncha (mobil ilova) — /api/questions/:id/video?v=... */
+  videoUrl?: string | null;
   explanation: string;
   ruleRef: string | null;
   difficulty: number;

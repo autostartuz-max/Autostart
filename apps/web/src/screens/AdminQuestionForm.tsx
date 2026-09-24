@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ChevronLeft, Menu, Plus, X, Upload, Image as ImageIcon, ListChecks,
-  Info, Mic, Grid3x3, BookOpen,
+  Info, Mic, Grid3x3, BookOpen, Film,
 } from 'lucide-react';
-import { adminApi, hasAdmin, ensureAdminAuto } from '../api';
+import { adminApi, hasAdmin, ensureAdminAuto, mediaUrl } from '../api';
 import Tesseract from 'tesseract.js';
 import { latToCyr } from '../translit';
 import AppSidebar from '../components/AppSidebar';
@@ -72,6 +72,10 @@ export default function AdminQuestionForm() {
   const [ocrDrag, setOcrDrag] = useState(false);
   const pasteRef = useRef<HTMLTextAreaElement>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  // Video tushuncha (mobil ilova uchun)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoBusy, setVideoBusy] = useState(false);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -136,6 +140,7 @@ export default function AdminQuestionForm() {
           setExplanation(it.explanation || '');
           setTopicId(it.topicId ? String(it.topicId) : '');
           setImageUrl(it.imageUrl || null);
+          setVideoUrl(it.videoUrl || null);
           if (it.options?.length)
             setOptions(it.options.map((o: any) => ({
               textLat: o.textLat, textRus: o.textRus || '', isCorrect: o.isCorrect,
@@ -189,6 +194,20 @@ export default function AdminQuestionForm() {
       setErr(e.message || 'Xato');
     } finally {
       setImageBusy(false);
+    }
+  };
+
+  const removeVideo = async () => {
+    if (!editing) { setVideoUrl(null); return; }
+    if (!window.confirm('Video tushuncha o‘chirilsinmi?')) return;
+    setVideoBusy(true);
+    try {
+      await adminApi.deleteVideo(Number(id));
+      setVideoUrl(null);
+    } catch (e: any) {
+      setErr(e.message || 'Xato');
+    } finally {
+      setVideoBusy(false);
     }
   };
 
@@ -346,6 +365,7 @@ export default function AdminQuestionForm() {
       }
       if (imageFile && qid) await adminApi.uploadImage(qid, imageFile);
       if (audioFile && qid) await adminApi.uploadAudio(qid, audioFile);
+      if (videoFile && qid) await adminApi.uploadVideo(qid, videoFile);
       nav('/savollar' + (shablon ? '?shablon=' + shablon : ''));
     } catch (e: any) {
       setErr(e.message || 'Saqlashda xato');
@@ -555,6 +575,27 @@ export default function AdminQuestionForm() {
                       </label>
                       {audioFile && <button className="adm-btn sec" onClick={() => setAudioFile(null)}>Bekor</button>}
                     </div>
+                  </div>
+
+                  <div className="qf-card">
+                    <div className="qf-lab">
+                      <span className="qf-ic blue"><Film size={18} /></span>
+                      <div><label>Video tushuncha</label><div className="sub">ixtiyoriy — mobil ilovada «O‘rganish → Video» da ko‘rinadi</div></div>
+                    </div>
+                    {videoUrl && !videoFile && (
+                      <video className="qf-video" src={mediaUrl(videoUrl)} controls preload="metadata" />
+                    )}
+                    <div className="adm-imgbtns">
+                      <label className="adm-btn sec file">
+                        {videoFile ? `✓ ${videoFile.name}` : videoUrl ? '🎬 Videoni almashtirish' : '🎬 Video tanlash'}
+                        <input type="file" accept="video/*" onChange={(e) => setVideoFile(e.target.files?.[0] || null)} />
+                      </label>
+                      {videoFile && <button className="adm-btn sec" onClick={() => setVideoFile(null)}>Bekor</button>}
+                      {!videoFile && videoUrl && (
+                        <button className="adm-btn danger" onClick={removeVideo} disabled={videoBusy}>Videoni o‘chirish</button>
+                      )}
+                    </div>
+                    {videoFile && <div className="sub qf-video-izoh">Video «Saqlash» bosilganda yuklanadi — katta fayl bir necha daqiqa olishi mumkin.</div>}
                   </div>
                 </div>
               </div>

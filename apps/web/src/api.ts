@@ -447,6 +447,9 @@ export const adminApi = {
   deleteImage: (id: number) => areq('/admin/questions/' + id + '/image', { method: 'DELETE' }),
   uploadAudio: (id: number, file: File) => aupload('/admin/questions/' + id + '/audio', 'audio', file),
   deleteAudio: (id: number) => areq('/admin/questions/' + id + '/audio', { method: 'DELETE' }),
+  /** Video tushuncha — mobil ilovada "O'rganish → Video" da ko'rinadi */
+  uploadVideo: (id: number, file: File) => aupload('/admin/questions/' + id + '/video', 'video', file),
+  deleteVideo: (id: number) => areq('/admin/questions/' + id + '/video', { method: 'DELETE' }),
   recolorImage: async (
     file: File,
     pairs: { object: string; color: string }[]

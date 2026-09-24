@@ -9,6 +9,7 @@ import { haptic, getTelegram } from '../telegram';
 import { latToCyr } from '../translit';
 import { mobilIlova } from '../native';
 import { setLang } from '../i18n';
+import VideoTushuncha from '../components/VideoTushuncha';
 import type { Question, Option } from '../types';
 
 interface Answered {
@@ -1116,7 +1117,14 @@ export default function TestPlayer() {
           <div className="sheet tpm-video" onClick={(e) => e.stopPropagation()}>
             <div className="grip" />
             <div className="tpm-video-q">{tx(q.textLat, q.textCyr, (q as any).textRus)}</div>
-            {q.imageUrl && <img className="tpm-video-img" src={mediaUrl(q.imageUrl)} alt="" />}
+            {q.videoUrl ? (
+              <VideoTushuncha key={q.id} src={mediaUrl(q.videoUrl)!} />
+            ) : (
+              <>
+                {q.imageUrl && <img className="tpm-video-img" src={mediaUrl(q.imageUrl)} alt="" />}
+                <div className="tpm-video-yoq">Bu savol uchun video tushuncha hali qo‘shilmagan</div>
+              </>
+            )}
             {(q as any).topic?.name && (
               <div className="tpm-video-t">
                 <b>Savol mavzusi:</b> <span>{(q as any).topic.name}</span>

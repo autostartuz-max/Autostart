@@ -7,7 +7,7 @@ import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } from '../auth';
 import { shifrla } from '../passwordVault';
 import { telegramgaYubor, esc } from '../notify';
-import { lessonFilePath, mobilFilePath, TOIFALAR } from '../uploads';
+import { lessonFilePath, mobilFilePath, TOIFALAR, savolVideoYoli } from '../uploads';
 import { mobilNusxaBormi } from '../video';
 import { xatoStatistikasi, qiyinSavolIdlari } from '../qiyinlik';
 
@@ -241,6 +241,20 @@ userRouter.get(
     res.setHeader('Content-Type', a.mime || 'audio/mpeg');
     res.setHeader('Cache-Control', 'public, max-age=86400');
     res.send(Buffer.from(a.data));
+  })
+);
+
+/* ---------- Savol video tushunchasi (public, Range bilan) ---------- */
+userRouter.get(
+  '/questions/:id/video',
+  ah(async (req, res) => {
+    const q = await prisma.question.findUnique({ where: { id: Number(req.params.id) }, select: { videoFile: true } });
+    if (!q?.videoFile) return res.status(404).json({ error: 'Video yoʻq' });
+    const fayl = savolVideoYoli(q.videoFile);
+    if (!fs.existsSync(fayl)) return res.status(404).json({ error: 'Video fayli topilmadi' });
+    res.sendFile(fayl, { acceptRanges: true, headers: { 'Cache-Control': 'public, max-age=604800' } }, (err) => {
+      if (err && !res.headersSent) res.status(404).json({ error: 'Videoni o‘qib bo‘lmadi' });
+    });
   })
 );
 

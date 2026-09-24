@@ -47,6 +47,24 @@ export function lessonFileniOchir(fileName: string) {
   try { fs.unlinkSync(mobilFilePath(fileName)); } catch { /* bo'lmasligi ham mumkin */ }
 }
 
+/** Savollarning video tushunchalari shu papkada (bazada faqat fayl nomi) */
+export const SAVOL_VIDEO_DIR = path.join(UPLOAD_DIR, 'savol-video');
+
+export function ensureSavolVideoDir(): string {
+  fs.mkdirSync(SAVOL_VIDEO_DIR, { recursive: true });
+  return SAVOL_VIDEO_DIR;
+}
+
+/** Bazadagi nomdan to'liq yo'l (path.basename — papkadan chiqib ketmaslik uchun) */
+export function savolVideoYoli(fileName: string): string {
+  return path.join(ensureSavolVideoDir(), path.basename(fileName));
+}
+
+export function savolVideoniOchir(fileName?: string | null) {
+  if (!fileName) return;
+  try { fs.unlinkSync(savolVideoYoli(fileName)); } catch { /* allaqachon yo'q */ }
+}
+
 /** Toifalar — admin va foydalanuvchi sahifalari shu ro'yxatga tayanadi */
 export const TOIFALAR = ['A', 'B', 'C', 'D', 'E', 'BC', 'CE', 'Boshqa'] as const;
 

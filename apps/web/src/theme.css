@@ -670,7 +670,30 @@ button { font-family: inherit; cursor: pointer; }
 
 /* Video oynasi */
 .tpm-video { padding-bottom: calc(18px + env(safe-area-inset-bottom)); text-align: center; }
-.tpm-video-q { font-size: 19px; font-weight: 800; line-height: 1.4; margin: 6px 4px 14px; }
+.tpm-video-q { font-size: 16px; font-weight: 800; line-height: 1.4; margin: 6px 4px 14px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tpm-video-yoq { font-size: 13.5px; color: #8ba0bd; margin: -6px 0 14px; }
+
+/* Video tushuncha pleyeri */
+.tvp { position: relative; border-radius: 16px; overflow: hidden; background: #000; margin-bottom: 16px; }
+.tvp-v { width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: #000; display: block; }
+.tvp-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 64px; height: 64px;
+  border-radius: 50%; border: none; background: #4ccf1e; color: #fff; box-shadow: 0 4px 0 #2e9410;
+  display: flex; align-items: center; justify-content: center; padding-left: 4px; cursor: pointer; }
+.tvp-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 14px 10px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .72) 40%); }
+.tvp-prog { width: 100%; height: 5px; margin: 0; border-radius: 3px; -webkit-appearance: none; appearance: none;
+  background: linear-gradient(to right, #4ccf1e var(--p, 0%), rgba(255, 255, 255, .45) var(--p, 0%)); outline: none; }
+.tvp-prog::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: none; }
+.tvp-prog::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; border: none; }
+.tvp-row { display: flex; align-items: center; gap: 16px; margin-top: 10px; color: #fff; }
+.tvp-row button { position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 0;
+  background: none; border: none; color: #fff; cursor: pointer; }
+.tvp-10 i { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-style: normal; font-weight: 800; }
+.tvp-t { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tvp-sp { flex: 1; }
+.tvp-tez { font-size: 13px; font-weight: 800; }
 .tpm-video-img { width: 100%; border-radius: 14px; display: block; margin-bottom: 16px; }
 .tpm-video-t { font-size: 18px; line-height: 1.5; margin-bottom: 16px; }
 .tpm-video-t b { font-weight: 800; }

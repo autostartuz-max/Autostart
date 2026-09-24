@@ -7,7 +7,10 @@ import * as XLSX from 'xlsx';
 import { prisma } from '../prisma';
 import { signAdminToken, requireAdmin, requireOwner } from '../auth';
 import { shifrla, ochish } from '../passwordVault';
-import { ensureLessonDir, lessonFileniOchir, TOIFALAR, toifaniTekshir } from '../uploads';
+import {
+  ensureLessonDir, lessonFileniOchir, TOIFALAR, toifaniTekshir,
+  ensureSavolVideoDir, savolVideoniOchir,
+} from '../uploads';
 import { mobilNusxaNavbatga } from '../video';
 import { xatoStatistikasi } from '../qiyinlik';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
@@ -768,8 +771,74 @@ adminRouter.put(
 adminRouter.delete(
   '/questions/:id',
   ah(async (req, res) => {
-    await prisma.question.delete({ where: { id: Number(req.params.id) } });
+    const id = Number(req.params.id);
+    const eski = await prisma.question.findUnique({ where: { id }, select: { videoFile: true } });
+    await prisma.question.delete({ where: { id } });
+    // Video tushuncha fayli diskda egasiz qolmasin
+    savolVideoniOchir(eski?.videoFile);
     res.json({ ok: true });
+  })
+);
+
+/* ---------- Savol video tushunchasi (mobil ilova: O'rganish → Video) ---------- */
+/**
+ * Video bazaga emas, diskka yoziladi (dars videolari kabi): bazani va
+ * kunlik zaxirani shishirmasin, Range bilan uzatish oson bo'lsin.
+ */
+const SAVOL_VIDEO_MB = Number(process.env.SAVOL_VIDEO_MB || 300);
+const savolVideoUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      try { cb(null, ensureSavolVideoDir()); } catch (e: any) { cb(e, ''); }
+    },
+    filename: (req, file, cb) => {
+      const ext = (path.extname(file.originalname) || '.mp4').toLowerCase().replace(/[^.a-z0-9]/g, '').slice(0, 6);
+      cb(null, `${Number(req.params.id)}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext || '.mp4'}`);
+    },
+  }),
+  limits: { fileSize: SAVOL_VIDEO_MB * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!/^video\//.test(file.mimetype)) return cb(new Error('Faqat video fayl yuklash mumkin'));
+    cb(null, true);
+  },
+});
+const savolVideoField = (req: Request, res: Response, next: NextFunction) =>
+  savolVideoUpload.single('video')(req, res, (err: any) => {
+    if (!err) return next();
+    const xabar = err?.code === 'LIMIT_FILE_SIZE'
+      ? `Video juda katta — eng ko'pi ${SAVOL_VIDEO_MB} MB`
+      : err?.message || 'Videoni yuklab bo‘lmadi';
+    res.status(400).json({ error: xabar });
+  });
+
+adminRouter.post(
+  '/questions/:id/video',
+  savolVideoField,
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const f = req.file;
+    if (!f) return res.status(400).json({ error: 'Video fayl tanlanmagan' });
+    const eski = await prisma.question.findUnique({ where: { id }, select: { videoFile: true } });
+    if (!eski) {
+      savolVideoniOchir(f.filename);
+      return res.status(404).json({ error: 'Savol topilmadi' });
+    }
+    // ?v= — video almashtirilganda telefon eski nusxani keshdan ko'rsatmasin
+    const videoUrl = `/api/questions/${id}/video?v=${Date.now()}`;
+    await prisma.question.update({ where: { id }, data: { videoFile: f.filename, videoUrl } });
+    savolVideoniOchir(eski.videoFile);
+    res.json({ ok: true, videoUrl });
+  })
+);
+
+adminRouter.delete(
+  '/questions/:id/video',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const eski = await prisma.question.findUnique({ where: { id }, select: { videoFile: true } });
+    await prisma.question.update({ where: { id }, data: { videoFile: null, videoUrl: null } });
+    savolVideoniOchir(eski?.videoFile);
+    res.json({ ok: true, videoUrl: null });
   })
 );
 

@@ -38,6 +38,9 @@ function loadSettings() {
 function stableShuffle<T extends { id: number }>(arr: T[], seed: number): T[] {
   return [...arr].sort((a, b) => (((a.id * 97 + seed) % 100) - ((b.id * 97 + seed) % 100)));
 }
+// Ovozli pleyerdagi to'lqin chiziqlari balandligi (%) — skrinshotdagidek notekis shakl
+const TOLQIN = [38, 62, 80, 55, 30, 22, 34, 48, 26, 40, 70, 92, 64, 44, 58, 86, 100, 72, 46, 30,
+  52, 78, 60, 36, 24, 42, 66, 88, 74, 50, 32, 56, 82, 68, 40, 28, 46, 72, 90, 58];
 const FS_LABEL: Record<string, string> = { sm: 'Kichik', md: "O'rtacha", lg: 'Katta' };
 const FF_LABEL: Record<string, string> = { soft: 'Yumshoq', classic: 'Klassik' };
 
@@ -890,12 +893,13 @@ export default function TestPlayer() {
             <>
               {showPlayer ? (
                 <div className="tpm-fab-i tpm-fab-player">
-                  <button className="tpm-pp" onClick={togglePlay}>
-                    {playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+                  <button className="tpm-pp" onClick={togglePlay} title={playing ? 'To‘xtatish' : 'Eshitish'}>
+                    {playing ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
                   </button>
-                  <div className={'tpm-wave' + (playing ? ' playing' : '')}>
-                    {Array.from({ length: 22 }).map((_, i) => (
-                      <i key={i} className={i / 22 <= aprog ? 'on' : ''} style={{ animationDelay: `${(i % 11) * 0.06}s` }} />
+                  {/* Ovoz to'lqini: shakli doimiy, eshitilgan qismi oqaradi */}
+                  <div className="tpm-wave">
+                    {TOLQIN.map((h, i) => (
+                      <i key={i} className={i / TOLQIN.length < aprog ? 'on' : ''} style={{ height: h + '%' }} />
                     ))}
                   </div>
                 </div>

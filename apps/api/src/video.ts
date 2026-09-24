@@ -23,7 +23,11 @@ let ffmpegHolati: boolean | null = null;
 export function ffmpegBormi(): Promise<boolean> {
   if (ffmpegHolati !== null) return Promise.resolve(ffmpegHolati);
   return new Promise((resolve) => {
-    const p = spawn('ffmpeg', ['-version']);
+    // Linux serverda eng past ustuvorlik (nice 19): siqish faqat bo'sh
+    // protsessor vaqtidan foydalanadi — sayt sekinlashmaydi.
+    const [buyruq, oldi] = process.platform === 'win32' ? ['ffmpeg', [] as string[]] : ['nice', ['-n', '19', 'ffmpeg']];
+    const p = spawn(buyruq, [
+      ...oldi,'-version']);
     p.on('error', () => { ffmpegHolati = false; resolve(false); });
     p.on('close', (kod) => { ffmpegHolati = kod === 0; resolve(ffmpegHolati); });
   });

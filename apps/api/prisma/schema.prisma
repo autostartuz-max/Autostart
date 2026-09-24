@@ -138,6 +138,9 @@ model UserAnswer {
   chosen     String   @default("[]") // JSON array of option ids
   timeMs     Int      @default(0)
   answeredAt DateTime @default(now())
+  /// Javob qayerdan berilgan: "ilova" — mobil ilova; null — sayt yoki Telegram.
+  /// Ilovadagi test oynasi faqat ilovada berilgan javoblarni tiklaydi.
+  source     String?
 }
 
 model Bookmark {

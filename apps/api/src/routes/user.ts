@@ -564,6 +564,8 @@ userRouter.post(
     const questionId = Number(req.body?.questionId);
     const chosen: number[] = Array.isArray(req.body?.chosen) ? req.body.chosen.map(Number) : [];
     const timeMs = Number(req.body?.timeMs || 0);
+    // Mobil ilovadan kelgan javob belgilanadi (ilova faqat o'zinikini tiklaydi)
+    const source = req.body?.manba === 'ilova' ? 'ilova' : null;
 
     const question = await prisma.question.findUnique({
       where: { id: questionId },
@@ -575,7 +577,7 @@ userRouter.post(
     const isCorrect = sameSet(chosen, correctIds);
 
     await prisma.userAnswer.create({
-      data: { userId, questionId, isCorrect, chosen: JSON.stringify(chosen), timeMs },
+      data: { userId, questionId, isCorrect, chosen: JSON.stringify(chosen), timeMs, source },
     });
 
     res.json({ isCorrect, correctOptionIds: correctIds });
@@ -739,9 +741,12 @@ userRouter.get(
   requireUser,
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
+    // ?manba=ilova — faqat mobil ilovada berilgan javoblar (saytdagi eski
+    // javoblar ilovaning test oynasida "yechilgan" bo'lib chiqmasin)
+    const faqatIlova = req.query.manba === 'ilova';
 
     const answers = await prisma.userAnswer.findMany({
-      where: { userId },
+      where: { userId, ...(faqatIlova ? { source: 'ilova' } : {}) },
       orderBy: { answeredAt: 'desc' },
       select: { questionId: true, isCorrect: true, chosen: true },
     });

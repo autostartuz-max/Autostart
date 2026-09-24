@@ -72,6 +72,9 @@ export default function TestPlayer() {
   const answersRef = useRef<Record<number, Answered>>({});
   // "Davom etish" joyi topildimi (birinchi javobsiz savol)
   const davomTopildi = useRef(false);
+  // Tarix tiklanayotganda sessiya SAQLANMAYDI: aks holda savollar chiqishi
+  // bilan "idx: 0" yozilib, talabaning haqiqiy joyi o'chib ketardi
+  const tiklanmoqda = useRef(true);
   const [learned, setLearned] = useState<Set<number>>(new Set());
   const [bmarks, setBmarks] = useState<Set<number>>(new Set());
   const [finished, setFinished] = useState(false);
@@ -117,6 +120,8 @@ export default function TestPlayer() {
   const [showImg, setShowImg] = useState(false); // rasm lightbox (F tugmasi)
   const [seconds, setSeconds] = useState(0);
   const [elapsed, setElapsed] = useState(0);
+  // Ilovadagi "Barcha testlar": bankdagi savollar soni — teskari sanoq uchun
+  const [jamiSoni, setJamiSoni] = useState(0);
   const startRef = useRef<number>(Date.now());
   const curRef = useRef<HTMLButtonElement | null>(null);
   // Javobdan keyin keyingi savolga o'tish taymeri (qo'lda o'tsa bekor qilinadi)
@@ -237,14 +242,26 @@ export default function TestPlayer() {
     if (limit) params.limit = limit;
     // Rejim almashsa yoki sahifa yopilsa fondagi yuklash to'xtaydi
     let bekor = false;
+    tiklanmoqda.current = true;
+    // Mahalliy sessiya savollar kelishidan OLDIN o'qiladi (keyin ustiga yozilmasin)
+    let oldingiSessiya: any = null;
+    try {
+      oldingiSessiya = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    } catch {
+      /* ignore */
+    }
+    // Saqlangan joy hali yuklanmagan qismda bo'lsa (masalan 300-savol) —
+    // o'sha qism fonda yuklangach shu savolga o'tiladi
+    let kutIdx: number | null = null;
     api
       .questions(params)
       .then(async (qs: Question[]) => {
         setQuestions(qs);
         // Ilovadagi "Barcha testlar": server bir so'rovda 120 tadan beradi —
         // qolgan savollar fonda, bo'lib-bo'lib qo'shiladi (butun bank).
-        if (mobil && mode === 'all' && !limit && qs.length >= 120) {
-          (async () => {
+        const fonYukla =
+          mobil && mode === 'all' && !limit && qs.length >= 120
+            ? async () => {
             let offset = qs.length;
             const bor = new Set(qs.map((x) => x.id));
             for (let i = 0; i < 40 && !bekor; i++) {
@@ -263,7 +280,12 @@ export default function TestPlayer() {
                 davom etish joyi keyingi sahifalarda bo'ladi — o'quvchi
                 yana boshidan boshlamasligi kerak.
               */
-              if (!davomTopildi.current) {
+              if (kutIdx !== null && offset + yangi.length > kutIdx) {
+                // Talaba to'xtagan savol shu qismda — o'sha joyga olib boramiz
+                davomTopildi.current = true;
+                setIdx(kutIdx);
+                kutIdx = null;
+              } else if (!davomTopildi.current && kutIdx === null) {
                 const joy = yangi.findIndex((x) => !answersRef.current[x.id]);
                 if (joy >= 0) {
                   davomTopildi.current = true;
@@ -273,8 +295,8 @@ export default function TestPlayer() {
               offset += sahifa.length;
               if (sahifa.length < 120) break;
             }
-          })();
-        }
+          }
+            : null;
         if (examMode) setSeconds(examSecondsFor(qs.length));
         // Xatolar rejimida: oldin belgilangan xato javoblarni ko'rsatamiz
         if (mode === 'mistakes') {
@@ -303,9 +325,12 @@ export default function TestPlayer() {
             Imtihon rejimi bundan mustasno: u har safar toza boshlanadi.
           */
           let oldin: Record<number, Answered> = {};
-          if (!examMode) {
+          // Faqat ILOVADA va faqat ilovada berilgan javoblar: saytda (yoki
+          // ilovadan oldin) yechilganlar bu yerda "yechilgan" bo'lib chiqmaydi.
+          // Saytning test oynasi avvalgidek — faqat shu brauzerdagi sessiya.
+          if (!examMode && mobil) {
             try {
-              const { list } = await api.myAnswers();
+              const { list } = await api.myAnswers('ilova');
               for (const a of list)
                 oldin[a.questionId] = { chosen: a.chosen, isCorrect: a.isCorrect };
             } catch {
@@ -315,7 +340,7 @@ export default function TestPlayer() {
 
           let sessiya: any = null;
           try {
-            const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+            const s = oldingiSessiya;
             if (
               s &&
               s.mode === mode &&
@@ -337,6 +362,10 @@ export default function TestPlayer() {
           if (sessiya && typeof sessiya.idx === 'number' && sessiya.idx < qs.length) {
             davomTopildi.current = true;
             setIdx(sessiya.idx);
+          } else if (mobil && fonYukla && sessiya && typeof sessiya.idx === 'number') {
+            kutIdx = sessiya.idx; // fonda yuklanadigan qismda — fonYukla o'tkazadi
+          } else if (!mobil) {
+            // Sayt: avvalgidek — boshqa narsa qilinmaydi
           } else {
             // Sessiya yo'q — birinchi JAVOBSIZ savoldan davom etamiz
             const joy = qs.findIndex((qq) => !birlashgan[qq.id]);
@@ -348,10 +377,16 @@ export default function TestPlayer() {
             }
           }
         }
+        // Tarix (javoblar va to'xtagan joy) tiklangach — endi qolgan savollar
+        tiklanmoqda.current = false;
+        if (!bekor && fonYukla) fonYukla();
       })
-      .catch(() => setQuestions([]));
+      .catch(() => { tiklanmoqda.current = false; setQuestions([]); });
     api.bookmarks().then((ids) => setBmarks(new Set(ids))).catch(() => {});
-    api.me().then((m: any) => setUserName(m?.user?.firstName || '')).catch(() => {});
+    api.me().then((m: any) => {
+      setUserName(m?.user?.firstName || '');
+      if (mobil && mode === 'all') setJamiSoni(Number(m?.stats?.totalQuestions) || 0);
+    }).catch(() => {});
     const sh = sp.get('shuffle');
     if (sh != null) setS('shuffle', sh === '1');
     return () => { bekor = true; };
@@ -423,6 +458,7 @@ export default function TestPlayer() {
   // Sessiyani saqlash — chiqib ketsa, o'sha joydan davom etish uchun
   useEffect(() => {
     if (!questions || finished || mode === 'mistakes' || !configured) return;
+    if (tiklanmoqda.current) return;
     try {
       localStorage.setItem(SESSION_KEY, JSON.stringify({ mode, topicId, ticketId, idx, answers }));
     } catch {
@@ -578,7 +614,13 @@ export default function TestPlayer() {
   const locked = answered || isLearned;
   const displayOpts = settings.shuffle ? stableShuffle(q.options, q.id) : q.options;
 
-  const shown = examMode ? seconds : elapsed;
+  // Ilovadagi "Barcha testlar" — teskari sanoq (Oson Pravadagidek): har savolga
+  // 75 soniya, 1260 savol = 1575:00 dan boshlab kamayadi. Saytda avvalgidek.
+  const SAVOLGA_SONIYA = 75;
+  const teskariSanoq = mobil && mode === 'all';
+  const shown = teskariSanoq
+    ? Math.max(0, (jamiSoni || questions.length) * SAVOLGA_SONIYA - elapsed)
+    : examMode ? seconds : elapsed;
   const mm = String(Math.floor(shown / 60)).padStart(2, '0');
   const ss = String(shown % 60).padStart(2, '0');
 
@@ -813,7 +855,8 @@ export default function TestPlayer() {
     turganini eslab qoladi.
   */
   const sessiyaniOchir = () => {
-    if (mode === 'all') return;
+    // Ilovadagi "Barcha testlar" tarixi Yakunlashda o'chmaydi; saytda avvalgidek
+    if (mobil && mode === 'all') return;
     try {
       localStorage.removeItem(SESSION_KEY);
     } catch {

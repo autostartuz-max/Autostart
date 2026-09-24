@@ -96,6 +96,15 @@ const NAVBAT = 'yhq_navbat';
  * brauzerda kesh ham, navbat ham yo'q — avvalgidek to'g'ridan-to'g'ri server.
  */
 const ilovaIchida = Capacitor.isNativePlatform();
+/** Javob ilovadan berilyaptimi (dev'da brauzerdagi ilova ko'rinishi ham) — server "ilova" deb belgilaydi */
+const ilovaManbasi = () => {
+  if (ilovaIchida) return true;
+  try {
+    return !!(import.meta as any).env?.DEV && localStorage.getItem('yhq_ilova_preview') === '1';
+  } catch {
+    return false;
+  }
+};
 
 /** Server javob bergan xatomi (true) yoki internet yo'qmi (false) */
 const serverXatosi = (e: any) => !!e?.serverdan;
@@ -230,7 +239,9 @@ export const api = {
   tickets: () => req('/tickets'),
   questions: (params: Record<string, string>) =>
     req('/questions?' + new URLSearchParams(params).toString()),
-  answer: async (body: { questionId: number; chosen: number[]; timeMs: number }) => {
+  answer: async (asl: { questionId: number; chosen: number[]; timeMs: number }) => {
+    // Ilovadan kelgan javob belgilanadi; saytda so'rov avvalgidek
+    const body = ilovaManbasi() ? { ...asl, manba: 'ilova' } : asl;
     try {
       const r = await req('/answers', { method: 'POST', body: JSON.stringify(body) });
       navbatniYubor(); // aloqa bor ekan, kutib turganlarini ham jo'natamiz
@@ -256,9 +267,9 @@ export const api = {
    * Har savol bo'yicha OXIRGI javobim — yengil ro'yxat (savolning o'zisiz).
    * Test oynasi shu bilan yechilgan savollarni tiklaydi.
    */
-  myAnswers: (): Promise<{
+  myAnswers: (manba?: 'ilova'): Promise<{
     list: Array<{ questionId: number; chosen: number[]; isCorrect: boolean }>;
-  }> => req('/progress/answers'),
+  }> => req('/progress/answers' + (manba ? '?manba=' + manba : '')),
   /** Har shablon bo'yicha progress (yechilgan va to'g'ri javoblar) */
   shablonProgress: (): Promise<{ list: ShablonProgress[] }> => req('/progress/shablon'),
   /** Hozir nechta foydalanuvchi ishlayapti (oxirgi 5 daqiqada faol) */

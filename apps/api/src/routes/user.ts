@@ -496,10 +496,17 @@ userRouter.get(
       );
     }
 
+    // `tartib=shablon` (ilovadagi "Barcha testlar"): avval 1-shablon savollari,
+    // keyin 2-shablon va h.k.; shablon ichida admin belgilagan tartib.
+    // Shablonga biriktirilmagan savollar oxirida. Parametr berilmasa tartib
+    // avvalgidek — sayt o'zgarmaydi.
+    const shablonTartibi = mode === 'all' && req.query.tartib === 'shablon';
     let questions = await prisma.question.findMany({
       where: base,
       include: questionInclude,
-      orderBy: [{ order: 'asc' }, { id: 'asc' }],
+      orderBy: shablonTartibi
+        ? [{ shablon: { sort: 'asc', nulls: 'last' } }, { order: 'asc' }, { id: 'asc' }]
+        : [{ order: 'asc' }, { id: 'asc' }],
     });
 
     // XAVFSIZLIK (ko'chirishga qarshi): bitta so'rovda butun savol banki

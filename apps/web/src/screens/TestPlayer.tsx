@@ -220,6 +220,8 @@ export default function TestPlayer() {
     setTugashSabab('');
     setAnswers({});
     const params: Record<string, string> = { mode };
+    // Ilovadagi "Barcha testlar" savollari shablon tartibida keladi
+    if (mobil && mode === 'all') params.tartib = 'shablon';
     if (topicId) params.topicId = topicId;
     if (ticketId) params.ticketId = ticketId;
     if (shablon) params.shablon = shablon;
@@ -238,7 +240,7 @@ export default function TestPlayer() {
             const bor = new Set(qs.map((x) => x.id));
             for (let i = 0; i < 40 && !bekor; i++) {
               const sahifa: Question[] = await api
-                .questions({ mode: 'all', offset: String(offset) })
+                .questions({ mode: 'all', tartib: 'shablon', offset: String(offset) })
                 .catch(() => []);
               if (bekor || !sahifa.length) break;
               // Server `offset`ni bilmasa (eski versiya) o'sha savollarni qayta
@@ -718,6 +720,12 @@ export default function TestPlayer() {
   // Avval ESC to'g'ridan-to'g'ri chiqarib yuborardi va natija ko'rinmasdi.
   const exit = () => {
     clearNext();
+    // Ilovada: chiqish tugmasi to'g'ridan-to'g'ri bosh menyuga. Javoblar
+    // saqlanib qoladi (sessiya) — keyin shu joydan davom ettirsa bo'ladi.
+    if (mobil) {
+      nav('/');
+      return;
+    }
     if (!finished) {
       setTugashSabab('toxtatildi');
       setFinished(true);
@@ -729,7 +737,8 @@ export default function TestPlayer() {
   // Natija oynasidagi "Yakunlash" — shu yerda haqiqatan chiqiladi
   const yakunla = () => {
     localStorage.removeItem(SESSION_KEY);
-    nav(randomMode ? '/random' : '/shablon');
+    // Ilovada natija oynasidan (bayroqcha) ham bosh menyuga qaytiladi
+    nav(mobil ? '/' : randomMode ? '/random' : '/shablon');
   };
 
   return (

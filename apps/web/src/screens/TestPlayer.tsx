@@ -17,6 +17,18 @@ interface Answered {
 }
 
 const SET_KEY = 'yhq_test_settings';
+/**
+ * Ilovadagi "Test yechish": 20 ta tasodifiy savol. Holati shu yerda turadi:
+ * kamida bitta javob berilgan, lekin hammasi yechilmagan bo'lsa — qayta
+ * kirganda o'sha test ochiladi; aks holda (javobsiz yoki to'liq yechilgan)
+ * yangi tasodifiy 20 ta savol olinadi.
+ */
+const AMALIY_KEY = 'yhq_amaliy_test';
+const AMALIY_SONI = 20;
+type AmaliyTest = { ids: number[]; answers: Record<number, { chosen: number[]; isCorrect: boolean }>; idx: number };
+function amaliyOqi(): AmaliyTest | null {
+  try { return JSON.parse(localStorage.getItem(AMALIY_KEY) || 'null'); } catch { return null; }
+}
 const SESSION_KEY = 'yhq_test_session';
 const SET_DEFAULTS = {
   autoNextCorrect: true,
@@ -240,6 +252,18 @@ export default function TestPlayer() {
     if (ticketId) params.ticketId = ticketId;
     if (shablon) params.shablon = shablon;
     if (limit) params.limit = limit;
+    // Ilovadagi "Test yechish": tugallanmagan test bo'lsa o'shani, bo'lmasa
+    // yangi tasodifiy 20 ta savolni olamiz
+    const amaliyot = mobil && mode === 'practice';
+    const amaliyEski = amaliyot ? amaliyOqi() : null;
+    const amaliyJavoblar = amaliyEski ? Object.keys(amaliyEski.answers || {}).length : 0;
+    const amaliyDavom =
+      !!amaliyEski && (amaliyEski.ids?.length || 0) > 0 && amaliyJavoblar >= 1 && amaliyJavoblar < amaliyEski.ids.length;
+    const soralgan: Record<string, string> = !amaliyot
+      ? params
+      : amaliyDavom
+        ? { ids: amaliyEski!.ids.join(',') }
+        : { mode: 'random', limit: String(AMALIY_SONI) };
     // Rejim almashsa yoki sahifa yopilsa fondagi yuklash to'xtaydi
     let bekor = false;
     tiklanmoqda.current = true;
@@ -254,9 +278,22 @@ export default function TestPlayer() {
     // o'sha qism fonda yuklangach shu savolga o'tiladi
     let kutIdx: number | null = null;
     api
-      .questions(params)
+      .questions(soralgan)
       .then(async (qs: Question[]) => {
         setQuestions(qs);
+        if (amaliyot) {
+          if (amaliyDavom && amaliyEski) {
+            // Tugallanmagan test — javoblar va turgan joy bilan
+            setAnswers(amaliyEski.answers || {});
+            setIdx(Math.min(Math.max(0, amaliyEski.idx || 0), Math.max(0, qs.length - 1)));
+          } else {
+            try {
+              localStorage.setItem(AMALIY_KEY, JSON.stringify({ ids: qs.map((x) => x.id), answers: {}, idx: 0 }));
+            } catch { /* ignore */ }
+          }
+          tiklanmoqda.current = false;
+          return;
+        }
         // Ilovadagi "Barcha testlar": server bir so'rovda 120 tadan beradi —
         // qolgan savollar fonda, bo'lib-bo'lib qo'shiladi (butun bank).
         const fonYukla =
@@ -459,6 +496,13 @@ export default function TestPlayer() {
   useEffect(() => {
     if (!questions || finished || mode === 'mistakes' || !configured) return;
     if (tiklanmoqda.current) return;
+    // Ilovadagi "Test yechish" o'z holatini alohida saqlaydi
+    if (mobil && mode === 'practice') {
+      try {
+        localStorage.setItem(AMALIY_KEY, JSON.stringify({ ids: questions.map((x) => x.id), answers, idx }));
+      } catch { /* ignore */ }
+      return;
+    }
     try {
       localStorage.setItem(SESSION_KEY, JSON.stringify({ mode, topicId, ticketId, idx, answers }));
     } catch {

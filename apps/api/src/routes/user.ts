@@ -446,6 +446,24 @@ userRouter.get(
     const shablon = req.query.shablon ? Number(req.query.shablon) : undefined;
     const limit = req.query.limit ? Number(req.query.limit) : undefined;
 
+    // `ids=1,2,3` — aniq savollar, berilgan tartibda (ilovadagi "Test yechish"
+    // tugallanmagan testni qayta ochadi). Bir so'rovda eng ko'pi 120 ta.
+    // Parametr berilmasa hech narsa o'zgarmaydi.
+    if (req.query.ids) {
+      const idlar = String(req.query.ids)
+        .split(',')
+        .map((x) => Math.floor(Number(x)))
+        .filter((x) => x > 0)
+        .slice(0, 120);
+      const topilgan = await prisma.question.findMany({
+        where: { status: 'published', id: { in: idlar } },
+        include: questionInclude,
+      });
+      const tartib = new Map(idlar.map((id, i) => [id, i]));
+      topilgan.sort((a, b) => (tartib.get(a.id) ?? 0) - (tartib.get(b.id) ?? 0));
+      return res.json(topilgan);
+    }
+
     const base: any = { status: 'published' };
     if (topicId) base.topicId = topicId;
     if (ticketId) base.ticketId = ticketId;

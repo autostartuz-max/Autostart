@@ -58,5 +58,7 @@ export interface Me {
     bookmarks: number;
     totalQuestions: number;
     accuracy: number;
+    /** Oxirgi javobi xato bo'lgan savollar soni ("Xatolarni tuzatish" ro'yxati) */
+    mistakes?: number;
   };
 }

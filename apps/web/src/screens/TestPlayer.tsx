@@ -248,6 +248,8 @@ export default function TestPlayer() {
     const params: Record<string, string> = { mode };
     // Ilovadagi "Barcha testlar" savollari shablon tartibida keladi
     if (mobil && mode === 'all') params.tartib = 'shablon';
+    // Ilovadagi "Xatolarni tuzatish" — faqat ilovada xato qilinganlar
+    if (mobil && mode === 'mistakes') params.manba = 'ilova';
     if (topicId) params.topicId = topicId;
     if (ticketId) params.ticketId = ticketId;
     if (shablon) params.shablon = shablon;
@@ -336,7 +338,11 @@ export default function TestPlayer() {
             : null;
         if (examMode) setSeconds(examSecondsFor(qs.length));
         // Xatolar rejimida: oldin belgilangan xato javoblarni ko'rsatamiz
-        if (mode === 'mistakes') {
+        // Ilovada xatolar belgilanmagan holda ochiladi — talaba qaytadan yechadi
+        // (to'g'ri javob bersa, keyingi safar ro'yxatda bo'lmaydi). Saytda avvalgidek.
+        if (mode === 'mistakes' && mobil) {
+          // hech narsa oldindan belgilanmaydi
+        } else if (mode === 'mistakes') {
           const pre: Record<number, Answered> = {};
           for (const qq of qs) {
             const ch = (qq as any).myChosen as number[] | undefined;
@@ -661,7 +667,9 @@ export default function TestPlayer() {
   // Ilovadagi "Barcha testlar" — teskari sanoq (Oson Pravadagidek): har savolga
   // 75 soniya, 1260 savol = 1575:00 dan boshlab kamayadi. Saytda avvalgidek.
   const SAVOLGA_SONIYA = 75;
-  const teskariSanoq = mobil && mode === 'all';
+  // Ilovada: Barcha testlar, Xatolarni tuzatish va Test yechish — hammasida
+  // teskari sanoq, har savolga 75 soniya (1.25 daqiqa)
+  const teskariSanoq = mobil && (mode === 'all' || mode === 'mistakes' || mode === 'practice');
   const shown = teskariSanoq
     ? Math.max(0, (jamiSoni || questions.length) * SAVOLGA_SONIYA - elapsed)
     : examMode ? seconds : elapsed;

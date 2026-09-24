@@ -219,7 +219,8 @@ export const api = {
   login: (login: string, password: string) =>
     req('/auth/login', { method: 'POST', body: JSON.stringify({ login, password }) }),
   me: async () => {
-    const r = await req('/me');
+    // Ilovada statistika faqat ilova javoblaridan
+    const r = await req('/me' + (ilovaManbasi() ? '?manba=ilova' : ''));
     rememberRole(r?.user?.role);
     return r;
   },
@@ -259,7 +260,7 @@ export const api = {
       return { isCorrect, correctOptionIds: togri, offline: true };
     }
   },
-  mistakes: () => req('/mistakes'),
+  mistakes: () => req('/mistakes' + (ilovaManbasi() ? '?manba=ilova' : '')),
   rating: (limit = 100): Promise<{ list: RatingRow[]; meId: number }> =>
     req('/rating?limit=' + limit),
   solved: () => req('/solved'),

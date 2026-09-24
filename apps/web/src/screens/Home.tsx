@@ -105,7 +105,7 @@ export default function Home() {
         <div className="tcard" onClick={() => nav('/test?mode=mistakes')} style={{ position: 'relative' }}>
           <div className="ci red"><HeartCrack size={22} /></div>
           <div className="bt">Xatolarni tuzatish</div>
-          {wrong > 0 && <span className="mbadge">{wrong}</span>}
+          {(me?.stats.mistakes ?? 0) > 0 && <span className="mbadge">{me?.stats.mistakes}</span>}
         </div>
       </div>
 

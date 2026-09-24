@@ -284,10 +284,13 @@ userRouter.get(
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    const total = await prisma.userAnswer.count({ where: { userId } });
-    const correct = await prisma.userAnswer.count({ where: { userId, isCorrect: true } });
+    // ?manba=ilova — mobil ilova: statistika faqat ilovada berilgan javoblardan
+    // (saytdagi eski javoblar ilovada hisobga kirmaydi). Parametrsiz — avvalgidek.
+    const jw: any = { userId, ...(req.query.manba === 'ilova' ? { source: 'ilova' } : {}) };
+    const total = await prisma.userAnswer.count({ where: jw });
+    const correct = await prisma.userAnswer.count({ where: { ...jw, isCorrect: true } });
     const solvedQuestions = await prisma.userAnswer.findMany({
-      where: { userId },
+      where: jw,
       distinct: ['questionId'],
       select: { questionId: true },
     });
@@ -295,7 +298,7 @@ userRouter.get(
     // bo'lishi uchun: har savolning OXIRGI javobi xato bo'lganlar soni.
     // (stats.wrong esa umuman xato javoblar soni — qayta urinishlar bilan.)
     const barchaJavoblar = await prisma.userAnswer.findMany({
-      where: { userId },
+      where: jw,
       orderBy: { answeredAt: 'desc' },
       select: { questionId: true, isCorrect: true },
     });
@@ -309,7 +312,7 @@ userRouter.get(
     // Ketma-ketlik: bugundan (yoki kechadan) orqaga qarab, har kuni kamida bitta
     // javob berilgan kunlar soni. Avval bu raqam kodda "15 kun" deb qotirilgandi.
     const kunlar = await prisma.userAnswer.findMany({
-      where: { userId },
+      where: jw,
       select: { answeredAt: true },
       orderBy: { answeredAt: 'desc' },
       take: 2000,
@@ -482,7 +485,7 @@ userRouter.get(
 
     // Xatolar (oxirgi javob noto'g'ri bo'lganlar)
     if (mode === 'mistakes') {
-      return res.json(await getMistakes(userId));
+      return res.json(await getMistakes(userId, req.query.manba === 'ilova'));
     }
 
     // Mashq: xato qilgan YOKI hali to'g'ri yechilmagan savollar (Test yechish tugmasi)
@@ -619,9 +622,10 @@ async function getPractice(userId: number) {
   return all.filter((q) => latest.get(q.id) !== true);
 }
 
-async function getMistakes(userId: number) {
+/** faqatIlova — faqat mobil ilovada berilgan javoblar (ilova "Xatolarni tuzatish") */
+async function getMistakes(userId: number, faqatIlova = false) {
   const answers = await prisma.userAnswer.findMany({
-    where: { userId },
+    where: { userId, ...(faqatIlova ? { source: 'ilova' } : {}) },
     orderBy: { answeredAt: 'desc' },
     select: { questionId: true, isCorrect: true, chosen: true },
   });
@@ -987,7 +991,7 @@ userRouter.get(
 userRouter.get(
   '/mistakes',
   requireUser,
-  ah(async (req, res) => res.json(await getMistakes((req as any).userId)))
+  ah(async (req, res) => res.json(await getMistakes((req as any).userId, req.query.manba === 'ilova')))
 );
 
 /* ---------- Saqlanganlar ---------- */

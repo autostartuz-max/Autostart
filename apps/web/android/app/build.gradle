@@ -7,8 +7,11 @@ android {
         applicationId "uz.autostart.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        // Har bir yig'ishda versiya o'zi oshadi: versionCode — daqiqalarda vaqt
+        // (doim o'sadi, Play Market shuni talab qiladi), versionName — sana-vaqt.
+        // Telefonda qaysi build turgani ilovaning bosh sahifasida ko'rinadi.
+        versionCode ((int) (System.currentTimeMillis() / 60000L - 29000000L))
+        versionName "1.0." + new Date().format('yyMMdd.HHmm')
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

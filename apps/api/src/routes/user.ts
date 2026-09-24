@@ -160,6 +160,22 @@ userRouter.post(
   })
 );
 
+/**
+ * Sessiyani uzaytirish — mobil ilova har ochilganda chaqiradi va yangi token
+ * oladi. Ilovadan muntazam foydalanilsa, qayta login so'ralmaydi. Token
+ * yaroqsiz bo'lsa requireUser 401 qaytaradi (bu holda ilova login so'raydi).
+ */
+userRouter.post(
+  '/auth/refresh',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+    const bor = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+    if (!bor) return res.status(401).json({ error: 'Foydalanuvchi topilmadi' });
+    res.json({ token: signUserToken(userId) });
+  })
+);
+
 // Telefon + parol bilan kirish
 userRouter.post(
   '/auth/login',

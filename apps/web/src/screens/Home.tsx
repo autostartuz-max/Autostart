@@ -33,8 +33,15 @@ export default function Home() {
   const nav = useNavigate();
   const [me, setMe] = useState<Me | null>(null);
 
+  // Ilova versiyasi — telefonda qaysi build o'rnatilganini bilish uchun
+  const [versiya, setVersiya] = useState('');
+
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
+    import('@capacitor/app')
+      .then(({ App }) => App.getInfo())
+      .then((i) => setVersiya(i.version))
+      .catch(() => {});
   }, []);
 
   const total = me?.stats.totalQuestions ?? 0;
@@ -132,6 +139,7 @@ export default function Home() {
 
       {/* Til va mavzu — ilovada yon menyu yo'q, shuning uchun shu yerda */}
       <div className="hlt"><LangTheme /></div>
+      {versiya && <div className="hver">Versiya {versiya}</div>}
     </div>
   );
 }

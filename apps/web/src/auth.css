@@ -115,3 +115,9 @@
   cursor: pointer;
 }
 .auth-back:hover { color: #eaf1fb; border-color: #3a4d6d; }
+
+/* Mobil ilova: telefon maydoni oldida o'zgarmas +998 */
+.auth-tel { position: relative; display: flex; align-items: center; width: 100%; }
+.auth-tel .auth-inp { flex: 1; width: 100%; }
+.auth-tel-k { position: absolute; left: 16px; font-size: 16px; font-weight: 600; color: #e7edf7; pointer-events: none; }
+.auth-tel .auth-inp { padding-left: 66px; letter-spacing: .3px; }

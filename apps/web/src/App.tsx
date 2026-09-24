@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { api, setToken, hasToken, clearToken } from './api';
+import { api, setToken, hasToken, clearToken, tokenniTikla } from './api';
 import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
 import Landing from './screens/Landing';
 import Login from './screens/Login';
@@ -44,10 +44,26 @@ export default function App() {
   useEffect(() => {
     initTelegram();
     (async () => {
+      // Ilovada token WebView xotirasidan o'chgan bo'lsa — zaxiradan tiklaymiz
+      if (mobilIlova()) await tokenniTikla();
       // 1) Mavjud token bo'lsa — tekshiramiz
       if (hasToken()) {
-        try { await api.me(); setAuthed(true); setChecking(false); return; }
-        catch { clearToken(); }
+        try {
+          await api.me();
+          setAuthed(true);
+          setChecking(false);
+          // Ilovada sessiya har ochilganda uzayadi — muntazam foydalanuvchi
+          // qayta login qilmaydi
+          if (mobilIlova()) api.refresh().then((r) => r?.token && setToken(r.token)).catch(() => {});
+          return;
+        } catch (e: any) {
+          // Ilovada: faqat server "token yaroqsiz" desa (401/403) chiqaramiz.
+          // Internet yo'q, sekin yoki server vaqtincha ishlamasa (502) —
+          // foydalanuvchi tizimda qoladi. Saytda avvalgidek.
+          const yaroqsiz = e?.status === 401 || e?.status === 403;
+          if (!mobilIlova() || yaroqsiz) clearToken();
+          else { setAuthed(true); setChecking(false); return; }
+        }
       }
       // 2) Telegram WebApp ichida — avtomatik kiramiz (seamless)
       if (isTelegram()) {

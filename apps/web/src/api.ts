@@ -7,6 +7,31 @@ let token = localStorage.getItem('yhq_token') || '';
 export function setToken(t: string) {
   token = t;
   localStorage.setItem('yhq_token', t);
+  tokenniZaxirala(t);
+}
+
+/*
+ * Mobil ilovada token qo'shimcha ravishda Capacitor Preferences'da (Android
+ * SharedPreferences) saqlanadi: WebView xotirasi tozalansa ham ilova login
+ * so'ramaydi. Saytda bu funksiyalar hech narsa qilmaydi.
+ */
+function tokenniZaxirala(t: string) {
+  if (!Capacitor.isNativePlatform()) return;
+  import('@capacitor/preferences')
+    .then(({ Preferences }) => (t ? Preferences.set({ key: 'yhq_token', value: t }) : Preferences.remove({ key: 'yhq_token' })))
+    .catch(() => {});
+}
+/** Ilova ochilganda: localStorage'da token bo'lmasa zaxiradan tiklaydi */
+export async function tokenniTikla() {
+  if (!Capacitor.isNativePlatform() || token) return;
+  try {
+    const { Preferences } = await import('@capacitor/preferences');
+    const { value } = await Preferences.get({ key: 'yhq_token' });
+    if (value) {
+      token = value;
+      localStorage.setItem('yhq_token', value);
+    }
+  } catch { /* zaxira yo'q */ }
 }
 export function hasToken() {
   return !!token;
@@ -17,6 +42,7 @@ export function authToken() {
 export function clearToken() {
   token = '';
   localStorage.removeItem('yhq_token');
+  tokenniZaxirala('');
   localStorage.removeItem(ROLE_KEY);
   notifyAdminChanged();
 }
@@ -160,6 +186,7 @@ async function req(path: string, opts: RequestInit = {}) {
       const body = await res.json().catch(() => ({}));
       const err: any = new Error(body.error || res.statusText);
       err.serverdan = true; // server javob berdi — keshga tushmaymiz
+      err.status = res.status; // 401/403 — token yaroqsiz; boshqasi — vaqtinchalik xato
       throw err;
     }
     const data = await res.json();
@@ -188,6 +215,8 @@ export const api = {
     return r;
   },
   updateMe: (data: any) => req('/me', { method: 'PATCH', body: JSON.stringify(data) }),
+  /** Sessiyani uzaytirish — yangi token (ilova har ochilganda) */
+  refresh: (): Promise<{ token: string }> => req('/auth/refresh', { method: 'POST' }),
   /** Akkauntni butunlay o'chirish (do'konlar talabi). Parol bo'lsa — tasdiq uchun. */
   deleteMe: (password = '') => req('/me', { method: 'DELETE', body: JSON.stringify({ password }) }),
   /** Savol muhokamasi (ilova) */

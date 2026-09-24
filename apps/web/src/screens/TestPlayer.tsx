@@ -68,6 +68,10 @@ export default function TestPlayer() {
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Answered>>({});
+  // Javoblarning eng so'nggi holati — fon jarayonlari shundan o'qiydi
+  const answersRef = useRef<Record<number, Answered>>({});
+  // "Davom etish" joyi topildimi (birinchi javobsiz savol)
+  const davomTopildi = useRef(false);
   const [learned, setLearned] = useState<Set<number>>(new Set());
   const [bmarks, setBmarks] = useState<Set<number>>(new Set());
   const [finished, setFinished] = useState(false);
@@ -222,6 +226,8 @@ export default function TestPlayer() {
     setFinished(false);
     setTugashSabab('');
     setAnswers({});
+    answersRef.current = {};
+    davomTopildi.current = false;
     const params: Record<string, string> = { mode };
     // Ilovadagi "Barcha testlar" savollari shablon tartibida keladi
     if (mobil && mode === 'all') params.tartib = 'shablon';
@@ -233,7 +239,7 @@ export default function TestPlayer() {
     let bekor = false;
     api
       .questions(params)
-      .then((qs: Question[]) => {
+      .then(async (qs: Question[]) => {
         setQuestions(qs);
         // Ilovadagi "Barcha testlar": server bir so'rovda 120 tadan beradi —
         // qolgan savollar fonda, bo'lib-bo'lib qo'shiladi (butun bank).
@@ -252,6 +258,18 @@ export default function TestPlayer() {
               if (!yangi.length) break;
               yangi.forEach((x) => bor.add(x.id));
               setQuestions((eski) => (eski ? [...eski, ...yangi] : eski));
+              /*
+                Birinchi sahifadagi savollarning HAMMASI yechilgan bo'lsa,
+                davom etish joyi keyingi sahifalarda bo'ladi — o'quvchi
+                yana boshidan boshlamasligi kerak.
+              */
+              if (!davomTopildi.current) {
+                const joy = yangi.findIndex((x) => !answersRef.current[x.id]);
+                if (joy >= 0) {
+                  davomTopildi.current = true;
+                  setIdx(offset + joy);
+                }
+              }
               offset += sahifa.length;
               if (sahifa.length < 120) break;
             }
@@ -267,9 +285,35 @@ export default function TestPlayer() {
           }
           setAnswers(pre);
         } else if (!randomMode) {
-          // Random testda savollar har safar qaytadan aralashadi — eski sessiyani
-          // tiklash boshqa savollarga tushib qolardi, shuning uchun tiklanmaydi.
-          // Davom ettirish — saqlangan sessiyani tiklaymiz
+          /*
+            DAVOM ETISH ikki manbadan yig'iladi:
+
+            1) SERVER — o'quvchining har savol bo'yicha oxirgi javobi
+               (`/progress/answers`). Javoblar PROFILGA bog'langan:
+               ilova o'chirib yoqilsa, brauzer xotirasi tozalansa yoki
+               boshqa rejim ochilib mahalliy sessiya ustiga yozilsa ham
+               yechilgan savollar joyida qoladi. Ilgari faqat mahalliy
+               sessiya bor edi va shu sabab "Barcha savollar" ba'zan
+               yechilmagan bo'lib ochilardi.
+            2) MAHALLIY SESSIYA — shu qurilmadagi eng so'nggi holat
+               (qaysi savolda turgani ham shunda). U serverdagi javob
+               ustiga qo'yiladi: aloqasiz yechilgan javoblar ham
+               yo'qolmaydi.
+
+            Imtihon rejimi bundan mustasno: u har safar toza boshlanadi.
+          */
+          let oldin: Record<number, Answered> = {};
+          if (!examMode) {
+            try {
+              const { list } = await api.myAnswers();
+              for (const a of list)
+                oldin[a.questionId] = { chosen: a.chosen, isCorrect: a.isCorrect };
+            } catch {
+              /* aloqa yo'q — mahalliy sessiya baribir qoladi */
+            }
+          }
+
+          let sessiya: any = null;
           try {
             const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
             if (
@@ -279,11 +323,29 @@ export default function TestPlayer() {
               String(s.ticketId || '') === String(ticketId || '') &&
               s.answers
             ) {
-              setAnswers(s.answers);
-              if (typeof s.idx === 'number' && s.idx < qs.length) setIdx(s.idx);
+              sessiya = s;
             }
           } catch {
             /* ignore */
+          }
+
+          if (bekor) return;
+
+          const birlashgan = { ...oldin, ...(sessiya?.answers || {}) };
+          if (Object.keys(birlashgan).length) setAnswers(birlashgan);
+
+          if (sessiya && typeof sessiya.idx === 'number' && sessiya.idx < qs.length) {
+            davomTopildi.current = true;
+            setIdx(sessiya.idx);
+          } else {
+            // Sessiya yo'q — birinchi JAVOBSIZ savoldan davom etamiz
+            const joy = qs.findIndex((qq) => !birlashgan[qq.id]);
+            if (joy > 0) {
+              davomTopildi.current = true;
+              setIdx(joy);
+            } else if (joy === 0) {
+              davomTopildi.current = true;
+            }
           }
         }
       })
@@ -352,6 +414,11 @@ export default function TestPlayer() {
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
   }, [questions, idx]);
+
+  // Fon jarayonlari (savollarni bo'lib yuklash) eng so'nggi javoblarni ko'rsin
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
 
   // Sessiyani saqlash — chiqib ketsa, o'sha joydan davom etish uchun
   useEffect(() => {
@@ -734,12 +801,28 @@ export default function TestPlayer() {
       setFinished(true);
       return;
     }
-    localStorage.removeItem(SESSION_KEY);
+    sessiyaniOchir();
     nav(randomMode ? '/random' : '/shablon');
+  };
+  /*
+    Sessiyani o'chirish — FAQAT tugallanadigan testlarda (shablon, bilet,
+    imtihon). "Barcha savollar" uzluksiz mashq: bayroqcha bosilib natija
+    ko'rilgach ham yechilgan savollar TARIXI joyida qolishi kerak —
+    ilgari "Yakunlash" uni o'chirib yuborardi va ro'yxat toza ochilardi.
+    Javoblar serverda ham saqlanadi, sessiya esa qaysi savolda
+    turganini eslab qoladi.
+  */
+  const sessiyaniOchir = () => {
+    if (mode === 'all') return;
+    try {
+      localStorage.removeItem(SESSION_KEY);
+    } catch {
+      /* ignore */
+    }
   };
   // Natija oynasidagi "Yakunlash" — shu yerda haqiqatan chiqiladi
   const yakunla = () => {
-    localStorage.removeItem(SESSION_KEY);
+    sessiyaniOchir();
     // Ilovada natija oynasidan (bayroqcha) ham bosh menyuga qaytiladi
     nav(mobil ? '/' : randomMode ? '/random' : '/shablon');
   };

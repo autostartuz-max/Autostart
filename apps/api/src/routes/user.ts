@@ -704,6 +704,54 @@ userRouter.get(
   })
 );
 
+/* ---------- Mening javoblarim (yengil ro'yxat) ---------- */
+/**
+ * O'quvchining HAR SAVOL bo'yicha OXIRGI javobi: savol raqami, tanlagan
+ * variantlari va to'g'ri-noto'g'riligi.
+ *
+ * NIMA UCHUN ALOHIDA: `/solved` savollarning O'ZINI (matn, variantlar,
+ * rasmlar bilan) qaytaradi — mingdan ortiq savolda bu juda og'ir. Test
+ * oynasiga esa faqat shu uch maydon kerak: qayta kirganda yechilgan
+ * savollar o'z rangida turadi va o'quvchi qolgan joydan davom etadi.
+ *
+ * FOYDALANUVCHIGA bog'langan (brauzer xotirasiga emas): ilova o'chirib
+ * yoqilsa ham, boshqa telefondan kirilsa ham javoblar joyida qoladi va
+ * bir telefonda ikki o'quvchi kirsa, har biri O'Z natijasini ko'radi.
+ */
+userRouter.get(
+  '/progress/answers',
+  requireUser,
+  ah(async (req, res) => {
+    const userId = (req as any).userId as number;
+
+    const answers = await prisma.userAnswer.findMany({
+      where: { userId },
+      orderBy: { answeredAt: 'desc' },
+      select: { questionId: true, isCorrect: true, chosen: true },
+    });
+
+    const oxirgi = new Map<number, { chosen: number[]; isCorrect: boolean }>();
+    for (const a of answers) {
+      if (oxirgi.has(a.questionId)) continue;
+      let chosen: number[] = [];
+      try {
+        chosen = JSON.parse(a.chosen || '[]');
+      } catch {
+        chosen = [];
+      }
+      oxirgi.set(a.questionId, { chosen, isCorrect: a.isCorrect });
+    }
+
+    res.json({
+      list: [...oxirgi.entries()].map(([questionId, v]) => ({
+        questionId,
+        chosen: v.chosen,
+        isCorrect: v.isCorrect,
+      })),
+    });
+  })
+);
+
 /* ---------- Shablonlar bo'yicha progress ---------- */
 /**
  * Har shablon uchun: nechta savol bor, nechtasiga javob berilgan, nechtasi

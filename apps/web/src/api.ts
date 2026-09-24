@@ -223,6 +223,13 @@ export const api = {
   rating: (limit = 100): Promise<{ list: RatingRow[]; meId: number }> =>
     req('/rating?limit=' + limit),
   solved: () => req('/solved'),
+  /**
+   * Har savol bo'yicha OXIRGI javobim — yengil ro'yxat (savolning o'zisiz).
+   * Test oynasi shu bilan yechilgan savollarni tiklaydi.
+   */
+  myAnswers: (): Promise<{
+    list: Array<{ questionId: number; chosen: number[]; isCorrect: boolean }>;
+  }> => req('/progress/answers'),
   /** Har shablon bo'yicha progress (yechilgan va to'g'ri javoblar) */
   shablonProgress: (): Promise<{ list: ShablonProgress[] }> => req('/progress/shablon'),
   /** Hozir nechta foydalanuvchi ishlayapti (oxirgi 5 daqiqada faol) */

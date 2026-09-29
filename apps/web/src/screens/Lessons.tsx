@@ -60,6 +60,10 @@ export default function Lessons() {
           className="am-video"
           src={lessonVideoUrl(l.id)}
           controls
+          // Brauzer menyusidagi "Yuklab olish" bandi ko'rinmaydi
+          controlsList="nodownload"
+          // O'ng tugmadagi "Videoni saqlash" ham yopiq
+          onContextMenu={(e) => e.preventDefault()}
           autoPlay
           playsInline
           preload="metadata"

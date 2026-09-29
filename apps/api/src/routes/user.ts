@@ -987,7 +987,17 @@ async function getRating(limit = 100) {
         accuracy: g.total ? Math.round((g.correct / g.total) * 100) : 0,
       };
     })
-    .sort((a, b) => b.accuracy - a.accuracy || b.correct - a.correct || a.firstName.localeCompare(b.firstName))
+    // Tartib: 1) to'g'ri yechilgan savollar soni; 2) teng bo'lsa — ko'proq
+    // savol ishlagan yuqorida (40 tadan 20 ta > 20 tadan 20 ta); 3) foiz.
+    // Avval faqat foiz bo'yicha edi — 20 tadan 20 ta yechgan (100%) ko'p
+    // ishlaganlardan oldinga o'tib ketardi.
+    .sort(
+      (a, b) =>
+        b.correct - a.correct ||
+        b.solved - a.solved ||
+        b.accuracy - a.accuracy ||
+        a.firstName.localeCompare(b.firstName)
+    )
     .slice(0, limit)
     .map((x, i) => ({ ...x, rank: i + 1 }));
 }

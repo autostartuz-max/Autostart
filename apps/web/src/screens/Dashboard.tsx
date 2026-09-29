@@ -286,6 +286,8 @@ export default function Dashboard() {
                       <div className="db-pod-av">{(r.firstName || '?')[0].toUpperCase()}</div>
                       <b>{r.firstName}</b>
                       <span>{r.rank}-o‘rin · {r.accuracy}%</span>
+                      {/* Nega shu o'rinda — reyting to'g'ri yechilgan savollar soni bo'yicha */}
+                      <em className="db-pod-son">{r.correct}/{r.solved} savol</em>
                     </div>
                   ))}
                 </div>
@@ -298,7 +300,9 @@ export default function Dashboard() {
                     <div className="db-rank">{r.rank}</div>
                     <div className="db-riav">{(r.firstName || '?')[0].toUpperCase()}</div>
                     <div className="db-riname">{r.firstName}</div>
-                    <div className="db-ripct" title={`${r.correct} ta to‘g‘ri / ${r.solved} ta savol`}>{r.accuracy}%</div>
+                    <div className="db-ripct" title={`${r.correct} ta to‘g‘ri / ${r.solved} ta savol`}>
+                      <small className="db-rison">{r.correct}/{r.solved}</small>{r.accuracy}%
+                    </div>
                   </div>
                 ))
               )}
@@ -308,7 +312,9 @@ export default function Dashboard() {
                   <div className="db-rank">{ozOrni.rank}</div>
                   <div className="db-riav">{(ozOrni.firstName || '?')[0].toUpperCase()}</div>
                   <div className="db-riname">{ozOrni.firstName}</div>
-                  <div className="db-ripct" title={`${ozOrni.correct} ta to‘g‘ri / ${ozOrni.solved} ta savol`}>{ozOrni.accuracy}%</div>
+                  <div className="db-ripct" title={`${ozOrni.correct} ta to‘g‘ri / ${ozOrni.solved} ta savol`}>
+                    <small className="db-rison">{ozOrni.correct}/{ozOrni.solved}</small>{ozOrni.accuracy}%
+                  </div>
                 </div>
               )}
               <button className="db-full" onClick={() => nav('/reyting')}>To‘liq reyting →</button>

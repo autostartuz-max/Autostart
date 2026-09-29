@@ -285,7 +285,7 @@ export default function Dashboard() {
                     <div className={'db-pod p' + (i + 1)} key={r.userId}>
                       <div className="db-pod-av">{(r.firstName || '?')[0].toUpperCase()}</div>
                       <b>{r.firstName}</b>
-                      <span>{r.rank}-o‘rin · {r.correct} ta to‘g‘ri</span>
+                      <span>{r.rank}-o‘rin · {r.accuracy}%</span>
                     </div>
                   ))}
                 </div>
@@ -298,7 +298,7 @@ export default function Dashboard() {
                     <div className="db-rank">{r.rank}</div>
                     <div className="db-riav">{(r.firstName || '?')[0].toUpperCase()}</div>
                     <div className="db-riname">{r.firstName}</div>
-                    <div className="db-ripct" title={`${r.correct} ta to‘g‘ri · ${r.solved} ta savol · ${r.accuracy}%`}>{r.correct}/{r.solved}</div>
+                    <div className="db-ripct" title={`${r.correct} ta to‘g‘ri / ${r.solved} ta savol`}>{r.accuracy}%</div>
                   </div>
                 ))
               )}
@@ -308,7 +308,7 @@ export default function Dashboard() {
                   <div className="db-rank">{ozOrni.rank}</div>
                   <div className="db-riav">{(ozOrni.firstName || '?')[0].toUpperCase()}</div>
                   <div className="db-riname">{ozOrni.firstName}</div>
-                  <div className="db-ripct" title={`${ozOrni.correct} ta to‘g‘ri · ${ozOrni.solved} ta savol · ${ozOrni.accuracy}%`}>{ozOrni.correct}/{ozOrni.solved}</div>
+                  <div className="db-ripct" title={`${ozOrni.correct} ta to‘g‘ri / ${ozOrni.solved} ta savol`}>{ozOrni.accuracy}%</div>
                 </div>
               )}
               <button className="db-full" onClick={() => nav('/reyting')}>To‘liq reyting →</button>

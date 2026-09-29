@@ -124,6 +124,58 @@ adminRouter.get(
   })
 );
 
+/* ---------- Tahlil: mavzular bo'yicha xatolar ---------- */
+/**
+ * Qaysi mavzularda talabalar ko'proq adashadi. Hisob "savollar" tahlili bilan
+ * bir xil qoidada (xatoStatistikasi: oxirgi javob, mehmonlarsiz) — savollar
+ * statistikasi mavzu bo'yicha qo'shib chiqiladi.
+ */
+adminRouter.get(
+  '/analytics/topics',
+  ah(async (_req, res) => {
+    const jam = await xatoStatistikasi();
+    const [savollar, mavzular, savolSoni] = await Promise.all([
+      prisma.question.findMany({ where: { id: { in: [...jam.keys()] } }, select: { id: true, topicId: true } }),
+      prisma.topic.findMany({ select: { id: true, name: true, order: true } }),
+      prisma.question.groupBy({ by: ['topicId'], where: { status: 'published' }, _count: { _all: true } }),
+    ]);
+    const nomi = new Map(mavzular.map((t) => [t.id, t.name]));
+    const jamiSavollar = new Map(savolSoni.map((g) => [g.topicId ?? 0, g._count._all]));
+
+    type Yig = { total: number; wrong: number; savollar: number; xatoSavollar: number; talabalar: Set<number>; xatoTalabalar: Set<number> };
+    const yig = new Map<number, Yig>();
+    for (const q of savollar) {
+      const g = jam.get(q.id)!;
+      const k = q.topicId ?? 0; // 0 — mavzuga biriktirilmagan savollar
+      const m = yig.get(k) || { total: 0, wrong: 0, savollar: 0, xatoSavollar: 0, talabalar: new Set(), xatoTalabalar: new Set() };
+      m.total += g.total;
+      m.wrong += g.wrong;
+      m.savollar++;
+      if (g.wrong > 0) m.xatoSavollar++;
+      g.talabalar.forEach((u) => m.talabalar.add(u));
+      g.xatoTalabalar.forEach((u) => m.xatoTalabalar.add(u));
+      yig.set(k, m);
+    }
+
+    const list = [...yig.entries()]
+      .map(([id, m]) => ({
+        topicId: id || null,
+        name: id ? nomi.get(id) || 'Nomsiz mavzu' : 'Mavzusiz savollar',
+        total: m.total,
+        wrong: m.wrong,
+        rate: m.total ? Math.round((m.wrong / m.total) * 100) : 0,
+        talabalar: m.talabalar.size,
+        xatoTalabalar: m.xatoTalabalar.size,
+        savollar: m.savollar,
+        xatoSavollar: m.xatoSavollar,
+        jamiSavollar: jamiSavollar.get(id) || 0,
+      }))
+      .sort((a, b) => b.rate - a.rate || b.wrong - a.wrong);
+
+    res.json({ list });
+  })
+);
+
 /* ---------- Bog'lanish xabarlari ---------- */
 // Owner ham, Admin ham o'qiy oladi (requireAdmin adminRouter darajasida qo'llangan)
 const MSG_STATUS = ['new', 'read', 'done'] as const;

@@ -7,6 +7,10 @@ export interface SavolStat {
   wrong: number;
   /** Xato qilganlar qaysi variantni belgilagan: variant id -> necha marta */
   tanlov: Map<number, number>;
+  /** Javob bergan talabalar (mavzu bo'yicha statistikada birlashtiriladi) */
+  talabalar: Set<number>;
+  /** Oxirgi urinishida xato qilgan talabalar */
+  xatoTalabalar: Set<number>;
 }
 
 /**
@@ -38,10 +42,14 @@ export async function xatoStatistikasi(): Promise<Map<number, SavolStat>> {
     const k = a.userId + ':' + a.questionId;
     if (korilgan.has(k)) continue; // eng yangisi birinchi keladi
     korilgan.add(k);
-    const g = jam.get(a.questionId) || { total: 0, wrong: 0, tanlov: new Map<number, number>() };
+    const g = jam.get(a.questionId) || {
+      total: 0, wrong: 0, tanlov: new Map<number, number>(), talabalar: new Set<number>(), xatoTalabalar: new Set<number>(),
+    };
     g.total++;
+    g.talabalar.add(a.userId);
     if (!a.isCorrect) {
       g.wrong++;
+      g.xatoTalabalar.add(a.userId);
       // Xato javobda qaysi variant belgilangani — tahlilda ko'rsatiladi
       for (const id of tanlovlar(a.chosen)) g.tanlov.set(id, (g.tanlov.get(id) || 0) + 1);
     }

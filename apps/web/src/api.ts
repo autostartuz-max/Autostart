@@ -536,6 +536,8 @@ export const adminApi = {
     }),
 
   /** Tahlil: barcha talabalar bo'yicha eng ko'p xato qilinadigan savollar */
+  /** Tahlil: qaysi mavzularda ko'proq xato qilinadi */
+  topicAnalytics: (): Promise<{ list: TopicStatRow[] }> => areq('/admin/analytics/topics'),
   mistakeAnalytics: (opts: { shablon?: number; min?: number; limit?: number } = {}):
     Promise<{ list: MistakeStatRow[]; jamiSavol: number }> => {
     const p = new URLSearchParams();
@@ -548,6 +550,23 @@ export const adminApi = {
 };
 
 /** Bitta savol bo'yicha umumiy xato statistikasi (Owner/Admin tahlili) */
+/** Tahlil: mavzu bo'yicha xato statistikasi */
+export interface TopicStatRow {
+  topicId: number | null;
+  name: string;
+  /** Javoblar soni (har talabaning har savolga oxirgi javobi) */
+  total: number;
+  wrong: number;
+  /** Xato foizi */
+  rate: number;
+  talabalar: number;
+  xatoTalabalar: number;
+  /** Javob berilgan savollar / shulardan xato qilinganlari / mavzudagi jami savol */
+  savollar: number;
+  xatoSavollar: number;
+  jamiSavollar: number;
+}
+
 export interface MistakeStatRow {
   id: number;
   textLat: string;

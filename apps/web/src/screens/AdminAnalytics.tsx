@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, ChevronLeft, TrendingUp, Pencil, Check, X } from 'lucide-react';
+import { Menu, ChevronLeft, TrendingUp, Pencil, Check, X, BookOpen, ChevronRight } from 'lucide-react';
 import {
-  adminApi, hasAdmin, canManageQuestions, clearAdmin, type MistakeStatRow,
+  adminApi, hasAdmin, canManageQuestions, clearAdmin, type MistakeStatRow, type TopicStatRow,
 } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
@@ -29,6 +29,19 @@ export default function AdminAnalytics() {
   const [foiz, setFoiz] = useState(0); // xato ulushi bo'yicha eng kam chegara
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
+  // Bo'lim: savollar yoki mavzular kesimida
+  const [bolim, setBolim] = useState<'savollar' | 'mavzular'>('savollar');
+  const [mavzular, setMavzular] = useState<TopicStatRow[] | null>(null);
+  // Mavzu bosilsa — savollar shu mavzu bilan filtrlanadi
+  const [mavzuFiltr, setMavzuFiltr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authed || bolim !== 'mavzular' || mavzular) return;
+    adminApi
+      .topicAnalytics()
+      .then((r) => setMavzular(r.list || []))
+      .catch((e: any) => setErr(e?.message || 'Mavzular tahlilini yuklab bo‘lmadi'));
+  }, [authed, bolim, mavzular]);
 
   useEffect(() => {
     if (!authed) return;
@@ -47,7 +60,7 @@ export default function AdminAnalytics() {
 
   // Filtr brauzerda qo'llanadi — server xatosi bor barcha savollarni qaytaradi,
   // shuning uchun chegarani surganda qayta so'rov ketmaydi.
-  const korinadigan = list.filter((q) => q.rate >= foiz);
+  const korinadigan = list.filter((q) => q.rate >= foiz && (!mavzuFiltr || (q.topic || 'Mavzusiz savollar') === mavzuFiltr));
 
   return (
     <div className="db">
@@ -65,6 +78,58 @@ export default function AdminAnalytics() {
             <AdminLogin onLogin={() => setAuthed(true)} />
           ) : (
             <>
+              <div className="th-bolim ud-seg">
+                <button type="button" className={'ud-seg-b' + (bolim === 'savollar' ? ' on' : '')} onClick={() => setBolim('savollar')}>
+                  <TrendingUp size={15} /> Savollar
+                </button>
+                <button type="button" className={'ud-seg-b' + (bolim === 'mavzular' ? ' on' : '')} onClick={() => setBolim('mavzular')}>
+                  <BookOpen size={15} /> Mavzular
+                </button>
+              </div>
+
+              {bolim === 'mavzular' ? (
+                <>
+                  <div className="adm-head">
+                    <div className="adm-head-l">
+                      <span className="th-ic"><BookOpen size={20} /></span>
+                      <h1 className="adm-title">Mavzular bo‘yicha xatolar{mavzular ? ` (${mavzular.length})` : ''}</h1>
+                    </div>
+                  </div>
+                  <p className="xt-lead">
+                    Har mavzuda talabalar qancha xato qilayotgani — <b>xato foizi</b> bo‘yicha saralangan,
+                    eng qiyin mavzu yuqorida. Hisob savollar tahlili bilan bir xil: har talabaning
+                    <b> oxirgi</b> javobi olinadi. Mavzuni bossangiz — undagi xato qilingan savollar ochiladi.
+                  </p>
+                  {!mavzular && <div className="adm-empty">Yuklanmoqda…</div>}
+                  {mavzular && mavzular.length === 0 && <div className="adm-empty">Hali hech kim test yechmagan.</div>}
+                  <div className="xt-list">
+                    {(mavzular || []).map((m, i) => (
+                      <button
+                        type="button"
+                        className="xt-card th-card th-mavzu"
+                        key={m.topicId ?? 'yoq'}
+                        onClick={() => { setMavzuFiltr(m.name); setFoiz(0); setBolim('savollar'); }}
+                        title="Shu mavzudagi xato qilingan savollar"
+                      >
+                        <div className="th-head">
+                          <span className={'th-rate ' + daraja(m.rate)}>{m.rate}%</span>
+                          <div className="th-q">
+                            <div className="xt-q">{i + 1}. {m.name}</div>
+                            <div className="xt-meta">
+                              <b>{m.xatoTalabalar}</b> talaba xato qilgan / {m.talabalar} ta talaba yechgan ·{' '}
+                              <b>{m.wrong}</b> xato javob / {m.total} ta javob ·{' '}
+                              {m.xatoSavollar} ta savolda xato ({m.jamiSavollar} ta savoldan)
+                            </div>
+                          </div>
+                          <ChevronRight size={18} className="th-mavzu-o" />
+                        </div>
+                        <div className="th-bar"><i className={daraja(m.rate)} style={{ width: m.rate + '%' }} /></div>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+              <>
               <div className="adm-head">
                 <div className="adm-head-l">
                   <span className="th-ic"><TrendingUp size={20} /></span>
@@ -98,6 +163,13 @@ export default function AdminAnalytics() {
                   </div>
                 </div>
               </div>
+
+              {mavzuFiltr && (
+                <div className="th-mfiltr">
+                  Mavzu: <b>{mavzuFiltr}</b>
+                  <button type="button" onClick={() => setMavzuFiltr(null)} title="Filtrni olib tashlash"><X size={14} /></button>
+                </div>
+              )}
 
               <p className="xt-lead">
                 Barcha talabalar bo‘yicha umumiy tahlil. Har talabaning savolga bergan{' '}
@@ -158,6 +230,8 @@ export default function AdminAnalytics() {
                   </div>
                 ))}
               </div>
+              </>
+              )}
             </>
           )}
         </div>

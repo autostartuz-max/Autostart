@@ -1,0 +1,45 @@
+# iOS ilovani bulutdagi Mac'da yig'ib, App Store Connect (TestFlight) ga yuklaydi.
+# Mac kerak emas — Codemagic GitHub'dan kodni olib, o'zi yig'adi.
+#
+# Ishga tushirishdan oldin Codemagic kabinetida bir marta:
+#   1. Teams → Integrations → Developer Portal: App Store Connect API kalitini
+#      "autostart" nomi bilan qo'shish.
+#   2. Code signing identities: iOS Distribution sertifikatini yaratish va
+#      uz.autostart.app uchun App Store profilini Developer Portal'dan olish.
+workflows:
+  ios-appstore:
+    name: iOS → App Store
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: autostart
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: uz.autostart.app
+      node: lts
+      xcode: latest
+    scripts:
+      - name: npm paketlar
+        script: npm ci
+      - name: Mobil web build (API https://autostart.uz/api ga qotiriladi)
+        script: npm run build:mobile -w apps/web
+      - name: Capacitor sync (Package.swift Mac'da qayta yoziladi)
+        script: cd apps/web && npx cap sync ios
+      - name: Imzo profillari
+        script: xcode-project use-profiles
+      - name: Build raqami — Android kabi daqiqalardagi vaqt (doim o'sadi)
+        script: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(( $(date +%s) / 60 - 29000000 ))" apps/web/ios/App/App/Info.plist
+      - name: IPA yig'ish
+        script: |
+          xcode-project build-ipa \
+            --project apps/web/ios/App/App.xcodeproj \
+            --scheme App
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

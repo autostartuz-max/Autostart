@@ -571,10 +571,10 @@ userRouter.get(
     // obunachi ham bir so'rovda hammasini ko'chirib olardi. Endi qat'iy cheklov:
     // eng ko'pi MAX ta (test uchun yetarli: shablon=20, imtihon=20/50/100).
     const MAX = 120;
-    // Random test bo'limi 200 tagacha so'raydi (20/50/100/200) — shu rejimga alohida
-    // yuqori shift. Bank 1238 ta, ya'ni 200 ham bankning oltidan biri: ko'chirishga
-    // qarshi himoya kuchida qoladi.
-    const RANDOM_MAX = 200;
+    // Random test 500 tagacha so'raydi (saytda 20/50/100/200, ilovada 50/100/200/500) —
+    // shu rejimga alohida yuqori shift. Asosiy himoya — /api/questions uchun so'rovlar
+    // soni cheklovi; bitta testning hajmi bankni yig'ib olishni sezilarli tezlashtirmaydi.
+    const RANDOM_MAX = 500;
     if (shablon) {
       // Shablon test: bitta bilet (20 ta), tartib bo'yicha — cheklov ichida
       questions = questions.slice(0, MAX);

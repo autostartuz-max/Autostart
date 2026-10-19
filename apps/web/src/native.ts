@@ -53,6 +53,9 @@ export async function initNative() {
   // Android'dagi "orqaga" tugmasi: sahifa bo'lsa orqaga, bosh sahifada esa
   // ilovadan chiqadi (aks holda oq ekranda qotib qoladi).
   App.addListener('backButton', ({ canGoBack }) => {
+    // Ochiq oyna (pastki oyna, til tanlash) bo'lsa — avval o'sha yopiladi.
+    // Oyna 'ilova:orqaga' hodisasini preventDefault() qilsa, shu yerda to'xtaymiz.
+    if (!window.dispatchEvent(new Event('ilova:orqaga', { cancelable: true }))) return;
     if (canGoBack && window.location.pathname !== '/') window.history.back();
     else App.exitApp();
   });

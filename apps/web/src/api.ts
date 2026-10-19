@@ -272,7 +272,9 @@ export const api = {
     list: Array<{ questionId: number; chosen: number[]; isCorrect: boolean }>;
   }> => req('/progress/answers' + (manba ? '?manba=' + manba : '')),
   /** Har shablon bo'yicha progress (yechilgan va to'g'ri javoblar) */
-  shablonProgress: (): Promise<{ list: ShablonProgress[] }> => req('/progress/shablon'),
+  // Ilovada — faqat ilovada berilgan javoblar (bosh sahifa va xatolar bilan bir xil)
+  shablonProgress: (): Promise<{ list: ShablonProgress[] }> =>
+    req('/progress/shablon' + (ilovaManbasi() ? '?manba=ilova' : '')),
   /** Hozir nechta foydalanuvchi ishlayapti (oxirgi 5 daqiqada faol) */
   online: (): Promise<{ count: number; minutes: number; list?: OnlineRow[] }> => req('/online'),
   /** Aloqa formasi — kirmagan mehmon ham yubora oladi */

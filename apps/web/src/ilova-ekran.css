@@ -1,0 +1,162 @@
+/* ===== Mobil ilova ekranlari (ie-*) — FAQAT ilovada chiziladi, saytga tegmaydi =====
+   Namuna — Oson Prava ilovasining "Biletlar" ekrani va "Savol sonini tanlang"
+   oynasi. O'lchamlar foydalanuvchi telefonidagi skrinshotdan (kenglik ~360px)
+   o'lchangan, ranglar test oynasi (tpm-*) bilan bir xil: fon #141f25,
+   kartochka #1d2a3d, ko'k #23aef1. */
+
+.ie { position: fixed; inset: 0; overflow-y: auto; background: #141f25; color: #fff;
+  font-family: 'Nunito', system-ui, -apple-system, Roboto, sans-serif; }
+
+/* Yuqori qism (sarlavha + bo'limlar) — ro'yxat skroll qilinsa ham joyida turadi */
+.ie-head { position: sticky; top: 0; z-index: 10; background: #141f25; }
+.ie-top { position: relative; display: flex; align-items: center; justify-content: center;
+  padding: calc(15px + env(safe-area-inset-top)) 64px 12px; border-bottom: 1px solid #1d293b; }
+.ie-back { position: absolute; left: 20px; bottom: 12px; width: 36px; height: 38px; padding: 0;
+  border-radius: 10px; background: #1d2a3d; border: 1px solid #334155; border-bottom: 3px solid #324155;
+  color: #919fb5; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.ie-title { font-size: 17px; font-weight: 800; line-height: 38px; color: #fff; white-space: nowrap; }
+
+/* Bo'limlar: Barchasi / Yangi / Xatolar */
+.ie-tabs-wrap { padding: 12px 20px; border-bottom: 1px solid #1d293b; }
+.ie-tabs { display: grid; grid-template-columns: repeat(3, 1fr); padding: 4px; border-radius: 27px; background: #1d2a3d; }
+.ie-tab { height: 45px; padding: 0; border-radius: 23px; border: 2px solid transparent; background: none;
+  color: #94a4be; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+.ie-tab.on { background: #141f25; border-color: #324155; color: #23aef1; }
+
+/* Kartochkalar: qatorga 3 ta, pastki qalin chiziq — "bosiladigan tugma" ko'rinishi */
+.ie-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  padding: 12px 16px calc(20px + env(safe-area-inset-bottom)); }
+/* flex — tugma ichidagi matnni brauzer o'rtaga qo'yadi, namunada esa yuqori chapda */
+.ie-tile { position: relative; height: 82px; box-sizing: border-box; overflow: hidden; margin: 0;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
+  padding: 10px 8px 0 12px; border-radius: 20px; background: #1d2a3d; border: 1px solid #334155;
+  border-bottom: 5px solid #324155; color: #94a4be; text-align: left; cursor: pointer;
+  font: inherit; font-size: 15px; font-weight: 800; line-height: 1.2; letter-spacing: -0.2px; white-space: nowrap; }
+.ie-tile:active { transform: translateY(2px); }
+/* Pastki tasma: "Yangi" yoki natija (18/20) */
+.ie-band { position: absolute; left: 0; right: 0; bottom: 0; height: 19px; display: flex; align-items: center;
+  justify-content: center; background: #1898d5; color: #fff; font-size: 12px; font-weight: 800; letter-spacing: 0; }
+.ie-band.ok { background: #22c55e; }
+.ie-band.mid { background: #f59e0b; }
+.ie-band.no { background: #ef4444; }
+
+.ie-empty { padding: 86px 20px; text-align: center; color: #94a4be; font-size: 16px; font-weight: 700; }
+
+/* ===== Pastdan chiqadigan oyna (PastkiOyna) ===== */
+.ie-sheet-bg { position: fixed; inset: 0; z-index: 60; background: rgba(3, 8, 12, .6); animation: ie-fade .2s ease; }
+.ie-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 61; max-height: 88vh; overflow-y: auto;
+  padding: 17px 24px calc(26px + env(safe-area-inset-bottom)); border-radius: 22px 22px 0 0;
+  background: #192430; color: #fff; box-shadow: 0 -12px 32px rgba(0, 0, 0, .35);
+  font-family: 'Nunito', system-ui, -apple-system, Roboto, sans-serif; animation: ie-up .24s cubic-bezier(.2, .8, .2, 1); }
+.ie-handle { width: 46px; height: 6px; margin: 0 auto 18px; border-radius: 3px; background: #3a4a5d; }
+.ie-sh-title { text-align: center; font-size: 17px; font-weight: 800; line-height: 1.3; }
+.ie-sh-sub { margin: 5px 0 21px; text-align: center; color: #94a4be; font-size: 14px; font-weight: 700; line-height: 1.3; }
+
+/* "Savol sonini tanlang" — 2x2 katak */
+.ie-sh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ie-sh-opt { height: 81px; box-sizing: border-box; margin: 0; padding: 0; border-radius: 20px; background: #1d2a3d;
+  border: 1px solid #334155; border-bottom: 5px solid #324155; color: #fff; font: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ie-sh-opt:active { transform: translateY(2px); }
+.ie-sh-opt b { font-size: 25px; font-weight: 800; line-height: 1.1; }
+.ie-sh-opt span { margin-top: 3px; color: #94a4be; font-size: 13px; font-weight: 700; }
+
+/* ===== Bosh sahifa (ih-*) ===== */
+/* --db-* — til/mavzu tugmalari (LangTheme) shu o'zgaruvchilardan rang oladi; ular faqat
+   sayt menyusida e'lon qilingan, bu yerda yo'q edi va tanlangan tugma ko'rinmay qolardi */
+.ih { padding: calc(14px + env(safe-area-inset-top)) 16px calc(22px + env(safe-area-inset-bottom));
+  --db-green: #22c55e; --db-border: #2d3c4e; --db-text: #fff; --db-muted: #94a4be; }
+.ih button { margin: 0; cursor: pointer; }
+.ih-row { margin-bottom: 16px; }
+/* minmax(0, 1fr) — uzun so'z ("Chalg'ituvchi") ustunni kengaytirib, ekrandan chiqarib yubormasin */
+.ih-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ih-side { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 12px; }
+
+.ih-hdr { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 18px; }
+.ih-user { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0; background: none; border: none; text-align: left; }
+.ih-ava { position: relative; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: #16313d;
+  border: 2px solid #26505f; color: #5cc3e4; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; }
+.ih-dot { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 50%;
+  background: #4fd11f; border: 2.5px solid #141f25; }
+.ih-who { display: flex; flex-direction: column; min-width: 0; }
+.ih-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; font-size: 18px; font-weight: 800; line-height: 1.2; }
+.ih-status { display: inline-flex; align-items: center; gap: 3px; margin-top: 2px; color: #5fd31f;
+  font-size: 13px; font-weight: 800; letter-spacing: .3px; }
+.ih-icons { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+.ih-icons button { display: inline-flex; padding: 0; background: none; border: none; color: #9aa8bb; }
+.ih-icons button.gold { color: #f5b301; }
+
+/* Progress kartochkasi */
+.ih-prog { height: 90px; box-sizing: border-box; padding: 11px 14px 0; border-radius: 20px;
+  background: linear-gradient(135deg, #1d3b24 0%, #152c22 55%, #15282a 100%);
+  border: 1px solid #2f4d3a; border-bottom: 4px solid #27402f; }
+.ih-prog-top { display: flex; align-items: center; justify-content: space-between; }
+.ih-days { display: inline-flex; align-items: center; gap: 5px; overflow: hidden; white-space: nowrap;
+  color: #a7b4ac; font-size: 13px; font-weight: 700; }
+.ih-streak { display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; color: #fbbf24; font-size: 14px; font-weight: 800; }
+.ih-prog-mid { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 1px; }
+.ih-pct { color: #fff; font-size: 25px; font-weight: 800; line-height: 1.15; }
+.ih-ball { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 4px; font-size: 12.5px; }
+.ih-ball b { display: inline-flex; align-items: center; gap: 1px; font-weight: 800; }
+.ih-ball .ok { color: #5fd31f; }
+.ih-ball .no { color: #f05252; }
+.ih-ball .tot { color: #8592a3; font-weight: 700; }
+.ih-pbar { height: 9px; margin-top: 6px; overflow: hidden; border-radius: 5px; background: #24382c; }
+.ih-pbar > span { display: block; height: 100%; min-width: 9px; border-radius: 5px; background: #5fcf26; }
+
+/* "Sizga savol bor" va "Avtodrom" — kichik kvadrat kartochkalar */
+.ih-ask, .ih-avto { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  box-sizing: border-box; padding: 4px 6px 0; border-radius: 20px; border: none; color: #fff; text-align: center;
+  font-size: 10.5px; font-weight: 800; line-height: 1.2; text-transform: uppercase; letter-spacing: .2px; }
+.ih-ask { height: 90px; background: linear-gradient(180deg, #a5b2c4, #96a3b6); border-bottom: 4px solid #7b889b; }
+.ih-avto { height: 88px; background: linear-gradient(180deg, #31b3f1, #1f9fe3); border-bottom: 6px solid #1784c6; }
+
+/* Darslik — keng ko'k kartochka */
+.ih-dars { height: 88px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 0 14px 0 18px; border-radius: 22px; border: none; border-bottom: 6px solid #1784c6;
+  background: linear-gradient(180deg, #31b3f1, #1f9fe3); color: #fff; text-align: left; }
+.ih-dars-t { display: flex; flex-direction: column; min-width: 0; }
+.ih-dars-t b { font-size: 21px; font-weight: 800; line-height: 1.2; }
+.ih-dars-t span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px;
+  font-size: 12.5px; font-weight: 700; opacity: .95; }
+.ih-circ { flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%; background: #fff;
+  display: inline-flex; align-items: center; justify-content: center; }
+.ih-dars .ih-circ { color: #1f9fe3; }
+
+/* Test yechish / Oktagon — katta rangli kartochkalar */
+.ih-big { height: 124px; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start;
+  padding: 14px 14px 0; border-radius: 22px; border: none; color: #fff; text-align: left; }
+.ih-big .ih-circ { width: 44px; height: 44px; margin-bottom: 9px; }
+.ih-big b { font-size: 19px; font-weight: 800; line-height: 1.2; }
+.ih-big > span:last-child { margin-top: 3px; font-size: 12.5px; font-weight: 700; opacity: .92; }
+.ih-big.green { background: linear-gradient(180deg, #63d11b, #54c20f); border-bottom: 7px solid #3f9a0a; }
+.ih-big.green .ih-circ { color: #4caf0f; }
+.ih-big.gray { background: linear-gradient(180deg, #a5b2c4, #96a3b6); border-bottom: 7px solid #7b889b; }
+.ih-big.gray .ih-circ { color: #8592a5; }
+
+/* Bo'lim kartochkalari: chapda rangli "dog'" ustida ikonka */
+.ih-tile { position: relative; height: 64px; box-sizing: border-box; display: flex; align-items: center; gap: 9px;
+  padding: 0 8px 0 12px; border-radius: 22px; background: #18232e; border: 1.5px solid #2d3c4e;
+  border-bottom: 4px solid #2d3c4e; color: #fff; text-align: left; }
+.ih-blobw { position: absolute; inset: 0; overflow: hidden; border-radius: 20px; pointer-events: none; }
+.ih-blob { position: absolute; left: -16px; top: -6px; width: 62px; height: 72px; background: currentColor;
+  opacity: .17; border-radius: 46% 54% 42% 58% / 55% 40% 60% 45%; transform: rotate(-16deg); }
+.ih-ic { position: relative; flex-shrink: 0; display: inline-flex; }
+.ih-tt { position: relative; min-width: 0; overflow-wrap: break-word; color: #fff; font-size: 15px; font-weight: 800; line-height: 1.15; }
+.ih-tile.blue { color: #3b9be6; }
+.ih-tile.red { color: #f05252; }
+.ih-tile.purple { color: #b07cf0; }
+.ih-tile.amber { color: #f2b417; }
+.ih-tile.green { color: #5ccf2e; }
+.ih-tile.teal { color: #2dd4bf; }
+.ih-badge { position: absolute; top: -9px; right: -5px; min-width: 24px; height: 24px; box-sizing: border-box;
+  padding: 0 6px; border-radius: 12px; border: 2px solid #141f25; background: #ef4444; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+.ih-badge.amber { background: #d99a06; }
+
+/* Til/mavzu tanlash va versiya — bosh sahifa oxirida */
+.ih .hlt { margin-top: 8px; }
+
+@keyframes ie-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes ie-fade { from { opacity: 0; } to { opacity: 1; } }

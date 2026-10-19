@@ -3,6 +3,7 @@ import fs from 'fs';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma';
+import { raqamliSavolIdlari } from '../raqamli';
 import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } from '../auth';
 import { shifrla } from '../passwordVault';
@@ -485,7 +486,12 @@ userRouter.get(
     if (topicId) base.topicId = topicId;
     if (ticketId) base.ticketId = ticketId;
     if (shablon) base.shablon = shablon;
-    if (mode === 'numeric') base.isNumeric = true;
+    // Raqamli savollar: `avto=1` (ilova) — javob variantlaridan avtomatik
+    // aniqlanadi ("50 km/s", "16 yosh"). Parametrsiz — avvalgidek, faqat belgi.
+    if (mode === 'numeric') {
+      if (req.query.avto === '1') base.id = { in: await raqamliSavolIdlari() };
+      else base.isNumeric = true;
+    }
 
     // Saqlangan savollar
     if (mode === 'saved') {
@@ -820,9 +826,12 @@ userRouter.get(
   requireUser,
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
+    // ?manba=ilova — mobil ilova: faqat ilovada berilgan javoblar (saytdagi
+    // javoblar ilovadagi shablon natijalariga qo'shilmaydi). Parametrsiz — avvalgidek.
+    const faqatIlova = req.query.manba === 'ilova';
 
     const answers = await prisma.userAnswer.findMany({
-      where: { userId },
+      where: { userId, ...(faqatIlova ? { source: 'ilova' } : {}) },
       orderBy: { answeredAt: 'desc' },
       select: { questionId: true, isCorrect: true },
     });

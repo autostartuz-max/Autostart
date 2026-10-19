@@ -9,6 +9,7 @@ import Dashboard from './screens/Dashboard';
 import Home from './screens/Home';
 import { mobilIlova } from './native';
 import Shablon from './screens/Shablon';
+import ShablonIlova from './screens/ShablonIlova';
 import RandomTests from './screens/RandomTests';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
@@ -123,7 +124,8 @@ export default function App() {
         {/* Mobil ilovada telefon uchun yasalgan bosh sahifa (plitkalar),
             saytda esa avvalgidek Dashboard — sayt o'zgarmaydi. */}
         <Route path="/" element={mobilIlova() ? <Home /> : <Dashboard />} />
-        <Route path="/shablon" element={<Shablon />} />
+        {/* Ilovada shablonlar "Biletlar" ko'rinishida (bo'limlar + 3 ustun), saytda avvalgidek */}
+        <Route path="/shablon" element={mobilIlova() ? <ShablonIlova /> : <Shablon />} />
         <Route path="/random" element={<RandomTests />} />
         <Route path="/mavzular" element={<Topics />} />
         <Route path="/xatolarim" element={<Mistakes />} />
@@ -149,6 +151,7 @@ export default function App() {
         {!mobilIlova() && <Route path="/savollar/yangi" element={<AdminQuestionForm />} />}
         {!mobilIlova() && <Route path="/savollar/:id" element={<AdminQuestionForm />} />}
         <Route path="/oktagon" element={<Placeholder title="Oktagon" emoji="⚔️" text="Bellashuv rejimi tez orada qo‘shiladi." />} />
+        {mobilIlova() && <Route path="/avtodrom" element={<Placeholder title="Avtodrom" emoji="🚗" text="Avtodrom mashqlari tez orada qo‘shiladi." />} />}
         <Route path="/reyting" element={<Rating />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

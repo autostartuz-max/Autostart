@@ -11,11 +11,16 @@ import { navbatniYubor } from './api';
 /**
  * Faqat ishlab chiqishda (npm run dev): brauzerda ilova ko'rinishini sinash.
  * localStorage'da yhq_ilova_preview=1 bo'lsa brauzer o'zini ilova deb biladi.
+ * Manzilga ?ilova=1 qo'shilsa yoqiladi, ?ilova=0 — o'chiriladi (telefonda ham qulay).
  * Production build'da import.meta.env.DEV = false — bu kod umuman ishlamaydi.
  */
 const ilovaSinovi = () => {
   try {
-    return !!(import.meta as any).env?.DEV && localStorage.getItem('yhq_ilova_preview') === '1';
+    if (!(import.meta as any).env?.DEV) return false;
+    const q = new URLSearchParams(window.location.search).get('ilova');
+    if (q === '1') localStorage.setItem('yhq_ilova_preview', '1');
+    if (q === '0') localStorage.removeItem('yhq_ilova_preview');
+    return localStorage.getItem('yhq_ilova_preview') === '1';
   } catch {
     return false;
   }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, Swords, Radio, Trophy, Users, ClipboardList, Zap, Target, X, UserRound } from 'lucide-react';
+import { ChevronLeft, Settings, Swords, Radio, Trophy, Users, ClipboardList, Zap, Target, X, UserRound, Share2, KeyRound } from 'lucide-react';
 import { oktagon, type OktagonDaraja } from '../../api';
 import PastkiOyna from '../../components/PastkiOyna';
 import { MEDAL } from './umumiy';
@@ -109,6 +109,145 @@ function Qidiruv({ onTopildi, onClose }: { onTopildi: (jangId: number) => void; 
   );
 }
 
+/** Do'stni jangga chaqirish: 6 xonali kod yaratish yoki do'stning kodi bilan qo'shilish */
+function DostOyna({ onJang, onClose }: { onJang: (jangId: number) => void; onClose: () => void }) {
+  const [rejim, setRejim] = useState<'tanlash' | 'yarat' | 'qoshil'>('tanlash');
+  const [kod, setKod] = useState('');
+  const [urinish, setUrinish] = useState(0); // "Yangi kod" — kod eskirganda qayta yaratish
+  const [kiritilgan, setKiritilgan] = useState('');
+  const [xabar, setXabar] = useState('');
+  const [band, setBand] = useState(false);
+  const toxtadi = useRef(false);
+  const jangRef = useRef(onJang);
+  jangRef.current = onJang;
+
+  // Kod yaratilgach — do'st qo'shilguncha holat so'raladi
+  useEffect(() => {
+    if (rejim !== 'yarat') return;
+    let faol = true;
+    let t: number | undefined;
+    const davom = () => faol && !toxtadi.current;
+    const sora = () =>
+      oktagon.taklifHolat().then(
+        (r) => {
+          if (!davom()) return;
+          if (r.holat === 'topildi') {
+            toxtadi.current = true;
+            jangRef.current(r.jangId);
+            return;
+          }
+          if (r.holat === 'yoq') {
+            setKod('');
+            setXabar('Kod eskirdi — yangisini yarating');
+            return;
+          }
+          t = window.setTimeout(sora, 1500);
+        },
+        () => { if (davom()) t = window.setTimeout(sora, 3000); }
+      );
+    oktagon.taklif().then(
+      (r) => {
+        if (!davom()) return;
+        setKod(r.kod);
+        setXabar('');
+        t = window.setTimeout(sora, 1500);
+      },
+      (e) => davom() && setXabar(e?.message || 'Aloqa yo‘q')
+    );
+    return () => {
+      faol = false;
+      clearTimeout(t);
+    };
+  }, [rejim, urinish]);
+
+  const yop = async () => {
+    toxtadi.current = true;
+    if (rejim === 'yarat') {
+      try {
+        // Shu soniyada do'st qo'shilgan bo'lsa — jangga kiramiz (do'st kutib qolmasin)
+        const r = await oktagon.taklifBekor();
+        if (r.jangId) return onJang(r.jangId);
+      } catch { /* aloqa yo'q — kod baribir eskiradi */ }
+    }
+    onClose();
+  };
+
+  const ulash = async () => {
+    const matn = `Autostart ilovasida Oktagon'da men bilan bellash! ⚔️\nKod: ${kod}\n(Oktagon → Do‘stni jangga chaqirish → Kod bilan qo‘shilish)`;
+    try {
+      const { Share } = await import('@capacitor/share');
+      await Share.share({ title: 'Oktagon', text: matn, dialogTitle: 'Do‘stingizga yuboring' });
+    } catch (e: any) {
+      if (/cancel/i.test(String(e?.message || ''))) return; // foydalanuvchi o'zi yopdi
+      try {
+        await navigator.clipboard.writeText(matn);
+        setXabar('Matn nusxalandi — do‘stingizga yuboring');
+      } catch {
+        setXabar('Kodni do‘stingizga ayting: ' + kod);
+      }
+    }
+  };
+
+  const qoshil = async () => {
+    const k = kiritilgan.replace(/\D/g, '');
+    if (k.length !== 6) return setXabar('Kod 6 ta raqamdan iborat');
+    setBand(true);
+    setXabar('');
+    try {
+      const r = await oktagon.qoshil(k);
+      toxtadi.current = true;
+      onJang(r.jangId);
+    } catch (e: any) {
+      setXabar(e?.message || 'Aloqa yo‘q');
+      setBand(false);
+    }
+  };
+
+  if (rejim === 'yarat')
+    return (
+      <PastkiOyna title="Do‘stingizni chaqiring" onClose={yop}>
+        <div className="ok-kod">{kod ? `${kod.slice(0, 3)} ${kod.slice(3)}` : '— — —'}</div>
+        <div className="ok-izoh" style={{ margin: '0 0 16px' }}>
+          Kodni do‘stingizga yuboring. U Oktagon → “Do‘stni jangga chaqirish” → “Kod bilan qo‘shilish” orqali kiradi.
+        </div>
+        {kod && <div className="ok-kutish"><span className="ok-nuqta" /> Do‘stingiz kutilmoqda…</div>}
+        {xabar && <div className="ok-izoh" style={{ margin: '0 0 14px' }}>{xabar}</div>}
+        {kod ? (
+          <button className="ok-btn yashil" onClick={ulash}><Share2 size={20} /> Ulashish</button>
+        ) : (
+          <button className="ok-btn yashil" onClick={() => setUrinish((x) => x + 1)}>Yangi kod</button>
+        )}
+      </PastkiOyna>
+    );
+
+  if (rejim === 'qoshil')
+    return (
+      <PastkiOyna title="Kod bilan qo‘shilish" subtitle="Do‘stingiz yuborgan 6 xonali kod" onClose={yop}>
+        <input
+          className="ok-kod-input"
+          inputMode="numeric"
+          autoFocus
+          maxLength={7}
+          placeholder="000 000"
+          value={kiritilgan}
+          onChange={(e) => { setKiritilgan(e.target.value); setXabar(''); }}
+          onKeyDown={(e) => e.key === 'Enter' && qoshil()}
+        />
+        {xabar && <div className="ok-izoh" style={{ margin: '0 0 14px', color: '#ff8a84' }}>{xabar}</div>}
+        <button className="ok-btn yashil" disabled={band} onClick={qoshil}><Swords size={20} /> Qo‘shilish</button>
+      </PastkiOyna>
+    );
+
+  return (
+    <PastkiOyna title="Do‘stni jangga chaqirish" subtitle="Do‘stingiz bilan to‘g‘ridan-to‘g‘ri bellashing" onClose={yop}>
+      <div style={{ display: 'grid', gap: 12 }}>
+        <button className="ok-btn yashil" onClick={() => setRejim('yarat')}><Users size={20} /> Kod yaratish</button>
+        <button className="ok-btn kulrang" onClick={() => setRejim('qoshil')}><KeyRound size={20} /> Kod bilan qo‘shilish</button>
+      </div>
+    </PastkiOyna>
+  );
+}
+
 export default function Oktagon() {
   const nav = useNavigate();
   const loc = useLocation();
@@ -186,14 +325,7 @@ export default function Oktagon() {
       {oyna === 'qidiruv' && (
         <Qidiruv onTopildi={(id) => nav(`/oktagon/jang/${id}`)} onClose={() => setOyna(null)} />
       )}
-      {oyna === 'dost' && (
-        <PastkiOyna title="Do‘stni jangga chaqirish" subtitle="Tez orada" onClose={() => setOyna(null)}>
-          <div className="ok-izoh" style={{ margin: '4px 0 20px', fontSize: 14 }}>
-            Do‘stingizga havola yuborasiz va u bilan to‘g‘ridan-to‘g‘ri bellashasiz. Hozircha “Qidirishni boshlash” orqali o‘ynang.
-          </div>
-          <button className="ok-btn yashil" onClick={() => setOyna(null)}>Tushunarli</button>
-        </PastkiOyna>
-      )}
+      {oyna === 'dost' && <DostOyna onJang={(id) => nav(`/oktagon/jang/${id}`)} onClose={() => setOyna(null)} />}
     </div>
   );
 }

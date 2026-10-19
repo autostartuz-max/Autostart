@@ -186,6 +186,44 @@
 .ok-ko-img { margin-bottom: 12px; overflow: hidden; border-radius: 14px; }
 .ok-ko-img img { display: block; width: 100%; height: auto; }
 
+/* Do'stni chaqirish: kod */
+.ok-kod { margin: 14px 0 12px; text-align: center; color: #fff; font-size: 44px; font-weight: 800; letter-spacing: 6px;
+  font-variant-numeric: tabular-nums; }
+.ok-kod-input { display: block; width: 100%; box-sizing: border-box; height: 64px; margin: 16px 0 14px; padding: 0 12px;
+  border-radius: 18px; border: 2px solid #334155; background: #141f25; color: #fff; text-align: center; outline: none;
+  font-family: inherit; font-size: 32px; font-weight: 800; letter-spacing: 6px; }
+.ok-kod-input:focus { border-color: #5fd31f; }
+.ok-kod-input::placeholder { color: #334155; }
+.ok-kutish { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px;
+  color: #5fd31f; font-size: 14px; font-weight: 800; }
+.ok-nuqta { width: 9px; height: 9px; border-radius: 50%; background: #5fd31f; animation: ok-miltilla 1.2s ease-in-out infinite; }
+@keyframes ok-miltilla { 50% { opacity: .25; } }
+
+/* Jang paytidagi emoji */
+.ok-emoji-btn { position: fixed; right: 0; bottom: calc(110px + env(safe-area-inset-bottom)); z-index: 15; width: 54px; height: 58px;
+  padding: 0; border-radius: 16px 0 0 16px; background: #1d2a3d; border: 1px solid #334155; border-right: none; color: #94a4be;
+  display: flex; align-items: center; justify-content: center; }
+.ok-emoji-panel { position: fixed; right: 62px; bottom: calc(110px + env(safe-area-inset-bottom)); z-index: 16;
+  display: grid; grid-template-columns: repeat(4, 46px); gap: 4px; padding: 8px; border-radius: 18px;
+  background: #1d2a3d; border: 1px solid #334155; box-shadow: 0 12px 30px rgba(0, 0, 0, .45); }
+.ok-emoji-panel button { width: 46px; height: 46px; padding: 0; border: none; border-radius: 12px; background: none; font-size: 27px; line-height: 1; }
+.ok-emoji-panel button:active { background: #263344; }
+.ok-pufak { position: fixed; z-index: 25; top: calc(66px + env(safe-area-inset-top)); font-size: 36px; line-height: 1;
+  pointer-events: none; animation: ok-pufak 2.6s ease forwards; }
+.ok-pufak.chap { left: 20px; }
+.ok-pufak.ong { right: 20px; }
+@keyframes ok-pufak {
+  0% { opacity: 0; transform: scale(.3) translateY(10px); }
+  12% { opacity: 1; transform: scale(1.2) translateY(0); }
+  22% { transform: scale(1); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-16px); }
+}
+
+/* Raqib qasos so'rayapti — tugma e'tiborni tortadi */
+.ok-urg { animation: ok-urg 1s ease-in-out infinite; }
+@keyframes ok-urg { 50% { filter: brightness(1.18); transform: scale(1.02); } }
+
 /* Ro'yxatlar: Eng zo'rlari, Mening janglarim */
 .ok-list { padding: 12px 16px calc(24px + env(safe-area-inset-bottom)); }
 .ok-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; padding: 12px 14px; border-radius: 16px;

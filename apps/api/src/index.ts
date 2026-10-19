@@ -35,7 +35,7 @@ app.use('/api', (req, res, next) => {
   if (/^\/lessons\/\d+\/video$/.test(req.path)) return next();
   // Oktagon jang holati va raqib qidirish soniyasiga bir marta so'raladi —
   // bitta sinf bitta IP dan o'ynasa ham umumiy chegaraga urilmasin (so'rov yengil)
-  if (req.method === 'GET' && /^\/oktagon\/(qidir|jang\/\d+)$/.test(req.path)) return next();
+  if (req.method === 'GET' && /^\/oktagon\/(qidir|taklif|jang\/\d+(\/qasos)?)$/.test(req.path)) return next();
   umumiyLimit(req, res, next);
 });
 

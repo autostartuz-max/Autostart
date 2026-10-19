@@ -231,8 +231,11 @@ export interface OktagonJang {
   men: { ism: string; ball: number; daraja: OktagonDaraja; javoblar: { i: number; togri: boolean; v?: number }[]; togri: number };
   raqib: { ism: string; bot: boolean; daraja: OktagonDaraja; javobSoni: number; javoblar?: { i: number; togri: boolean }[]; togri?: number };
   natija: { ozgarish: number; holat: OktagonNatija } | null;
+  /** Oxirgi soniyalardagi emojilar; n — takrorlanmas raqam */
+  emoji?: { n: number; men: boolean; e: string }[];
   savollar?: OktagonSavol[];
 }
+export const OKTAGON_EMOJILAR = ['👍', '😂', '😮', '😡', '🔥', '👏', '😎', '🤔'];
 type Qidiruv = { holat: 'yoq' } | { holat: 'kutmoqda'; soniya: number } | { holat: 'topildi'; jangId: number };
 
 export const oktagon = {
@@ -245,7 +248,19 @@ export const oktagon = {
   javob: (id: number, i: number, variantId: number): Promise<{ togri?: boolean; togriVariant?: number | null; tugadi?: boolean }> =>
     req(`/oktagon/jang/${id}/javob`, { method: 'POST', body: JSON.stringify({ i, variantId }) }),
   chiqish: (id: number) => req(`/oktagon/jang/${id}/chiqish`, { method: 'POST' }),
-  qasos: (id: number): Promise<{ jangId: number }> => req(`/oktagon/jang/${id}/qasos`, { method: 'POST' }),
+  emoji: (id: number, e: string) => req(`/oktagon/jang/${id}/emoji`, { method: 'POST', body: JSON.stringify({ e }) }),
+  /** Bot bilan — darhol yangi jang; odam bilan — raqib rozi bo'lguncha { kutmoqda } */
+  qasos: (id: number): Promise<{ jangId?: number; kutmoqda?: boolean }> => req(`/oktagon/jang/${id}/qasos`, { method: 'POST' }),
+  qasosHolat: (id: number): Promise<{ holat: 'yoq' | 'men' | 'raqib' | 'tayyor'; jangId?: number }> =>
+    req(`/oktagon/jang/${id}/qasos`, {}, false),
+  qasosBekor: (id: number) => req(`/oktagon/jang/${id}/qasos`, { method: 'DELETE' }),
+  /** Do'stni chaqirish: 6 xonali kod */
+  taklif: (): Promise<{ kod: string; qolganMs: number }> => req('/oktagon/taklif', { method: 'POST' }),
+  taklifHolat: (): Promise<{ holat: 'yoq' } | { holat: 'kutmoqda'; kod: string; qolganMs: number } | { holat: 'topildi'; jangId: number }> =>
+    req('/oktagon/taklif', {}, false),
+  taklifBekor: (): Promise<{ ok: boolean; jangId: number | null }> => req('/oktagon/taklif', { method: 'DELETE' }),
+  qoshil: (kod: string): Promise<{ jangId: number }> =>
+    req('/oktagon/taklif/qoshil', { method: 'POST', body: JSON.stringify({ kod }) }),
   reyting: (): Promise<{ list: { orin: number; ism: string; ball: number; daraja: OktagonDaraja; janglar: number; men: boolean }[]; orin: number | null }> =>
     req('/oktagon/reyting', {}, false),
   janglarim: (): Promise<{ list: { id: number; sana: string; raqib: string; bot: boolean; menT: number; raqibT: number; ozgarish: number; natija: OktagonNatija }[] }> =>

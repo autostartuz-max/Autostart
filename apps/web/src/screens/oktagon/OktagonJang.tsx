@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Swords, Play, Frown, Meh, Trophy, House } from 'lucide-react';
-import { oktagon, mediaUrl, type OktagonJang as Jang, type OktagonSavol } from '../../api';
+import { ChevronLeft, Swords, Play, Frown, Meh, Trophy, House, Smile } from 'lucide-react';
+import { oktagon, mediaUrl, OKTAGON_EMOJILAR, type OktagonJang as Jang, type OktagonSavol } from '../../api';
 import PastkiOyna from '../../components/PastkiOyna';
 import { MEDAL, NATIJA_MATN, harf, ballMatn, tilda } from './umumiy';
 import '../../ilova-ekran.css';
@@ -35,6 +35,26 @@ function OktagonJang({ id }: { id: number }) {
   const [korish, setKorish] = useState<{ n: number; men: boolean } | null>(null);
   const [yangiJang, setYangiJang] = useState(YANGI_JANG_SONIYA);
   const [xato, setXato] = useState('');
+  // Emoji: panel, ekrandagi pufaklar va allaqachon ko'rsatilganlar (server raqami n)
+  const [emojiPanel, setEmojiPanel] = useState(false);
+  const [pufaklar, setPufaklar] = useState<{ k: string; men: boolean; e: string }[]>([]);
+  const korilgan = useRef(new Set<number>());
+  const oxirgiEmoji = useRef(0);
+  // Odam bilan qasos: yoq | men (men so'radim) | raqib (raqib so'radi)
+  const [qasosHolat, setQasosHolat] = useState<'yoq' | 'men' | 'raqib'>('yoq');
+
+  const pufakQosh = (men: boolean, e: string, k: string) => {
+    setPufaklar((p) => [...p, { k, men, e }]);
+    window.setTimeout(() => setPufaklar((p) => p.filter((x) => x.k !== k)), 2600);
+  };
+  const emojilarniOl = (j: Jang) => {
+    for (const x of j.emoji || []) {
+      if (korilgan.current.has(x.n)) continue;
+      korilgan.current.add(x.n);
+      // O'zimnikini yuborgan zahoti ko'rsatganmiz — serverdan qaytgani takrorlanmaydi
+      if (!x.men) pufakQosh(false, x.e, 'r' + x.n);
+    }
+  };
 
   // Birinchi yuklash — savollar bilan. Jang davom etayotgan bo'lsa, to'xtagan joydan
   useEffect(() => {
@@ -71,6 +91,7 @@ function OktagonJang({ id }: { id: number }) {
         .jang(id)
         .then(async (j) => {
           if (!faol) return;
+          emojilarniOl(j);
           if (j.holat === 'tugadi') {
             const toliq = await oktagon.jang(id, true); // endi to'g'ri javoblar bilan
             if (!faol) return;
@@ -97,16 +118,42 @@ function OktagonJang({ id }: { id: number }) {
   const jangda = bosqich === 'vs' || bosqich === 'jang';
   const oynaOchiq = useRef(false);
   oynaOchiq.current = chiqishOyna || !!korish;
+  const panelOchiq = useRef(false);
+  panelOchiq.current = emojiPanel;
   useEffect(() => {
     if (!jangda) return;
     const orqaga = (e: Event) => {
       if (oynaOchiq.current) return; // ochiq oyna o'zi yopiladi
       e.preventDefault();
-      setChiqishOyna(true);
+      if (panelOchiq.current) setEmojiPanel(false);
+      else setChiqishOyna(true);
     };
     window.addEventListener('ilova:orqaga', orqaga);
     return () => window.removeEventListener('ilova:orqaga', orqaga);
   }, [jangda]);
+
+  // Odam bilan jang natijasi: raqib qasos so'radimi / yangi jang tayyormi — so'rab turamiz
+  const botJangi = jang?.raqib.bot;
+  useEffect(() => {
+    if (bosqich !== 'natija' || botJangi !== false) return;
+    let faol = true;
+    let t: number | undefined;
+    const sora = () =>
+      oktagon.qasosHolat(id).then(
+        (r) => {
+          if (!faol) return;
+          if (r.holat === 'tayyor' && r.jangId) return nav(`/oktagon/jang/${r.jangId}`, { replace: true });
+          setQasosHolat(r.holat === 'tayyor' ? 'yoq' : r.holat);
+          t = window.setTimeout(sora, 1500);
+        },
+        () => { if (faol) t = window.setTimeout(sora, 3000); }
+      );
+    sora();
+    return () => {
+      faol = false;
+      clearTimeout(t);
+    };
+  }, [bosqich, id, botJangi, nav]);
 
   // Natijadagi "Yangi jang" — 4 soniyadan keyin ochiladi
   useEffect(() => {
@@ -146,12 +193,29 @@ function OktagonJang({ id }: { id: number }) {
   };
 
   const qasos = async () => {
+    setXato('');
+    // So'rab qo'yganman va raqib hali javob bermadi — qayta bosish bekor qiladi
+    if (qasosHolat === 'men') {
+      setQasosHolat('yoq');
+      oktagon.qasosBekor(id).catch(() => {});
+      return;
+    }
     try {
       const r = await oktagon.qasos(id);
-      nav(`/oktagon/jang/${r.jangId}`, { replace: true });
+      if (r.jangId) return nav(`/oktagon/jang/${r.jangId}`, { replace: true });
+      setQasosHolat('men'); // odam bilan — raqib rozi bo'lishini kutamiz
     } catch (e: any) {
+      setQasosHolat('yoq');
       setXato(e?.message || 'Qayta urinib ko‘ring');
     }
+  };
+
+  const emojiYubor = (e: string) => {
+    setEmojiPanel(false);
+    if (Date.now() - oxirgiEmoji.current < 1500) return; // server ham 1.5 soniyada bitta qabul qiladi
+    oxirgiEmoji.current = Date.now();
+    pufakQosh(true, e, 'm' + Date.now());
+    oktagon.emoji(id, e).catch(() => {});
   };
 
   if (!jang) {
@@ -246,9 +310,11 @@ function OktagonJang({ id }: { id: number }) {
         {xato && <div className="ok-izoh" style={{ marginTop: 16 }}>{xato}</div>}
 
         <div className="ok-res-foot">
-          {jang.raqib.bot && (
-            <button className="ok-btn qizil" onClick={qasos}><Swords size={22} /> Qasos olish</button>
-          )}
+          {qasosHolat === 'raqib' && <div className="ok-izoh" style={{ margin: 0, color: '#ff8a84' }}>Raqib qasos olmoqchi!</div>}
+          <button className={'ok-btn ' + (qasosHolat === 'men' ? 'kut' : 'qizil') + (qasosHolat === 'raqib' ? ' ok-urg' : '')} onClick={qasos}>
+            <Swords size={22} />
+            {qasosHolat === 'men' ? 'Raqib javobi kutilmoqda…' : qasosHolat === 'raqib' ? 'Qasosni qabul qilish' : 'Qasos olish'}
+          </button>
           <div className="qator">
             <button className="ok-btn kulrang" onClick={() => nav('/')} aria-label="Bosh sahifa"><House size={24} /></button>
             <button
@@ -338,6 +404,19 @@ function OktagonJang({ id }: { id: number }) {
           Raqib javob bermoqda… {raqibSoni}/{n}
         </div>
       )}
+
+      {/* Emoji: o'zimniki chapda (avatarim ostida), raqibniki o'ngda */}
+      {pufaklar.map((p) => (
+        <span key={p.k} className={'ok-pufak ' + (p.men ? 'chap' : 'ong')}>{p.e}</span>
+      ))}
+      {emojiPanel && (
+        <div className="ok-emoji-panel">
+          {OKTAGON_EMOJILAR.map((e) => (
+            <button key={e} onClick={() => emojiYubor(e)}>{e}</button>
+          ))}
+        </div>
+      )}
+      <button className="ok-emoji-btn" onClick={() => setEmojiPanel((x) => !x)} aria-label="Emoji"><Smile size={28} /></button>
 
       {chiqishOyna && <ChiqishOyna onChiq={chiqish} onClose={() => setChiqishOyna(false)} />}
     </div>

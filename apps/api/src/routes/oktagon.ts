@@ -148,6 +148,55 @@ async function qidiruvHolati(men: number) {
   return { holat: 'kutmoqda' as const, soniya };
 }
 
+// ---------- Do'stni jangga chaqirish (6 xonali taklif kodi) ----------
+const TAKLIF_MUDDATI_MS = 10 * 60_000;
+type Taklif = { egasi: number; yaratildi: number; oxirgi: number; jangId?: number };
+const takliflar = new Map<string, Taklif>(); // kod → taklif
+const egasiKodi = new Map<number, string>(); // foydalanuvchi → uning faol kodi
+
+function takliflarniTozala() {
+  const t = Date.now();
+  for (const [kod, x] of takliflar) {
+    // Muddat tugagan, egasi kutishni to'xtatgan yoki jang allaqachon olib ketilgan
+    const eski = t - x.yaratildi > TAKLIF_MUDDATI_MS || t - x.oxirgi > (x.jangId ? 60_000 : 30_000);
+    if (!eski) continue;
+    takliflar.delete(kod);
+    if (egasiKodi.get(x.egasi) === kod) egasiKodi.delete(x.egasi);
+  }
+}
+
+function yangiKod() {
+  let k: string;
+  do k = String(Math.floor(100000 + Math.random() * 900000));
+  while (takliflar.has(k));
+  return k;
+}
+
+// ---------- Jang paytidagi emoji ----------
+const EMOJILAR = ['👍', '😂', '😮', '😡', '🔥', '👏', '😎', '🤔'];
+type EmojiXabar = { n: number; tomon: 1 | 2; e: string; vaqt: number };
+const jangEmojilari = new Map<number, EmojiXabar[]>();
+let emojiN = 0;
+function emojiQosh(jangId: number, tomon: 1 | 2, e: string, kechikish = 0) {
+  const r = jangEmojilari.get(jangId) || [];
+  r.push({ n: ++emojiN, tomon, e, vaqt: Date.now() + kechikish });
+  jangEmojilari.set(jangId, r.slice(-10));
+}
+
+// ---------- Odam bilan qasos (tugagan jang → yangi jang o'sha ikki kishi o'rtasida) ----------
+const QASOS_MUDDATI_MS = 60_000;
+// soruvchi — qasos so'ragan tomon; oxirgi — u natija oynasida hali turibdimi
+type Qasos = { soruvchi: 1 | 2; vaqt: number; oxirgi: number; jangId?: number };
+const qasoslar = new Map<number, Qasos>(); // eski jang id → so'rov
+
+// Xotiradagi eski yozuvlarni vaqti-vaqti bilan tozalash (tashlab ketilgan janglar)
+setInterval(() => {
+  const t = Date.now();
+  takliflarniTozala();
+  for (const [id, r] of jangEmojilari) if (!r.length || t - r[r.length - 1].vaqt > 10 * 60_000) jangEmojilari.delete(id);
+  for (const [id, q] of qasoslar) if (t - q.vaqt > 5 * 60_000) qasoslar.delete(id);
+}, 5 * 60_000).unref();
+
 // ---------- Jangni yakunlash ----------
 function tugashiKerak(j: Jang) {
   if (Date.now() > muddat(j)) return true;
@@ -338,6 +387,10 @@ oktagonRouter.get(
             holat: chiqdi ? 'chiqdi' : menT > raqibT ? 'galaba' : menT === raqibT ? 'durang' : 'maglubiyat',
           }
         : null,
+      // Oxirgi 6 soniyadagi emojilar (botning javobi kechiktirib qo'yiladi — vaqti kelgani)
+      emoji: (jangEmojilari.get(j.id) || [])
+        .filter((x) => x.vaqt <= Date.now() && Date.now() - x.vaqt < 6000)
+        .map((x) => ({ n: x.n, men: x.tomon === tomon, e: x.e })),
       savollar,
     });
   })
@@ -395,15 +448,178 @@ oktagonRouter.post(
   })
 );
 
-/** Qasos olish — o'sha bot bilan yangi jang (odam bilan qasos — do'stni chaqirish bilan keyin) */
+/** Jang paytida emoji yuborish: { e } — ruxsat etilganlardan biri */
+oktagonRouter.post(
+  '/jang/:id/emoji',
+  ah(async (req, res) => {
+    const ol = await jangniOl(req, res);
+    if (!ol) return;
+    const e = String(req.body?.e || '');
+    if (!EMOJILAR.includes(e)) return res.status(400).json({ error: 'Bunday emoji yo‘q' });
+    if (ol.j.holat !== 'jang') return res.json({ ok: false });
+    const tomon = ol.tomon as 1 | 2;
+    const oxirgi = (jangEmojilari.get(ol.j.id) || []).filter((x) => x.tomon === tomon).pop();
+    if (oxirgi && Date.now() - oxirgi.vaqt < 1500) return res.status(429).json({ error: 'Biroz kuting' });
+    emojiQosh(ol.j.id, tomon, e);
+    // Bot ham ba'zan javob qaytaradi (1–3 soniyadan keyin)
+    if (ol.j.p2Id == null && Math.random() < 0.5)
+      emojiQosh(ol.j.id, 2, EMOJILAR[Math.floor(Math.random() * EMOJILAR.length)], 1200 + Math.random() * 1800);
+    res.json({ ok: true });
+  })
+);
+
+/**
+ * Qasos olish. Bot jangi — o'sha bot bilan darhol yangi jang.
+ * Odam bilan — ikkinchi tomon rozi bo'lishi kerak: birinchi bosgan so'rov
+ * qoldiradi, ikkinchisi bosganda (yoki "Qabul qilish") yangi jang yaratiladi.
+ * Javob: { jangId } yoki { kutmoqda: true }.
+ */
 oktagonRouter.post(
   '/jang/:id/qasos',
   ah(async (req, res) => {
     const ol = await jangniOl(req, res);
     if (!ol) return;
-    if (ol.j.p2Id != null) return res.status(400).json({ error: 'Qasos hozircha faqat bot bilan' });
-    const jang = await jangYarat(ol.men, null, ol.j.botIsm);
-    res.json({ jangId: jang.id });
+    const { j } = ol;
+    const tomon = ol.tomon as 1 | 2;
+    if (j.p2Id == null) {
+      const jang = await jangYarat(ol.men, null, j.botIsm);
+      return res.json({ jangId: jang.id });
+    }
+    if (j.holat !== 'tugadi') return res.status(400).json({ error: 'Jang hali tugamagan' });
+
+    const t = Date.now();
+    const q = qasoslar.get(j.id);
+    if (q?.jangId && q.jangId > 0) return res.json({ jangId: q.jangId });
+    // Raqib allaqachon so'ragan va natija oynasida kutib turibdi — yangi jang
+    if (q && q.soruvchi !== tomon && !q.jangId && t - q.vaqt < QASOS_MUDDATI_MS) {
+      if (t - q.oxirgi > 8000) {
+        qasoslar.delete(j.id);
+        return res.status(410).json({ error: 'Raqib chiqib ketgan' });
+      }
+      q.jangId = -1; // band — ikki so'rov bir vaqtda ikki jang yaratmasin
+      try {
+        const soruvchiId = q.soruvchi === 1 ? j.p1Id : j.p2Id;
+        const jang = await jangYarat(soruvchiId, ol.men);
+        q.jangId = jang.id;
+        return res.json({ jangId: jang.id });
+      } catch (e) {
+        q.jangId = undefined;
+        throw e;
+      }
+    }
+    qasoslar.set(j.id, { soruvchi: tomon, vaqt: t, oxirgi: t });
+    res.json({ kutmoqda: true });
+  })
+);
+
+/** Qasos holati (natija oynasi so'raydi): yoq | men (men so'radim) | raqib (raqib so'radi) | tayyor */
+oktagonRouter.get(
+  '/jang/:id/qasos',
+  ah(async (req, res) => {
+    const ol = await jangniOl(req, res);
+    if (!ol) return;
+    const q = qasoslar.get(ol.j.id);
+    if (!q || (!q.jangId && Date.now() - q.vaqt > QASOS_MUDDATI_MS)) return res.json({ holat: 'yoq' });
+    if (q.jangId && q.jangId > 0) return res.json({ holat: 'tayyor', jangId: q.jangId });
+    if (q.soruvchi === ol.tomon) {
+      q.oxirgi = Date.now();
+      return res.json({ holat: 'men' });
+    }
+    res.json({ holat: 'raqib' });
+  })
+);
+
+oktagonRouter.delete(
+  '/jang/:id/qasos',
+  ah(async (req, res) => {
+    const ol = await jangniOl(req, res);
+    if (!ol) return;
+    const q = qasoslar.get(ol.j.id);
+    if (q && q.soruvchi === ol.tomon && !q.jangId) qasoslar.delete(ol.j.id);
+    res.json({ ok: true });
+  })
+);
+
+/** Do'stni chaqirish: taklif kodi yaratish (faol kod bo'lsa — o'sha) */
+oktagonRouter.post(
+  '/taklif',
+  ah(async (req, res) => {
+    const men = (req as any).userId as number;
+    takliflarniTozala();
+    const t = Date.now();
+    const eski = egasiKodi.get(men);
+    const x = eski ? takliflar.get(eski) : undefined;
+    if (eski && x && !x.jangId) {
+      x.oxirgi = t;
+      return res.json({ kod: eski, qolganMs: TAKLIF_MUDDATI_MS - (t - x.yaratildi) });
+    }
+    const kod = yangiKod();
+    takliflar.set(kod, { egasi: men, yaratildi: t, oxirgi: t });
+    egasiKodi.set(men, kod);
+    res.json({ kod, qolganMs: TAKLIF_MUDDATI_MS });
+  })
+);
+
+/** Taklif holati: do'st qo'shilsa — jangId */
+oktagonRouter.get(
+  '/taklif',
+  ah(async (req, res) => {
+    const men = (req as any).userId as number;
+    takliflarniTozala();
+    const kod = egasiKodi.get(men);
+    const x = kod ? takliflar.get(kod) : undefined;
+    if (!kod || !x) return res.json({ holat: 'yoq' });
+    x.oxirgi = Date.now();
+    if (x.jangId && x.jangId > 0) {
+      takliflar.delete(kod);
+      egasiKodi.delete(men);
+      return res.json({ holat: 'topildi', jangId: x.jangId });
+    }
+    res.json({ holat: 'kutmoqda', kod, qolganMs: Math.max(0, TAKLIF_MUDDATI_MS - (Date.now() - x.yaratildi)) });
+  })
+);
+
+oktagonRouter.delete(
+  '/taklif',
+  ah(async (req, res) => {
+    const men = (req as any).userId as number;
+    const kod = egasiKodi.get(men);
+    const x = kod ? takliflar.get(kod) : undefined;
+    // Shu soniyada do'st qo'shilgan bo'lsa — jangId qaytadi (do'st kutib qolmasin)
+    if (kod && x?.jangId && x.jangId > 0) {
+      takliflar.delete(kod);
+      egasiKodi.delete(men);
+      return res.json({ ok: true, jangId: x.jangId });
+    }
+    if (kod && x && !x.jangId) {
+      takliflar.delete(kod);
+      egasiKodi.delete(men);
+    }
+    res.json({ ok: true, jangId: null });
+  })
+);
+
+/** Do'stning kodi bilan qo'shilish: { kod } → { jangId } */
+oktagonRouter.post(
+  '/taklif/qoshil',
+  ah(async (req, res) => {
+    const men = (req as any).userId as number;
+    takliflarniTozala();
+    const kod = String(req.body?.kod || '').replace(/\D/g, '');
+    const x = takliflar.get(kod);
+    if (!x) return res.status(404).json({ error: 'Kod topilmadi yoki eskirgan' });
+    if (x.egasi === men) return res.status(400).json({ error: 'Bu sizning kodingiz — uni do‘stingizga yuboring' });
+    if (x.jangId) return res.status(409).json({ error: 'Bu taklif bilan allaqachon jang boshlangan' });
+    if (Date.now() - x.oxirgi > 8000) return res.status(410).json({ error: 'Do‘stingiz kutishni to‘xtatgan' });
+    x.jangId = -1; // band
+    try {
+      const jang = await jangYarat(x.egasi, men);
+      x.jangId = jang.id;
+      res.json({ jangId: jang.id });
+    } catch (e) {
+      x.jangId = undefined;
+      throw e;
+    }
   })
 );
 

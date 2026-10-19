@@ -125,6 +125,9 @@ model User {
   // Oxirgi faollik vaqti — "hozir nechta odam ishlayapti" ni hisoblash uchun.
   // Har so'rovda emas, daqiqada bir marta yangilanadi (ortiqcha yozuvning oldini olish).
   lastSeen   DateTime?
+  // Oktagon (jang rejimi): ball va o'ynalgan janglar soni. Ball manfiy bo'lishi mumkin.
+  oktagonBall Int @default(0)
+  oktagonJang Int @default(0)
   answers    UserAnswer[]
   bookmarks  Bookmark[]
   complaints Complaint[]
@@ -254,4 +257,30 @@ model CommentReport {
   createdAt DateTime        @default(now())
 
   @@unique([commentId, userId])
+}
+
+// Oktagon — ikki o'yinchi bir xil 10 ta savolga javob beradi. p2Id bo'sh bo'lsa
+// raqib bot (botIsm, botReja). Javoblar JSON: [{ i, togri }] — tartib bo'yicha.
+// Foydalanuvchi o'chirilsa jang tarixi qoladi (FK yo'q), ism "O'chirilgan" bo'ladi.
+model OktagonJang {
+  id         Int       @id @default(autoincrement())
+  p1Id       Int
+  p2Id       Int?
+  botIsm     String?
+  // Bot javoblari jadvali: [{ ms, togri }] — jang boshidan necha ms da javob beradi
+  botReja    Json?
+  savollar   Json
+  p1Javob    Json      @default("[]")
+  p2Javob    Json      @default("[]")
+  // jang | tugadi
+  holat      String    @default("jang")
+  boshlandi  DateTime  @default(now())
+  tugadi     DateTime?
+  p1Chiqdi   Boolean   @default(false)
+  p2Chiqdi   Boolean   @default(false)
+  p1Ozgarish Int?
+  p2Ozgarish Int?
+
+  @@index([p1Id])
+  @@index([p2Id])
 }

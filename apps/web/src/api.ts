@@ -180,7 +180,9 @@ export async function navbatniYubor() {
   }
 }
 
-async function req(path: string, opts: RequestInit = {}) {
+// kesh=false — jonli holat (Oktagon jangi): eski nusxa qaytarilmaydi va har
+// soniyalik so'rov keshga yozilmaydi
+async function req(path: string, opts: RequestInit = {}, kesh = true) {
   const metod = String(opts.method || 'GET').toUpperCase();
   try {
     const res = await fetch(API + path, {
@@ -199,16 +201,56 @@ async function req(path: string, opts: RequestInit = {}) {
       throw err;
     }
     const data = await res.json();
-    if (metod === 'GET') keshYoz(path, data);
+    if (metod === 'GET' && kesh) keshYoz(path, data);
     return data;
   } catch (e) {
-    if (metod === 'GET' && !serverXatosi(e)) {
+    if (metod === 'GET' && kesh && !serverXatosi(e)) {
       const k = keshOqi(path);
       if (k !== null) return k; // internet yo'q — oxirgi nusxadan beramiz
     }
     throw e;
   }
 }
+
+/* ---------- Oktagon (jang rejimi, faqat ilovada) ---------- */
+export type OktagonDaraja = 'Bronza' | 'Kumush' | 'Oltin' | 'Brilliant';
+export type OktagonNatija = 'galaba' | 'durang' | 'maglubiyat' | 'chiqdi';
+export interface OktagonSavol {
+  id: number;
+  textLat: string;
+  textCyr: string;
+  textRus: string;
+  imageUrl: string | null;
+  options: { id: number; textLat: string; textCyr: string; textRus: string; isCorrect?: boolean }[];
+}
+export interface OktagonJang {
+  id: number;
+  holat: 'jang' | 'tugadi';
+  savolSoni: number;
+  qolganMs: number;
+  men: { ism: string; ball: number; daraja: OktagonDaraja; javoblar: { i: number; togri: boolean; v?: number }[]; togri: number };
+  raqib: { ism: string; bot: boolean; daraja: OktagonDaraja; javobSoni: number; javoblar?: { i: number; togri: boolean }[]; togri?: number };
+  natija: { ozgarish: number; holat: OktagonNatija } | null;
+  savollar?: OktagonSavol[];
+}
+type Qidiruv = { holat: 'yoq' } | { holat: 'kutmoqda'; soniya: number } | { holat: 'topildi'; jangId: number };
+
+export const oktagon = {
+  men: (): Promise<{ ball: number; daraja: OktagonDaraja; janglar: number; onlayn: number }> => req('/oktagon/men', {}, false),
+  qidir: (): Promise<Qidiruv> => req('/oktagon/qidir', { method: 'POST' }),
+  qidiruv: (): Promise<Qidiruv> => req('/oktagon/qidir', {}, false),
+  bekor: (): Promise<{ ok: boolean; jangId: number | null }> => req('/oktagon/qidir', { method: 'DELETE' }),
+  jang: (id: number, savol = false): Promise<OktagonJang> =>
+    req(`/oktagon/jang/${id}` + (savol ? '?savol=1' : ''), {}, false),
+  javob: (id: number, i: number, variantId: number): Promise<{ togri?: boolean; togriVariant?: number | null; tugadi?: boolean }> =>
+    req(`/oktagon/jang/${id}/javob`, { method: 'POST', body: JSON.stringify({ i, variantId }) }),
+  chiqish: (id: number) => req(`/oktagon/jang/${id}/chiqish`, { method: 'POST' }),
+  qasos: (id: number): Promise<{ jangId: number }> => req(`/oktagon/jang/${id}/qasos`, { method: 'POST' }),
+  reyting: (): Promise<{ list: { orin: number; ism: string; ball: number; daraja: OktagonDaraja; janglar: number; men: boolean }[]; orin: number | null }> =>
+    req('/oktagon/reyting', {}, false),
+  janglarim: (): Promise<{ list: { id: number; sana: string; raqib: string; bot: boolean; menT: number; raqibT: number; ozgarish: number; natija: OktagonNatija }[] }> =>
+    req('/oktagon/janglarim', {}, false),
+};
 
 export const api = {
   authTelegram: (initData: string, guestId?: string) =>

@@ -10,6 +10,9 @@ import Home from './screens/Home';
 import { mobilIlova } from './native';
 import Shablon from './screens/Shablon';
 import ShablonIlova from './screens/ShablonIlova';
+import Oktagon from './screens/oktagon/Oktagon';
+import OktagonJangSahifa from './screens/oktagon/OktagonJang';
+import OktagonRoyxat from './screens/oktagon/OktagonRoyxat';
 import RandomTests from './screens/RandomTests';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
@@ -150,7 +153,14 @@ export default function App() {
         {!mobilIlova() && <Route path="/savollar/import" element={<AdminImport />} />}
         {!mobilIlova() && <Route path="/savollar/yangi" element={<AdminQuestionForm />} />}
         {!mobilIlova() && <Route path="/savollar/:id" element={<AdminQuestionForm />} />}
-        <Route path="/oktagon" element={<Placeholder title="Oktagon" emoji="⚔️" text="Bellashuv rejimi tez orada qo‘shiladi." />} />
+        {/* Oktagon (jang rejimi) — faqat ilovada; saytda avvalgidek "tez orada" */}
+        <Route
+          path="/oktagon"
+          element={mobilIlova() ? <Oktagon /> : <Placeholder title="Oktagon" emoji="⚔️" text="Bellashuv rejimi tez orada qo‘shiladi." />}
+        />
+        {mobilIlova() && <Route path="/oktagon/jang/:id" element={<OktagonJangSahifa />} />}
+        {mobilIlova() && <Route path="/oktagon/reyting" element={<OktagonRoyxat tur="reyting" />} />}
+        {mobilIlova() && <Route path="/oktagon/janglarim" element={<OktagonRoyxat tur="janglarim" />} />}
         {mobilIlova() && <Route path="/avtodrom" element={<Placeholder title="Avtodrom" emoji="🚗" text="Avtodrom mashqlari tez orada qo‘shiladi." />} />}
         <Route path="/reyting" element={<Rating />} />
         <Route path="*" element={<Navigate to="/" replace />} />

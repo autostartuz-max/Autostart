@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { PORT, HOST, DEV_AUTH } from './env';
 import { userRouter } from './routes/user';
+import { oktagonRouter } from './routes/oktagon';
 import { adminRouter } from './routes/admin';
 import { rateLimit } from './rateLimit';
 
@@ -32,9 +33,13 @@ app.use('/api', (req, res, next) => {
   // o'nlab Range so'rovi qiladi va bitta sinf bitta IP dan kirsa, hammasi
   // 429 bilan to'xtab qolardi. Fayl statik kontent — cheklash foyda bermaydi.
   if (/^\/lessons\/\d+\/video$/.test(req.path)) return next();
+  // Oktagon jang holati va raqib qidirish soniyasiga bir marta so'raladi —
+  // bitta sinf bitta IP dan o'ynasa ham umumiy chegaraga urilmasin (so'rov yengil)
+  if (req.method === 'GET' && /^\/oktagon\/(qidir|jang\/\d+)$/.test(req.path)) return next();
   umumiyLimit(req, res, next);
 });
 
+app.use('/api/oktagon', oktagonRouter);
 app.use('/api', userRouter);
 app.use('/api/admin', adminRouter);
 

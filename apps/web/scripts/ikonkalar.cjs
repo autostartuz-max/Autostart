@@ -33,7 +33,7 @@ const niqob = (olcham, doira) =>
   );
 
 (async () => {
-  const zichlik = { mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 };
+  const zichlik = { ldpi: 0.75, mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 };
   for (const [nom, k] of Object.entries(zichlik)) {
     const dir = path.join(RES, 'mipmap-' + nom);
     // Adaptiv ikonka (Android 8+): 108dp maydon, ko'rinadigani o'rtadagi ~72dp.

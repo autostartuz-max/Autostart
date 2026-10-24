@@ -98,6 +98,8 @@ export default function TestPlayer() {
   const mobil = mobilIlova();
   const [fabOpen, setFabOpen] = useState(false); // "O'rganish" menyusi ochiqmi
   const [showVideo, setShowVideo] = useState(false); // "Video" oynasi
+  // "Mavzuni to'liq ko'rish" — nazariy darslar hali tayyor emas, "tez orada" yoziladi
+  const [mavzuTezOrada, setMavzuTezOrada] = useState(false);
   // "Muhokama" — savol bo'yicha izohlar
   const [showMuh, setShowMuh] = useState(false);
   const [izohlar, setIzohlar] = useState<CommentRow[] | null>(null);
@@ -1115,7 +1117,7 @@ export default function TestPlayer() {
 
       {/* ===== Ilova: Video — savol mavzusi va video darsliklar ===== */}
       {mobil && showVideo && (
-        <div className="modal" onClick={() => setShowVideo(false)}>
+        <div className="modal" onClick={() => { setShowVideo(false); setMavzuTezOrada(false); }}>
           <div className="sheet tpm-video" onClick={(e) => e.stopPropagation()}>
             <div className="grip" />
             <div className="tpm-video-q">{tx(q.textLat, q.textCyr, (q as any).textRus)}</div>
@@ -1132,9 +1134,11 @@ export default function TestPlayer() {
                 <b>Savol mavzusi:</b> <span>{(q as any).topic.name}</span>
               </div>
             )}
-            <button className="tpm-video-btn" onClick={() => { setShowVideo(false); nav('/amaliy'); }}>
+            {/* Avval /amaliy ga o'tardi — u amaliy (haydash) video darslar, nazariy mavzu emas */}
+            <button className="tpm-video-btn" onClick={() => setMavzuTezOrada(true)}>
               <Clapperboard size={20} /> Mavzuni to‘liq ko‘rish
             </button>
+            {mavzuTezOrada && <div className="tpm-video-tez">Nazariy darslar tez orada qo‘shiladi</div>}
           </div>
         </div>
       )}

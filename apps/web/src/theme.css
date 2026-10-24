@@ -701,6 +701,8 @@ button { font-family: inherit; cursor: pointer; }
 .tpm-video-btn { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   background: #1ea7f5; color: #fff; border: none; border-radius: 16px; padding: 17px; font-size: 17px;
   font-weight: 800; font-family: inherit; box-shadow: 0 5px 0 #0f76b3; cursor: pointer; }
+.tpm-video-tez { margin-top: 16px; padding: 11px 14px; border-radius: 12px; background: rgba(30, 167, 245, .12);
+  color: #7cc8f5; font-size: 14.5px; font-weight: 700; }
 
 /* Muhokama oynasi */
 .tpm-muh { max-height: 82vh; display: flex; flex-direction: column; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }

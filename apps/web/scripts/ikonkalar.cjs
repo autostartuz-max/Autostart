@@ -37,8 +37,9 @@ const niqob = (olcham, doira) =>
   for (const [nom, k] of Object.entries(zichlik)) {
     const dir = path.join(RES, 'mipmap-' + nom);
     // Adaptiv ikonka (Android 8+): 108dp maydon, ko'rinadigani o'rtadagi ~72dp.
-    // Emblema balandligi 63% — ko'rinadigan maydonni tepadan pastgacha to'ldiradi.
-    await (await kvadrat(Math.round(108 * k), 0.63)).toFile(path.join(dir, 'ic_launcher_foreground.png'));
+    // Emblema balandligi 52% — Android xavfsiz zonasiga (66dp doira) sig'adi: Samsung
+    // niqobi kattaroq emblemaning tepasi va pastini kesib qo'yardi.
+    await (await kvadrat(Math.round(108 * k), 0.52)).toFile(path.join(dir, 'ic_launcher_foreground.png'));
     // Eski Android (7 va undan past): 48dp tayyor ikonka — to'q fon, emblema katta
     const L = Math.round(48 * k);
     for (const [fayl, doira, ulush] of [['ic_launcher.png', false, 0.84], ['ic_launcher_round.png', true, 0.74]]) {

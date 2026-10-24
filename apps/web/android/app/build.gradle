@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+// Play Market imzosi (upload key). Kalit va parollar repoda EMAS — android/keystore.properties
+// (gitignore). Fayl bo'lmasa release imzosiz yig'iladi (debug APK'ga ta'sir qilmaydi).
+def kalitFayli = rootProject.file('keystore.properties')
+def kalit = new Properties()
+if (kalitFayli.exists()) kalitFayli.withInputStream { kalit.load(it) }
+
 android {
     namespace "uz.autostart.app"
     compileSdk rootProject.ext.compileSdkVersion
@@ -19,8 +25,19 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (kalitFayli.exists()) {
+                storeFile file(kalit['storeFile'])
+                storePassword kalit['storePassword']
+                keyAlias kalit['keyAlias']
+                keyPassword kalit['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (kalitFayli.exists()) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

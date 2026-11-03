@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Menu, Phone, Send, Mail, Check, MessageCircle,
   Users, Wallet, CreditCard, Camera,
@@ -16,6 +17,7 @@ const KARTA_IC = { k: Users, s: Wallet, v: CreditCard };
 
 export default function Contact() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [open, setOpen] = useState(false);
   const kirgan = hasToken();
 
@@ -73,8 +75,8 @@ export default function Contact() {
       <div className="db-main">
         <header className="db-top">
           {kirgan && <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>}
-          <button className="adm-back" onClick={() => nav(kirgan ? '/' : '/kirish')}>
-            <ChevronLeft size={18} /> {kirgan ? 'Bosh sahifa' : 'Kirish'}
+          <button className="adm-back" onClick={() => (kirgan ? orqaga() : nav('/kirish'))}>
+            <ChevronLeft size={18} /> {kirgan ? orqagaYozuvi() : 'Kirish'}
           </button>
         </header>
 

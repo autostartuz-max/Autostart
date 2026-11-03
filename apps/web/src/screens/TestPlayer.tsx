@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
   Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap, Eye, Clapperboard, MessageCircle, Send, Trash2, Ban,
@@ -63,6 +64,7 @@ const FF_LABEL: Record<string, string> = { soft: 'Yumshoq', classic: 'Klassik' }
 
 export default function TestPlayer() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [sp] = useSearchParams();
   const mode = sp.get('mode') || 'all';
   const topicId = sp.get('topicId') || undefined;
@@ -633,14 +635,14 @@ export default function TestPlayer() {
     };
     return (
       <div>
-        <button className="back" onClick={() => nav('/')}>← Bosh sahifa</button>
+        <button className="back" onClick={orqaga}>← {orqagaYozuvi()}</button>
         <div className="empty">
           <div className="em">{e.em}</div>
           <div className="empty-title">{e.title}</div>
           <div className="empty-text">{e.text}</div>
           <div className="empty-btns">
             <button className="empty-cta" onClick={() => nav('/test?mode=practice')}>Test yechishni boshlash →</button>
-            <button className="empty-ghost" onClick={() => nav('/')}>Bosh sahifa</button>
+            <button className="empty-ghost" onClick={orqaga}>{orqagaYozuvi()}</button>
           </div>
         </div>
       </div>
@@ -900,10 +902,10 @@ export default function TestPlayer() {
   // Avval ESC to'g'ridan-to'g'ri chiqarib yuborardi va natija ko'rinmasdi.
   const exit = () => {
     clearNext();
-    // Ilovada: chiqish tugmasi to'g'ridan-to'g'ri bosh menyuga. Javoblar
+    // Ilovada: chiqish tugmasi test ochilgan oynaga (masalan Testlar) qaytaradi. Javoblar
     // saqlanib qoladi (sessiya) — keyin shu joydan davom ettirsa bo'ladi.
     if (mobil) {
-      nav('/');
+      orqaga();
       return;
     }
     if (!finished) {

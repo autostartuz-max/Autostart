@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOrqaga } from '../orqaga';
 import {
   ChevronLeft, Bell, Search, Moon, Globe, User, Menu, Shuffle, X, Clock, ListChecks,
 } from 'lucide-react';
@@ -44,6 +45,7 @@ function Flag({ c }: { c: 'uz' | 'ru' }) {
 
 export default function RandomTests() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [open, setOpen] = useState(false); // mobil menyu
   const [name, setName] = useState('Mehmon');
   const [picking, setPicking] = useState(false); // "Tanlang" oynasi
@@ -74,7 +76,7 @@ export default function RandomTests() {
       <div className="wl-main">
         <header className="wl-top">
           <button className="wl-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
-          <button className="wl-icard" onClick={() => nav('/')}><ChevronLeft size={20} /></button>
+          <button className="wl-icard" onClick={orqaga} aria-label="Orqaga"><ChevronLeft size={20} /></button>
           <div className="wl-top-right">
             <div className="wl-lang"><Globe size={16} /> O‘zbek (lotin)</div>
             <button className="wl-icard"><Search size={18} /></button>

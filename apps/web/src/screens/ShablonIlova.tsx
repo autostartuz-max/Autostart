@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useOrqaga } from '../orqaga';
 import { ChevronLeft, X } from 'lucide-react';
 import { api, type ShablonProgress } from '../api';
 import '../shablon.css';
@@ -52,6 +53,7 @@ function Flag({ c }: { c: 'uz' | 'ru' }) {
 
 export default function ShablonIlova() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [sp] = useSearchParams();
   const [bolim, setBolim] = useState<Bolim>('barchasi');
   const [progress, setProgress] = useState<Record<number, ShablonProgress>>({});
@@ -113,7 +115,7 @@ export default function ShablonIlova() {
     <div className="ie">
       <div className="ie-head">
         <div className="ie-top">
-          <button className="ie-back" onClick={() => nav('/')} aria-label="Orqaga"><ChevronLeft size={22} /></button>
+          <button className="ie-back" onClick={orqaga} aria-label="Orqaga"><ChevronLeft size={22} /></button>
           <div className="ie-title">Shablon testlar</div>
         </div>
         <div className="ie-tabs-wrap">

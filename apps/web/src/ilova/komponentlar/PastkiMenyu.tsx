@@ -43,6 +43,18 @@ const IKONKA: Record<MenyuBolim, ReactNode> = {
 /** Pastki menyu: ekran pastida qotib turadi, faol bo'lim sariq. */
 export default function PastkiMenyu({ faol }: { faol: MenyuBolim }) {
   const nav = useNavigate();
+  // Telefondagi odatiy pastki menyudek: Bosh sahifadan bo'limga o'tish tarixga qo'shiladi
+  // (orqaga = Bosh sahifa), bo'limdan bo'limga — almashtiriladi (orqaga tugmasi bo'limlarni
+  // birma-bir aylanib chiqmaydi), "Asosiy" esa Bosh sahifaga orqaga qaytaradi.
+  const bos = (m: (typeof MENYU)[number]) => {
+    if (m.bolim === faol) return;
+    if (faol === 'asosiy') nav(m.manzil);
+    else if (m.bolim === 'asosiy') {
+      const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+      if (idx > 0) nav(-1);
+      else nav('/', { replace: true });
+    } else nav(m.manzil, { replace: true });
+  };
   return (
     <nav className="ilv-menyu" aria-label="Asosiy menyu">
       <div className="ilv-menyu-ichi">
@@ -52,7 +64,7 @@ export default function PastkiMenyu({ faol }: { faol: MenyuBolim }) {
             type="button"
             className={'ilv-menyu-b' + (m.bolim === faol ? ' faol' : '')}
             aria-current={m.bolim === faol ? 'page' : undefined}
-            onClick={() => m.bolim !== faol && nav(m.manzil, { replace: true })}
+            onClick={() => bos(m)}
           >
             <svg className="ilv-menyu-ikonka" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               {IKONKA[m.bolim]}

@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import { ChevronLeft, Menu, ShieldCheck, FileText, ScrollText } from 'lucide-react';
 import AppSidebar from '../components/AppSidebar';
 import { hasToken } from '../api';
@@ -237,6 +238,7 @@ function Oferta(): ReactNode {
 
 export default function Legal() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const { doc } = useParams();
   const [open, setOpen] = useState(false);
 
@@ -254,8 +256,8 @@ export default function Legal() {
       <div className="db-main">
         <header className="db-top">
           {kirgan && <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>}
-          <button className="adm-back" onClick={() => nav(kirgan ? '/' : '/kirish')}>
-            <ChevronLeft size={18} /> {kirgan ? 'Bosh sahifa' : 'Kirish'}
+          <button className="adm-back" onClick={() => (kirgan ? orqaga() : nav('/kirish'))}>
+            <ChevronLeft size={18} /> {kirgan ? orqagaYozuvi() : 'Kirish'}
           </button>
         </header>
 

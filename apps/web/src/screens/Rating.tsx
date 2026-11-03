@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import { ChevronLeft, Menu, Trophy, ChevronRight } from 'lucide-react';
 import { api, canManageQuestions, hasAdmin, type RatingRow } from '../api';
 import AppSidebar from '../components/AppSidebar';
@@ -7,6 +8,7 @@ import '../dashboard.css';
 
 export default function Rating() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<RatingRow[]>([]);
   const [meId, setMeId] = useState<number | null>(null);
@@ -29,7 +31,7 @@ export default function Rating() {
       <div className="db-main">
         <header className="db-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
-          <button className="adm-back" onClick={() => nav('/')}><ChevronLeft size={18} /> Bosh sahifa</button>
+          <button className="adm-back" onClick={orqaga}><ChevronLeft size={18} /> {orqagaYozuvi()}</button>
         </header>
 
         <div className="db-content">

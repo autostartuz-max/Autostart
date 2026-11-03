@@ -85,8 +85,10 @@ export async function initNative() {
     // Ochiq oyna (pastki oyna, til tanlash) bo'lsa — avval o'sha yopiladi.
     // Oyna 'ilova:orqaga' hodisasini preventDefault() qilsa, shu yerda to'xtaymiz.
     if (!window.dispatchEvent(new Event('ilova:orqaga', { cancelable: true }))) return;
-    if (canGoBack && window.location.pathname !== '/') window.history.back();
-    else App.exitApp();
+    if (window.location.pathname === '/') App.exitApp();
+    else if (canGoBack) window.history.back();
+    // Tarix yo'q (ilova shu sahifada ochilgan) — chiqib ketmasdan bosh sahifaga (App.tsx tinglaydi)
+    else window.dispatchEvent(new Event('ilova:bosh'));
   });
 
   // Ilova orqa fondan qaytganda ham kutayotgan javoblarni jo'natamiz

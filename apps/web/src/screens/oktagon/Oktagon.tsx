@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useOrqaga } from '../../orqaga';
 import { ChevronLeft, Settings, Swords, Radio, Trophy, Users, ClipboardList, Zap, Target, X, UserRound, Share2, KeyRound } from 'lucide-react';
 import { oktagon, type OktagonDaraja } from '../../api';
 import PastkiOyna from '../../components/PastkiOyna';
@@ -250,6 +251,7 @@ function DostOyna({ onJang, onClose }: { onJang: (jangId: number) => void; onClo
 
 export default function Oktagon() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const loc = useLocation();
   const [men, setMen] = useState<{ ball: number; daraja: OktagonDaraja; janglar: number; onlayn: number } | null>(null);
   // Natija sahifasidagi "Yangi jang" — qoidalarsiz to'g'ri qidirishga
@@ -268,7 +270,7 @@ export default function Oktagon() {
   return (
     <div className="ie ok-ekran ok-asosiy">
       <div className="ok-top">
-        <button className="ok-ic" onClick={() => nav('/')} aria-label="Orqaga"><ChevronLeft size={22} /></button>
+        <button className="ok-ic" onClick={orqaga} aria-label="Orqaga"><ChevronLeft size={22} /></button>
         <button className="ok-ic" onClick={() => setOyna('qoidalar-info')} aria-label="Qoidalar"><Settings size={20} /></button>
       </div>
 

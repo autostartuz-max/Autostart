@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import { Menu, ChevronLeft, Play, HeartCrack, Check, X, Info } from 'lucide-react';
 import { api, mediaUrl } from '../api';
 import AppSidebar from '../components/AppSidebar';
@@ -11,6 +12,7 @@ type XatoSavol = Question & { myChosen?: number[]; shablon?: number | null; orde
 
 export default function Mistakes() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<XatoSavol[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ export default function Mistakes() {
       <div className="db-main">
         <header className="db-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
-          <button className="adm-back" onClick={() => nav('/')}><ChevronLeft size={18} /> Bosh sahifa</button>
+          <button className="adm-back" onClick={orqaga}><ChevronLeft size={18} /> {orqagaYozuvi()}</button>
         </header>
 
         <div className="db-content">

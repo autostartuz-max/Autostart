@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { api, setToken, hasToken, clearToken, tokenniTikla } from './api';
 import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
 import Landing from './screens/Landing';
@@ -86,6 +86,14 @@ export default function App() {
       setChecking(false);
     })();
   }, []);
+
+  // Telefonning orqaga tugmasi: tarix bo'lmagan sahifada ilovadan chiqmasdan bosh sahifaga (native.ts)
+  const nav = useNavigate();
+  useEffect(() => {
+    const bosh = () => nav('/', { replace: true });
+    window.addEventListener('ilova:bosh', bosh);
+    return () => window.removeEventListener('ilova:bosh', bosh);
+  }, [nav]);
 
   if (checking)
     return (

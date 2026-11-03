@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import { Menu, Search, Bell, ShieldCheck, ChevronLeft } from 'lucide-react';
 import { api } from '../api';
 import AppSidebar from '../components/AppSidebar';
@@ -9,6 +10,7 @@ import '../dashboard.css';
 
 export default function Topics() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Catalog[]>([]);
   const [shuffle, setShuffle] = useState(false);
@@ -31,7 +33,7 @@ export default function Topics() {
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
           {/* Ilovada yon menyu yo'q — orqaga qaytish tugmasi kerak */}
           {mobilIlova() && (
-            <button className="adm-back" onClick={() => nav('/')}><ChevronLeft size={18} /> Bosh sahifa</button>
+            <button className="adm-back" onClick={orqaga}><ChevronLeft size={18} /> {orqagaYozuvi()}</button>
           )}
           <div className="db-search"><Search size={17} /><input placeholder="Qidirish…" /></div>
           <div className="db-top-right">
@@ -46,7 +48,7 @@ export default function Topics() {
 
         <div className="db-content">
           <div className="mv-head">
-            <button className="mv-back" onClick={() => nav('/')}><ChevronLeft size={18} /> Orqaga</button>
+            <button className="mv-back" onClick={orqaga}><ChevronLeft size={18} /> Orqaga</button>
             <h1 className="mv-title">Mavzu bo‘yicha mashqni boshlash</h1>
             <label className="mv-shuffle" onClick={() => setShuffle((s) => !s)}>
               <span className={'mv-tog' + (shuffle ? ' on' : '')} />

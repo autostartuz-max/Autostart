@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import { Menu, ChevronLeft, Play, Video, Clock } from 'lucide-react';
 import { api, lessonVideoUrl, canManageQuestions, hasAdmin, type Lesson } from '../api';
 import { TOIFALAR, TOIFA_IZOH, hajm, sana } from '../lessons';
@@ -17,6 +18,7 @@ const HAMMASI = '';
  */
 export default function Lessons() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<Lesson[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -95,7 +97,7 @@ export default function Lessons() {
       <div className="db-main">
         <header className="db-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
-          <button className="adm-back" onClick={() => nav('/')}><ChevronLeft size={18} /> Bosh sahifa</button>
+          <button className="adm-back" onClick={orqaga}><ChevronLeft size={18} /> {orqagaYozuvi()}</button>
         </header>
 
         <div className="db-content">

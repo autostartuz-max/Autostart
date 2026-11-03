@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import { api } from '../api';
 import type { Catalog } from '../types';
 
 export default function Tickets() {
   const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [items, setItems] = useState<Catalog[]>([]);
 
   useEffect(() => {
@@ -13,7 +15,7 @@ export default function Tickets() {
 
   return (
     <div>
-      <button className="back" onClick={() => nav('/')}>← Bosh sahifa</button>
+      <button className="back" onClick={orqaga}>← {orqagaYozuvi()}</button>
       <div className="h2">Biletlar</div>
       <div className="list">
         {items.map((t, i) => (

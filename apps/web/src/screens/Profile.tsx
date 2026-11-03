@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap,
   CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare,
@@ -24,7 +24,7 @@ const sanaVaqt = (s?: string | null) => {
 };
 
 export default function Profile() {
-  const nav = useNavigate();
+  const orqaga = useOrqaga();
   const [open, setOpen] = useState(false);
   const [me, setMe] = useState<any>(null);
   // Akkauntni o'chirish (App Store/Play Market talabi) — ikki bosqichli tasdiq
@@ -64,7 +64,7 @@ export default function Profile() {
       <div className="db-main">
         <header className="db-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
-          <button className="adm-back" onClick={() => nav('/')}><ChevronLeft size={18} /> Bosh sahifa</button>
+          <button className="adm-back" onClick={orqaga}><ChevronLeft size={18} /> {orqagaYozuvi()}</button>
         </header>
 
         <div className="db-content">

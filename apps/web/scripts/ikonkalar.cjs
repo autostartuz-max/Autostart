@@ -30,7 +30,7 @@ const RES = path.join(ILDIZ, 'android/app/src/main/res');
 const FONLAR = {
   toq: { nom: "To'q kulrang (ilova rangi)", ichki: '#3e3c3a', tashqi: '#1f1e1d', asosiy: '#2B2A29' },
   kok: { nom: "To'q ko'k", ichki: '#1a3d6b', tashqi: '#0a1a31', asosiy: '#10294A' },
-  qora: { nom: 'Qora', ichki: '#1c1c1c', tashqi: '#000000', asosiy: '#0B0B0B' },
+  qora: { nom: "To'q qora", ichki: '#000000', tashqi: '#000000', asosiy: '#000000' },
 };
 
 // Adaptiv ikonka: 108dp maydon, ko'rinadigan qismi markazdagi 72dp, hech qaysi niqob kesmaydigan

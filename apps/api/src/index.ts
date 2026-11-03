@@ -24,7 +24,10 @@ app.get('/api/health', (_req, res) => res.json({ ok: true, devAuth: DEV_AUTH }))
 // 1) Login/ro'yxatdan o'tish — qattiq (parol taxminlashga qarshi)
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: 'Juda ko‘p urinish. 15 daqiqa kuting.' });
 app.use('/api/admin/login', authLimiter);
-app.use('/api/auth', authLimiter);
+// Sessiyani uzaytirish (/auth/refresh) bu chegaraga kirmaydi: u amaldagi token bilan ishlaydi
+// (parol taxminlashga yaramaydi) va ilova HAR ochilganda chaqiriladi — bitta maktab Wi-Fi'idan
+// 20 ta o'quvchi ilovani ochsa, qolganlarga login/ro'yxatdan o'tish 15 daqiqa yopilib qolardi.
+app.use('/api/auth', (req, res, next) => (req.path === '/refresh' ? next() : authLimiter(req, res, next)));
 // 2) Savol/rasm — ommaviy ko'chirishga qarshi (bitta test ~20 savol/rasm)
 app.use('/api/questions', rateLimit({ windowMs: 5 * 60 * 1000, max: 240, message: 'Savol/rasm so‘rovlari cheklandi. Biroz kuting.' }));
 // 3) Umumiy chegara — har qanday IP uchun

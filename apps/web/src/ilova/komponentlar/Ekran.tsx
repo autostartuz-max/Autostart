@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import PastkiMenyu, { type MenyuBolim } from './PastkiMenyu';
+import { ilovaEkrani } from '../../native';
 import '../tema.css';
 import './komponentlar.css';
 
@@ -9,6 +10,11 @@ import './komponentlar.css';
  * turgan menyu kontentni yopmasligi uchun joy qoldiriladi.
  */
 export default function Ekran({ faol, children, className }: { faol: MenyuBolim; children: ReactNode; className?: string }) {
+  // Telefonning tepa (soat) va pastki (tugmalar) chizig'i ham ekran fonidek #2B2A29 bo'lsin
+  useEffect(() => {
+    ilovaEkrani(true);
+    return () => ilovaEkrani(false);
+  }, []);
   return (
     <div className={'ilv ilv-ekran' + (className ? ' ' + className : '')}>
       <main className="ilv-ichi">{children}</main>

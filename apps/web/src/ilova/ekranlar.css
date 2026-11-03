@@ -60,7 +60,12 @@
   width: 238px;
   background: repeating-linear-gradient(90deg, var(--ilv-chiziq) 0 var(--ilv-chiziq-en), transparent var(--ilv-chiziq-en) var(--ilv-chiziq-qadam));
   transform: skewX(var(--ilv-chiziq-qiya));
-  animation: ilv-asosiy-chiziq .75s linear infinite;
+  /* Alohida xossalar: "animation" qisqa yozuvi tema.css dagi pauza qoidasini bekor qilib,
+     karta ekrandan chiqqanda ham harakat to'xtamay qolardi */
+  animation-name: ilv-asosiy-chiziq;
+  animation-duration: .75s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
   pointer-events: none;
 }
 @keyframes ilv-asosiy-chiziq {
@@ -131,7 +136,10 @@
   border-radius: 50%;
   background: var(--ilv-sariq);
   color: var(--ilv-toq);
-  animation: ilv-asosiy-play 1.5s ease-in-out infinite;
+  animation-name: ilv-asosiy-play;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 .ilv .ilv-asosiy-play svg { display: block; width: 100%; height: 100%; }
 @keyframes ilv-asosiy-play {

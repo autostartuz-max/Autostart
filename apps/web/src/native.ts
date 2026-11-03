@@ -29,6 +29,34 @@ const ilovaSinovi = () => {
 /** Ilova ichidamizmi (App Store / Play Market build'i) */
 export const mobilIlova = () => Capacitor.isNativePlatform() || ilovaSinovi();
 
+// Tizim chiziqlari (tepadagi soat qatori va pastki tugmalar) rangi: yangi ilova ekranlari
+// (Bosh sahifa, Testlar, O'rganish, Profil — Ekran qobig'i) fonida #2B2A29, qolganlarida #0f1117.
+const ODDIY_BAR = '#0f1117';
+const ILV_BAR = '#2b2a29';
+let ilvEkranlar = 0;
+let barTaymer: ReturnType<typeof setTimeout> | undefined;
+const joriyBar = () => (ilvEkranlar > 0 ? ILV_BAR : ODDIY_BAR);
+
+async function barRangi(color: string) {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    const [{ EdgeToEdge }, { StatusBar }] = await Promise.all([
+      import('@capawesome/capacitor-android-edge-to-edge-support'),
+      import('@capacitor/status-bar'),
+    ]);
+    EdgeToEdge.setBackgroundColor({ color }).catch(() => {});
+    StatusBar.setBackgroundColor({ color }).catch(() => {});
+  } catch { /* plagin bu platformada yo'q */ }
+}
+
+/** Ekran qobig'i ochilganda true, yopilganda false — tizim chiziqlari ekran rangiga moslanadi */
+export function ilovaEkrani(ochiq: boolean) {
+  ilvEkranlar = Math.max(0, ilvEkranlar + (ochiq ? 1 : -1));
+  // Ekranlar orasida o'tganda (biri yopilib, keyingisi ochiladi) rang miltillamasin
+  clearTimeout(barTaymer);
+  barTaymer = setTimeout(() => { barRangi(joriyBar()); }, 30);
+}
+
 export async function initNative() {
   // Tarmoq tiklanganda offline yechilgan javoblar serverga jo'natiladi.
   // Bu brauzerda ham kerak — shuning uchun native tekshiruvdan oldin turadi.
@@ -48,7 +76,8 @@ export async function initNative() {
 
   // Qorong'i fon — status bar matni oq bo'lsin
   StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
-  StatusBar.setBackgroundColor({ color: '#0f1117' }).catch(() => {});
+  StatusBar.setBackgroundColor({ color: joriyBar() }).catch(() => {});
+  if (ilvEkranlar > 0) barRangi(ILV_BAR);
 
   // Android'dagi "orqaga" tugmasi: sahifa bo'lsa orqaga, bosh sahifada esa
   // ilovadan chiqadi (aks holda oq ekranda qotib qoladi).

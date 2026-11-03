@@ -1110,7 +1110,7 @@ export default function TestPlayer() {
               setFabOpen((v) => !v);
             }}
           >
-            {fabOpen ? <X size={19} /> : <GraduationCap size={19} />} O‘rganish
+            {fabOpen ? <><X size={19} /> Yopish</> : <><GraduationCap size={19} /> O‘rganish</>}
           </button>
         </div>
       )}

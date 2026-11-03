@@ -83,3 +83,61 @@
   --ilv-shr-yozuv: 13px; /* statistika yozuvi, 600 */
   --ilv-shr-menyu: 12px; /* menyu yozuvi, 700 */
 }
+
+/* ---------------------------------------------------------------------------------------
+   YORUG' MAVZU (Profil → mavzu: Light, yoki "System" va telefon yorug' rejimda).
+   theme.ts <html data-theme="light"> qo'yadi. Namuna to'q — yorug' variant shu ranglardan:
+   fon iliq och kulrang, kartochkalar oq, matn to'q. TEST YECHISH va Profil daraja kartasi
+   ikkala mavzuda ham to'q qoladi (asosiy karta). Sariq faqat to'ldirish (tugma, tabletka)
+   sifatida — oq fonda sariq matn o'qilmaydi, shuning uchun sariq yozuvlar to'q/oltinrang.
+   --------------------------------------------------------------------------------------- */
+:root[data-theme="light"] .ilv {
+  --ilv-fon: #f2f1ee;
+  --ilv-karta: #ffffff;
+  --ilv-oq: #1f1e1d; /* asosiy matn (to'q mavzuda oq) */
+  --ilv-matn2: #6b6762;
+  --ilv-togri: #0a9c4b;
+  --ilv-xato: #e42327;
+  --ilv-oltin: #a88600; /* sariq o'rniga matn uchun: oq fonda 3.4:1 (katta qalin yozuv) */
+  --ilv-soya: 0 1px 2px rgba(31, 30, 29, .06), 0 2px 10px rgba(31, 30, 29, .06);
+}
+/* To'q qoladigan kartalar: ichida to'q mavzu ranglari */
+:root[data-theme="light"] .ilv .ilv-asosiy,
+:root[data-theme="light"] .ilv .ilv-pr-daraja {
+  --ilv-oq: #ffffff;
+  --ilv-matn2: #d4d2cf;
+  --ilv-karta: #3b3937;
+  color: var(--ilv-oq); /* rangi berilmagan yozuvlar (masalan "76 / 300 ball") ham oq bo'lsin */
+  box-shadow: 0 4px 16px rgba(31, 30, 29, .18);
+}
+/* Logotip: yorug' fonda shaffof, oq yozuvlari to'q (logo-yorug.webp). `.ilv-logo` bilan birga —
+   komponentlar.css dagi `.ilv .ilv-logo { display: block }` dan kuchliroq bo'lsin */
+.ilv .ilv-logo.ilv-logo-yorug { display: none; }
+:root[data-theme="light"] .ilv .ilv-logo.ilv-logo-toq { display: none; }
+:root[data-theme="light"] .ilv .ilv-logo.ilv-logo-yorug { display: block; }
+/* Oq kartochkalar och fondan ajralib tursin */
+:root[data-theme="light"] .ilv .ilv-karta,
+:root[data-theme="light"] .ilv .ilv-pr-karta,
+:root[data-theme="light"] .ilv .ilv-pr-sozlama { box-shadow: var(--ilv-soya); }
+:root[data-theme="light"] .ilv .ilv-stat,
+:root[data-theme="light"] .ilv .ilv-pr-xato { background: var(--ilv-karta); box-shadow: var(--ilv-soya); }
+:root[data-theme="light"] .ilv .ilv-menyu-ichi { background: var(--ilv-karta); box-shadow: 0 2px 14px rgba(31, 30, 29, .12); }
+/* Sariq matnli tugmalar → sariq tugma, to'q belgi */
+:root[data-theme="light"] .ilv .ilv-chip,
+:root[data-theme="light"] .ilv .ilv-qidiruv,
+:root[data-theme="light"] .ilv .ilv-pr-xato-tugma { background: var(--ilv-sariq); color: var(--ilv-toq); }
+/* Sariq yozuvlar → to'q yoki oltinrang */
+:root[data-theme="light"] .ilv .ilv-ekran-sarlavha { color: var(--ilv-toq); }
+:root[data-theme="light"] .ilv .ilv-stat-qolgan .ilv-stat-son,
+:root[data-theme="light"] .ilv .ilv-pr-royxat > li > b,
+:root[data-theme="light"] .ilv .ilv-pr-sozlama > .ilv-pr-sozlama-ik { color: var(--ilv-oltin); }
+:root[data-theme="light"] .ilv .ilv-pr-kod { background: var(--ilv-fon); color: var(--ilv-toq); }
+:root[data-theme="light"] .ilv .ilv-pr-til .lt .lt-seg { background: var(--ilv-fon); }
+/* Rangli belgi ("27", "1") va Oktagon rasmi ustidagi sarlavha — oq yozuv */
+:root[data-theme="light"] .ilv .ilv-belgi,
+:root[data-theme="light"] .ilv .ilv-karta-fonli .ilv-karta-sarlavha { color: #ffffff; }
+/* 3D ikonkalar soyasi oq kartochkada yengilroq */
+:root[data-theme="light"] .ilv .ilv-joy > .ilv-ikonka,
+:root[data-theme="light"] .ilv .ilv-joy > svg { filter: drop-shadow(0 5px 5px rgba(31, 30, 29, .22)); }
+/* Klaviatura fokusi: sariq chiziq oq fonda ko'rinmaydi */
+:root[data-theme="light"] .ilv *:focus-visible { outline-color: var(--ilv-toq); }

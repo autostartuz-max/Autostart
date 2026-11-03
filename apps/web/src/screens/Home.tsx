@@ -118,7 +118,7 @@ export default function Home() {
           belgi={{ matn: xato, rang: 'qizil' }}
           onClick={() => nav('/test?mode=mistakes')}
         />
-        <IlovaKarta sarlavha="Oktagon" fon={{ animatsiya: oktagon, kadr: oktagonKadr }} onClick={() => nav('/oktagon')} />
+        <IlovaKarta sarlavha="Bellashuv" fon={{ animatsiya: oktagon, kadr: oktagonKadr }} onClick={() => nav('/oktagon')} />
       </div>
     </Ekran>
   );

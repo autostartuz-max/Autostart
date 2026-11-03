@@ -23,7 +23,7 @@ function Qoidalar({ kutish, tugma, onDavom, onClose }: { kutish: number; tugma: 
   }, [qoldi]);
 
   return (
-    <PastkiOyna title="Oktagon qoidalari" onClose={onClose}>
+    <PastkiOyna title="Bellashuv qoidalari" onClose={onClose}>
       <div style={{ height: 18 }} />
       <div className="ok-rule yashil">
         <span className="ok-rule-ic"><Swords size={20} /></span>
@@ -173,10 +173,10 @@ function DostOyna({ onJang, onClose }: { onJang: (jangId: number) => void; onClo
   };
 
   const ulash = async () => {
-    const matn = `Autostart ilovasida Oktagon'da men bilan bellash! ⚔️\nKod: ${kod}\n(Oktagon → Do‘stni jangga chaqirish → Kod bilan qo‘shilish)`;
+    const matn = `Autostart ilovasida men bilan bellash! ⚔️\nKod: ${kod}\n(Bellashuv → Do‘stni jangga chaqirish → Kod bilan qo‘shilish)`;
     try {
       const { Share } = await import('@capacitor/share');
-      await Share.share({ title: 'Oktagon', text: matn, dialogTitle: 'Do‘stingizga yuboring' });
+      await Share.share({ title: 'Bellashuv', text: matn, dialogTitle: 'Do‘stingizga yuboring' });
     } catch (e: any) {
       if (/cancel/i.test(String(e?.message || ''))) return; // foydalanuvchi o'zi yopdi
       try {
@@ -208,7 +208,7 @@ function DostOyna({ onJang, onClose }: { onJang: (jangId: number) => void; onClo
       <PastkiOyna title="Do‘stingizni chaqiring" onClose={yop}>
         <div className="ok-kod">{kod ? `${kod.slice(0, 3)} ${kod.slice(3)}` : '— — —'}</div>
         <div className="ok-izoh" style={{ margin: '0 0 16px' }}>
-          Kodni do‘stingizga yuboring. U Oktagon → “Do‘stni jangga chaqirish” → “Kod bilan qo‘shilish” orqali kiradi.
+          Kodni do‘stingizga yuboring. U Bellashuv → “Do‘stni jangga chaqirish” → “Kod bilan qo‘shilish” orqali kiradi.
         </div>
         {kod && <div className="ok-kutish"><span className="ok-nuqta" /> Do‘stingiz kutilmoqda…</div>}
         {xabar && <div className="ok-izoh" style={{ margin: '0 0 14px' }}>{xabar}</div>}
@@ -273,7 +273,7 @@ export default function Oktagon() {
       </div>
 
       <div className="ok-emblem"><Swords size={60} strokeWidth={1.6} /></div>
-      <div className="ok-name">OKTAGON</div>
+      <div className="ok-name">BELLASHUV</div>
       <div className="ok-sub">JANG REJIMI</div>
 
       <div className="ok-stats">

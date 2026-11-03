@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Search } from 'lucide-react';
 import logo from '../rasmlar/logo.webp';
+import logoYorug from '../rasmlar/logo-yorug.webp';
 import '../tema.css';
 import './komponentlar.css';
 
@@ -11,7 +12,9 @@ import './komponentlar.css';
 export default function TepaQator({ ong }: { ong?: ReactNode }) {
   return (
     <header className="ilv-tepa">
-      <img className="ilv-logo" src={logo} alt="AutoStart — haydovchilar tayyorlash maktabi" />
+      {/* Mavzuga qarab bittasi ko'rinadi (tema.css): to'q fonli asl logo yoki yorug' fon uchun shaffof nusxa */}
+      <img className="ilv-logo ilv-logo-toq" src={logo} alt="AutoStart — haydovchilar tayyorlash maktabi" />
+      <img className="ilv-logo ilv-logo-yorug" src={logoYorug} alt="AutoStart — haydovchilar tayyorlash maktabi" />
       {ong}
     </header>
   );

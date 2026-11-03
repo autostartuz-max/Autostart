@@ -16,10 +16,11 @@ export default function OrganishIlova() {
       <TepaQator ong={<QidiruvTugma onClick={() => nav('/mavzular')} />} />
       <h1 className="ilv-ekran-sarlavha">O‘rganish</h1>
       <div className="ilv-karta-tor">
-        <IlovaKarta tur="test" sarlavha="Darslik" ikonka={<Shapka />} onClick={() => nav('/amaliy')} />
+        {/* Darslik — nazariy darslar (hali tayyor emas); amaliy videolar Avtodrom'da */}
+        <IlovaKarta tur="test" sarlavha="Darslik" ikonka={<Shapka />} onClick={() => nav('/darslik')} />
         <IlovaKarta tur="test" sarlavha="Mavzular" ikonka={<Papka />} onClick={() => nav('/mavzular')} />
         <IlovaKarta tur="test" sarlavha="Yo‘l belgilari" ikonka={<YolBelgisi />} onClick={() => nav('/belgilar')} />
-        <IlovaKarta tur="test" sarlavha="Avtodrom" ikonka={<Mashina />} onClick={() => nav('/avtodrom')} />
+        <IlovaKarta tur="test" sarlavha="Avtodrom" ikonka={<Mashina />} onClick={() => nav('/amaliy')} />
       </div>
     </Ekran>
   );

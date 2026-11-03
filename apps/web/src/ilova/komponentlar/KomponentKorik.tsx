@@ -37,7 +37,7 @@ export default function KomponentKorik() {
         <IlovaKarta sarlavha="Mavzular" ikonka={<Papka />} onClick={bos} />
         <IlovaKarta sarlavha="Yo‘l belgilari" ikonka={<YolBelgisi />} onClick={bos} />
         <IlovaKarta sarlavha="Xatolarni tuzatish" ikonka={<SinganYurak />} belgi={{ matn: 27, rang: 'qizil' }} onClick={bos} />
-        <IlovaKarta sarlavha="Oktagon" fon={{ animatsiya: oktagon, kadr: oktagonKadr }} onClick={bos} />
+        <IlovaKarta sarlavha="Bellashuv" fon={{ animatsiya: oktagon, kadr: oktagonKadr }} onClick={bos} />
       </div>
 
       {/* Testlar ekrani bo'laklari — birinchi ekrandan (844px) pastda, solishtirishga xalaqit bermasin */}

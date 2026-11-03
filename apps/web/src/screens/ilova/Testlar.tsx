@@ -49,8 +49,9 @@ export default function TestlarIlova() {
           onClick={() => nav('/test?mode=saved')}
         />
         <IlovaKarta tur="test" sarlavha="Xatolarim" ikonka={<SinganYurak />} onClick={() => nav('/xatolarim')} />
-        <IlovaKarta tur="test" sarlavha="Avtodrom" ikonka={<Mashina />} onClick={() => nav('/avtodrom')} />
-        <IlovaKarta tur="test" sarlavha="Darslik" ikonka={<Shapka />} onClick={() => nav('/amaliy')} />
+        {/* Avtodrom — amaliy mashg'ulot videolari; Darslik — nazariy darslar (hali tayyor emas) */}
+        <IlovaKarta tur="test" sarlavha="Avtodrom" ikonka={<Mashina />} onClick={() => nav('/amaliy')} />
+        <IlovaKarta tur="test" sarlavha="Darslik" ikonka={<Shapka />} onClick={() => nav('/darslik')} />
         {/* Namunada "Sizga" dan keyin yangi qator */}
         <IlovaKarta tur="test" sarlavha={'Sizga\nsavol bor'} ikonka={<SavolPufak />} onClick={() => nav('/aloqa')} />
       </div>

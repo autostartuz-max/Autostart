@@ -28,9 +28,9 @@ const QIYMATLAR: [keyof BallMen['qiymatlar'], string][] = [
   ['faollik', 'Kunlik faollik (kunning birinchi javobi)'],
   ['shablon', 'Shablonni yiqilmasdan tugatish (3 tadan kam xato)'],
   ['imtihon', 'Real imtihondan o‘tish'],
-  ['video', 'Darslik videosini oxirigacha ko‘rish'],
-  ['oktagonJang', 'Oktagonda jang'],
-  ['oktagonGalaba', 'Oktagonda g‘alaba (qo‘shimcha)'],
+  ['video', 'Avtodrom videosini oxirigacha ko‘rish'],
+  ['oktagonJang', 'Bellashuvda jang'],
+  ['oktagonGalaba', 'Bellashuvda g‘alaba (qo‘shimcha)'],
   ['taklif', 'Taklif qilgan do‘stingiz maktabga yozilsa'],
 ];
 

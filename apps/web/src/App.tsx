@@ -168,7 +168,9 @@ export default function App() {
         {mobilIlova() && <Route path="/oktagon/jang/:id" element={<OktagonJangSahifa />} />}
         {mobilIlova() && <Route path="/oktagon/reyting" element={<OktagonRoyxat tur="reyting" />} />}
         {mobilIlova() && <Route path="/oktagon/janglarim" element={<OktagonRoyxat tur="janglarim" />} />}
-        {mobilIlova() && <Route path="/avtodrom" element={<Placeholder title="Avtodrom" emoji="🚗" text="Avtodrom mashqlari tez orada qo‘shiladi." />} />}
+        {/* Ilovada Avtodrom = amaliy mashg'ulot videolari (/amaliy); Darslik — nazariy darslar, hali tayyor emas */}
+        {mobilIlova() && <Route path="/avtodrom" element={<Navigate to="/amaliy" replace />} />}
+        {mobilIlova() && <Route path="/darslik" element={<Placeholder title="Darslik" emoji="📘" text="Nazariy darslar tez orada qo‘shiladi." />} />}
         {/* Ilovaning pastki menyusi: Testlar, O'rganish, Profil (Asosiy — "/") */}
         {mobilIlova() && <Route path="/testlar" element={<TestlarIlova />} />}
         {mobilIlova() && <Route path="/organish" element={<OrganishIlova />} />}

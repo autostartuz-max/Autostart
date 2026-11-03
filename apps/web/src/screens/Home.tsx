@@ -8,7 +8,8 @@ import TepaQator, { KunChip } from '../ilova/komponentlar/TepaQator';
 import StatBlok from '../ilova/komponentlar/StatBlok';
 import IlovaKarta from '../ilova/komponentlar/IlovaKarta';
 import { useKorinish } from '../ilova/komponentlar/useKorinish';
-import { Chipta, Papka, SinganYurak, Svetofor, YolBelgisi } from '../ilova/ikonkalar';
+import { Chipta, Papka, Royxat, SavolPufak, SinganYurak, Svetofor, YolBelgisi } from '../ilova/ikonkalar';
+import PastkiOyna from '../components/PastkiOyna';
 import oktagon from '../ilova/rasmlar/oktagon.webp';
 import oktagonKadr from '../ilova/rasmlar/oktagon-kadr.webp';
 import '../ilova/ekranlar.css';
@@ -71,10 +72,19 @@ function AsosiyKarta({ ism, yechilgan, jami, foiz, onClick }: {
   );
 }
 
+// "50/100 talik": random test uchun savol soni (server bir so'rovda 200 tagacha beradi)
+const SONLAR = [50, 100, 200, 500];
+
 export default function Home() {
   const nav = useNavigate();
   const [me, setMe] = useState<MeIlova | null>(null);
   const [ball, setBall] = useState<BallMen | null>(null);
+  // "50/100 talik" darhol test ochmaydi — avval savol sonini so'raydi
+  const [soniOyna, setSoniOyna] = useState(false);
+  const randomBoshla = (n: number) => {
+    setSoniOyna(false);
+    nav(`/test?mode=random&limit=${n}&exam=1&lang=${testTili()}&shuffle=0`);
+  };
 
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
@@ -119,7 +129,23 @@ export default function Home() {
           onClick={() => nav('/test?mode=mistakes')}
         />
         <IlovaKarta sarlavha="Bellashuv" fon={{ animatsiya: oktagon, kadr: oktagonKadr }} onClick={() => nav('/oktagon')} />
+        {/* Namunadagi 3 qatordan keyin: 50/100 talik (Testlar'dan ko'chdi) va savol yuborish */}
+        <IlovaKarta sarlavha="50/100 talik" ikonka={<Royxat />} onClick={() => setSoniOyna(true)} />
+        <IlovaKarta sarlavha={'Sizga\nsavol bor'} ikonka={<SavolPufak />} onClick={() => nav('/aloqa')} />
       </div>
+
+      {soniOyna && (
+        <PastkiOyna title="Savol sonini tanlang" subtitle="Random savollar bilan test" onClose={() => setSoniOyna(false)}>
+          <div className="ie-sh-grid">
+            {SONLAR.map((n) => (
+              <button key={n} type="button" className="ie-sh-opt" onClick={() => randomBoshla(n)}>
+                <b>{n}</b>
+                <span>ta savol</span>
+              </button>
+            ))}
+          </div>
+        </PastkiOyna>
+      )}
     </Ekran>
   );
 }

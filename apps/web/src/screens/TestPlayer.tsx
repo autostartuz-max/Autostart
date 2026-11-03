@@ -1082,7 +1082,7 @@ export default function TestPlayer() {
         </div>}
       </div>
 
-      {/* ===== Ilova: "O'rganish" menyusi (pastki o'ng burchak) ===== */}
+      {/* ===== Ilova: "O'rganish" menyusi (pastki chap burchak) ===== */}
       {mobil && (
         <div className={'tpm-fab' + (fabOpen ? ' open' : '')}>
           {fabOpen && (

@@ -649,9 +649,9 @@ button { font-family: inherit; cursor: pointer; }
 /* Pastda "O'rganish" menyusi uchun joy — oxirgi variant uning ostida qolmasin */
 .cap .tp2-nav { margin-top: 0; padding: 0 0 calc(80px + env(safe-area-inset-bottom)); border: none; }
 
-/* "O'rganish" menyusi — o'ng tomonda, variantlar ustida */
-.tpm-fab { position: fixed; right: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40;
-  display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+/* "O'rganish" menyusi — pastki chap burchakda, variantlar ustida; tugmalar chap chetga tekislanadi */
+.tpm-fab { position: fixed; left: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
 .tpm-fab-main, .tpm-fab-i { display: inline-flex; align-items: center; gap: 9px; height: 38px;
   padding: 0 13px; border-radius: 12px; background: #1d2a3d; border: 1px solid #445468;
   border-bottom: 3px solid #34455a; color: #ccdae7; font-size: 14px; font-weight: 700;

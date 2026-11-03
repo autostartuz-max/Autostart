@@ -5,6 +5,7 @@ import fs from 'fs';
 import { PORT, HOST, DEV_AUTH } from './env';
 import { userRouter } from './routes/user';
 import { oktagonRouter } from './routes/oktagon';
+import { ballRouter } from './routes/ball';
 import { adminRouter } from './routes/admin';
 import { rateLimit } from './rateLimit';
 
@@ -40,6 +41,7 @@ app.use('/api', (req, res, next) => {
 });
 
 app.use('/api/oktagon', oktagonRouter);
+app.use('/api/ball', ballRouter);
 app.use('/api', userRouter);
 app.use('/api/admin', adminRouter);
 

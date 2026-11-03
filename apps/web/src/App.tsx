@@ -13,6 +13,8 @@ import ShablonIlova from './screens/ShablonIlova';
 import Oktagon from './screens/oktagon/Oktagon';
 import OktagonJangSahifa from './screens/oktagon/OktagonJang';
 import OktagonRoyxat from './screens/oktagon/OktagonRoyxat';
+import IkonkaKorik from './ilova/ikonkalar/Korik';
+import KomponentKorik from './ilova/komponentlar/KomponentKorik';
 import RandomTests from './screens/RandomTests';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
@@ -163,6 +165,9 @@ export default function App() {
         {mobilIlova() && <Route path="/oktagon/janglarim" element={<OktagonRoyxat tur="janglarim" />} />}
         {mobilIlova() && <Route path="/avtodrom" element={<Placeholder title="Avtodrom" emoji="🚗" text="Avtodrom mashqlari tez orada qo‘shiladi." />} />}
         <Route path="/reyting" element={<Rating />} />
+        {/* Faqat ishlab chiqishda: ilova ikonkalari ko'rigi (production build'da yo'q) */}
+        {(import.meta as any).env?.DEV && <Route path="/ilv-korik" element={<IkonkaKorik />} />}
+        {(import.meta as any).env?.DEV && <Route path="/ilv-komponent" element={<KomponentKorik />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

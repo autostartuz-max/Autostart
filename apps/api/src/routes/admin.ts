@@ -13,6 +13,7 @@ import {
 } from '../uploads';
 import { mobilNusxaNavbatga } from '../video';
 import { xatoStatistikasi } from '../qiyinlik';
+import { BALL, ballQosh } from '../ball';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
@@ -1194,5 +1195,55 @@ adminRouter.delete(
     await prisma.lesson.delete({ where: { id } });
     lessonFileniOchir(mavjud.fileName);
     res.json({ ok: true, id });
+  })
+);
+
+/* ---------- Promokod: do'stini Autostart maktabiga taklif qilganlar ---------- */
+/** Promokod bilan ro'yxatdan o'tganlar. ?q= — ism, telefon yoki promokod bo'yicha qidiruv */
+adminRouter.get(
+  '/promo',
+  requireAdmin,
+  ah(async (req, res) => {
+    const q = String(req.query.q || '').trim().toLowerCase();
+    const takliflar = await prisma.promoTaklif.findMany({ orderBy: { id: 'desc' }, take: 500 });
+    const idlar = [...new Set(takliflar.flatMap((t) => [t.egasiId, t.dostId]))];
+    const userlar = await prisma.user.findMany({
+      where: { id: { in: idlar } },
+      select: { id: true, firstName: true, phone: true, email: true },
+    });
+    const u = new Map(userlar.map((x) => [x.id, x]));
+    let list = takliflar.map((t) => ({
+      id: t.id,
+      kod: t.kod,
+      holat: t.holat,
+      yaratildi: t.yaratildi,
+      tasdiqlandi: t.tasdiqlandi,
+      dost: u.get(t.dostId) || null,
+      egasi: u.get(t.egasiId) || null,
+    }));
+    if (q)
+      list = list.filter((x) =>
+        [x.kod, x.dost?.firstName, x.dost?.phone, x.dost?.email, x.egasi?.firstName, x.egasi?.phone].some(
+          (v) => v && String(v).toLowerCase().includes(q)
+        )
+      );
+    res.json({ list: list.slice(0, 100) });
+  })
+);
+
+/** Do'st maktabga yozildi (chegirma berildi) — tasdiqlash; promokod egasiga bonus ball */
+adminRouter.post(
+  '/promo/:id/tasdiq',
+  requireAdmin,
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const r = await prisma.promoTaklif.updateMany({
+      where: { id, holat: 'yangi' },
+      data: { holat: 'tasdiqlangan', tasdiqlandi: new Date() },
+    });
+    if (!r.count) return res.status(409).json({ error: 'Allaqachon tasdiqlangan yoki topilmadi' });
+    const t = await prisma.promoTaklif.findUnique({ where: { id } });
+    if (t) await ballQosh(t.egasiId, 'taklif', BALL.taklif, `taklif:${t.dostId}`);
+    res.json({ ok: true });
   })
 );

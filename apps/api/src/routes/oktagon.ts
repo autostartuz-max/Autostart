@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '../prisma';
 import { requireUser } from '../auth';
+import { BALL as DARAJA_BALL, KUNLIK_OKTAGON, ballQosh, bugungiSoni, kun } from '../ball';
 
 /**
  * Oktagon — jang rejimi. Ikki o'yinchi bir xil 10 ta savolga javob beradi,
@@ -213,8 +214,10 @@ async function yakunla(j: Jang): Promise<Jang> {
   const t2 = b.filter((x) => x.togri).length;
   const natija = (chiqdi: boolean, raqibChiqdi: boolean, men: number, u: number): Natija =>
     chiqdi ? 'chiqdi' : raqibChiqdi ? 'galaba' : men > u ? 'galaba' : men === u ? 'durang' : 'maglubiyat';
-  const d1 = BALL[natija(j.p1Chiqdi, j.p2Chiqdi, t1, t2)];
-  const d2 = j.p2Id == null ? null : BALL[natija(j.p2Chiqdi, j.p1Chiqdi, t2, t1)];
+  const n1 = natija(j.p1Chiqdi, j.p2Chiqdi, t1, t2);
+  const n2 = j.p2Id == null ? null : natija(j.p2Chiqdi, j.p1Chiqdi, t2, t1);
+  const d1 = BALL[n1];
+  const d2 = n2 == null ? null : BALL[n2];
 
   // Faqat bitta so'rov yakunlaydi (ikki o'yinchi bir vaqtda so'rasa ball ikki marta qo'shilmasin)
   const r = await prisma.oktagonJang.updateMany({
@@ -228,8 +231,19 @@ async function yakunla(j: Jang): Promise<Jang> {
         .catch(() => {}); // o'yinchi akkauntini o'chirgan bo'lishi mumkin
     await ball(j.p1Id, d1);
     if (j.p2Id != null && d2 != null) await ball(j.p2Id, d2);
+    // Daraja tizimi (umumiy ball, Oktagon balidan alohida)
+    await darajaBallari(j.p1Id, j.id, n1).catch(() => {});
+    if (j.p2Id != null && n2) await darajaBallari(j.p2Id, j.id, n2).catch(() => {});
   }
   return (await prisma.oktagonJang.findUnique({ where: { id: j.id } }))!;
+}
+
+/** Daraja tizimiga: jang +1, g'alaba +5; chiqib ketganga yo'q; kuniga KUNLIK_OKTAGON tagacha jang */
+async function darajaBallari(userId: number, jangId: number, n: Natija) {
+  if (n === 'chiqdi') return;
+  if ((await bugungiSoni(userId, 'oktagon')) >= KUNLIK_OKTAGON) return;
+  await ballQosh(userId, 'oktagon', DARAJA_BALL.oktagonJang, `oktagon:${kun()}:${jangId}`);
+  if (n === 'galaba') await ballQosh(userId, 'oktagon-galaba', DARAJA_BALL.oktagonGalaba, `oktagon-galaba:${kun()}:${jangId}`);
 }
 
 // Bir jangga javoblar ketma-ket yoziladi (JSON ustun — o'qib, qo'shib, yozish)

@@ -212,6 +212,22 @@ async function req(path: string, opts: RequestInit = {}, kesh = true) {
   }
 }
 
+/* ---------- Daraja tizimi ---------- */
+export interface BallMen {
+  id: number;
+  ism: string;
+  qoshilgan: string;
+  ball: number;
+  daraja: { nom: string; dan: number; keyingi: { nom: string; dan: number } | null };
+  streak: number;
+  oxirgi7: number;
+  orin: number | null;
+  promoKod: string | null;
+  taklif: { jami: number; tasdiqlangan: number };
+  qiymatlar: Record<'javob' | 'shablon' | 'imtihon' | 'video' | 'oktagonJang' | 'oktagonGalaba' | 'faollik' | 'taklif', number>;
+  tarix: { kun: string; sabab: string; miqdor: number; soni: number }[];
+}
+
 /* ---------- Oktagon (jang rejimi, faqat ilovada) ---------- */
 export type OktagonDaraja = 'Bronza' | 'Kumush' | 'Oltin' | 'Brilliant';
 export type OktagonNatija = 'galaba' | 'durang' | 'maglubiyat' | 'chiqdi';
@@ -270,8 +286,13 @@ export const oktagon = {
 export const api = {
   authTelegram: (initData: string, guestId?: string) =>
     req('/auth/telegram', { method: 'POST', body: JSON.stringify({ initData, guestId }) }),
-  register: (name: string, phone: string, password: string, email = '') =>
-    req('/auth/register', { method: 'POST', body: JSON.stringify({ name, phone, email, password }) }),
+  // promo — do'stining promokodi (ilova); bo'sh bo'lsa yuborilmaydi
+  register: (name: string, phone: string, password: string, email = '', promo = '') =>
+    req('/auth/register', { method: 'POST', body: JSON.stringify({ name, phone, email, password, ...(promo ? { promo } : {}) }) }),
+  /** Daraja tizimi: ball, daraja, streak, promokod, tarix */
+  ballMen: (): Promise<BallMen> => req('/ball/men', {}, false),
+  ballImtihon: (savollar: number[]) => req('/ball/imtihon', { method: 'POST', body: JSON.stringify({ savollar }) }),
+  ballVideo: (lessonId: number) => req('/ball/video', { method: 'POST', body: JSON.stringify({ lessonId }) }),
   /** login — telefon yoki pochta */
   login: (login: string, password: string) =>
     req('/auth/login', { method: 'POST', body: JSON.stringify({ login, password }) }),

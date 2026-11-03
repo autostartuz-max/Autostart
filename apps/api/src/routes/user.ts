@@ -4,6 +4,7 @@ import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma';
 import { raqamliSavolIdlari } from '../raqamli';
+import { BALL, ballQosh, faollik, shablonTekshir } from '../ball';
 import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } from '../auth';
 import { shifrla } from '../passwordVault';
@@ -150,13 +151,23 @@ userRouter.post(
       return res.status(409).json({ error: 'Bu pochta allaqachon ro‘yxatdan o‘tgan. Kiring.' });
     }
 
+    // Ixtiyoriy promokod (ilova): do'stining kodi bilan kelgan — Autostart maktabida chegirma oladi.
+    // Parametr berilmasa — avvalgidek.
+    const promo = String(req.body?.promo || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const egasi = promo ? await prisma.user.findUnique({ where: { promoKod: promo }, select: { id: true } }) : null;
+    if (promo && !egasi) {
+      return res.status(400).json({ error: 'Promokod topilmadi. Tekshirib qayta kiriting yoki bo‘sh qoldiring' });
+    }
+
     const user = await prisma.user.create({
       data: {
         phone, email, firstName: name,
         passwordHash: bcrypt.hashSync(password, 10),
         passwordEnc: shifrla(password), // admin panelida ko'rsatish uchun
+        taklifQiluvchiId: egasi?.id ?? null,
       },
     });
+    if (egasi) await prisma.promoTaklif.create({ data: { egasiId: egasi.id, dostId: user.id, kod: promo } });
     res.json({ token: signUserToken(user.id), user: safeUser(user) });
   })
 );
@@ -620,6 +631,14 @@ userRouter.post(
     await prisma.userAnswer.create({
       data: { userId, questionId, isCorrect, chosen: JSON.stringify(chosen), timeMs, source },
     });
+
+    // Daraja tizimi: kunning birinchi javobi +5, savolga birinchi to'g'ri javob +1,
+    // shablon yiqilmasdan tugasa +20. Fonda — javobni kechiktirmaydi, xatosi javobga ta'sir qilmaydi.
+    void (async () => {
+      await faollik(userId);
+      if (isCorrect) await ballQosh(userId, 'javob', BALL.javob, `javob:${questionId}`);
+      if (question.shablon) await shablonTekshir(userId, question.shablon);
+    })().catch((e) => console.error('[ball]', e?.message || e));
 
     res.json({ isCorrect, correctOptionIds: correctIds });
   })

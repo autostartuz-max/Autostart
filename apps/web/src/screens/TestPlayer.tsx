@@ -148,6 +148,17 @@ export default function TestPlayer() {
     }
   };
 
+  // Daraja tizimi: real imtihondan (shablon emas) o'tildi — +30 ball. Server javoblarni
+  // o'zi qayta tekshiradi va kuniga 3 martagacha beradi
+  const imtihonYuborildi = useRef(false);
+  useEffect(() => {
+    if (!finished || imtihonYuborildi.current || !questions || mode !== 'exam' || shablon || tugashSabab) return;
+    const javoblar = questions.map((q) => answers[q.id]).filter(Boolean);
+    if (javoblar.length < questions.length || javoblar.filter((a) => !a.isCorrect).length >= 3) return;
+    imtihonYuborildi.current = true;
+    api.ballImtihon(questions.map((q) => q.id)).catch(() => {});
+  }, [finished, questions, answers, mode, shablon, tugashSabab]);
+
   // ---- Ovozli pleyer ----
   const voiceRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);

@@ -1,0 +1,62 @@
+/* ===== Ilova temasi (ilv-*) — Bosh sahifa, Testlar, O'rganish, Profil =====
+   Ranglar, shrift va o'lchamlar shu bitta faylda. FAQAT ilovada chiziladi:
+   hamma qoida `.ilv` ichida va `ilv-` prefiksli — saytga tegmaydi.
+   Maket: 390×844 (namuna "variant-6"). */
+
+@import '@fontsource/exo-2/500.css';
+@import '@fontsource/exo-2/600.css';
+@import '@fontsource/exo-2/700.css';
+@import '@fontsource/exo-2/800.css';
+@import '@fontsource/exo-2/800-italic.css';
+
+.ilv {
+  /* Ranglar */
+  --ilv-fon: #2b2a29;
+  --ilv-karta: #3b3937;
+  --ilv-toq: #1f1e1d;
+  --ilv-sariq: #ffee00;
+  --ilv-qizil: #e42327;
+  --ilv-yashil: #0a9c4b;
+  --ilv-oq: #ffffff;
+  --ilv-matn2: #d4d2cf;
+  --ilv-togri: #3bd97f;
+  --ilv-xato: #ff6b6b;
+
+  /* Shrift */
+  --ilv-shrift: 'Exo 2', system-ui, -apple-system, Roboto, sans-serif;
+
+  /* O'lchamlar */
+  --ilv-padding: 14px 16px 12px;
+  --ilv-oraliq: 10px; /* bosh sahifa elementlari orasi */
+  --ilv-tor: 8px; /* kartochkalar orasi */
+  --ilv-logo-en: 258px;
+  --ilv-logo-boy: 46px;
+  --ilv-chip-boy: 40px;
+  --ilv-chip-radius: 12px;
+  --ilv-qidiruv: 44px;
+  --ilv-asosiy-boy: 184px;
+  --ilv-asosiy-radius: 22px;
+  --ilv-stat-boy: 68px;
+  --ilv-stat-radius: 16px;
+  --ilv-karta-boy: 122px; /* bosh sahifa */
+  --ilv-karta-boy-test: 112px; /* Testlar ekrani */
+  --ilv-karta-radius: 20px;
+  --ilv-menyu-boy: 66px;
+  --ilv-menyu-radius: 20px;
+  --ilv-menyu-faol-radius: 15px;
+  --ilv-tugma-min: 44px; /* har qanday bosiladigan joy kamida 44px */
+
+  font-family: var(--ilv-shrift);
+  color: var(--ilv-oq);
+  background: var(--ilv-fon);
+}
+
+/* Animatsiyalar faqat element ekranda ko'rinib turganda ishlaydi (useKorinish
+   kartochkaga `ilv-korinadi` qo'shadi) va tizimdagi "harakatni kamaytirish"
+   sozlamasi yoqilgan bo'lsa umuman o'chadi. Animatsiyali har bir qism `ilv-ani`. */
+.ilv .ilv-ani { animation-play-state: paused; }
+.ilv .ilv-korinadi .ilv-ani,
+.ilv .ilv-ani.ilv-korinadi { animation-play-state: running; }
+@media (prefers-reduced-motion: reduce) {
+  .ilv .ilv-ani { animation: none !important; }
+}

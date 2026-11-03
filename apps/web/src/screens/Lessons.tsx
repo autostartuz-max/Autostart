@@ -67,6 +67,8 @@ export default function Lessons() {
           autoPlay
           playsInline
           preload="metadata"
+          // Daraja tizimi: dars oxirigacha ko'rildi — +10 ball (har dars uchun bir marta)
+          onEnded={() => api.ballVideo(l.id).catch(() => {})}
         />
       ) : (
         <button className="am-poster" onClick={() => setOchilgan(l.id)} aria-label={l.title + ' — ko‘rish'}>

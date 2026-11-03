@@ -128,6 +128,12 @@ model User {
   // Oktagon (jang rejimi): ball va o'ynalgan janglar soni. Ball manfiy bo'lishi mumkin.
   oktagonBall Int @default(0)
   oktagonJang Int @default(0)
+  // Daraja tizimi: jami ball (Piyoda → Yo'lovchi → Haydovchi → Professional), BallTarix yig'indisi
+  ball        Int     @default(0)
+  // Shaxsiy promokod — do'stlarni Autostart maktabiga taklif qilish (birinchi so'rovda yaratiladi)
+  promoKod    String? @unique
+  // Ro'yxatdan o'tishda kimning promokodi kiritilgan
+  taklifQiluvchiId Int?
   answers    UserAnswer[]
   bookmarks  Bookmark[]
   complaints Complaint[]
@@ -283,4 +289,34 @@ model OktagonJang {
 
   @@index([p1Id])
   @@index([p2Id])
+}
+
+// Ball tarixi. kalit — takrorlanmaslik uchun: bir savol ("javob:123"), video, shablon
+// yoki kun ("faollik:2026-11-03") uchun ball bir marta beriladi.
+model BallTarix {
+  id     Int      @id @default(autoincrement())
+  userId Int
+  // javob | shablon | imtihon | video | oktagon | faollik | taklif
+  sabab  String
+  miqdor Int
+  kalit  String
+  vaqt   DateTime @default(now())
+
+  @@unique([userId, kalit])
+  @@index([userId, vaqt])
+}
+
+// Promokod bilan ro'yxatdan o'tgan do'st. Maktabga yozilganda admin tasdiqlaydi —
+// shunda promokod egasi bonus ball oladi, do'st esa maktabda chegirma oladi.
+model PromoTaklif {
+  id          Int       @id @default(autoincrement())
+  egasiId     Int
+  dostId      Int       @unique
+  kod         String
+  // yangi | tasdiqlangan
+  holat       String    @default("yangi")
+  yaratildi   DateTime  @default(now())
+  tasdiqlandi DateTime?
+
+  @@index([egasiId])
 }

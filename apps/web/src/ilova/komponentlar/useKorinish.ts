@@ -22,3 +22,28 @@ export function useKorinish<T extends Element>() {
   }, []);
   return [ref, korinadi] as const;
 }
+
+const KAM_HARAKAT = '(prefers-reduced-motion: reduce)';
+
+/**
+ * Tizimda "harakatni kamaytirish" yoqilganmi. CSS animatsiyalarni tema.css o'zi
+ * o'chiradi; bu hook animatsiyali RASMLAR uchun (Oktagon) — ularni CSS to'xtata olmaydi,
+ * o'rniga statik kadr qo'yiladi. Sozlama ilova ochiqligida o'zgarsa ham kuzatiladi.
+ */
+export function useKamHarakat() {
+  const [kam, setKam] = useState(() => typeof matchMedia === 'function' && matchMedia(KAM_HARAKAT).matches);
+  useEffect(() => {
+    if (typeof matchMedia !== 'function') return;
+    const mq = matchMedia(KAM_HARAKAT);
+    const yangila = () => setKam(mq.matches);
+    yangila();
+    // Eski Safari'da faqat addListener bor
+    if (mq.addEventListener) mq.addEventListener('change', yangila);
+    else mq.addListener(yangila);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', yangila);
+      else mq.removeListener(yangila);
+    };
+  }, []);
+  return kam;
+}

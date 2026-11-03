@@ -1,1 +1,252 @@
-/* F-agent: umumiy komponentlar uslubi — kartochka, belgi, statistika, menyu, tepa qator, ekran qobig'i (KONTRAKT.md) */
+/* ===== Umumiy komponentlar (ilv-*): ekran qobig'i, tepa qator, kartochka, belgi, statistika, menyu =====
+   O'lchamlar namunadan o'lchangan (maket kadrida 1pt = 1.5px). Hamma qoida `.ilv` ichida va
+   `ilv-` prefiksli — saytga tegmaydi. Ranglar/o'lchamlar tema.css dagi o'zgaruvchilardan. */
+
+/* ---------- Ekran qobig'i (Ekran.tsx) ----------
+   .app (theme.css) chetlarida bo'shliq va boshqa fon bor — ilova ekrani butun oynani egallashi
+   uchun o'zi qotib turuvchi (fixed) skroll qatlami bo'ladi (ilova-ekran.css dagi .ie kabi). */
+.ilv.ilv-ekran {
+  position: fixed;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  padding: calc(var(--ilv-tepa-joy) + env(safe-area-inset-top)) var(--ilv-chet)
+    calc(var(--ilv-past-joy) + var(--ilv-menyu-boy) + var(--ilv-oraliq) + env(safe-area-inset-bottom));
+  background: var(--ilv-fon);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+.ilv .ilv-ichi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ilv-oraliq);
+  max-width: var(--ilv-max-en);
+  margin: 0 auto;
+}
+
+/* ---------- Tepa qator (TepaQator.tsx) ---------- */
+.ilv .ilv-tepa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: var(--ilv-logo-boy);
+}
+/* Joyi 258×46, logotipning o'zi namunadagidek 233×42 — chapga va o'rtaga tekislangan */
+.ilv .ilv-logo {
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  width: var(--ilv-logo-en);
+  height: var(--ilv-logo-boy);
+  padding: 2.67px 0 1.33px;
+  object-fit: contain;
+  object-position: -.67px center;
+}
+
+/* Streak chipi: sariq chaqmoq + "0 kun". Ko'rinishi 40px, bosiladigan joyi 44px (::before).
+   padding-top + svg margin-top — namunada matn o'rtadan 1.3px pastroq, chaqmoq esa o'rtada */
+.ilv .ilv-chip {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3.4px;
+  height: var(--ilv-chip-boy);
+  margin: 0;
+  padding: 2.67px 11.33px 0 10.5px;
+  border: 0;
+  border-radius: var(--ilv-chip-radius);
+  background: var(--ilv-karta);
+  color: var(--ilv-sariq);
+  font: 700 var(--ilv-shr-chip)/1 var(--ilv-shrift);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ilv .ilv-chip::before { content: ''; position: absolute; inset: -2px 0; }
+/* Ichiga lucide Zap qo'yilsa ham shu o'lcham va bo'yoq oladi */
+.ilv .ilv-chip svg { flex: none; width: 16.4px; height: 16.4px; margin-top: -2.67px; fill: currentColor; stroke-width: 0; }
+
+/* Qidiruv tugmasi (Testlar): 44×44, sariq lupa */
+.ilv .ilv-qidiruv {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ilv-qidiruv);
+  height: var(--ilv-qidiruv);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ilv-chip-radius);
+  background: var(--ilv-karta);
+  color: var(--ilv-sariq);
+  cursor: pointer;
+}
+.ilv .ilv-qidiruv svg { flex: none; width: 17.4px; height: 17.4px; stroke-width: 2.77; }
+
+/* ---------- Kartochkalar (IlovaKarta.tsx) ---------- */
+.ilv .ilv-karta-tor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ilv-tor); }
+
+/* flex — aks holda brauzer tugma ichini tik o'rtaga qo'yadi, namunada sarlavha yuqori chapda */
+.ilv .ilv-karta {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  height: var(--ilv-karta-boy);
+  margin: 0;
+  padding: var(--ilv-karta-ichki);
+  border: 0;
+  border-radius: var(--ilv-karta-radius);
+  background: var(--ilv-karta);
+  color: var(--ilv-oq);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform .12s ease;
+}
+.ilv .ilv-karta.ilv-karta-test { height: var(--ilv-karta-boy-test); }
+.ilv .ilv-karta:active { transform: scale(.98); }
+.ilv .ilv-karta:focus-visible,
+.ilv .ilv-chip:focus-visible,
+.ilv .ilv-qidiruv:focus-visible,
+.ilv .ilv-menyu-b:focus-visible { outline: 2px solid var(--ilv-sariq); outline-offset: 2px; }
+
+/* Sarlavha: 16px 700, ko'pi bilan 2 qator. Kengligi cheklangan — namunadagidek "Barcha testlar"
+   (108px), "Xatolarni tuzatish" ikki qatorga bo'linadi, "Chalg‘ituvchi" (98px) bir qatorda.
+   Boshqacha bo'linishi kerak bo'lsa sarlavhada "\n": "Sizga\nsavol bor" (pre-line) */
+.ilv .ilv-karta-sarlavha {
+  position: relative;
+  z-index: 2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  max-width: 103px;
+  font-size: var(--ilv-shr-sarlavha);
+  font-weight: 700;
+  line-height: var(--ilv-sarlavha-qadam);
+  white-space: pre-line;
+  overflow-wrap: break-word;
+}
+
+/* Oktagon: rasm butun kartochkani qoplaydi, sarlavha to'q shaffof "tabletka" ichida */
+.ilv .ilv-karta-fon {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.ilv .ilv-karta-fonli .ilv-karta-sarlavha {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: block;
+  max-width: calc(100% - 20px);
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 7.5px;
+  background: var(--ilv-toq-shaffof);
+  line-height: 22px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Son belgisi: chap pastda, 22px balandlikdagi tabletka */
+.ilv .ilv-belgi {
+  position: absolute;
+  z-index: 2;
+  left: 14px;
+  bottom: 12px;
+  min-width: var(--ilv-belgi-boy);
+  height: var(--ilv-belgi-boy);
+  padding: 0 10px;
+  border-radius: calc(var(--ilv-belgi-boy) / 2);
+  color: var(--ilv-oq);
+  font-size: var(--ilv-shr-belgi);
+  font-weight: 800;
+  line-height: var(--ilv-belgi-boy);
+  text-align: center;
+  white-space: nowrap;
+}
+.ilv .ilv-belgi.ilv-belgi-qizil { background: var(--ilv-qizil); }
+.ilv .ilv-belgi.ilv-belgi-yashil { background: var(--ilv-yashil); }
+
+/* ---------- Statistika (StatBlok.tsx) ---------- */
+.ilv .ilv-stat-qator { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ilv-tor); }
+/* Son va yozuv namunadagi joyida: tik o'rtalash emas, aniq yuqori bo'shliq */
+.ilv .ilv-stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 0;
+  height: var(--ilv-stat-boy);
+  padding: 13.4px 12px 0;
+  border-radius: var(--ilv-stat-radius);
+  background: var(--ilv-toq);
+}
+.ilv .ilv-stat-son,
+.ilv .ilv-stat-yozuv { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ilv .ilv-stat-son { font-size: var(--ilv-shr-son); font-weight: 800; line-height: 1.2; }
+.ilv .ilv-stat-yozuv { color: var(--ilv-matn2); font-size: var(--ilv-shr-yozuv); font-weight: 600; line-height: 1.2; }
+.ilv .ilv-stat-togri .ilv-stat-son { color: var(--ilv-togri); }
+.ilv .ilv-stat-xato .ilv-stat-son { color: var(--ilv-xato); }
+.ilv .ilv-stat-qolgan .ilv-stat-son { color: var(--ilv-sariq); }
+
+/* ---------- Pastki menyu (PastkiMenyu.tsx) ----------
+   Ekran pastida qotib turadi (yon va past 16/12px), iPhone'ning pastki chizig'i ustida.
+   Tashqi qatlam — fon rangidagi tasma: kichik ekranda kontent menyu ostiga skroll bo'lganda
+   menyu yonlari, burchaklari va ostidagi bo'shliq namunadagidek bo'sh ko'rinadi (va ostidagi
+   yashirin kartochka bosilib ketmaydi). */
+.ilv .ilv-menyu {
+  position: fixed;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 var(--ilv-chet) calc(var(--ilv-past-joy) + env(safe-area-inset-bottom));
+  background: var(--ilv-fon);
+}
+.ilv .ilv-menyu-ichi {
+  display: flex;
+  justify-content: space-between;
+  max-width: var(--ilv-max-en);
+  height: var(--ilv-menyu-boy);
+  margin: 0 auto;
+  padding: var(--ilv-menyu-ichki);
+  border-radius: var(--ilv-menyu-radius);
+  background: var(--ilv-toq);
+}
+.ilv .ilv-menyu-b {
+  flex: 0 1 var(--ilv-menyu-tugma);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ilv-menyu-faol-radius);
+  background: transparent;
+  color: var(--ilv-matn2);
+  font: 700 var(--ilv-shr-menyu)/1 var(--ilv-shrift);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ilv .ilv-menyu-b.faol { background: var(--ilv-sariq); color: var(--ilv-toq); cursor: default; }
+.ilv .ilv-menyu-b .ilv-menyu-ikonka { flex: none; width: 20px; height: 20px; }

@@ -1,221 +1,125 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  ListChecks, HeartCrack, BookOpen, Ticket, ListOrdered, ClipboardCheck,
-  CircleAlert, Bookmark, TriangleAlert, Hash, Swords, Play, Trophy, Search,
-  Settings, Check, X, Zap, Pencil, ChevronRight, User, Layers, GraduationCap,
-  CarFront, MessageCircleQuestion,
-} from 'lucide-react';
-import { api } from '../api';
+import { api, type BallMen } from '../api';
 import { getLang } from '../i18n';
-import LangTheme from '../components/LangTheme';
-import PastkiOyna from '../components/PastkiOyna';
 import type { Me } from '../types';
-import '../ilova-ekran.css';
+import Ekran from '../ilova/komponentlar/Ekran';
+import TepaQator, { KunChip } from '../ilova/komponentlar/TepaQator';
+import StatBlok from '../ilova/komponentlar/StatBlok';
+import IlovaKarta from '../ilova/komponentlar/IlovaKarta';
+import { useKorinish } from '../ilova/komponentlar/useKorinish';
+import { Chipta, Papka, SinganYurak, Svetofor, YolBelgisi } from '../ilova/ikonkalar';
+import oktagon from '../ilova/rasmlar/oktagon.webp';
+import oktagonKadr from '../ilova/rasmlar/oktagon-kadr.webp';
+import '../ilova/ekranlar.css';
 
 /**
- * Ilovaning bosh sahifasi (saytda Dashboard). Namuna — Oson Prava ilovasining
- * bosh sahifasi: progress + "Sizga savol bor", Darslik + Avtodrom,
- * Test yechish + Oktagon va pastda 2 ustunli kartochkalar.
+ * Ilovaning bosh sahifasi (saytda Dashboard). Namuna — "variant-6": logotip va faollik chipi,
+ * "TEST YECHISH" kartasi, statistika va 6 ta bo'lim. Qolgan testlar — Testlar ekranida,
+ * til/mavzu va ilova versiyasi — Profil ekranida.
  */
 
-// "50/100 talik" darhol test ochmaydi — savol sonini so'raydi
-const SAVOL_SONI = '#savol-soni';
-// Imtihon testi: til ilova sozlamasidan olinadi (alohida so'ralmaydi)
-const IMTIHON = '#imtihon';
-
-const TILES = [
-  { to: '/mavzular', Icon: BookOpen, cls: 'purple', title: 'Mavzular' },
-  { to: '/shablon', Icon: Layers, cls: 'blue', title: 'Shablon testlar' },
-  { to: SAVOL_SONI, Icon: ListOrdered, cls: 'green', title: '50/100 talik' },
-  { to: IMTIHON, Icon: ClipboardCheck, cls: 'green', title: 'Real imtihon' },
-  { to: '/test?mode=tricky', Icon: CircleAlert, cls: 'red', title: "Chalg'ituvchi" },
-  { to: '/test?mode=saved', Icon: Bookmark, cls: 'amber', title: 'Saralangan' },
-  { to: '/belgilar', Icon: TriangleAlert, cls: 'blue', title: "Yo'l belgilari" },
-  { to: '/test?mode=numeric', Icon: Hash, cls: 'purple', title: 'Raqamli savollar' },
-  { to: '/biletlar', Icon: Ticket, cls: 'amber', title: 'Biletlar' },
-  { to: '/xatolarim', Icon: HeartCrack, cls: 'red', title: 'Xatolarim' },
-];
-
-// Random test uchun savol soni (server bir so'rovda 200 tagacha beradi)
-const SONLAR = [50, 100, 200, 500];
-
-function daysLeft(d?: string | null) {
-  if (!d) return null;
-  const ms = new Date(d).getTime() - Date.now();
-  return Math.max(0, Math.ceil(ms / 86400000));
-}
-
-// Test oynasi tili: ilovadagi "Uzbek" — lotin
-const testTili = () => {
+// Test oynasi tili: ilovadagi "Uzbek" — lotin (Testlar ekranidagi random test ham shundan oladi)
+export const testTili = () => {
   const l = getLang();
   return l === 'uz' ? 'lat' : l;
 };
 
+// Ilovaga /me faollik seriyasini ham qaytaradi — Me turida u hali yo'q
+type MeIlova = Me & { stats: Me['stats'] & { streak?: number } };
+
+function AsosiyKarta({ ism, yechilgan, jami, foiz, onClick }: {
+  ism: string;
+  yechilgan: number;
+  jami: number;
+  foiz: number;
+  onClick: () => void;
+}) {
+  // Chiziqlar va play faqat karta ekranda ko'rinib turganda harakatlanadi (tema.css)
+  const [ref, korinadi] = useKorinish<HTMLButtonElement>();
+  const ulush = jami ? Math.min(1, yechilgan / jami) : 0;
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={'ilv-asosiy' + (korinadi ? ' ilv-korinadi' : '')}
+      onClick={onClick}
+      aria-label={`Test yechish: ${yechilgan} / ${jami} savol, ${foiz}% to‘g‘ri`}
+    >
+      <span className="ilv-asosiy-chiziq ilv-ani" aria-hidden="true" />
+      {/* Ma'lumot kelguncha bo'sh qator — sahifa sakramasin */}
+      <span className="ilv-asosiy-ism">{ism || ' '}</span>
+      <span className="ilv-asosiy-sarlavha">Test yechish</span>
+      <span className="ilv-asosiy-past">
+        <span className="ilv-asosiy-info">
+          <span className="ilv-asosiy-sonlar">
+            <span className="ilv-asosiy-savol">{`${yechilgan} / ${jami} savol`}</span>
+            <span className="ilv-asosiy-foiz">{`${foiz}% to‘g‘ri`}</span>
+          </span>
+          <span className="ilv-asosiy-progress">
+            <span className="ilv-asosiy-tola" style={{ width: `${ulush * 100}%` }} />
+          </span>
+        </span>
+        <span className="ilv-asosiy-play ilv-ani" aria-hidden="true">
+          {/* Uchburchak namunadan o'lchangan (burchaklari ~1.1px yumaloq): og'irlik markazi doira markazida */}
+          <svg viewBox="0 0 56 56" aria-hidden="true">
+            <path d="M24.13 20.76 36.3 28 24.13 35.24Z" fill="currentColor" stroke="currentColor" strokeWidth="2.26" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </span>
+    </button>
+  );
+}
+
 export default function Home() {
   const nav = useNavigate();
-  const [me, setMe] = useState<Me | null>(null);
-  const [soniOyna, setSoniOyna] = useState(false);
-
-  // Ilova versiyasi — telefonda qaysi build o'rnatilganini bilish uchun
-  const [versiya, setVersiya] = useState('');
+  const [me, setMe] = useState<MeIlova | null>(null);
+  const [ball, setBall] = useState<BallMen | null>(null);
 
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
-    import('@capacitor/app')
-      .then(({ App }) => App.getInfo())
-      .then((i) => setVersiya(i.version))
-      .catch(() => {});
+    // Daraja tizimi eski serverda bo'lmasligi mumkin — unda faqat ism ko'rinadi
+    api.ballMen().then(setBall).catch(() => {});
   }, []);
 
-  const total = me?.stats.totalQuestions ?? 0;
-  const solved = me?.stats.solvedQuestions ?? 0;
-  const correct = me?.stats.correct ?? 0;
-  const wrong = me?.stats.wrong ?? 0;
-  const mistakes = me?.stats.mistakes ?? 0;
-  const saved = me?.stats.bookmarks ?? 0;
-  const progressPct = total ? Math.round((solved / total) * 100) : 0;
-  const streak = 0;
-  const days = daysLeft(me?.user.examDate);
-  const name = me?.user.firstName || 'Ismingiz';
-  const initial = name[0].toUpperCase();
-
-  const ochish = (to: string) => {
-    if (to === SAVOL_SONI) setSoniOyna(true);
-    else if (to === IMTIHON) nav(`/test?mode=exam&exam=1&lang=${testTili()}&shuffle=0`);
-    else nav(to);
-  };
-
-  const randomBoshla = (n: number) => {
-    setSoniOyna(false);
-    nav(`/test?mode=random&limit=${n}&exam=1&lang=${testTili()}&shuffle=0`);
-  };
-
-  const badge = (to: string) => {
-    if (to === '/test?mode=saved' && saved > 0) return <span className="ih-badge amber">{saved}</span>;
-    return null;
-  };
+  // Yuklanguncha hammasi 0 — joylashuv o'zgarmaydi
+  const s = me?.stats;
+  const jami = s?.totalQuestions ?? 0;
+  const yechilgan = s?.solvedQuestions ?? 0;
+  const xato = s?.mistakes ?? 0;
+  const togri = Math.max(0, yechilgan - xato);
+  const qolgan = Math.max(0, jami - yechilgan);
+  const foiz = yechilgan ? Math.round((togri / yechilgan) * 100) : 0;
+  const streak = s?.streak ?? ball?.streak ?? 0;
+  const ism = me ? [me.user.firstName, ball?.daraja.nom].filter(Boolean).join(' · ') : '';
 
   return (
-    <div className="ie ih">
-      {/* Header */}
-      <div className="ih-hdr">
-        <button className="ih-user" onClick={() => nav('/profil')}>
-          <span className="ih-ava">
-            {initial}
-            <span className="ih-dot" />
-          </span>
-          <span className="ih-who">
-            <span className="ih-name">{name}</span>
-            <span className="ih-status">
-              <User size={13} strokeWidth={2.6} /> YO‘LOVCHI <ChevronRight size={13} strokeWidth={2.6} />
-            </span>
-          </span>
-        </button>
-        <div className="ih-icons">
-          <button title="Yutuqlar" className="gold" onClick={() => nav('/reyting')}><Trophy size={24} /></button>
-          <button title="Qidiruv" onClick={() => nav('/mavzular')}><Search size={24} /></button>
-          <button title="Sozlamalar" onClick={() => nav('/profil')}><Settings size={24} /></button>
-        </div>
+    <Ekran faol="asosiy">
+      <TepaQator ong={<KunChip kun={streak} onClick={() => nav('/men')} />} />
+      <AsosiyKarta ism={ism} yechilgan={yechilgan} jami={jami} foiz={foiz} onClick={() => nav('/test?mode=practice')} />
+      <div className="ilv-stat-qator">
+        <StatBlok son={togri} yozuv="To‘g‘ri" rang="togri" />
+        <StatBlok son={xato} yozuv="Xato" rang="xato" />
+        <StatBlok son={qolgan} yozuv="Qolgan" rang="qolgan" />
       </div>
-
-      {/* Progress + Sizga savol bor */}
-      <div className="ih-row ih-side">
-        <div className="ih-prog">
-          <div className="ih-prog-top">
-            <span className="ih-days">
-              {days == null ? 'Sanani o‘zgartirish' : `${days} kun qoldi`} <Pencil size={12} />
-            </span>
-            <span className="ih-streak"><Zap size={15} fill="currentColor" /> {streak} kun</span>
-          </div>
-          <div className="ih-prog-mid">
-            <span className="ih-pct">{progressPct}%</span>
-            <span className="ih-ball">
-              <b className="ok"><Check size={13} strokeWidth={3} /> {correct}</b>
-              <b className="no"><X size={13} strokeWidth={3} /> {wrong}</b>
-              <span className="tot">— {total}</span>
-            </span>
-          </div>
-          <div className="ih-pbar"><span style={{ width: `${progressPct}%` }} /></div>
-        </div>
-        <button className="ih-ask" onClick={() => nav('/aloqa')}>
-          <MessageCircleQuestion size={34} />
-          <span>Sizga savol bor</span>
-        </button>
+      <div className="ilv-karta-tor">
+        {/* Imtihon testi: til ilova sozlamasidan olinadi (alohida so'ralmaydi) */}
+        <IlovaKarta
+          sarlavha="Real imtihon"
+          ikonka={<Svetofor />}
+          onClick={() => nav(`/test?mode=exam&exam=1&lang=${testTili()}&shuffle=0`)}
+        />
+        <IlovaKarta sarlavha="Biletlar" ikonka={<Chipta />} onClick={() => nav('/biletlar')} />
+        <IlovaKarta sarlavha="Mavzular" ikonka={<Papka />} onClick={() => nav('/mavzular')} />
+        <IlovaKarta sarlavha="Yo‘l belgilari" ikonka={<YolBelgisi />} onClick={() => nav('/belgilar')} />
+        <IlovaKarta
+          sarlavha="Xatolarni tuzatish"
+          ikonka={<SinganYurak />}
+          belgi={{ matn: xato, rang: 'qizil' }}
+          onClick={() => nav('/test?mode=mistakes')}
+        />
+        <IlovaKarta sarlavha="Oktagon" fon={{ animatsiya: oktagon, kadr: oktagonKadr }} onClick={() => nav('/oktagon')} />
       </div>
-
-      {/* Barcha testlar / Xatolarni tuzatish */}
-      <div className="ih-row ih-grid">
-        <button className="ih-tile blue" onClick={() => nav('/test?mode=all')}>
-          <span className="ih-blobw"><span className="ih-blob" /></span>
-          <span className="ih-ic"><ListChecks size={24} /></span>
-          <span className="ih-tt">Barcha testlar</span>
-        </button>
-        <button className="ih-tile red" onClick={() => nav('/test?mode=mistakes')}>
-          <span className="ih-blobw"><span className="ih-blob" /></span>
-          <span className="ih-ic"><HeartCrack size={24} /></span>
-          <span className="ih-tt">Xatolarni tuzatish</span>
-          {mistakes > 0 && <span className="ih-badge">{mistakes}</span>}
-        </button>
-      </div>
-
-      {/* Darslik + Avtodrom */}
-      <div className="ih-row ih-side">
-        <button className="ih-dars" onClick={() => nav('/amaliy')}>
-          <span className="ih-dars-t">
-            <b>Darslik</b>
-            <span>Amaliy mashg‘ulotlar</span>
-          </span>
-          <span className="ih-circ"><GraduationCap size={26} /></span>
-        </button>
-        <button className="ih-avto" onClick={() => nav('/avtodrom')}>
-          <CarFront size={40} strokeWidth={1.8} />
-          <span>Avtodrom</span>
-        </button>
-      </div>
-
-      {/* Test yechish + Oktagon */}
-      <div className="ih-row ih-grid">
-        <button className="ih-big green" onClick={() => nav('/test?mode=practice')}>
-          <span className="ih-circ"><Play size={24} fill="currentColor" /></span>
-          <b>Test yechish</b>
-          <span>Sizga mos savollar</span>
-        </button>
-        <button className="ih-big gray" onClick={() => nav('/oktagon')}>
-          <span className="ih-circ"><Swords size={24} /></span>
-          <b>Oktagon</b>
-          <span>Birga-bir jang</span>
-        </button>
-      </div>
-
-      {/* Bo'limlar */}
-      <div className="ih-row ih-grid">
-        {TILES.map((t) => (
-          <button key={t.to} className={'ih-tile ' + t.cls} onClick={() => ochish(t.to)}>
-            <span className="ih-blobw"><span className="ih-blob" /></span>
-            <span className="ih-ic"><t.Icon size={24} /></span>
-            <span className="ih-tt">{t.title}</span>
-            {badge(t.to)}
-          </button>
-        ))}
-      </div>
-
-      {/* Til va mavzu — ilovada yon menyu yo'q, shuning uchun shu yerda */}
-      <div className="hlt"><LangTheme /></div>
-      {versiya && <div className="hver">Versiya {versiya}</div>}
-
-      {soniOyna && (
-        <PastkiOyna title="Savol sonini tanlang" subtitle="Random savollar bilan test" onClose={() => setSoniOyna(false)}>
-          <div className="ie-sh-grid">
-            {SONLAR.map((n) => (
-              <button key={n} className="ie-sh-opt" onClick={() => randomBoshla(n)}>
-                <b>{n}</b>
-                <span>ta savol</span>
-              </button>
-            ))}
-          </div>
-        </PastkiOyna>
-      )}
-    </div>
+    </Ekran>
   );
 }

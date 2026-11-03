@@ -1,6 +1,113 @@
-/* A-agent: bosh guruhi ikonkalari — joylashuv (ilv-joy-*) va animatsiyalar (KONTRAKT.md) */
-.ilv .ilv-joy-svetofor { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-chipta { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-papka { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-yol-belgisi { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-singan-yurak { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
+/* A-agent: bosh guruhi ikonkalari — joylashuv (ilv-joy-*) va animatsiyalar (KONTRAKT.md).
+   Joy va o'lcham namunadan o'lchangan: kartochkaning o'ng va past chetidan, 1pt = 1.482px.
+   Animatsiyada `animation` qisqa yozuvi ishlatilmaydi: u tema.css dagi animation-play-state
+   (ko'rinmaganda to'xtatish) ni bekor qilib yuborardi — faqat alohida xossalar. */
+
+.ilv .ilv-joy-svetofor,
+.ilv .ilv-joy-chipta,
+.ilv .ilv-joy-papka,
+.ilv .ilv-joy-yol-belgisi,
+.ilv .ilv-joy-singan-yurak { position: absolute; pointer-events: none; }
+
+/* Namunadagi yumshoq soya (svg o'zi kesgan shakldan hisoblanadi, harakatlansa birga yuradi) */
+.ilv .ilv-joy-svetofor > .ilv-ikonka,
+.ilv .ilv-joy-chipta > .ilv-ikonka,
+.ilv .ilv-joy-papka > .ilv-ikonka,
+.ilv .ilv-joy-yol-belgisi > .ilv-ikonka,
+.ilv .ilv-joy-singan-yurak > .ilv-ikonka { display: block; filter: drop-shadow(0 6.75px 6.07px rgba(0, 0, 0, 0.45)); }
+
+/* ---- Svetofor (Real imtihon): ustuni kartochka pastidan chiqib ketadi ---- */
+.ilv .ilv-joy-svetofor { right: 17.37px; bottom: -4.05px; width: 42.51px; height: 93.12px; }
+.ilv .ilv-svetofor-qizil,
+.ilv .ilv-svetofor-sariq,
+.ilv .ilv-svetofor-yashil {
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+/* Statik (harakatsiz) holat — qizil yoniq */
+.ilv .ilv-svetofor-sariq,
+.ilv .ilv-svetofor-yashil { opacity: 0; }
+.ilv .ilv-svetofor-qizil { animation-name: ilv-svetofor-qizil; }
+.ilv .ilv-svetofor-sariq { animation-name: ilv-svetofor-sariq; }
+.ilv .ilv-svetofor-yashil { animation-name: ilv-svetofor-yashil; }
+/* Har chiroq 1 s yonadi, almashinuv ~0.08 s */
+@keyframes ilv-svetofor-qizil {
+  0%, 32% { opacity: 1; }
+  34.67%, 97.33% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes ilv-svetofor-sariq {
+  0%, 32% { opacity: 0; }
+  34.67%, 65.33% { opacity: 1; }
+  68%, 100% { opacity: 0; }
+}
+@keyframes ilv-svetofor-yashil {
+  0%, 65.33% { opacity: 0; }
+  68%, 97.33% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---- Chipta (Biletlar): tebranib ko'tariladi, 3 s ---- */
+.ilv .ilv-joy-chipta { right: 6.75px; bottom: 2.7px; width: 89.74px; height: 74.22px; }
+.ilv .ilv-chipta-tebranish {
+  transform-origin: 43.05px 33.94px; /* chipta markazi */
+  animation-name: ilv-chipta-tebranish;
+  animation-duration: 3s;
+  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-chipta-tebranish {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(0.74px, -5.84px) rotate(13.3deg); }
+}
+
+/* ---- Papka (Mavzular): old qismi kartochka pastidan chiqib ketadi; qog'oz chiqib kiradi, 3 s ---- */
+.ilv .ilv-joy-papka { right: 5.74px; bottom: -6.07px; width: 91.77px; height: 84.35px; }
+.ilv .ilv-papka-qogoz {
+  animation-name: ilv-papka-qogoz;
+  animation-duration: 3s;
+  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-papka-qogoz {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-17px); }
+}
+
+/* ---- Yo'l belgisi: chapga-o'ngga chayqaladi, 1.5 s ---- */
+.ilv .ilv-joy-yol-belgisi { right: 6.07px; bottom: 10.12px; width: 89.07px; height: 74.22px; }
+.ilv .ilv-belgi-chayqalish {
+  transform-origin: 44.2px 80.97px; /* belgi ostidagi nuqta */
+  animation-name: ilv-belgi-chayqalish;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-belgi-chayqalish {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+/* ---- Singan yurak (Xatolarni tuzatish 122pt; Xatolarim 112pt — namunada biroz kichik) ---- */
+.ilv .ilv-joy-singan-yurak { right: 10.12px; bottom: 6.75px; width: 75.57px; height: 75.57px; }
+.ilv .ilv-karta-test .ilv-joy-singan-yurak { right: 10.6px; bottom: 5.5px; width: 68.85px; height: 68.85px; }
+.ilv .ilv-yurak-chap,
+.ilv .ilv-yurak-ong {
+  transform-box: view-box;
+  animation-duration: 3s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+/* Har bo'lak o'zining pastki uchi atrofida buriladi */
+.ilv .ilv-yurak-chap { transform-origin: 55.1px 105px; animation-name: ilv-yurak-chap; }
+.ilv .ilv-yurak-ong { transform-origin: 63.9px 103.8px; animation-name: ilv-yurak-ong; }
+@keyframes ilv-yurak-chap {
+  0%, 20%, 80%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-7px, 3px) rotate(-9deg); }
+}
+@keyframes ilv-yurak-ong {
+  0%, 20%, 80%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(7px, 2.5px) rotate(9deg); }
+}

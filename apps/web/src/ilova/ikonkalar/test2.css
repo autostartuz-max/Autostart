@@ -1,5 +1,120 @@
-/* C-agent: test2 guruhi ikonkalari — joylashuv (ilv-joy-*) va animatsiyalar (KONTRAKT.md) */
-.ilv .ilv-joy-bayroqcha { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-mashina { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-shapka { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-savol-pufak { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
+/* C-agent: test2 guruhi ikonkalari — joylashuv (ilv-joy-*) va animatsiyalar (KONTRAKT.md).
+   SVG lar karta koordinatalarida chizilgan (1 birlik = 1pt, karta 175×112), shuning uchun
+   ikonka qutisi kartaning o'ng-past burchagiga yopishadi. Animatsiyalar `animation` qisqa
+   yozuvisiz berilgan: aks holda tema.css dagi pauza (animation-play-state) bekor bo'lib qoladi.
+   Davrlar namunadagi GIF (3 s aylana) bilan bir xil. */
+
+.ilv .ilv-joy-mashina,
+.ilv .ilv-joy-savol-pufak,
+.ilv .ilv-joy-bayroqcha,
+.ilv .ilv-joy-shapka { position: absolute; right: 0; bottom: 0; pointer-events: none; }
+.ilv .ilv-joy-mashina > svg,
+.ilv .ilv-joy-savol-pufak > svg,
+.ilv .ilv-joy-bayroqcha > svg,
+.ilv .ilv-joy-shapka > svg {
+  display: block;
+  overflow: visible;
+  /* namunadagi yumshoq soya — ikonka atrofi va ostidagi yorqinlik profili bo'yicha moslangan */
+  filter: drop-shadow(0 7px 5.5px rgba(0, 0, 0, .39));
+}
+
+/* ---------- Avtodrom: mashina ---------- */
+.ilv .ilv-joy-mashina { width: 101px; height: 82px; }
+.ilv .ilv-mashina-kuzov {
+  animation-name: ilv-mashina-silkin;
+  animation-duration: 0.75s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-mashina-silkin {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+/* faralar: 0.75 s yoniq, 0.75 s o'chiq */
+.ilv .ilv-mashina-fara {
+  animation-name: ilv-mashina-fara;
+  animation-duration: 1.5s;
+  animation-timing-function: step-end;
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-mashina-fara {
+  0% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ---------- Sizga savol bor: ko'k pufak ---------- */
+.ilv .ilv-joy-savol-pufak { width: 85px; height: 80px; }
+/* savol belgisi kattalashib chapga, keyin o'ngga og'adi va joyiga qaytadi (1.5 s) */
+.ilv .ilv-savol-belgi {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation-name: ilv-savol-belgi;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-savol-belgi {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  28% { transform: scale(1.17) rotate(-10deg); }
+  62% { transform: scale(1.18) rotate(10deg); }
+}
+
+/* ---------- Saralangan: yashil lenta ---------- */
+.ilv .ilv-joy-bayroqcha { width: 79px; height: 86px; }
+/* lenta 1.5 s da ~6pt ko'tarilib, yana 7.5° chapga og'adi va qaytadi (3 s aylana) */
+.ilv .ilv-bayroqcha-lenta {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation-name: ilv-bayroqcha-tebran;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+@keyframes ilv-bayroqcha-tebran {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to { transform: translate(-1.6px, -5.9px) rotate(-7.5deg); }
+}
+/* yulduz 3 s da bir marta soat yo'nalishida aylanadi */
+.ilv .ilv-bayroqcha-yulduz {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation-name: ilv-bayroqcha-aylan;
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-bayroqcha-aylan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Darslik: bitiruv shapkasi ---------- */
+.ilv .ilv-joy-shapka { width: 103px; height: 94px; }
+/* shapka 1.5 s da 11pt ko'tarilib 6.4° chapga og'adi, keyin tushadi; popuk biroz ko'proq og'adi */
+.ilv .ilv-shapka-kiyim {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation-name: ilv-shapka-kotar;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+@keyframes ilv-shapka-kotar {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to { transform: translate(-0.6px, -11.3px) rotate(-6.4deg); }
+}
+.ilv .ilv-shapka-popuk {
+  transform-box: fill-box;
+  transform-origin: 51.5% 0.5%;
+  animation-name: ilv-shapka-popuk;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+@keyframes ilv-shapka-popuk {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-2deg); }
+}

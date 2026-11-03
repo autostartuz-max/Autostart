@@ -615,6 +615,14 @@ export const adminApi = {
       xhr.send(fd);
     }),
 
+  /* ---- Promokod: ilovada do'stining kodi bilan ro'yxatdan o'tganlar ---- */
+  /** q — ism, telefon, pochta yoki promokod bo'yicha qidiruv (server oxirgi 100 tasini beradi) */
+  promolar: (q = ''): Promise<{ list: PromoRow[] }> =>
+    areq('/admin/promo' + (q ? '?q=' + encodeURIComponent(q) : '')),
+  /** Do'st maktabga yozildi — tasdiqlash; kod egasi bonus ball oladi (bir marta) */
+  promoTasdiqla: (id: number): Promise<{ ok: boolean }> =>
+    areq('/admin/promo/' + id + '/tasdiq', { method: 'POST' }),
+
   /** Tahlil: barcha talabalar bo'yicha eng ko'p xato qilinadigan savollar */
   /** Tahlil: qaysi mavzularda ko'proq xato qilinadi */
   topicAnalytics: (): Promise<{ list: TopicStatRow[] }> => areq('/admin/analytics/topics'),
@@ -688,6 +696,25 @@ export interface OnlineRow {
   role: Role;
   lastSeen: string | null;
   mehmon: boolean;
+}
+
+/** Promokod taklifi: egasi — kod kimniki, dost — shu kod bilan ro'yxatdan o'tgan */
+export type PromoHolat = 'yangi' | 'tasdiqlangan';
+export interface PromoShaxs {
+  id: number;
+  firstName: string;
+  phone: string | null;
+  email: string | null;
+}
+export interface PromoRow {
+  id: number;
+  kod: string;
+  holat: PromoHolat;
+  yaratildi: string;
+  tasdiqlandi: string | null;
+  /** Akkaunt o'chirilgan bo'lsa null */
+  dost: PromoShaxs | null;
+  egasi: PromoShaxs | null;
 }
 
 export type MessageStatus = 'new' | 'read' | 'done';

@@ -60,3 +60,26 @@
 @media (prefers-reduced-motion: reduce) {
   .ilv .ilv-ani { animation: none !important; }
 }
+
+/* Umumiy komponentlar o'lchamlari (komponentlar.css). Namunadan o'lchangan:
+   maket kadrida 1pt = 1.5px (telefon 844pt = 1266px). */
+.ilv {
+  --ilv-toq-shaffof: rgba(31, 30, 29, .85); /* Oktagon sarlavhasi: #1f1e1d, 85% */
+  --ilv-chet: 16px; /* ekranning yon bo'shlig'i (--ilv-padding bilan bir xil) */
+  --ilv-tepa-joy: 14px; /* ekran yuqorisi */
+  --ilv-past-joy: 12px; /* ekran pastki cheti va menyu orasi */
+  --ilv-menyu-ichki: 6px;
+  --ilv-menyu-tugma: 84px; /* faol bo'lim "tabletkasi" kengligi */
+  --ilv-karta-ichki: 11.6px 14px 0; /* sarlavha joyi: chapdan 14, yuqoridan (harf boshi) 12 */
+  --ilv-sarlavha-qadam: 20px; /* kartochka sarlavhasi: 16px, qatorlar orasi 20px */
+  --ilv-belgi-boy: 22px; /* "27" / "1" belgisi */
+  --ilv-max-en: 520px; /* planshetda ham telefon kengligida qoladi (.app kabi) */
+
+  /* Shrift o'lchamlari */
+  --ilv-shr-sarlavha: 16px; /* kartochka sarlavhasi, 700 */
+  --ilv-shr-chip: 14px; /* "0 kun", 700 */
+  --ilv-shr-belgi: 14px; /* "27", 800 */
+  --ilv-shr-son: 22px; /* statistika soni, 800 */
+  --ilv-shr-yozuv: 13px; /* statistika yozuvi, 600 */
+  --ilv-shr-menyu: 12px; /* menyu yozuvi, 700 */
+}

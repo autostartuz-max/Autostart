@@ -3,12 +3,15 @@ import PastkiMenyu, { type MenyuBolim } from './PastkiMenyu';
 import '../tema.css';
 import './komponentlar.css';
 
-// QOLIP — F-agent to'ldiradi (KONTRAKT.md). Props o'zgarmaydi.
-/** Menyuli ekran qobig'i: fon, padding, pastda menyu uchun joy va menyuning o'zi */
+/**
+ * Menyuli ekran qobig'i: butun oynani egallaydi, fon va yon/yuqori bo'shliqlar shu yerda,
+ * bo'limlar orasi 10px (flex gap — bolalarga margin qo'yish shart emas), pastda qotib
+ * turgan menyu kontentni yopmasligi uchun joy qoldiriladi.
+ */
 export default function Ekran({ faol, children, className }: { faol: MenyuBolim; children: ReactNode; className?: string }) {
   return (
     <div className={'ilv ilv-ekran' + (className ? ' ' + className : '')}>
-      <div className="ilv-ichi">{children}</div>
+      <main className="ilv-ichi">{children}</main>
       <PastkiMenyu faol={faol} />
     </div>
   );

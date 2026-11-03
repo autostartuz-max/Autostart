@@ -1,0 +1,152 @@
+/* ===== Ilova ekranlari (ilv-*): Bosh sahifa, Testlar, O'rganish =====
+   O'lchamlar namunadan o'lchangan (maket kadrida 1pt = 1.5px). Hamma qoida `.ilv` ichida va
+   `ilv-` prefiksli — saytga tegmaydi. Umumiy ranglar/o'lchamlar tema.css da. */
+
+/* Faqat shu ekranlarda ishlatiladigan o'lchamlar (asosiy karta, ekran sarlavhasi) */
+.ilv {
+  --ilv-asosiy-fon: linear-gradient(135deg, #454240, var(--ilv-toq));
+  --ilv-asosiy-ichki: 16px 18px;
+  --ilv-chiziq: rgba(255, 238, 0, .07); /* sariq, 7% */
+  --ilv-chiziq-en: 16px;
+  --ilv-chiziq-qadam: 32px; /* chiziq 16 + oraliq 16 */
+  --ilv-chiziq-qiya: -24deg;
+  --ilv-progress-boy: 10px;
+  --ilv-progress-fon: rgba(255, 255, 255, .16);
+  --ilv-play: 56px;
+  --ilv-shr-asosiy: 32px; /* "TEST YECHISH", 800 italic */
+  --ilv-shr-ekran: 30px; /* "TESTLAR", 800 italic */
+  --ilv-shr-matn: 14px; /* asosiy kartadagi yozuvlar, 700 */
+}
+
+/* ---------- Asosiy karta: "TEST YECHISH" ----------
+   isolation — qiya chiziqlar (z-index:-1) fon ustida, matn ostida qoladi; Safari'da
+   aylanma burchak animatsiyali bolani ham kesadi. */
+.ilv .ilv-asosiy {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+  width: 100%;
+  height: var(--ilv-asosiy-boy);
+  margin: 0;
+  padding: var(--ilv-asosiy-ichki);
+  border: 0;
+  border-radius: var(--ilv-asosiy-radius);
+  background: var(--ilv-asosiy-fon);
+  color: var(--ilv-oq);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform .12s ease;
+}
+.ilv .ilv-asosiy:active { transform: scale(.98); }
+.ilv .ilv-asosiy:focus-visible { outline: 2px solid var(--ilv-sariq); outline-offset: 2px; }
+
+/* Qiya sariq chiziqlar: tik chiziqlar (16 + 16) skewX bilan qiyshaytirilgan — gorizontal bo'yicha
+   eni 16 va oralig'i 16 saqlanadi. Blok o'ngga yopishgan: 390px ekranda uning chap cheti (karta
+   balandligining o'rtasida) kartaning 168px ida, namunadagidek. Namuna GIF'ida butun blok har
+   0.75 s da bitta qadam (32px) o'ngga yuradi va qaytadan boshlanadi.
+   O'ngdan 48px chiqib turadi — qiyshayganda pastki o'ng burchak ochilib qolmasin. */
+.ilv .ilv-asosiy-chiziq {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: -48px;
+  bottom: 0;
+  width: 238px;
+  background: repeating-linear-gradient(90deg, var(--ilv-chiziq) 0 var(--ilv-chiziq-en), transparent var(--ilv-chiziq-en) var(--ilv-chiziq-qadam));
+  transform: skewX(var(--ilv-chiziq-qiya));
+  animation: ilv-asosiy-chiziq .75s linear infinite;
+  pointer-events: none;
+}
+@keyframes ilv-asosiy-chiziq {
+  from { transform: skewX(var(--ilv-chiziq-qiya)) translateX(0); }
+  to { transform: skewX(var(--ilv-chiziq-qiya)) translateX(var(--ilv-chiziq-qadam)); }
+}
+
+/* "Muzaffar · Yo‘lovchi" — bitta qator; ma'lumot kelguncha ham balandligi saqlanadi.
+   line-height 1.3 va sarlavha ustidagi 2.6px — harflar namunadagi joyida (o'lchangan) */
+.ilv .ilv-asosiy-ism {
+  display: block;
+  overflow: hidden;
+  font-size: var(--ilv-shr-matn);
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ilv .ilv-asosiy-sarlavha {
+  display: block;
+  margin-top: 2.6px;
+  color: var(--ilv-sariq);
+  font-size: var(--ilv-shr-asosiy);
+  font-style: italic;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Past: chapda sonlar + progress, o'ngda play. Play pastki cheti progress bilan bir chiziqda. */
+.ilv .ilv-asosiy-past {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin-top: auto;
+}
+.ilv .ilv-asosiy-info { display: block; flex: 1 1 auto; min-width: 0; }
+.ilv .ilv-asosiy-sonlar {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--ilv-shr-matn);
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+/* Juda tor ekranda (320px, "1260 / 1260 savol") play ostiga kirmasin — savol soni qisqaradi, foiz to'liq qoladi */
+.ilv .ilv-asosiy-savol { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ilv .ilv-asosiy-foiz { flex: none; }
+/* To'lgan qism trek ichida kesiladi: chapi yumaloq, o'ng cheti tekis (namunadagidek) */
+.ilv .ilv-asosiy-progress {
+  display: block;
+  height: var(--ilv-progress-boy);
+  margin-top: 4.6px;
+  overflow: hidden;
+  border-radius: calc(var(--ilv-progress-boy) / 2);
+  background: var(--ilv-progress-fon);
+}
+.ilv .ilv-asosiy-tola { display: block; height: 100%; background: var(--ilv-sariq); }
+
+/* Play: 56px sariq doira, 1.5 s da 1 → 1.1 → 1 */
+.ilv .ilv-asosiy-play {
+  flex: none;
+  display: block;
+  width: var(--ilv-play);
+  height: var(--ilv-play);
+  border-radius: 50%;
+  background: var(--ilv-sariq);
+  color: var(--ilv-toq);
+  animation: ilv-asosiy-play 1.5s ease-in-out infinite;
+}
+.ilv .ilv-asosiy-play svg { display: block; width: 100%; height: 100%; }
+@keyframes ilv-asosiy-play {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ---------- Ekran sarlavhasi: "TESTLAR", "O‘RGANISH" ---------- */
+.ilv .ilv-ekran-sarlavha {
+  margin: 0;
+  color: var(--ilv-sariq);
+  font-size: var(--ilv-shr-ekran);
+  font-style: italic;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}

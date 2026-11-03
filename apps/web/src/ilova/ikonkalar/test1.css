@@ -1,6 +1,111 @@
-/* B-agent: test1 guruhi ikonkalari — joylashuv (ilv-joy-*) va animatsiyalar (KONTRAKT.md) */
-.ilv .ilv-joy-hujjat { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-royxat { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-qatlamlar { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-panjara { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
-.ilv .ilv-joy-undov { position: absolute; right: 12px; bottom: 10px; width: 64px; height: 64px; }
+/* B-agent: test1 guruhi ikonkalari — joylashuv (ilv-joy-*) va animatsiyalar (KONTRAKT.md).
+   Namunada har ikonka kartochkaning o'ng past burchagidagi 72×72pt qutida (o'ngdan 8, pastdan 2).
+   SVG viewBox shu qutini namuna pikselida beradi (1pt = 1.5px), shuning uchun quyidagi
+   translate qiymatlari ham namuna pikseli: 9px = 6pt, 13.8px = 9.2pt. */
+.ilv .ilv-joy-hujjat,
+.ilv .ilv-joy-royxat,
+.ilv .ilv-joy-qatlamlar,
+.ilv .ilv-joy-panjara,
+.ilv .ilv-joy-undov {
+  position: absolute;
+  right: 8px;
+  bottom: 2px;
+  width: 72px;
+  height: 72px;
+  pointer-events: none;
+}
+.ilv .ilv-joy-hujjat > svg,
+.ilv .ilv-joy-royxat > svg,
+.ilv .ilv-joy-qatlamlar > svg,
+.ilv .ilv-joy-panjara > svg,
+.ilv .ilv-joy-undov > svg {
+  display: block;
+  overflow: visible;
+  /* namunadagi soya: 6pt pastga siljigan, ostida to'q, yon tomonlarda tez so'nadi */
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .46));
+}
+/* Namunada ajralgan qatlamlarning yashil uchi va qizil pasti 72pt qutida kesiladi */
+.ilv .ilv-joy-qatlamlar > svg { overflow: hidden; }
+
+/* `animation` qisqa yozuvi ishlatilmaydi: u tema.css dagi animation-play-state
+   (ko'rinmaganda to'xtatish) qoidasini bekor qilib qo'yardi. */
+
+/* Hujjat: yashil belgi 1,5 s da bir marta sakraydi (1 → 1.3 → 0.955 → 1) */
+.ilv .ilv-hujjat-belgi {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-name: ilv-hujjat-belgi;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-hujjat-belgi {
+  0%, 59% { transform: scale(1); animation-timing-function: ease-out; }
+  72% { transform: scale(1.3); animation-timing-function: ease-in; }
+  81% { transform: scale(1); animation-timing-function: ease-out; }
+  86% { transform: scale(.955); }
+  91% { transform: scale(.96); animation-timing-function: ease-in-out; }
+  95%, 100% { transform: scale(1); }
+}
+
+/* Ro'yxat: butun ikonka 6pt ko'tarilib tushadi */
+.ilv .ilv-royxat-sakra {
+  animation-name: ilv-royxat-sakra;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-royxat-sakra {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+/* Qatlamlar: yashil 9.2pt tepaga, qizil 6.7pt pastga — qatlamlar ajraladi va qaytadi */
+.ilv .ilv-qatlam-yuqori,
+.ilv .ilv-qatlam-past {
+  animation-duration: 3s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+.ilv .ilv-qatlam-yuqori { animation-name: ilv-qatlam-yuqori; }
+.ilv .ilv-qatlam-past { animation-name: ilv-qatlam-past; }
+@keyframes ilv-qatlam-yuqori {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-13.8px); }
+}
+@keyframes ilv-qatlam-past {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+
+/* Panjara: markazi atrofida chapga, keyin o'ngga 12° chayqaladi */
+.ilv .ilv-panjara-tebran {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-name: ilv-panjara-tebran;
+  animation-duration: 3s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-panjara-tebran {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(12deg); }
+}
+
+/* Undov: shar 1,1 s davomida so'nib boruvchi silkinish, keyin 0,4 s tinch turadi */
+.ilv .ilv-undov-silkin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-name: ilv-undov-silkin;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes ilv-undov-silkin {
+  0% { transform: rotate(0deg); }
+  15.3% { transform: rotate(-12deg); }
+  30.5% { transform: rotate(10deg); }
+  45.5% { transform: rotate(-7deg); }
+  61% { transform: rotate(4deg); }
+  73.5%, 100% { transform: rotate(0deg); }
+}

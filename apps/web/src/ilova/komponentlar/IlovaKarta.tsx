@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
-import { useKorinish } from './useKorinish';
+import { useKamHarakat, useKorinish } from './useKorinish';
 import '../tema.css';
 import './komponentlar.css';
 
-// QOLIP — F-agent to'ldiradi (KONTRAKT.md). Props o'zgarmaydi.
 export interface IlovaKartaProps {
+  /** "\n" — shu joyda yangi qator (namunadagi "Sizga / savol bor" kabi) */
   sarlavha: string;
   onClick: () => void;
   /** Ikonka o'z joyini (o'ng past) o'zi belgilaydi — ilv-joy-* */
@@ -18,20 +18,30 @@ export interface IlovaKartaProps {
   ariaLabel?: string;
 }
 
+/** Bo'lim kartochkasi: chap yuqorida sarlavha, o'ng pastda ikonka, chap pastda son belgisi. */
 export default function IlovaKarta({ sarlavha, onClick, ikonka, belgi, fon, tur = 'bosh', ariaLabel }: IlovaKartaProps) {
   const [ref, korinadi] = useKorinish<HTMLButtonElement>();
+  const kamHarakat = useKamHarakat();
+  const belgiMatn = belgi && belgi.matn ? belgi.matn : null;
+  const nom = sarlavha.replace(/\s*\n\s*/g, ' ');
   return (
     <button
       ref={ref}
       type="button"
-      className={'ilv-karta ilv-karta-' + tur + (korinadi ? ' ilv-korinadi' : '')}
+      className={'ilv-karta ilv-karta-' + tur + (fon ? ' ilv-karta-fonli' : '') + (korinadi ? ' ilv-korinadi' : '')}
       onClick={onClick}
-      aria-label={ariaLabel || sarlavha}
+      // Belgi soni ham o'qilsin: "Xatolarni tuzatish, 27 ta"
+      aria-label={ariaLabel || (belgiMatn != null ? `${nom}, ${belgiMatn} ta` : nom)}
     >
-      {fon && <img className="ilv-karta-fon" src={korinadi ? fon.animatsiya : fon.kadr} alt="" />}
+      {/* Statik kadr doim tagida turadi: animatsiyali rasm yuklanguncha ham bo'sh joy ko'rinmaydi.
+          Animatsiyali rasm faqat kartochka ekranda bo'lsa va harakat cheklanmagan bo'lsa qo'yiladi. */}
+      {fon && <img className="ilv-karta-fon" src={fon.kadr} alt="" draggable={false} />}
+      {fon && korinadi && !kamHarakat && <img className="ilv-karta-fon" src={fon.animatsiya} alt="" draggable={false} />}
       <span className="ilv-karta-sarlavha">{sarlavha}</span>
       {ikonka}
-      {belgi && belgi.matn ? <span className={'ilv-belgi ilv-belgi-' + belgi.rang}>{belgi.matn}</span> : null}
+      {belgiMatn != null && belgi && (
+        <span className={'ilv-belgi ilv-belgi-' + belgi.rang} aria-hidden="true">{belgiMatn}</span>
+      )}
     </button>
   );
 }

@@ -1,0 +1,214 @@
+/* ===== Profil ekrani (ilv-pr-*) — FAQAT ilovada (/men) =====
+   Namunada yo'q, shuning uchun Bosh sahifa va Testlar tilida: sarlavha — .ilv-ekran-sarlavha
+   ("TESTLAR" bilan bir xil), daraja kartasi — asosiy karta (fon, qiya chiziqlar, sonlar va progress
+   ekranlar.css dagi .ilv-asosiy-* bo'laklari), statistika — StatBlok, kartochkalar #3B3937 radius 20.
+   Hamma qoida `.ilv` ichida va `ilv-` prefiksli — saytga tegmaydi. */
+
+/* Yuqori qatordagi sozlamalar tugmasi: .ilv-qidiruv ko'rinishi, tishli g'ildirak lupadan kattaroq */
+.ilv .ilv-qidiruv.ilv-pr-tepa-tugma svg { width: 20px; height: 20px; stroke-width: 2.4; }
+
+/* ---------- Ism va daraja (asosiy karta ko'rinishida, lekin tugma emas) ----------
+   isolation — .ilv-asosiy-chiziq (z-index:-1) fon ustida, matn ostida qoladi */
+.ilv .ilv-pr-daraja {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--ilv-asosiy-boy);
+  padding: var(--ilv-asosiy-ichki, 16px 18px);
+  border-radius: var(--ilv-asosiy-radius);
+  background: var(--ilv-asosiy-fon, linear-gradient(135deg, #454240, #1f1e1d));
+}
+.ilv .ilv-pr-daraja.ilv-pr-daraja-qisqa { min-height: 0; }
+
+.ilv .ilv-pr-kim { display: flex; align-items: center; gap: 12px; min-width: 0; }
+/* Ism bosh harfi: bosh sahifadagi play tugmasi kabi sariq doira, to'q harf */
+.ilv .ilv-pr-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ilv-sariq);
+  color: var(--ilv-toq);
+  font: italic 800 20px/1 var(--ilv-shrift);
+}
+.ilv .ilv-pr-kim-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ilv .ilv-pr-ism {
+  overflow: hidden;
+  color: var(--ilv-oq);
+  font-size: var(--ilv-shr-sarlavha);
+  font-weight: 700;
+  line-height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ilv .ilv-pr-id { color: var(--ilv-matn2); font-size: var(--ilv-shr-yozuv); font-weight: 600; line-height: 16px; }
+
+/* Daraja nomi — .ilv-asosiy-sarlavha ("TEST YECHISH": 32px 800 italic katta harf, sariq);
+   ostida keyingi daraja, pastda ball sonlari va progress (.ilv-asosiy-sonlar / -progress) */
+.ilv .ilv-pr-keyingi { color: var(--ilv-matn2); font-size: var(--ilv-shr-yozuv); font-weight: 600; line-height: 16px; }
+.ilv .ilv-pr-past { margin-top: auto; padding-top: 8px; }
+
+/* Daraja ma'lumoti kelmadi — qayta urinish */
+.ilv .ilv-pr-xato {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 10px 10px 16px;
+  border-radius: var(--ilv-stat-radius);
+  background: var(--ilv-toq);
+  color: var(--ilv-matn2);
+  font-size: var(--ilv-shr-yozuv);
+  font-weight: 600;
+  line-height: 1.35;
+}
+.ilv .ilv-pr-xato-tugma {
+  flex: none;
+  min-height: var(--ilv-tugma-min);
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--ilv-chip-radius);
+  background: var(--ilv-karta);
+  color: var(--ilv-sariq);
+  font: 700 14px/1 var(--ilv-shrift);
+  cursor: pointer;
+}
+
+/* ---------- Statistika: StatBlok, 2 ustun ---------- */
+.ilv .ilv-pr-statlar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ilv-tor); }
+
+/* ---------- Kartochkalar (promokod, ball qiymatlari) ---------- */
+.ilv .ilv-pr-karta {
+  padding: 14px 16px 16px;
+  border-radius: var(--ilv-karta-radius);
+  background: var(--ilv-karta);
+}
+.ilv .ilv-pr-karta-sarlavha {
+  margin: 0;
+  color: var(--ilv-oq);
+  font-size: var(--ilv-shr-sarlavha);
+  font-weight: 700;
+  line-height: var(--ilv-sarlavha-qadam);
+}
+.ilv .ilv-pr-matn {
+  margin: 6px 0 0;
+  color: var(--ilv-matn2);
+  font-size: var(--ilv-shr-yozuv);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Promokod va "Ulashish" */
+.ilv .ilv-pr-kod-qator { display: flex; gap: var(--ilv-tor); margin-top: 12px; }
+.ilv .ilv-pr-kod {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 14px;
+  overflow: hidden;
+  border-radius: var(--ilv-chip-radius);
+  background: var(--ilv-toq);
+  color: var(--ilv-sariq);
+  font-size: var(--ilv-shr-son);
+  font-weight: 800;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-user-select: all;
+  user-select: all;
+}
+.ilv .ilv-pr-ulash {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 48px;
+  margin: 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--ilv-chip-radius);
+  background: var(--ilv-sariq);
+  color: var(--ilv-toq);
+  font: 700 14px/1 var(--ilv-shrift);
+  cursor: pointer;
+}
+.ilv .ilv-pr-ulash svg { flex: none; width: 18px; height: 18px; stroke-width: 2.4; }
+.ilv .ilv-pr-sanoq {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 10px;
+  color: var(--ilv-matn2);
+  font-size: var(--ilv-shr-yozuv);
+  font-weight: 600;
+}
+.ilv .ilv-pr-sanoq b { color: var(--ilv-oq); font-weight: 800; }
+.ilv .ilv-pr-xabar { margin-top: 10px; color: var(--ilv-togri); font-size: var(--ilv-shr-yozuv); font-weight: 600; }
+
+/* Ball qanday yig'iladi: chapda nima uchun, o'ngda sariq "+N" */
+.ilv .ilv-pr-royxat { margin: 6px 0 0; padding: 0; list-style: none; }
+.ilv .ilv-pr-royxat > li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid rgba(255, 255, 255, .07);
+  color: var(--ilv-matn2);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.ilv .ilv-pr-royxat > li:first-child { border-top: 0; }
+.ilv .ilv-pr-royxat > li > b { flex: none; color: var(--ilv-sariq); font-weight: 800; }
+
+/* ---------- Sozlamalar, til/mavzu, versiya ---------- */
+.ilv .ilv-pr-sozlama {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  margin: 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--ilv-karta-radius);
+  background: var(--ilv-karta);
+  color: var(--ilv-oq);
+  font: 700 var(--ilv-shr-sarlavha)/1.2 var(--ilv-shrift);
+  text-align: left;
+  cursor: pointer;
+}
+.ilv .ilv-pr-sozlama > span { flex: 1; min-width: 0; }
+.ilv .ilv-pr-sozlama > svg { flex: none; width: 20px; height: 20px; }
+.ilv .ilv-pr-sozlama > .ilv-pr-sozlama-ik { color: var(--ilv-sariq); }
+.ilv .ilv-pr-sozlama > .ilv-pr-sozlama-strelka { color: var(--ilv-matn2); }
+
+/* LangTheme (sayt komponenti, .lt-*) ilova ranglarida: to'q blok, faol tugma sariq, har tugma 44px.
+   `.lt` bilan — saytdagi `:root[data-theme="light"] .lt-seg` qoidasidan kuchliroq bo'lsin */
+.ilv .ilv-pr-til .lt { gap: var(--ilv-tor); padding: 0; }
+.ilv .ilv-pr-til .lt .lt-seg { gap: 4px; padding: 4px; border: 0; border-radius: 14px; background: var(--ilv-toq); }
+.ilv .ilv-pr-til .lt .lt-b {
+  min-height: var(--ilv-tugma-min);
+  padding: 0 4px;
+  border-radius: 10px;
+  color: var(--ilv-matn2);
+  font: 700 var(--ilv-shr-yozuv)/1 var(--ilv-shrift);
+}
+.ilv .ilv-pr-til .lt .lt-b.on { background: var(--ilv-sariq); color: var(--ilv-toq); }
+.ilv .ilv-pr-til .lt .lt-b svg { width: 15px; height: 15px; }
+.ilv .ilv-pr-versiya { color: var(--ilv-matn2); font-size: 12px; font-weight: 600; text-align: center; opacity: .7; }
+
+.ilv .ilv-pr-ulash:focus-visible,
+.ilv .ilv-pr-sozlama:focus-visible,
+.ilv .ilv-pr-xato-tugma:focus-visible,
+.ilv .ilv-pr-til .lt .lt-b:focus-visible { outline: 2px solid var(--ilv-sariq); outline-offset: 2px; }

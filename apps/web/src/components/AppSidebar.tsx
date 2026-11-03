@@ -6,7 +6,7 @@ import { mobilIlova } from '../native';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, MessageCircle, Moon,
-  ClipboardList, Shuffle, ShieldCheck, ScrollText,
+  ClipboardList, Shuffle, ShieldCheck, ScrollText, TicketPercent,
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -126,6 +126,10 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
             </button>
             <button className={'db-navi' + (active === '/xabarlar' ? ' active' : '')} onClick={() => go('/xabarlar')}>
               <MessageCircle size={18} /> <span>Xabarlar</span>
+            </button>
+            {/* Ilovada do'stining kodi bilan kelganlar — maktabga yozilganini tasdiqlash */}
+            <button className={'db-navi' + (active === '/promokodlar' ? ' active' : '')} onClick={() => go('/promokodlar')}>
+              <TicketPercent size={18} /> <span>Promokodlar</span>
             </button>
             <button className={'db-navi' + (active === '/tahlil' ? ' active' : '')} onClick={() => go('/tahlil')}>
               <TrendingUp size={18} /> <span>Tahlil</span>

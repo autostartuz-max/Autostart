@@ -15,6 +15,10 @@ import OktagonJangSahifa from './screens/oktagon/OktagonJang';
 import OktagonRoyxat from './screens/oktagon/OktagonRoyxat';
 import IkonkaKorik from './ilova/ikonkalar/Korik';
 import KomponentKorik from './ilova/komponentlar/KomponentKorik';
+import TestlarIlova from './screens/ilova/Testlar';
+import OrganishIlova from './screens/ilova/Organish';
+import ProfilIlova from './screens/ilova/Profil';
+import AdminPromo from './screens/AdminPromo';
 import RandomTests from './screens/RandomTests';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
@@ -141,6 +145,7 @@ export default function App() {
             ro'yxatdan o'tmaydi — "*" qoidasi ularni bosh sahifaga qaytaradi. */}
         {!mobilIlova() && <Route path="/xabarlar" element={<AdminMessages />} />}
         {!mobilIlova() && <Route path="/tahlil" element={<AdminAnalytics />} />}
+        {!mobilIlova() && <Route path="/promokodlar" element={<AdminPromo />} />}
         <Route path="/biletlar" element={<Tickets />} />
         <Route path="/test" element={<TestPlayer />} />
         <Route path="/belgilar" element={<Signs />} />
@@ -164,6 +169,10 @@ export default function App() {
         {mobilIlova() && <Route path="/oktagon/reyting" element={<OktagonRoyxat tur="reyting" />} />}
         {mobilIlova() && <Route path="/oktagon/janglarim" element={<OktagonRoyxat tur="janglarim" />} />}
         {mobilIlova() && <Route path="/avtodrom" element={<Placeholder title="Avtodrom" emoji="🚗" text="Avtodrom mashqlari tez orada qo‘shiladi." />} />}
+        {/* Ilovaning pastki menyusi: Testlar, O'rganish, Profil (Asosiy — "/") */}
+        {mobilIlova() && <Route path="/testlar" element={<TestlarIlova />} />}
+        {mobilIlova() && <Route path="/organish" element={<OrganishIlova />} />}
+        {mobilIlova() && <Route path="/men" element={<ProfilIlova />} />}
         <Route path="/reyting" element={<Rating />} />
         {/* Faqat ishlab chiqishda: ilova ikonkalari ko'rigi (production build'da yo'q) */}
         {(import.meta as any).env?.DEV && <Route path="/ilv-korik" element={<IkonkaKorik />} />}

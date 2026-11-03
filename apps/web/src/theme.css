@@ -649,15 +649,26 @@ button { font-family: inherit; cursor: pointer; }
 /* Pastda "O'rganish" menyusi uchun joy — oxirgi variant uning ostida qolmasin */
 .cap .tp2-nav { margin-top: 0; padding: 0 0 calc(80px + env(safe-area-inset-bottom)); border: none; }
 
-/* "O'rganish" menyusi — pastki chap burchakda, variantlar ustida; tugmalar chap chetga tekislanadi */
+/* "O'rganish" menyusi — pastda chapdan bitta qator: avval "O'rganish"/"Yopish", ochilganda uning
+   o'ng tomonida Qoida, Video, Ovoz. Javob variantlarini yopmaydi. Sig'masa (TestPlayer o'lchaydi):
+   "Yopish" faqat ✕, pleyer ochiq bo'lsa Qoida/Video ham faqat belgi; baribir sig'masa yonga suriladi.
+   Yopiq holatda faqat tugma kengligida (qolgan joyni bosish mumkin). */
 .tpm-fab { position: fixed; left: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40;
-  display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-.tpm-fab-main, .tpm-fab-i { display: inline-flex; align-items: center; gap: 9px; height: 38px;
-  padding: 0 13px; border-radius: 12px; background: #1d2a3d; border: 1px solid #445468;
+  display: flex; flex-direction: row; align-items: flex-end; gap: 8px; }
+.tpm-fab.open { right: 15px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+  padding-top: 4px; margin-top: -4px; }
+.tpm-fab.open::-webkit-scrollbar { display: none; }
+.tpm-fab > * { flex-shrink: 0; }
+.tpm-fab.ixcham .tpm-fab-main .tpm-yozuv,
+.tpm-fab.ixcham2 .tpm-fab-i .tpm-yozuv { display: none; }
+.tpm-fab.ixcham .tpm-fab-main,
+.tpm-fab.ixcham2 .tpm-fab-i:not(.tpm-fab-player) { width: 42px; padding: 0; justify-content: center; }
+.tpm-fab-main, .tpm-fab-i { display: inline-flex; align-items: center; gap: 7px; height: 38px;
+  padding: 0 11px; border-radius: 12px; background: #1d2a3d; border: 1px solid #445468;
   border-bottom: 3px solid #34455a; color: #ccdae7; font-size: 14px; font-weight: 700;
   font-family: inherit; cursor: pointer; box-shadow: none; }
 .tpm-fab-i { animation: tpmIn .16s ease; }
-@keyframes tpmIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes tpmIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
 
 /* Ovozli pleyer menyu ichida, "Ovozli" o'rnida — skrinshotdagidek ixcham:
    boshqa tugmalar bilan bir xil quti (175x43), oq ▶/⏸ va ingichka to'lqin */

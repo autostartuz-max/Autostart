@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
@@ -166,6 +166,22 @@ export default function TestPlayer() {
   const [playing, setPlaying] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
   const [aprog, setAprog] = useState(0);
+
+  // "O'rganish" qatori ekranga sig'masa: avval "Yopish" faqat ✕ bo'ladi; ovoz pleyeri ochiq va
+  // baribir sig'masa Qoida/Video ham faqat belgisi bilan qoladi (qolgani yonga suriladi)
+  const fabRef = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    const el = fabRef.current;
+    if (!el || !fabOpen) return;
+    const olch = () => {
+      el.classList.remove('ixcham', 'ixcham2');
+      if (el.scrollWidth > el.clientWidth + 1) el.classList.add('ixcham');
+      if (el.scrollWidth > el.clientWidth + 1) el.classList.add('ixcham2');
+    };
+    olch();
+    window.addEventListener('resize', olch);
+    return () => window.removeEventListener('resize', olch);
+  }, [fabOpen, showPlayer]);
   const [settings, setSettings] = useState<any>(() => loadSettings());
   const [showSettings, setShowSettings] = useState(false);
   const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>((sp.get('lang') as any) || 'lat');
@@ -1082,11 +1098,31 @@ export default function TestPlayer() {
         </div>}
       </div>
 
-      {/* ===== Ilova: "O'rganish" menyusi (pastki chap burchak) ===== */}
+      {/* ===== Ilova: "O'rganish" menyusi — pastda chapdan bir qator: "O'rganish"/"Yopish",
+           ochilganda uning o'ng tomonida Qoida, Video, Ovoz (javoblarni yopmaydi) ===== */}
       {mobil && (
-        <div className={'tpm-fab' + (fabOpen ? ' open' : '')}>
+        <div ref={fabRef} className={'tpm-fab' + (fabOpen ? ' open' : '')}>
+          <button
+            className="tpm-fab-main"
+            aria-label={fabOpen ? 'Yopish' : 'O‘rganish'}
+            onClick={() => {
+              // Menyu yopilsa ovoz ham to'xtaydi — pleyer menyuning ichida
+              if (fabOpen) closePlayer();
+              setFabOpen((v) => !v);
+            }}
+          >
+            {fabOpen
+              ? <><X size={19} /> <span className="tpm-yozuv">Yopish</span></>
+              : <><GraduationCap size={19} /> <span className="tpm-yozuv">O‘rganish</span></>}
+          </button>
           {fabOpen && (
             <>
+              <button className="tpm-fab-i" aria-label="Qoida" onClick={() => setShowRule(true)}>
+                <Info size={19} /> <span className="tpm-yozuv">Qoida</span>
+              </button>
+              <button className="tpm-fab-i" aria-label="Video" onClick={() => setShowVideo(true)}>
+                <Clapperboard size={19} /> <span className="tpm-yozuv">Video</span>
+              </button>
               {showPlayer ? (
                 <div className="tpm-fab-i tpm-fab-player">
                   <button className="tpm-pp" onClick={togglePlay} title={playing ? 'To‘xtatish' : 'Eshitish'}>
@@ -1100,31 +1136,12 @@ export default function TestPlayer() {
                   </div>
                 </div>
               ) : (
-                <button className="tpm-fab-i" onClick={learn}>
-                  <Play size={19} fill="currentColor" /> Ovozli
+                <button className="tpm-fab-i" aria-label="Ovoz" onClick={learn}>
+                  <Play size={19} fill="currentColor" /> <span className="tpm-yozuv">Ovoz</span>
                 </button>
               )}
-              <button className="tpm-fab-i" onClick={() => setShowVideo(true)}>
-                <Clapperboard size={19} /> Video
-              </button>
-              <button className="tpm-fab-i" onClick={() => setShowRule(true)}>
-                <Info size={19} /> Qoidasi
-              </button>
-              <button className="tpm-fab-i" onClick={muhokamaniOch}>
-                <MessageCircle size={19} /> Muhokama
-              </button>
             </>
           )}
-          <button
-            className="tpm-fab-main"
-            onClick={() => {
-              // Menyu yopilsa ovoz ham to'xtaydi — pleyer menyuning ichida
-              if (fabOpen) closePlayer();
-              setFabOpen((v) => !v);
-            }}
-          >
-            {fabOpen ? <><X size={19} /> Yopish</> : <><GraduationCap size={19} /> O‘rganish</>}
-          </button>
         </div>
       )}
 

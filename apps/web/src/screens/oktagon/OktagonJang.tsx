@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Swords, Play, Frown, Meh, Trophy, House, Smile } from 'lucide-react';
+import { ChevronLeft, HandFist, Play, Frown, Meh, Trophy, House, Smile } from 'lucide-react';
 import { oktagon, mediaUrl, OKTAGON_EMOJILAR, type OktagonJang as Jang, type OktagonSavol } from '../../api';
 import PastkiOyna from '../../components/PastkiOyna';
 import { MEDAL, NATIJA_MATN, harf, ballMatn, tilda } from './umumiy';
@@ -312,7 +312,7 @@ function OktagonJang({ id }: { id: number }) {
         <div className="ok-res-foot">
           {qasosHolat === 'raqib' && <div className="ok-izoh" style={{ margin: 0, color: '#ff8a84' }}>Raqib qasos olmoqchi!</div>}
           <button className={'ok-btn ' + (qasosHolat === 'men' ? 'kut' : 'qizil') + (qasosHolat === 'raqib' ? ' ok-urg' : '')} onClick={qasos}>
-            <Swords size={22} />
+            <HandFist size={22} />
             {qasosHolat === 'men' ? 'Raqib javobi kutilmoqda…' : qasosHolat === 'raqib' ? 'Qasosni qabul qilish' : 'Qasos olish'}
           </button>
           <div className="qator">
@@ -322,7 +322,7 @@ function OktagonJang({ id }: { id: number }) {
               disabled={yangiJang > 0}
               onClick={() => nav('/oktagon', { replace: true, state: { qidir: true } })}
             >
-              <Swords size={20} /> Yangi jang{yangiJang > 0 ? ` (${yangiJang})` : ''}
+              <HandFist size={20} /> Yangi jang{yangiJang > 0 ? ` (${yangiJang})` : ''}
             </button>
           </div>
         </div>
@@ -360,7 +360,7 @@ function OktagonJang({ id }: { id: number }) {
           </div>
           <div className="ok-hisob">
             <span>{menSoni}</span>
-            <Swords size={24} />
+            <HandFist size={24} />
             <span>{raqibSoni}</span>
           </div>
           <div className="ok-pl ong">

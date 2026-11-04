@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useOrqaga } from '../../orqaga';
-import { ChevronLeft, Settings, Swords, Radio, Trophy, Users, ClipboardList, Zap, Target, X, UserRound, Share2, KeyRound } from 'lucide-react';
+import { ChevronLeft, Settings, HandFist, Radio, Trophy, Users, ClipboardList, Zap, Target, X, UserRound, Share2, KeyRound } from 'lucide-react';
+import kurashRasm from '../../ilova/rasmlar/oktagon.webp';
+import kurashKadr from '../../ilova/rasmlar/oktagon-kadr.webp';
+
+const KAM_HARAKAT = typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 import { oktagon, type OktagonDaraja } from '../../api';
 import PastkiOyna from '../../components/PastkiOyna';
 import { MEDAL } from './umumiy';
@@ -27,7 +31,7 @@ function Qoidalar({ kutish, tugma, onDavom, onClose }: { kutish: number; tugma: 
     <PastkiOyna title="Bellashuv qoidalari" onClose={onClose}>
       <div style={{ height: 18 }} />
       <div className="ok-rule yashil">
-        <span className="ok-rule-ic"><Swords size={20} /></span>
+        <span className="ok-rule-ic"><HandFist size={20} /></span>
         <span>Onlayn o‘yinchi qidiriladi va u bilan bellashasiz. 15 soniyada topilmasa — bot bilan o‘ynaysiz. Savollar ikki tomonga ham bir xil bo‘ladi.</span>
       </div>
       <div className="ok-rule sariq">
@@ -235,7 +239,7 @@ function DostOyna({ onJang, onClose }: { onJang: (jangId: number) => void; onClo
           onKeyDown={(e) => e.key === 'Enter' && qoshil()}
         />
         {xabar && <div className="ok-izoh" style={{ margin: '0 0 14px', color: '#ff8a84' }}>{xabar}</div>}
-        <button className="ok-btn yashil" disabled={band} onClick={qoshil}><Swords size={20} /> Qo‘shilish</button>
+        <button className="ok-btn yashil" disabled={band} onClick={qoshil}><HandFist size={20} /> Qo‘shilish</button>
       </PastkiOyna>
     );
 
@@ -274,7 +278,8 @@ export default function Oktagon() {
         <button className="ok-ic" onClick={() => setOyna('qoidalar-info')} aria-label="Qoidalar"><Settings size={20} /></button>
       </div>
 
-      <div className="ok-emblem"><Swords size={60} strokeWidth={1.6} /></div>
+      {/* Bosh sahifadagi Bellashuv kartasidagi kabi — kuch sinashayotgan qo'llar ("harakatni kamaytirish"da — harakatsiz) */}
+      <div className="ok-emblem"><img src={KAM_HARAKAT ? kurashKadr : kurashRasm} alt="" /></div>
       <div className="ok-name">BELLASHUV</div>
       <div className="ok-sub">JANG REJIMI</div>
 
@@ -315,7 +320,7 @@ export default function Oktagon() {
       </div>
 
       <div className="ok-foot">
-        <button className="ok-btn yashil" onClick={boshla}><Swords size={24} /> Qidirishni boshlash</button>
+        <button className="ok-btn yashil" onClick={boshla}><HandFist size={24} /> Qidirishni boshlash</button>
       </div>
 
       {oyna === 'qoidalar' && (

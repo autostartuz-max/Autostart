@@ -299,23 +299,26 @@ export default function Oktagon() {
       </div>
 
       <div className="ok-tiles">
+        {/* Yozuv va belgi yonma-yon (ok-tile-t | ok-tile-ic): yozuv hech qachon belgi ustiga chiqmaydi */}
         <button className="ok-tile" onClick={boshla}>
-          Onlayn o‘yinchilar
-          <span className="ok-tile-ic"><Radio size={24} /></span>
+          <span className="ok-tile-t">Onlayn o‘yinchilar</span>
+          <span className="ok-tile-ic"><Radio size={22} /></span>
           {men && <span className="ok-online">{men.onlayn}</span>}
         </button>
         <button className="ok-tile gold" onClick={() => nav('/oktagon/reyting')}>
-          Eng zo‘rlari
-          <small>Reytingni ko‘ring</small>
-          <span className="ok-tile-ic"><Trophy size={24} /></span>
+          <span className="ok-tile-t">
+            Eng zo‘rlari
+            <small>Reytingni ko‘ring</small>
+          </span>
+          <span className="ok-tile-ic"><Trophy size={22} /></span>
         </button>
         <button className="ok-tile" onClick={() => setOyna('dost')}>
-          Do‘stni jangga chaqirish
-          <span className="ok-tile-ic"><Users size={24} /></span>
+          <span className="ok-tile-t">Do‘stni jangga chaqirish</span>
+          <span className="ok-tile-ic"><Users size={22} /></span>
         </button>
         <button className="ok-tile" onClick={() => nav('/oktagon/janglarim')}>
-          Mening janglarim
-          <span className="ok-tile-ic"><ClipboardList size={24} /></span>
+          <span className="ok-tile-t">Mening janglarim</span>
+          <span className="ok-tile-ic"><ClipboardList size={22} /></span>
         </button>
       </div>
 

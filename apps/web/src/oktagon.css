@@ -34,13 +34,16 @@
 .ok-medal { font-size: 24px; line-height: 1.1; }
 
 .ok-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin: 30px 14px 0; }
-/* Belgi o'ng tomonda, yozuv uning ustiga chiqmaydi — o'ngda belgiga joy qoldiriladi (padding-right) */
-.ok-tile { position: relative; isolation: isolate; height: 80px; box-sizing: border-box; padding: 0 56px 0 14px; border: none; border-radius: 22px;
+/* Yozuv (chapda) va belgi (o'ngda) yonma-yon — yozuv hech qachon belgi ustiga chiqmaydi va so'z o'rtasidan
+   bo'linmaydi. Telefonda shrift kattalashtirilib eng uzun so'z belgi yoniga sig'masa — belgi yozuv ostiga
+   (o'ng chetga) o'tadi va karta balandlashadi (min-height) */
+.ok-tile { position: relative; min-height: 80px; box-sizing: border-box; padding: 8px 8px 8px 14px; border: none; border-radius: 22px;
   border-bottom: 5px solid #2a3442; background: linear-gradient(180deg, #46536a, #3b475a); color: #fff; text-align: left;
-  display: flex; flex-direction: column; justify-content: center; font-size: 13px; font-weight: 800; line-height: 1.3;
-  text-transform: uppercase; }
+  display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; align-content: center; gap: 4px 6px;
+  font-size: 13px; font-weight: 800; line-height: 1.3; text-transform: uppercase; }
+.ok-tile-t { flex: 1 1 0; max-width: 100%; display: flex; flex-direction: column; overflow-wrap: break-word; }
 .ok-tile small { margin-top: 2px; font-size: 11.5px; font-weight: 700; text-transform: none; opacity: .85; }
-.ok-tile-ic { position: absolute; z-index: -1; top: calc(50% - 22px); right: 9px; width: 40px; height: 40px; border-radius: 12px;
+.ok-tile-ic { flex: none; margin-left: auto; width: 40px; height: 40px; border-radius: 12px;
   background: rgba(255, 255, 255, .08); color: #a3b0c2; display: flex; align-items: center; justify-content: center; }
 .ok-tile.gold { background: linear-gradient(180deg, #fccb3a, #f5b301); border-bottom-color: #c98f00; color: #4a2f00; }
 .ok-tile.gold .ok-tile-ic { background: rgba(255, 255, 255, .25); color: #a86b00; }

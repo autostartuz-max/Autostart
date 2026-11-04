@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../api';
+import { api, oxirgiJavob } from '../../api';
 import type { Me } from '../../types';
 import Ekran from '../../ilova/komponentlar/Ekran';
 import TepaQator, { QidiruvTugma } from '../../ilova/komponentlar/TepaQator';
@@ -14,7 +14,8 @@ import '../../ilova/ekranlar.css';
  */
 export default function TestlarIlova() {
   const nav = useNavigate();
-  const [saralangan, setSaralangan] = useState(0);
+  // Oxirgi ma'lum son darhol, yangisi serverdan orqada
+  const [saralangan, setSaralangan] = useState(() => oxirgiJavob<Me>('me')?.stats?.bookmarks ?? 0);
 
   useEffect(() => {
     api.me().then((m: Me) => setSaralangan(m.stats.bookmarks ?? 0)).catch(() => {});

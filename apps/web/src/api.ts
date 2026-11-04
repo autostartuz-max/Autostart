@@ -44,6 +44,7 @@ export function clearToken() {
   localStorage.removeItem('yhq_token');
   tokenniZaxirala('');
   localStorage.removeItem(ROLE_KEY);
+  oxirginiTozala(); // boshqa foydalanuvchi kirsa, avvalgisining raqamlari ko'rinmasin
   notifyAdminChanged();
 }
 
@@ -132,6 +133,34 @@ function keshOqi(path: string): any | null {
     const r = localStorage.getItem(KESH + path);
     return r ? JSON.parse(r) : null;
   } catch { return null; }
+}
+
+/*
+ * Oxirgi javob (Bosh sahifa, Testlar, Profil): ekran ochilishi bilan oxirgi ma'lum raqamlar
+ * darhol chiziladi, yangisi serverdan orqada keladi va almashtiradi — har safar "0" ko'rinib,
+ * 1-2 soniyadan keyin to'lmaydi. Xotirada (Map) va ilovada localStorage'da (ilova qayta
+ * ochilganda ham). Chiqishda (clearToken) tozalanadi.
+ */
+const OXIRGI = 'yhq_oxirgi_';
+const oxirgi = new Map<string, any>();
+function oxirgiYoz(nom: string, data: any) {
+  oxirgi.set(nom, data);
+  if (!ilovaIchida) return;
+  try { localStorage.setItem(OXIRGI + nom, JSON.stringify(data)); } catch { /* joy yo'q — faqat xotirada */ }
+}
+export function oxirgiJavob<T = any>(nom: 'me' | 'ballMen'): T | null {
+  if (oxirgi.has(nom)) return oxirgi.get(nom);
+  if (!ilovaIchida) return null;
+  try {
+    const r = localStorage.getItem(OXIRGI + nom);
+    return r ? JSON.parse(r) : null;
+  } catch { return null; }
+}
+function oxirginiTozala() {
+  oxirgi.clear();
+  try {
+    for (const k of Object.keys(localStorage)) if (k.startsWith(OXIRGI)) localStorage.removeItem(k);
+  } catch { /* ignore */ }
 }
 
 /** Keshlangan savollar orasidan bittasini topish — offline baholash uchun */
@@ -290,7 +319,11 @@ export const api = {
   register: (name: string, phone: string, password: string, email = '', promo = '') =>
     req('/auth/register', { method: 'POST', body: JSON.stringify({ name, phone, email, password, ...(promo ? { promo } : {}) }) }),
   /** Daraja tizimi: ball, daraja, streak, promokod, tarix */
-  ballMen: (): Promise<BallMen> => req('/ball/men', {}, false),
+  ballMen: async (): Promise<BallMen> => {
+    const r = await req('/ball/men', {}, false);
+    oxirgiYoz('ballMen', r);
+    return r;
+  },
   ballImtihon: (savollar: number[]) => req('/ball/imtihon', { method: 'POST', body: JSON.stringify({ savollar }) }),
   ballVideo: (lessonId: number) => req('/ball/video', { method: 'POST', body: JSON.stringify({ lessonId }) }),
   /** login — telefon yoki pochta */
@@ -300,6 +333,7 @@ export const api = {
     // Ilovada statistika faqat ilova javoblaridan
     const r = await req('/me' + (ilovaManbasi() ? '?manba=ilova' : ''));
     rememberRole(r?.user?.role);
+    oxirgiYoz('me', r);
     return r;
   },
   updateMe: (data: any) => req('/me', { method: 'PATCH', body: JSON.stringify(data) }),

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, type BallMen } from '../api';
+import { api, oxirgiJavob, type BallMen } from '../api';
 import { getLang } from '../i18n';
 import type { Me } from '../types';
 import Ekran from '../ilova/komponentlar/Ekran';
@@ -77,8 +77,9 @@ const SONLAR = [50, 100, 200, 500];
 
 export default function Home() {
   const nav = useNavigate();
-  const [me, setMe] = useState<MeIlova | null>(null);
-  const [ball, setBall] = useState<BallMen | null>(null);
+  // Oxirgi ma'lum raqamlar bilan darhol chiziladi, yangisi serverdan orqada keladi
+  const [me, setMe] = useState<MeIlova | null>(() => oxirgiJavob<MeIlova>('me'));
+  const [ball, setBall] = useState<BallMen | null>(() => oxirgiJavob<BallMen>('ballMen'));
   // "50/100 talik" darhol test ochmaydi — avval savol sonini so'raydi
   const [soniOyna, setSoniOyna] = useState(false);
   const randomBoshla = (n: number) => {

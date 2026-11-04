@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { CalendarDays, ChevronRight, Settings, Share2, Trophy, Zap } from 'lucide-react';
-import { api, type BallMen } from '../../api';
+import { api, oxirgiJavob, type BallMen } from '../../api';
 import LangTheme from '../../components/LangTheme';
 import Ekran from '../../ilova/komponentlar/Ekran';
 import TepaQator from '../../ilova/komponentlar/TepaQator';
@@ -61,8 +61,9 @@ function Stat({ yozuv, ikonka, son }: { yozuv: string; ikonka: ReactNode; son: R
 
 export default function ProfilIlova() {
   const nav = useNavigate();
-  const [me, setMe] = useState<MeQisqa | null>(null);
-  const [ball, setBall] = useState<BallMen | null>(null);
+  // Oxirgi ma'lum ma'lumot bilan darhol chiziladi, yangisi serverdan orqada keladi
+  const [me, setMe] = useState<MeQisqa | null>(() => oxirgiJavob<MeQisqa>('me'));
+  const [ball, setBall] = useState<BallMen | null>(() => oxirgiJavob<BallMen>('ballMen'));
   // Ball kelmadi: 'tarmoq' — qayta urinish tugmasi; 'yoq' — server eski (404), daraja qismi jimgina yo'q
   const [ballXato, setBallXato] = useState<'' | 'tarmoq' | 'yoq'>('');
   const [xabar, setXabar] = useState('');
@@ -165,7 +166,8 @@ export default function ProfilIlova() {
         )}
       </section>
 
-      {ballXato === 'tarmoq' && (
+      {/* Oxirgi ma'lumot bor bo'lsa xato ko'rsatilmaydi — o'sha ko'rinib turadi */}
+      {ballXato === 'tarmoq' && !ball && (
         <div className="ilv-pr-xato" role="status">
           <span>Daraja va coin ma’lumotini yuklab bo‘lmadi</span>
           <button type="button" className="ilv-pr-xato-tugma" onClick={ballYukla}>Qayta urinish</button>

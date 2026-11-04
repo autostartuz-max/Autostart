@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Settings, Share2 } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { CalendarDays, ChevronRight, Settings, Share2, Trophy, Zap } from 'lucide-react';
 import { api, type BallMen } from '../../api';
 import LangTheme from '../../components/LangTheme';
 import Ekran from '../../ilova/komponentlar/Ekran';
 import TepaQator from '../../ilova/komponentlar/TepaQator';
-import StatBlok from '../../ilova/komponentlar/StatBlok';
 // Ekran sarlavhasi va asosiy karta bo'laklari (qiya chiziqlar, progress) — Bosh sahifa/Testlar bilan bitta manba
 import '../../ilova/ekranlar.css';
 import '../../ilova/profil.css';
@@ -33,6 +33,31 @@ const QIYMATLAR: [keyof BallMen['qiymatlar'], string][] = [
   ['oktagonGalaba', 'Bellashuvda g‘alaba (qo‘shimcha)'],
   ['taklif', 'Taklif qilgan do‘stingiz maktabga yozilsa'],
 ];
+
+/** Coin belgisi: oltinrang tanga, ichida "A" (Autostart) */
+export function Tanga({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="11" fill="#e0a100" />
+      <circle cx="12" cy="11.4" r="9.6" fill="#ffd23f" />
+      <circle cx="12" cy="11.4" r="7.4" fill="none" stroke="#e8ae00" strokeWidth="1.2" />
+      <path d="M12 6.6 15.6 16h-2.1l-.7-2h-1.6l-.7 2H8.4Zm0 3.4-.6 2.3h1.2Z" fill="#9a6400" />
+    </svg>
+  );
+}
+
+// Minglar bo'sh joy bilan: 1500 → "1 500"
+const raqam = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+/** Profil statistikasi: yuqorida yozuv, pastda belgi va son (Coin balansi, Reyting, ...) */
+function Stat({ yozuv, ikonka, son }: { yozuv: string; ikonka: ReactNode; son: ReactNode }) {
+  return (
+    <div className="ilv-pr-stat">
+      <span className="ilv-pr-stat-yozuv">{yozuv}</span>
+      <b className="ilv-pr-stat-son">{ikonka}{son}</b>
+    </div>
+  );
+}
 
 export default function ProfilIlova() {
   const nav = useNavigate();
@@ -122,8 +147,8 @@ export default function ProfilIlova() {
             <div className="ilv-pr-keyingi">{keyingi ? `Keyingi daraja: ${keyingi.nom}` : 'Eng yuqori daraja'}</div>
             <div className="ilv-pr-past">
               <div className="ilv-asosiy-sonlar">
-                <span>{keyingi ? `${ball.ball} / ${keyingi.dan} ball` : `${ball.ball} ball`}</span>
-                {keyingi && <span>{qoldi} ball qoldi</span>}
+                <span>{keyingi ? `${raqam(ball.ball)} / ${raqam(keyingi.dan)} coin` : `${raqam(ball.ball)} coin`}</span>
+                {keyingi && <span>{raqam(qoldi)} coin qoldi</span>}
               </div>
               <div
                 className="ilv-asosiy-progress"
@@ -142,17 +167,25 @@ export default function ProfilIlova() {
 
       {ballXato === 'tarmoq' && (
         <div className="ilv-pr-xato" role="status">
-          <span>Daraja va ball ma’lumotini yuklab bo‘lmadi</span>
+          <span>Daraja va coin ma’lumotini yuklab bo‘lmadi</span>
           <button type="button" className="ilv-pr-xato-tugma" onClick={ballYukla}>Qayta urinish</button>
         </div>
       )}
 
       {ball && (
         <div className="ilv-pr-statlar">
-          <StatBlok son={ball.ball} yozuv="Ball" rang="qolgan" />
-          <StatBlok son={ball.orin != null ? `#${ball.orin}` : '—'} yozuv="Reyting o‘rni" rang="togri" />
-          <StatBlok son={`${streak} kun`} yozuv="Faollik" rang="qolgan" />
-          <StatBlok son={ball.oxirgi7 > 0 ? `+${ball.oxirgi7}` : 0} yozuv="Oxirgi 7 kun" rang="togri" />
+          <Stat yozuv="Coin balansi" ikonka={<Tanga className="ilv-pr-stat-ik" />} son={raqam(ball.ball)} />
+          <Stat
+            yozuv="Reyting o‘rni"
+            ikonka={<Trophy className="ilv-pr-stat-ik ilv-pr-stat-kubok" aria-hidden="true" />}
+            son={ball.orin != null ? `#${raqam(ball.orin)}` : '—'}
+          />
+          <Stat yozuv="Faollik" ikonka={<Zap className="ilv-pr-stat-ik ilv-pr-stat-chaqmoq" aria-hidden="true" />} son={`${streak} kun`} />
+          <Stat
+            yozuv="Oxirgi 7 kun"
+            ikonka={<CalendarDays className="ilv-pr-stat-ik ilv-pr-stat-kalendar" aria-hidden="true" />}
+            son={`+${raqam(ball.oxirgi7)} coin`}
+          />
         </div>
       )}
 
@@ -161,7 +194,7 @@ export default function ProfilIlova() {
           <h2 id="ilv-pr-promo" className="ilv-pr-karta-sarlavha">Do‘stlarni taklif qiling</h2>
           <p className="ilv-pr-matn">
             Do‘stingiz shu promokod bilan ro‘yxatdan o‘tib, Autostart maktabiga yozilsa — chegirma oladi
-            {taklifBall ? `, siz esa +${taklifBall} ball.` : '.'}
+            {taklifBall ? `, siz esa +${taklifBall} coin.` : '.'}
           </p>
           <div className="ilv-pr-kod-qator">
             {/* data-notr — kirill/rus tilida ham kod o'zgarmasin */}
@@ -181,12 +214,12 @@ export default function ProfilIlova() {
 
       {ball?.qiymatlar && (
         <section className="ilv-pr-karta" aria-labelledby="ilv-pr-qiymat">
-          <h2 id="ilv-pr-qiymat" className="ilv-pr-karta-sarlavha">Ball qanday yig‘iladi</h2>
+          <h2 id="ilv-pr-qiymat" className="ilv-pr-karta-sarlavha">Coin qanday yig‘iladi</h2>
           <ul className="ilv-pr-royxat">
             {QIYMATLAR.filter(([k]) => typeof ball.qiymatlar[k] === 'number').map(([k, nom]) => (
               <li key={k}>
                 <span>{nom}</span>
-                <b>+{ball.qiymatlar[k]}</b>
+                <b className="ilv-pr-royxat-coin">+{ball.qiymatlar[k]} <Tanga className="ilv-pr-royxat-ik" /></b>
               </li>
             ))}
           </ul>

@@ -82,6 +82,23 @@
 
 /* ---------- Statistika: StatBlok, 2 ustun ---------- */
 .ilv .ilv-pr-statlar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ilv-tor); }
+/* Statistika plitkasi: yuqorida yozuv, pastda belgi + son (Coin balansi, Reyting o'rni, ...) */
+.ilv .ilv-pr-stat {
+  display: flex; flex-direction: column; justify-content: center; gap: 7px;
+  min-height: 74px; padding: 12px 14px; border-radius: var(--ilv-stat-radius); background: var(--ilv-toq);
+}
+.ilv .ilv-pr-stat-yozuv { color: var(--ilv-matn2); font-size: var(--ilv-shr-yozuv); font-weight: 600; line-height: 16px; }
+.ilv .ilv-pr-stat-son {
+  display: inline-flex; align-items: center; gap: 7px; min-width: 0;
+  color: var(--ilv-oq); font-size: 20px; font-weight: 800; line-height: 24px; white-space: nowrap;
+}
+.ilv .ilv-pr-stat-ik { flex: none; width: 22px; height: 22px; }
+.ilv .ilv-pr-stat-kubok { color: #ffb020; }
+.ilv .ilv-pr-stat-chaqmoq { color: var(--ilv-sariq); fill: currentColor; }
+.ilv .ilv-pr-stat-kalendar { color: #9b8cff; }
+/* "Coin qanday yig'iladi" ro'yxatida son yonida kichik tanga */
+.ilv .ilv-pr-royxat-coin { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.ilv .ilv-pr-royxat-ik { width: 16px; height: 16px; flex: none; }
 
 /* ---------- Kartochkalar (promokod, ball qiymatlari) ---------- */
 .ilv .ilv-pr-karta {

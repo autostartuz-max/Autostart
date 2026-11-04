@@ -120,7 +120,9 @@
 :root[data-theme="light"] .ilv .ilv-pr-karta,
 :root[data-theme="light"] .ilv .ilv-pr-sozlama { box-shadow: var(--ilv-soya); }
 :root[data-theme="light"] .ilv .ilv-stat,
+:root[data-theme="light"] .ilv .ilv-pr-stat,
 :root[data-theme="light"] .ilv .ilv-pr-xato { background: var(--ilv-karta); box-shadow: var(--ilv-soya); }
+:root[data-theme="light"] .ilv .ilv-pr-stat-chaqmoq { color: var(--ilv-oltin); }
 :root[data-theme="light"] .ilv .ilv-menyu-ichi { background: var(--ilv-karta); box-shadow: 0 2px 14px rgba(31, 30, 29, .12); }
 /* Sariq matnli tugmalar → sariq tugma, to'q belgi */
 :root[data-theme="light"] .ilv .ilv-chip,

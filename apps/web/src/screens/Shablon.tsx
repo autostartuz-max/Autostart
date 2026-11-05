@@ -4,17 +4,19 @@ import {
   Bookmark, ChevronLeft, Bell, Search, Moon, Globe, User, Menu, X,
 } from 'lucide-react';
 import { api, type ShablonProgress } from '../api';
+import { rusBor } from '../i18n';
 import AppSidebar from '../components/AppSidebar';
 import '../shablon.css';
 
 const COUNT = 63;
 // Progress doirasi uzunligi (r=18)
 const RING = 2 * Math.PI * 18;
-const LANGS: [string, string, 'uz' | 'ru'][] = [
+// Rus tili vaqtincha o'chirilgan (i18n.ts → rusBor)
+const LANGS = ([
   ['lat', 'O‘zbek', 'uz'],
   ['cyr', 'Кирилл', 'uz'],
   ['rus', 'Рус', 'ru'],
-];
+] as [string, string, 'uz' | 'ru'][]).filter(([v]) => v !== 'rus' || rusBor());
 
 // Haqiqiy bayroqlar (emoji Windows'da harf bo'lib ko'rinadi, shuning uchun SVG)
 function Flag({ c }: { c: 'uz' | 'ru' }) {

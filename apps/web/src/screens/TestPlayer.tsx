@@ -9,7 +9,7 @@ import { api, mediaUrl, type CommentRow } from '../api';
 import { haptic, getTelegram } from '../telegram';
 import { latToCyr } from '../translit';
 import { mobilIlova } from '../native';
-import { setLang } from '../i18n';
+import { setLang, rusBor } from '../i18n';
 import VideoTushuncha from '../components/VideoTushuncha';
 import type { Question, Option } from '../types';
 
@@ -184,10 +184,10 @@ export default function TestPlayer() {
   }, [fabOpen, showPlayer]);
   const [settings, setSettings] = useState<any>(() => loadSettings());
   const [showSettings, setShowSettings] = useState(false);
-  // Ilovada rus tili yo'q: eski havolada lang=rus bo'lsa ham o'zbekcha (lotin) ochiladi
+  // Rus tili vaqtincha o'chirilgan: eski havolada lang=rus bo'lsa ham o'zbekcha (lotin) ochiladi
   const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>(() => {
     const l = (sp.get('lang') as 'lat' | 'cyr' | 'rus' | null) || 'lat';
-    return l === 'rus' && mobilIlova() ? 'lat' : l;
+    return l === 'rus' && !rusBor() ? 'lat' : l;
   });
   const [configured, setConfigured] = useState(!examMode || !!sp.get('lang'));
   const [userName, setUserName] = useState('');
@@ -556,9 +556,9 @@ export default function TestPlayer() {
   }, [idx, answers, questions, finished, configured]);
 
   if (!configured) {
-    // Ilovada rus tili yo'q
+    // Rus tili vaqtincha o'chirilgan (i18n.ts → rusBor)
     const LANGS: [string, string][] = ([['lat', '🇺🇿 O‘zbek'], ['cyr', '🇺🇿 Кирилл'], ['rus', '🇷🇺 Рус']] as [string, string][])
-      .filter(([v]) => v !== 'rus' || !mobil);
+      .filter(([v]) => v !== 'rus' || rusBor());
     const cfgCount = Number(limit) || questions?.length || 20;
     return (
       <div className="cfg-wrap">
@@ -1290,8 +1290,8 @@ export default function TestPlayer() {
             <div
               className="set-row"
               onClick={() => {
-                // lotin → kirill → rus → lotin (ilovada rus yo'q: lotin ↔ kirill). Savol matni ham, ilova interfeysi ham almashadi.
-                const keyingi = cfgLang === 'lat' ? 'cyr' : cfgLang === 'cyr' && !mobil ? 'rus' : 'lat';
+                // lotin → kirill → (rus) → lotin; rus vaqtincha o'chirilgan. Savol matni ham, ilova interfeysi ham almashadi.
+                const keyingi = cfgLang === 'lat' ? 'cyr' : cfgLang === 'cyr' && rusBor() ? 'rus' : 'lat';
                 setCfgLang(keyingi);
                 setLang(keyingi === 'lat' ? 'uz' : keyingi);
               }}

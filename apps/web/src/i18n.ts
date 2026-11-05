@@ -1,7 +1,6 @@
 // Global til almashtirish: butun ilova UI matnini tanlangan tilga o'zgartiradi.
 // uz — o'zbekcha lotin (asl), cyr — avtomatik transliteratsiya, rus — avtomatik tarjima (keshlanadi).
 import { latToCyr } from './translit';
-import { mobilIlova } from './native';
 
 export type Lang = 'uz' | 'cyr' | 'rus';
 
@@ -9,12 +8,17 @@ const API = (import.meta as any).env?.VITE_API || '/api';
 const LKEY = 'yhq_lang';
 const RKEY = 'yhq_ru_cache_v1';
 
-/** Ilovada rus tili yo'q (faqat o'zbek lotin va kirill); saytda avvalgidek uchala til */
-export const rusBor = () => !mobilIlova();
+/**
+ * Rus tili VAQTINCHA O'CHIRILGAN (2026-11-05, egasi so'radi) — sayt va ilovaning hamma joyida:
+ * til almashtirish, test/shablon til tanlash, admin savol formasidagi rus maydonlari.
+ * Bazadagi ruscha matnlar (textRus) o'chirilmagan, admin yangi savolga orqada tarjima ham yozib boradi.
+ * Qaytarish uchun shu yerda `true` qiling.
+ */
+export const rusBor = () => false;
 
 export function getLang(): Lang {
   const l = localStorage.getItem(LKEY);
-  if (l === 'rus') return rusBor() ? 'rus' : 'uz'; // ilovada avval rus tanlangan bo'lsa — o'zbekcha
+  if (l === 'rus') return rusBor() ? 'rus' : 'uz'; // avval rus tanlangan bo'lsa — o'zbekcha
   return l === 'cyr' ? 'cyr' : 'uz';
 }
 

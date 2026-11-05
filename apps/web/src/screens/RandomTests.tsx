@@ -5,6 +5,7 @@ import {
   ChevronLeft, Bell, Search, Moon, Globe, User, Menu, Shuffle, X, Clock, ListChecks,
 } from 'lucide-react';
 import { api } from '../api';
+import { rusBor } from '../i18n';
 import AppSidebar from '../components/AppSidebar';
 import '../shablon.css';
 
@@ -14,11 +15,12 @@ const COUNTS = [20, 50, 100, 200];
 const minutesFor = (n: number) => Math.round(n * 1.25);
 const allowedWrong = (n: number) => Math.max(3, Math.round(n * 0.15));
 
-const LANGS: [string, string, 'uz' | 'ru'][] = [
+// Rus tili vaqtincha o'chirilgan (i18n.ts → rusBor)
+const LANGS = ([
   ['lat', 'O‘zbek', 'uz'],
   ['cyr', 'Кирилл', 'uz'],
   ['rus', 'Рус', 'ru'],
-];
+] as [string, string, 'uz' | 'ru'][]).filter(([v]) => v !== 'rus' || rusBor());
 
 // Haqiqiy bayroqlar (emoji Windows'da harf bo'lib ko'rinadi, shuning uchun SVG)
 function Flag({ c }: { c: 'uz' | 'ru' }) {

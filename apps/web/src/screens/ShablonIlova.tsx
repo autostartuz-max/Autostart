@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useOrqaga } from '../orqaga';
 import { ChevronLeft, X } from 'lucide-react';
 import { api, type ShablonProgress } from '../api';
+import { rusBor } from '../i18n';
 import '../shablon.css';
 import '../ilova-ekran.css';
 
@@ -22,11 +23,12 @@ const BOLIMLAR: [Bolim, string][] = [
   ['xatolar', 'Xatolar'],
 ];
 
-// Ilovada rus tili yo'q
-const LANGS: [string, string, 'uz' | 'ru'][] = [
+// Rus tili vaqtincha o'chirilgan (i18n.ts → rusBor)
+const LANGS = ([
   ['lat', 'O‘zbek', 'uz'],
   ['cyr', 'Кирилл', 'uz'],
-];
+  ['rus', 'Рус', 'ru'],
+] as [string, string, 'uz' | 'ru'][]).filter(([v]) => v !== 'rus' || rusBor());
 
 // Haqiqiy bayroqlar (emoji Windows'da harf bo'lib ko'rinadi, shuning uchun SVG)
 function Flag({ c }: { c: 'uz' | 'ru' }) {

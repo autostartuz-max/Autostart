@@ -7,6 +7,7 @@ import {
 import { adminApi, hasAdmin, ensureAdminAuto, mediaUrl } from '../api';
 import Tesseract from 'tesseract.js';
 import { latToCyr } from '../translit';
+import { rusBor } from '../i18n';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
@@ -332,7 +333,8 @@ export default function AdminQuestionForm() {
       if (!rusFinal) {
         try { const r = await adminApi.translate(textLat.trim()); rusFinal = r?.text || ''; } catch { /* ignore */ }
       }
-      if (!rusFinal) { setBusy(false); return setErr('Savol matni (rus) to‘ldirilmadi — qo‘lda kiriting'); }
+      // Rus tili o'chirilgan paytda maydon ko'rinmaydi — tarjima chiqmasa ham saqlanaveradi
+      if (!rusFinal && rusBor()) { setBusy(false); return setErr('Savol matni (rus) to‘ldirilmadi — qo‘lda kiriting'); }
 
       // Bo'sh qolgan ruscha variantlarni saqlashdan oldin to'ldiramiz
       const optsFinal = await Promise.all(
@@ -458,7 +460,8 @@ export default function AdminQuestionForm() {
                     </div>
                   </div>
 
-                  <div className="qf-card">
+                  {/* Rus tili vaqtincha o'chirilgan (i18n.ts → rusBor): maydon ko'rinmaydi, tarjima orqada yoziladi */}
+                  {rusBor() && <div className="qf-card">
                     <div className="qf-lab">
                       <span className="qf-ic blue">Я</span>
                       <div><label>Savol matni (rus) <span className="req">*</span></label><div className="sub">lotin bilan bir xil ma’noda avtomatik tarjima qilinadi {rusLoading && <span style={{ color: '#7fb0ff' }}>· tarjima qilinmoqda…</span>}</div></div>
@@ -467,7 +470,7 @@ export default function AdminQuestionForm() {
                       <textarea className="adm-ta" maxLength={500} value={textRus} onChange={(e) => { setTextRus(e.target.value); setRusTouched(true); }} placeholder="Автоматический перевод (при необходимости отредактируйте)" />
                       <span className="qf-count">{textRus.length}/500</span>
                     </div>
-                  </div>
+                  </div>}
 
                   <div className="qf-card">
                     <div className="qf-lab">
@@ -515,7 +518,7 @@ export default function AdminQuestionForm() {
                           <input type="checkbox" checked={o.isCorrect} onChange={(e) => setOpt(i, { isCorrect: e.target.checked })} />
                         </label>
                         <input className="adm-inp flex" placeholder={`Variant ${i + 1} (lotin)`} value={o.textLat} onChange={(e) => setOpt(i, { textLat: e.target.value })} />
-                        <input className="adm-inp flex" placeholder="Rus tilida (avtomatik)" value={o.textRus} onChange={(e) => setOpt(i, { textRus: e.target.value, rusTouched: true })} />
+                        {rusBor() && <input className="adm-inp flex" placeholder="Rus tilida (avtomatik)" value={o.textRus} onChange={(e) => setOpt(i, { textRus: e.target.value, rusTouched: true })} />}
                         {options.length > 2 && <button className="adm-x" onClick={() => rmOpt(i)}><X size={15} /></button>}
                       </div>
                     ))}

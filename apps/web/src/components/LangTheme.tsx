@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Sun, Moon, MonitorSmartphone } from 'lucide-react';
-import { getLang, setLang, type Lang } from '../i18n';
+import { getLang, setLang, rusBor, type Lang } from '../i18n';
 import { getTheme, setTheme, type Theme } from '../theme';
 
-const LANGS: [Lang, string][] = [['uz', 'Uzbek'], ['cyr', 'Kiril'], ['rus', 'Rus']];
+// Ilovada rus tili yo'q — faqat Uzbek va Kiril
+const LANGS: [Lang, string][] = ([['uz', 'Uzbek'], ['cyr', 'Kiril'], ['rus', 'Rus']] as [Lang, string][])
+  .filter(([v]) => v !== 'rus' || rusBor());
 const THEMES: [Theme, string, any][] = [
   ['light', 'Light', Sun],
   ['system', 'System', MonitorSmartphone],

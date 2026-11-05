@@ -22,10 +22,10 @@ const BOLIMLAR: [Bolim, string][] = [
   ['xatolar', 'Xatolar'],
 ];
 
+// Ilovada rus tili yo'q
 const LANGS: [string, string, 'uz' | 'ru'][] = [
   ['lat', 'O‘zbek', 'uz'],
   ['cyr', 'Кирилл', 'uz'],
-  ['rus', 'Рус', 'ru'],
 ];
 
 // Haqiqiy bayroqlar (emoji Windows'da harf bo'lib ko'rinadi, shuning uchun SVG)

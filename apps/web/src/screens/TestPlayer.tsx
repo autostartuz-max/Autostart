@@ -184,7 +184,11 @@ export default function TestPlayer() {
   }, [fabOpen, showPlayer]);
   const [settings, setSettings] = useState<any>(() => loadSettings());
   const [showSettings, setShowSettings] = useState(false);
-  const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>((sp.get('lang') as any) || 'lat');
+  // Ilovada rus tili yo'q: eski havolada lang=rus bo'lsa ham o'zbekcha (lotin) ochiladi
+  const [cfgLang, setCfgLang] = useState<'lat' | 'cyr' | 'rus'>(() => {
+    const l = (sp.get('lang') as 'lat' | 'cyr' | 'rus' | null) || 'lat';
+    return l === 'rus' && mobilIlova() ? 'lat' : l;
+  });
   const [configured, setConfigured] = useState(!examMode || !!sp.get('lang'));
   const [userName, setUserName] = useState('');
   const tx = (lat: string, cyr: string, rus?: string) =>
@@ -552,7 +556,9 @@ export default function TestPlayer() {
   }, [idx, answers, questions, finished, configured]);
 
   if (!configured) {
-    const LANGS: [string, string][] = [['lat', '🇺🇿 O‘zbek'], ['cyr', '🇺🇿 Кирилл'], ['rus', '🇷🇺 Рус']];
+    // Ilovada rus tili yo'q
+    const LANGS: [string, string][] = ([['lat', '🇺🇿 O‘zbek'], ['cyr', '🇺🇿 Кирилл'], ['rus', '🇷🇺 Рус']] as [string, string][])
+      .filter(([v]) => v !== 'rus' || !mobil);
     const cfgCount = Number(limit) || questions?.length || 20;
     return (
       <div className="cfg-wrap">
@@ -1284,8 +1290,8 @@ export default function TestPlayer() {
             <div
               className="set-row"
               onClick={() => {
-                // lotin → kirill → rus → lotin. Savol matni ham, ilova interfeysi ham almashadi.
-                const keyingi = cfgLang === 'lat' ? 'cyr' : cfgLang === 'cyr' ? 'rus' : 'lat';
+                // lotin → kirill → rus → lotin (ilovada rus yo'q: lotin ↔ kirill). Savol matni ham, ilova interfeysi ham almashadi.
+                const keyingi = cfgLang === 'lat' ? 'cyr' : cfgLang === 'cyr' && !mobil ? 'rus' : 'lat';
                 setCfgLang(keyingi);
                 setLang(keyingi === 'lat' ? 'uz' : keyingi);
               }}

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1190.1"
+   height="350.10001"
+   id="svg2"
+   version="1.1"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   sodipodi:docname="RU_road_sign_5.24.1.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35355339"
+     inkscape:cx="1009.7485"
+     inkscape:cy="434.16356"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-paths="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:object-paths="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-midpoints="true"
+     inkscape:snap-object-midpoints="true"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showguides="false" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <dc:description>ГОСТ Р 52290-2004</dc:description>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0.05,-702.31218)">
+    <path
+       id="rect8314"
+       style="display:inline;overflow:visible;opacity:1;fill:#ffffff;stroke:none;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;marker:none;enable-background:accumulate"
+       d="m 45,702.36218 h 1100 c 24.93,0 45,20.07 45,45 v 260.00002 c 0,24.93 -20.07,45 -45,45 H 45 c -24.93,0 -45,-20.07 -45,-45 V 747.36218 c 0,-24.93 20.07,-45 45,-45 z"
+       sodipodi:nodetypes="sssssssss" />
+    <path
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.543;marker:none;enable-background:accumulate"
+       d="m 45.00001,712.36219 c -19.39,0 -35,15.61 -35,35 v 260.00011 c 0,19.39 15.61,35 35,35 H 1145 c 19.39,0 35,-15.61 35,-35 V 747.36219 c 0,-19.39 -15.61,-35 -35,-35 z m 0,10 H 1145 c 13.85,0 25,11.15 25,25 v 260.00011 c 0,13.85 -11.15,25 -25,25 H 45.00001 c -13.85,0 -25,-11.15 -25,-25 V 747.36219 c 0,-13.85 11.15,-25 25,-25 z"
+       id="rect8316"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ssssssssssssssssss" />
+    <path
+       id="rect8382"
+       style="display:inline;overflow:visible;opacity:1;fill:none;stroke:#000000;stroke-width:2;marker:none;enable-background:accumulate"
+       d="m 45,703.36218 h 1100 c 24.376,0 44,19.624 44,44 v 260.00002 c 0,24.376 -19.624,44 -44,44 H 45 c -24.376,0 -44,-19.624 -44,-44 V 747.36218 c 0,-24.376 19.624,-44 44,-44 z"
+       sodipodi:nodetypes="sssssssss" />
+    <path
+       id="text7475"
+       style="font-size:254.63px;font-family:'Russian Road Sign';-inkscape-font-specification:'Russian Road Sign';letter-spacing:-11.86px;fill:#000000;stroke-width:21.2192"
+       d="M 257.47344 802.36296 C 218.26046 802.36296 199.41875 835.97427 199.41875 877.22429 C 199.41875 918.47431 218.26046 952.08562 257.47344 952.08562 C 296.68642 952.08562 315.53008 918.47431 315.53008 877.22429 C 315.53008 835.97427 296.68642 802.36296 257.47344 802.36296 z M 402.46562 802.36296 C 372.16468 802.36296 350.77617 821.96979 350.77617 846.92351 C 350.77617 857.87259 355.61448 881.04359 395.33672 886.90007 C 427.16544 891.48341 427.41875 903.45056 427.41875 909.05241 L 427.41875 909.30827 C 427.41875 914.6555 421.3091 928.91374 399.41094 928.91374 C 374.45722 928.91374 360.45195 912.10906 360.45195 912.10906 L 342.88164 927.13249 C 342.88164 927.13249 366.81782 952.08562 398.90117 952.08562 C 434.54934 952.08562 453.64531 925.34915 453.64531 907.52507 C 453.64531 886.13617 438.11465 871.87815 413.16094 866.53093 C 393.55445 862.45685 375.7293 860.16375 375.7293 846.41374 C 375.7293 839.53874 381.07673 825.53484 402.46562 825.53484 C 421.0536 825.53484 434.03984 839.7946 434.03984 839.7946 L 450.59062 821.97038 C 450.59062 821.97038 427.41934 802.36296 402.46562 802.36296 z M 75.051563 805.92741 L 75.051563 827.31609 L 114.26445 827.31609 L 114.26445 948.52116 L 139.21758 948.52116 L 139.21758 827.31609 L 178.43047 827.31609 L 178.43047 805.92741 L 75.051563 805.92741 z M 480.99883 805.92741 L 480.99883 948.52116 L 505.95391 948.52116 L 505.95391 884.3532 L 559.42461 884.3532 L 559.42461 948.52116 L 584.37969 948.52116 L 584.37969 805.92741 L 559.42461 805.92741 L 559.42461 862.96452 L 505.95391 862.96452 L 505.95391 805.92741 L 480.99883 805.92741 z M 619.87969 805.92741 L 619.87969 948.52116 L 644.83477 948.52116 L 644.83477 805.92741 L 619.87969 805.92741 z M 694.74102 805.92741 L 645.08867 873.15007 L 698.30547 948.52116 L 730.38945 948.52116 L 675.64336 872.89616 L 726.825 805.92741 L 694.74102 805.92741 z M 755.45195 805.92741 L 755.45195 948.52116 L 846.3543 948.52116 L 846.3543 927.13249 L 780.40508 927.13249 L 780.40508 884.3532 L 832.09453 884.3532 L 832.09453 862.96452 L 780.40508 862.96452 L 780.40508 829.09929 L 844.57109 829.09929 L 844.57109 805.92741 L 755.45195 805.92741 z M 879.05352 805.92741 L 879.05352 948.52116 L 904.00859 948.52116 L 904.00859 845.14031 L 957.4793 948.52116 L 985.99883 948.52116 L 985.99883 805.92741 L 961.0457 805.92741 L 961.0457 907.52507 L 907.57305 805.92741 L 879.05352 805.92741 z M 1011.5691 805.92741 L 1011.5691 827.31609 L 1050.782 827.31609 L 1050.782 948.52116 L 1075.7352 948.52116 L 1075.7352 827.31609 L 1114.948 827.31609 L 1114.948 805.92741 L 1011.5691 805.92741 z M 257.47344 825.53484 C 277.07993 825.53484 291.33867 845.14094 291.33867 877.22429 C 291.33867 909.30764 277.07993 928.91374 257.47344 928.91374 C 237.86695 928.91374 223.6082 909.30764 223.6082 877.22429 C 223.6082 845.14094 237.86695 825.53484 257.47344 825.53484 z " />
+  </g>
+</svg>

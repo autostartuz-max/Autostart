@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="634.14001"
+   height="561.22998"
+   id="svg2"
+   version="1.1"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   sodipodi:docname="UZ_road_sign_1.35.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title3002">1.25.3 Kemiruvchi va sudralib yuruvchi hayvonlar</title>
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.0091986"
+     inkscape:cx="395.85864"
+     inkscape:cy="435.49405"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-paths="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:object-paths="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showguides="false" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>1.25.3 Kemiruvchi va sudralib yuruvchi hayvonlar</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <dc:description>ГОСТ Р 52290-2004
+Размеры и пропорции по типоразмеру I</dc:description>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-491.13214)">
+    <path
+       sodipodi:nodetypes="sccsccsccs"
+       inkscape:connector-curvature="0"
+       d="m 339.56541,497.17249 c -21.52311,-12.42634 -49.04475,-5.052 -61.47117,16.47128 L 6.0363923,984.8621 c -12.42642,21.5231 -5.05209,49.0447 16.4710997,61.4711 6.84091,3.9496 14.60091,6.0289 22.50008,6.0289 l 544.115728,-10e-5 c 7.8993,0 15.65928,-2.0793 22.50008,-6.0289 21.5232,-12.4264 28.8976,-39.948 16.4712,-61.47108 L 356.0366,513.64377 c -3.94962,-6.84091 -9.63028,-12.52165 -16.47119,-16.47128 z"
+       style="opacity:1;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path5313" />
+    <path
+       id="path5791"
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 1.0074138,1007.3622 c 5.7e-5,-7.72358 2.033128,-15.31118 5.894964,-21.99998 L 278.96019,514.14412 c 12.15026,-21.0448 39.06025,-28.2554 60.10512,-16.1052 6.68883,3.8618 12.2433,9.4163 16.10512,16.1052 l 272.05769,471.2181 c 3.86184,6.6888 5.89491,14.2764 5.89497,21.99998 -7e-5,24.3005 -19.69961,43.9999 -44.00009,44 l -544.115503,0 c -24.300475,-10e-5 -44.0000132,-19.6995 -44.0000832,-44 z"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccscccccc" />
+    <path
+       style="opacity:1;fill:#ff0000;fill-opacity:1;stroke:none"
+       d="M 316.3125 10 C 304.49402 10.264781 293.09264 16.514178 286.75 27.5 L 14.6875 498.71875 C 5.0225195 515.45903 10.75976 536.86625 27.5 546.53125 C 32.82067 549.60315 38.85622 551.21875 45 551.21875 L 589.125 551.21875 C 595.26878 551.21875 601.30433 549.60315 606.625 546.53125 C 623.36524 536.86625 629.10248 515.45903 619.4375 498.71875 L 347.375 27.5 C 344.30311 22.1793 339.88318 17.7594 334.5625 14.6875 C 328.80805 11.365156 322.50313 9.8613054 316.3125 10 z M 316.375 70.25 C 318.29628 70.114265 320.2689 70.558188 322.0625 71.59375 C 323.58269 72.47135 324.84108 73.7283 325.71875 75.25 L 567.28125 493.625 C 570.04221 498.40555 568.40793 504.51975 563.625 507.28125 C 562.10481 508.15885 560.38027 508.625 558.625 508.625 L 75.53125 508.625 C 70.008436 508.625 65.53125 504.1479 65.53125 498.625 C 65.53125 496.86955 65.967441 495.1428 66.84375 493.625 L 308.40625 75.25 C 310.13186 72.261187 313.17286 70.476225 316.375 70.25 z "
+       transform="translate(0,491.13214)"
+       id="path4410" />
+    <path
+       id="rect2542"
+       style="opacity:1;fill:#000000;fill-rule:evenodd;stroke-width:0.225479;stroke-linecap:round;paint-order:stroke fill markers"
+       d="m 279.41378,794.15605 -0.31004,7.73234 h -6.3134 l -4.21803,-5.81929 -2.94971,5.81929 h -3.65524 l -5.74794,-7.09906 -3.50286,7.29017 -7.44165,-3.73446 0.89488,6.60846 -11.50911,-0.67292 1.31585,5.66781 -15.01282,0.97939 4.32901,3.92036 -8.163,4.90767 -9.07728,-0.0493 3.60414,5.7286 -10.14478,3.28351 1.48848,5.58678 -9.02528,5.54975 -0.96889,4.86542 -9.3133,4.73505 5.56914,3.00166 -7.87768,8.41762 v 7.21532 l -6.37153,6.37062 v 9.92107 l -10.56929,16.00195 10.3306,-4.61614 v 8.11723 l -3.16022,7.69266 6.09144,-0.0837 8.45283,8.60782 v 6.85419 h 11.72489 c 0,0 12.08426,11.46424 19.24582,15.55803 8.93383,5.10687 28.90533,10.83971 28.90533,10.83971 3.86827,7.53103 20.84699,14.90378 29.46722,14.29147 3.25149,-0.23098 5.41469,-5.51778 7.70857,-9.9598 h 11.90898 l 2.35165,5.26177 4.26475,-5.26177 h 26.62582 c 2.88446,0.73041 2.93393,3.46921 0.71784,7.81247 l 10.52264,-7.81247 h 9.44809 1.80383 c 0,0 7.20788,8.37319 16.96637,11.44656 8.25028,2.59837 19.05138,0.56744 21.40288,-4.89185 1.9471,-4.52053 -7.2527,-4.70597 -9.6146,-8.19119 -1.116,-1.64694 -2.3037,-3.70331 -1.9112,-5.6537 0.2559,-1.27183 2.5753,-2.91801 2.5753,-2.91801 l 14.7662,-10.22406 7.181,3.04839 8.4563,-8.58141 8.8096,2.9365 c 0,0 25.9029,-14.23979 46.763,-28.346 10.6265,-7.18601 23.9589,-10.20553 23.6303,-19.79369 -0.2493,-7.27602 -4.361,-8.46627 -12.1203,-11.07046 -9.225,-3.09619 -22.7485,-7.26781 -29.0964,-13.15177 -15.1105,-14.00578 -35.2645,-50.76264 -35.2645,-50.76264 l -6.9467,5.68806 -14.1312,-10.02591 -3.5619,6.87007 -14.87277,-9.58461 -2.94705,6.27904 -14.59974,-8.60516 -3.67814,5.94966 -3.42268,0.0731 -7.19155,-5.89415 -0.81384,6.06326 -3.92649,-0.46156 -4.41266,-7.09816 -1.42954,6.41117 -6.26672,-0.73722 -1.05957,-7.05766 -2.60708,6.62699 -4.07976,-0.69231 -1.80383,-8.11723 -2.82024,5.34718 -7.2109,-0.16644 -3.33023,-4.58444 -1.52284,4.43823 -5.86686,-0.148 -1.63472,-5.07151 -2.70313,4.96143 -4.23828,-0.10746 z m 142.3378,74.28466 a 10.722171,10.722171 0 0 1 10.7226,10.72255 10.722171,10.722171 0 0 1 -10.7226,10.72169 10.722171,10.722171 0 0 1 -10.7217,-10.72169 10.722171,10.722171 0 0 1 10.7217,-10.72255 z m 0,2.94972 a 7.7725781,7.7725781 0 0 0 -7.772,7.77283 7.7725781,7.7725781 0 0 0 7.772,7.77198 7.7725781,7.7725781 0 0 0 7.7729,-7.77198 7.7725781,7.7725781 0 0 0 -7.7729,-7.77283 z" />
+  </g>
+</svg>

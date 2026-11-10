@@ -1,0 +1,87 @@
+/* Ilova: "Yo'l belgilari" (screens/ilova/Belgilar.tsx). Ranglar tema.css tokenlaridan — yorug'/to'q mavzuda ishlaydi. */
+/* Butun ekran (umumiy .app o'ramining chetlaridan chiqib): o'zi skroll qilinadi, planshetda kontent 520px */
+.ilv.ilv-bl {
+  position: fixed; inset: 0; z-index: 1; overflow-y: auto; overscroll-behavior-y: contain;
+  box-sizing: border-box;
+  padding: calc(10px + env(safe-area-inset-top)) max(var(--ilv-chet, 16px), calc((100% - var(--ilv-max-en, 520px)) / 2)) calc(24px + env(safe-area-inset-bottom));
+}
+.ilv .ilv-bl-tepa { display: flex; align-items: center; gap: 8px; min-height: 48px; }
+.ilv .ilv-bl-orqaga {
+  flex: none; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 12px; background: var(--ilv-karta); color: var(--ilv-oq); cursor: pointer;
+}
+.ilv .ilv-bl-orqaga svg { width: 24px; height: 24px; }
+.ilv .ilv-bl-sarlavha { margin: 0; font-size: 26px; font-weight: 800; font-style: italic; text-transform: uppercase; color: var(--ilv-sariq); line-height: 1.1; }
+
+.ilv .ilv-bl-qidiruv {
+  display: flex; align-items: center; gap: 8px; margin-top: 12px; height: 46px; padding: 0 6px 0 14px;
+  border-radius: 14px; background: var(--ilv-karta); color: var(--ilv-matn2);
+}
+.ilv .ilv-bl-qidiruv > svg { flex: none; width: 19px; height: 19px; }
+.ilv .ilv-bl-qidiruv input {
+  flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent;
+  color: var(--ilv-oq); font: 600 15px var(--ilv-shrift);
+}
+.ilv .ilv-bl-qidiruv input::placeholder { color: var(--ilv-matn2); opacity: .8; }
+.ilv .ilv-bl-qidiruv input::-webkit-search-cancel-button { display: none; }
+.ilv .ilv-bl-tozala { flex: none; width: 36px; height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--ilv-matn2); display: inline-flex; align-items: center; justify-content: center; }
+.ilv .ilv-bl-tozala svg { width: 18px; height: 18px; }
+
+/* Toifalar — yonga suriladigan "tabletkalar" */
+.ilv .ilv-bl-toifalar {
+  display: flex; gap: 8px; margin: 12px calc(-1 * var(--ilv-chet, 16px)) 0; padding: 0 var(--ilv-chet, 16px) 2px;
+  overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain;
+}
+.ilv .ilv-bl-toifalar::-webkit-scrollbar { display: none; }
+.ilv .ilv-bl-toifa {
+  flex: none; display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 12px 0 14px;
+  border: 0; border-radius: 12px; background: var(--ilv-karta); color: var(--ilv-oq);
+  font: 700 14px var(--ilv-shrift); white-space: nowrap; cursor: pointer;
+}
+.ilv .ilv-bl-toifa.faol { background: var(--ilv-sariq); color: var(--ilv-toq); }
+.ilv .ilv-bl-son {
+  min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 11px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .18); font-size: 12px; font-weight: 800;
+}
+.ilv .ilv-bl-toifa-tavsif { margin: 12px 2px 0; color: var(--ilv-matn2); font-size: 13px; font-weight: 600; line-height: 1.4; }
+
+/* Belgilar — 3 ustun */
+.ilv .ilv-bl-tor { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.ilv .ilv-bl-karta {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 150px; padding: 10px 6px 10px;
+  border: 0; border-radius: 16px; background: var(--ilv-karta); color: var(--ilv-oq);
+  font-family: var(--ilv-shrift); text-align: center; cursor: pointer;
+}
+.ilv .ilv-bl-karta:active { transform: scale(.98); }
+.ilv .ilv-bl-rasm-joy { width: 100%; height: 76px; display: flex; align-items: center; justify-content: center; }
+.ilv .ilv-bl-img { max-width: 84px; max-height: 76px; object-fit: contain; }
+.ilv .ilv-bl-yoq {
+  width: 66px; height: 66px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+  border: 2px dashed var(--ilv-matn2); border-radius: 14px; color: var(--ilv-matn2); font-size: 13px; font-weight: 800; opacity: .7;
+}
+.ilv .ilv-bl-raqam { margin-top: 2px; color: var(--ilv-sariq); font-size: 12px; font-weight: 800; line-height: 1.2; }
+.ilv .ilv-bl-nom {
+  font-size: 12.5px; font-weight: 700; line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Belgi oynasi (PastkiOyna ichida) */
+.bl-oyna { padding: 4px 2px 8px; background: transparent; }
+.bl-oyna .ilv-bl-oyna-rasmlar { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 6px 0 14px; }
+.bl-oyna .ilv-bl-oyna-rasm { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bl-oyna .ilv-bl-img.katta { max-width: 150px; max-height: 140px; }
+.bl-oyna .kop .ilv-bl-img.katta { max-width: 92px; max-height: 92px; }
+.bl-oyna .ilv-bl-yoq.katta { width: 110px; height: 110px; font-size: 18px; }
+.bl-oyna figcaption { font-size: 12px; font-weight: 800; color: #ffd400; }
+.bl-oyna .ilv-bl-tavsif { margin: 0 0 8px; font-size: 15px; line-height: 1.5; color: inherit; }
+.bl-oyna .ilv-bl-tavsif-yoq { opacity: .7; }
+
+/* Yorug' mavzu */
+:root[data-theme="light"] .ilv .ilv-bl-karta,
+:root[data-theme="light"] .ilv .ilv-bl-qidiruv,
+:root[data-theme="light"] .ilv .ilv-bl-orqaga,
+:root[data-theme="light"] .ilv .ilv-bl-toifa:not(.faol) { box-shadow: var(--ilv-soya); }
+:root[data-theme="light"] .ilv .ilv-bl-sarlavha { color: var(--ilv-toq); }
+:root[data-theme="light"] .ilv .ilv-bl-raqam { color: var(--ilv-oltin); }
+:root[data-theme="light"] .ilv .ilv-bl-son { background: rgba(0, 0, 0, .08); }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="350" version="1.1">
+  <title>7.4.2 Вид транспортного средства</title>
+  <rect style="fill:#000000;" x="0" y="0" width="700" height="350" rx="45" ry="45"/>
+  <rect style="fill:#ffffff;" x="10" y="10" width="680" height="330" rx="35" ry="35"/>
+  <path style="fill:#000000;" transform="scale(1.09375)" d="m 180 200 v -120 a 20 20 0 0 0 -20 -20 h -160 v 140 z"/>
+  <path style="fill:#000000;" transform="scale(1.09375)" d="m 39 244 a 45 45 0 0 1 18 -36 h -57 v 36 z"/>
+  <rect style="fill:#000000;" transform="scale(1.09375)" x="240" y="140" width="294" height="60"/>
+  <path style="fill:#000000;" transform="scale(1.09375)" d="m 180 244 v -16 h 57.94 a 45 45 0 0 1 15.06 -20 h -142 a 45 45 0 0 1 18 36 z"/>
+  <path style="fill:#000000;" transform="scale(1.09375)" d="m 461.94 228 a 45 45 0 0 1 15.06 -20 h -170 a 45 45 0 0 1 15.06 20 z"/>
+  <path style="fill:#000000;" transform="scale(1.09375)" d="m 84 280 a 36 36 0 0 0 36 -36 a 36 36 0 0 0 -36 -36 a 36 36 0 0 0 -36 36 a 36 36 0 0 0 36 36 z m 0 -16 a 20 20 0 0 1 -20 -20 a 20 20 0 0 1 20 -20 a 20 20 0 0 1 20 20 a 20 20 0 0 1 -20 20 z"/>
+  <path style="fill:#000000;" transform="scale(1.09375)" d="m 280 280 a 36 36 0 0 0 36 -36 a 36 36 0 0 0 -36 -36 a 36 36 0 0 0 -36 36 a 36 36 0 0 0 36 36 z m 0 -16 a 20 20 0 0 1 -20 -20 a 20 20 0 0 1 20 -20 a 20 20 0 0 1 20 20 a 20 20 0 0 1 -20 20 z"/>
+  <path style="fill:#000000;" transform="scale(1.09375)" d="m 504 280 a 36 36 0 0 0 36 -36 a 36 36 0 0 0 -36 -36 a 36 36 0 0 0 -36 36 a 36 36 0 0 0 36 36 z m 0 -16 a 20 20 0 0 1 -20 -20 a 20 20 0 0 1 20 -20 a 20 20 0 0 1 20 20 a 20 20 0 0 1 -20 20 z"/>
+</svg>

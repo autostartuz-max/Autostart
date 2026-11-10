@@ -31,6 +31,7 @@ import AdminMessages from './screens/AdminMessages';
 import AdminAnalytics from './screens/AdminAnalytics';
 import TestPlayer from './screens/TestPlayer';
 import Signs from './screens/Signs';
+import BelgilarIlova from './screens/ilova/Belgilar';
 import Profile from './screens/Profile';
 import Placeholder from './screens/Placeholder';
 import AdminQuestions from './screens/AdminQuestions';
@@ -156,7 +157,8 @@ export default function App() {
         {!mobilIlova() && <Route path="/promokodlar" element={<AdminPromo />} />}
         <Route path="/biletlar" element={<Tickets />} />
         <Route path="/test" element={<TestPlayer />} />
-        <Route path="/belgilar" element={<Signs />} />
+        {/* Yo'l belgilari: ilovada yangi ko'rinish (toifalar, qidiruv), saytda ro'yxat — ma'lumot bitta katalogdan */}
+        <Route path="/belgilar" element={mobilIlova() ? <BelgilarIlova /> : <Signs />} />
         <Route path="/amaliy" element={<Lessons />} />
         {!mobilIlova() && <Route path="/amaliy/boshqaruv" element={<AdminLessons />} />}
         <Route path="/profil" element={<Profile />} />

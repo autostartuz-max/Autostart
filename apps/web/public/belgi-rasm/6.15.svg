@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="6.15 Uzbekistan road sign.svg"
+   xml:space="preserve"
+   viewBox="0 0 600 899.14532"
+   height="899.14532"
+   width="600"
+   id="background"
+   version="1.1"><metadata
+   id="metadata6917"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
+   id="defs6915" /><sodipodi:namedview
+   inkscape:current-layer="background"
+   inkscape:window-maximized="1"
+   inkscape:window-y="-9"
+   inkscape:window-x="-9"
+   inkscape:cy="861.17099"
+   inkscape:cx="-1714.1236"
+   inkscape:zoom="0.20190476"
+   showgrid="false"
+   id="namedview6913"
+   inkscape:window-height="1001"
+   inkscape:window-width="1920"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0"
+   guidetolerance="10"
+   gridtolerance="10"
+   objecttolerance="10"
+   borderopacity="1"
+   bordercolor="#666666"
+   pagecolor="#ffffff" />
+  <g
+   transform="matrix(0.85470085,0,0,0.85470085,0.85470085,0.85470085)"
+   id="g6910">
+    <path
+   style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+   id="path6904"
+   d="M 0,45 C 0,20.147 20.147,0 45,0 h 610 c 24.852,0 45,20.147 45,45 v 960 c 0,24.852 -20.148,45 -45,45 H 45 c -24.853,0 -45,-20.148 -45,-45 z"
+   stroke="none"
+   fill-rule="evenodd"
+   fill="#FFFFFF" />
+    <path
+   style="fill:#0d69e1;fill-opacity:1"
+   id="path6906"
+   d="M 20,45 C 20,31.192 31.192,20 45,20 h 610 c 13.807,0 25,11.192 25,25 v 960 c 0,13.807 -11.193,25 -25,25 H 45 c -13.808,0 -25,-11.193 -25,-25 z m 45.625,131.382 c 0,-11.045 8.954,-20 20,-20 h 528.75 c 11.045,0 20,8.955 20,20 v 540.852 c 0,11.045 -8.955,20 -20,20 H 85.625 c -11.046,0 -20,-8.955 -20,-20 z"
+   stroke="none"
+   fill-rule="evenodd"
+   fill="#0D66FF" />
+    <path
+   id="path6908"
+   d="m 161.875,594.343 c -26.469,0 -48.125,21.657 -48.125,48.125 0,26.688 21.656,48.125 48.125,48.125 26.687,0 48.125,-21.437 48.125,-48.125 0,-26.468 -21.438,-48.125 -48.125,-48.125 z m 0,19.688 c -15.75,0 -28.438,12.687 -28.438,28.437 0,15.75 12.688,28.438 28.438,28.438 15.75,0 28.437,-12.688 28.437,-28.438 0,-15.75 -12.687,-28.437 -28.437,-28.437 z m 70,28.437 c 0,-38.718 -31.282,-70 -70,-70 -10.282,0 -20.782,0 -20.782,0 V 422.624 h 224 v 0 72.407 l -69.781,186.375 c -63.437,0 -63.437,0 -63.437,0 z M 125.343,400.093 138.031,410.375 286.343,227.937 273.875,217.656 Z m 162.969,-1.968 -57.75,-24.282 33.688,-80.281 57.75,24.5 z M 505.531,179.812 c -23.406,0 -42.219,18.813 -42.219,42 0,23.406 18.813,42.219 42.219,42.219 23.187,0 42,-18.813 42,-42.219 0,-23.187 -18.813,-42 -42,-42 z m -50.532,491.75 c 0,9.844 9.844,19.688 19.688,19.688 10.938,0 19.688,-9.844 19.688,-19.688 V 480.593 c 0,-6.343 6.343,-12.469 12.031,-12.469 6.344,0 12.031,5.688 12.031,12.25 v 191.188 c 0,9.844 10.063,19.688 19.688,19.688 10.281,0 19.687,-9.844 19.687,-19.688 V 336.656 c 0,-5.031 3.5,-9.407 8.094,-9.407 4.156,0 7.219,4.157 7.219,9.407 v 131.468 c 0,6.563 5.25,11.594 10.5,11.594 5.468,0 11.375,-5.031 11.375,-11.594 V 327.249 c 0,-21.656 -21.875,-46.593 -43.094,-46.593 h -77.219 c -16.406,0 -26.25,8.969 -36.75,26.687 l -33.469,54.032 c -5.25,8.75 -14.875,12.687 -26.031,12.687 h -44.188 c -4.812,0 -10.281,5.25 -10.281,10.5 0,5.906 5.469,11.375 10.281,11.375 h 58.844 c 11.813,0 23.188,-7.219 32.813,-21.875 l 21.437,-32.813 c 2.625,-4.593 7.656,-3.5 7.656,1.313 z"
+   stroke="none"
+   fill-rule="evenodd"
+   fill="#000000" />
+  </g>
+</svg>

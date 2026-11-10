@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="700" version="1.1">
+  <title>3.32 Движение транспортных средств с опасными грузами запрещено</title>
+  <circle style="fill:#ffffff;" cx="350" cy="350" r="350"/>
+  <circle style="fill:none;stroke:#000000;stroke-width:2;" cx="350" cy="350" r="349"/>
+  <path style="fill:#ff0000;" d="m 350 690 a 340 340 0 0 0 340 -340 a 340 340 0 0 0 -340 -340 a 340 340 0 0 0 -340 340 a 340 340 0 0 0 340 340 z m 0 -57.74 a 282.26 282.26 0 0 1 -282.26 -282.26 a 282.26 282.26 0 0 1 282.26 -282.26 a 282.26 282.26 0 0 1 282.26 282.26 a 282.26 282.26 0 0 1 -282.26 282.26 z"/>
+  <path style="fill:#ff8000;" transform="scale(1.1290322581)" d="m 420 400 v -238 a 22 22 0 0 0 -22 -22 h -176 a 22 22 0 0 0 -22 22 v 238 z"/>
+  <rect style="fill:#000000;" transform="scale(1.1290322581)" x="200" y="410" width="220" height="10"/>
+  <path style="fill:#000000;" transform="scale(1.1290322581)" d="m 420 490 v -60 h -30 v 24 h -60.92 a 20 20 0 0 0 -19.08 -14 a 20 20 0 0 0 -19.08 14 h -60.92 v -24 h -30 v 60 h 30 v -24 h 60.92 a 20 20 0 0 0 19.08 14 a 20 20 0 0 0 19.08 -14 h 60.92 v 24 z"/>
+</svg>

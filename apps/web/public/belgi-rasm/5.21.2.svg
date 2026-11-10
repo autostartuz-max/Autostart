@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1420"
+   height="300"
+   id="svg2"
+   version="1.1"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   sodipodi:docname="RU_road_sign_6.10.2_A.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title3006">5.21.2 Yoʻnalishlar koʻrsatkichi</title>
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="480.1255"
+     inkscape:cy="181.72644"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-paths="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:object-paths="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-midpoints="true"
+     inkscape:snap-object-midpoints="true"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>5.21.2 Yoʻnalishlar koʻrsatkichi</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <dc:description>ГОСТ Р 52290-2004</dc:description>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-752.36218)">
+    <path
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.543;marker:none;enable-background:accumulate"
+       d="m 1375,752.36215 c 24.93,0 45,20.07 45,45 v 210.00005 c 0,24.93 -20.07,45 -45,45 H 259.8438 L 0,902.36215 l 259.8438,-150 z"
+       id="rect12447"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="sssscccs" />
+    <path
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker:none;enable-background:accumulate"
+       d="m 1375,753.36215 c 24.376,0 44,19.624 44,44 v 210.00005 c 0,24.376 -19.624,44 -44,44 H 260.125 L 2.0312,902.36215 l 258.0938,-149 z"
+       id="rect12491"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="sssscccs" />
+    <path
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#00a500;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.543;marker:none;enable-background:accumulate"
+       d="m 1375,761.36215 c 19.944,0 36,16.056 36,36 v 210.00005 c 0,19.944 -16.056,36 -36,36 H 265.25 l -141,-141.00005 141,-141 z"
+       id="rect12445" />
+    <path
+       id="path1208"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.9914;marker:none;enable-background:accumulate"
+       d="m 326.58984,807.3768 -10.10546,46.04101 h 14.16796 l 2.00586,-46.04101 z m 10.13086,0 1.98047,46.04101 h 14.16797 L 342.76367,807.3768 Z m -63.82422,52.18945 v 8.15234 h 17.3086 v 14.27344 h 8.12695 l 4.00977,-14.27344 h 64.66992 l 4.0625,14.27344 h 8.07422 v -14.27344 h 17.30859 v -8.15234 z m 37.54493,14.24609 -32.34766,123.5352 h 48.49609 l 4.0625,-123.5352 z m 28.25976,0 4.0625,123.5352 h 48.49414 L 358.9375,873.81234 Z" />
+    <g
+       aria-label="XIVA  15"
+       id="text993"
+       style="font-size:226.278px;line-height:1.5;font-family:'Russian Road Sign';-inkscape-font-specification:'Russian Road Sign';fill:#ffffff;fill-rule:evenodd;stroke-width:2.26278;stroke-linecap:round;paint-order:stroke fill markers">
+      <path
+         d="m 517.39324,838.21236 h -28.28475 l 36.20448,60.18995 -39.37237,66.52573 h 26.7008 l 25.34314,-45.93443 25.34313,45.93443 h 26.70081 l -39.37238,-66.52573 36.20448,-60.18995 h -28.28475 l -20.59129,39.59865 z"
+         id="path1213" />
+      <path
+         d="m 620.12359,964.92804 h 22.17525 V 838.21236 h -22.17525 z"
+         id="path1215" />
+      <path
+         d="m 715.16051,964.92804 h 28.51103 l 34.84681,-126.71568 h -23.75919 l -25.34314,95.03676 -25.34313,-95.03676 h -25.34314 z"
+         id="path1217" />
+      <path
+         d="m 848.21183,920.57755 15.83946,-53.85416 15.83946,53.85416 z m 3.16789,-82.36519 -41.18259,126.71568 h 23.75919 l 7.91973,-25.34314 h 44.35048 l 7.91973,25.34314 h 23.75919 L 876.72286,838.21236 Z"
+         id="path1219" />
+      <path
+         d="m 1162.5118,867.6285 7.4672,9.72995 16.9708,-10.63506 v 98.20465 h 22.1753 V 838.21236 h -19.0074 z"
+         id="path1221" />
+      <path
+         d="m 1316.8335,858.80366 6.3358,-20.5913 h -72.8615 v 61.77389 l 14.2555,7.91973 c 3.1679,-1.58394 9.5037,-9.50367 19.0073,-9.50367 14.2556,0 22.1753,12.67157 22.1753,23.75919 0,15.83946 -15.8395,23.75919 -28.511,23.75919 -10.4088,0 -22.4016,-1.13139 -30.095,-6.33579 l 3.1679,20.5913 c 0,0 15.8394,6.33579 30.0949,6.33579 30.095,0 49.1024,-20.5913 49.1024,-45.93444 0,-25.34313 -20.5913,-39.59865 -38.0147,-39.59865 -7.2409,0 -15.8395,1.58395 -20.5913,7.91973 v -30.09497 z"
+         id="path1223" />
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="600"
+   height="900"
+   id="svg2"
+   version="1.1"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   sodipodi:docname="RU_road_sign_5.18.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="270"
+     inkscape:cy="627.5"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showguides="true">
+    <sodipodi:guide
+       position="181.875,410.5"
+       orientation="1,0"
+       id="guide42613"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="418.125,397.5"
+       orientation="1,0"
+       id="guide42615"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <dc:contributor>
+          <cc:Agent>
+            <dc:title />
+          </cc:Agent>
+        </dc:contributor>
+        <dc:description>ГОСТ Р 52290-2004
+Размеры и пропорции по типоразмеру I</dc:description>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-152.36218)">
+    <rect
+       y="152.36218"
+       x="0"
+       height="900"
+       width="600"
+       id="rect8073"
+       style="opacity:1;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.54299997999999980;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       rx="45"
+       ry="45" />
+    <path
+       style="opacity:1;color:#000000;fill:#0d69e1;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.54299997999999980;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="M 45 20 C 31.15 20 20 31.15 20 45 L 20 855 C 20 868.85 31.15 880 45 880 L 555 880 C 568.85 880 580 868.85 580 855 L 580 45 C 580 31.15 568.85 20 555 20 L 45 20 z M 101.25 150 L 498.75 150 C 523.68 150 543.75 170.07 543.75 195 L 543.75 592.5 C 543.75 617.43 523.68 637.5 498.75 637.5 L 101.25 637.5 C 76.32 637.5 56.25 617.43 56.25 592.5 L 56.25 195 C 56.25 170.07 76.32 150 101.25 150 z "
+       transform="translate(0,152.36218)"
+       id="rect9536" />
+    <rect
+       ry="44"
+       rx="44"
+       y="153.36218"
+       x="1"
+       height="898"
+       width="598"
+       id="rect3041"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;opacity:1" />
+    <path
+       style="opacity:1;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.54299997999999980;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="M 273.3125 365.625 L 262.5 384.375 L 231.875 384.375 C 226.48568 384.375 220.72563 388.49887 218.96875 393.59375 L 212.4375 412.46875 L 198.9375 451.59375 C 198.925 451.62975 198.91795 451.68288 198.90625 451.71875 L 195.78125 460.8125 C 188.08226 460.8125 181.875 467.01978 181.875 474.71875 L 181.875 530.28125 C 181.875 537.98022 188.08226 544.1875 195.78125 544.1875 L 404.21875 544.1875 C 411.91778 544.1875 418.125 537.98022 418.125 530.28125 L 418.125 474.71875 C 418.125 467.01978 411.91777 460.8125 404.21875 460.8125 L 401.09375 451.71875 C 401.08155 451.68285 401.0751 451.62972 401.0625 451.59375 L 387.5625 412.46875 L 381.03125 393.59375 C 379.27419 388.49887 373.51422 384.375 368.125 384.375 L 337.5 384.375 L 326.6875 365.625 L 273.3125 365.625 z M 236.09375 398.28125 L 300 398.28125 L 363.90625 398.28125 C 366.60072 398.28125 369.46532 400.32756 370.34375 402.875 L 390.34375 460.8125 L 300 460.8125 L 209.65625 460.8125 L 229.65625 402.875 C 230.5346 400.32756 233.39918 398.28125 236.09375 398.28125 z M 383.375 474 C 394.8877 474 404.21875 483.33105 404.21875 494.84375 C 404.21875 506.35645 394.8877 515.6875 383.375 515.6875 C 371.8623 515.6875 362.53125 506.35645 362.53125 494.84375 C 362.53125 483.33105 371.8623 474 383.375 474 z M 215.53125 474.71875 C 215.88655 474.70074 216.26523 474.71875 216.625 474.71875 C 228.1377 474.71875 237.46875 484.0498 237.46875 495.5625 C 237.46875 507.0752 228.1377 516.40625 216.625 516.40625 C 205.1123 516.40625 195.78125 507.0752 195.78125 495.5625 C 195.78125 484.40957 204.51707 475.27706 215.53125 474.71875 z "
+       transform="translate(0,152.36218)"
+       id="path8093" />
+    <path
+       id="path8095"
+       d="m 195.77205,703.50192 0,27.79412 c 0,11.5127 9.33291,20.84558 20.84558,20.84558 11.5127,0 20.84561,-9.33288 20.84561,-20.84558 l 0,-27.79412 -41.69119,0 z"
+       style="opacity:1;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       style="opacity:1;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 362.53679,703.50192 0,27.79412 c 0,11.5127 9.33292,20.84558 20.84559,20.84558 11.5126,0 20.84551,-9.33288 20.84551,-20.84558 l 0,-27.79412 -41.6911,0 z"
+       id="path8103" />
+    <g
+       id="g21559"
+       transform="matrix(4.9497463,0,0,4.9497463,1023.6248,-469.85401)">
+      <rect
+         style="fill:#000000"
+         id="rect21544"
+         width="9.5459414"
+         height="9.5459414"
+         x="-170.05919"
+         y="176.39885" />
+      <rect
+         style="fill:#000000"
+         id="rect21546"
+         width="9.5459414"
+         height="9.5459414"
+         x="-160.51324"
+         y="166.85291" />
+      <rect
+         style="fill:#000000"
+         id="rect21548"
+         width="9.5459414"
+         height="9.5459414"
+         x="-150.9673"
+         y="176.39885" />
+      <rect
+         style="fill:#000000"
+         id="rect21550"
+         width="9.5459414"
+         height="9.5459414"
+         x="-141.42136"
+         y="166.85291" />
+      <rect
+         style="fill:#000000"
+         id="rect21552"
+         width="9.5459414"
+         height="9.5459414"
+         x="-131.87541"
+         y="176.39885" />
+    </g>
+  </g>
+</svg>

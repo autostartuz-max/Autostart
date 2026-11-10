@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   sodipodi:docname="7.1.1_Uz_road_sign.svg"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   version="1.1"
+   id="svg2"
+   height="300"
+   width="600">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     inkscape:document-rotation="0"
+     inkscape:guide-bbox="true"
+     showguides="true"
+     inkscape:snap-object-midpoints="true"
+     inkscape:snap-midpoints="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:object-paths="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:bbox-nodes="true"
+     inkscape:bbox-paths="true"
+     inkscape:snap-bbox="true"
+     inkscape:window-maximized="1"
+     inkscape:window-y="-9"
+     inkscape:window-x="-9"
+     inkscape:window-height="1001"
+     inkscape:window-width="1920"
+     showgrid="false"
+     inkscape:current-layer="text10636"
+     inkscape:document-units="px"
+     inkscape:cy="136.16432"
+     inkscape:cx="251.84932"
+     inkscape:zoom="1.4142136"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <dc:description>ГОСТ Р 52290-2004
+Размеры и пропорции по типоразмеру I</dc:description>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(0,-752.36218)"
+     id="layer1"
+     inkscape:groupmode="layer"
+     inkscape:label="Layer 1">
+    <rect
+       ry="45"
+       rx="45"
+       style="opacity:1;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.54299997999999980;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect5622"
+       width="600"
+       height="300"
+       x="0"
+       y="752.36218" />
+    <rect
+       ry="35"
+       rx="35"
+       style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.54299997999999980;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;opacity:1"
+       id="rect9537"
+       width="580"
+       height="280"
+       x="10"
+       y="762.36212" />
+    <g
+       id="text10636"
+       style="font-size:267.86059569999998000px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:-11.15625000000000000px;word-spacing:0px;opacity:1;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial">
+      <path
+         id="path10717"
+         style="fill:#000000;font-family:Russian Road Sign;-inkscape-font-specification:Russian Road Sign"
+         d="m 51.361603,836.73706 9.910714,22.23214 c 5.1339,-4.51997 10.133895,-7.80122 15.000001,-9.84375 4.866022,-2.04228 10.937445,-3.04675 18.214286,-3.01339 4.882746,0.11732 9.179616,1.75794 12.890626,4.92187 3.71086,3.16418 5.66398,7.14856 5.85937,11.95313 -0.23445,5.85948 -3.51569,11.48447 -9.84375,16.875 -6.328187,5.39072 -14.296929,9.14072 -23.906247,11.25 l 0,20.625 c 1.902851,-0.89837 3.989902,-1.44525 6.261159,-1.64063 2.271155,-0.19524 4.5591,-0.27337 6.863842,-0.23437 11.768906,0.51346 19.235406,3.3706 22.399546,8.57143 3.16398,5.20094 4.53675,9.66522 4.11831,13.39286 -0.40187,8.65516 -3.68312,14.98328 -9.84375,18.98437 -6.16078,4.00114 -13.593808,5.97658 -22.299106,5.92634 -6.395138,0.0391 -13.09156,-0.57475 -20.089286,-1.84152 -6.997792,-1.26671 -12.890643,-3.42073 -17.678572,-6.46205 l 3.214286,26.25 c 0.658461,0.26786 5.167384,1.33929 13.526782,3.21428 8.359334,1.875 16.618256,2.94643 24.77679,3.21429 17.884976,-0.625 31.534506,-5.9375 40.948656,-15.9375 9.41396,-9.99998 14.15726,-20.93747 14.22992,-32.8125 -0.27624,-8.1018 -2.72994,-14.81476 -7.36111,-20.1389 -4.63139,-5.324 -9.7835,-9.39807 -15.45636,-12.22222 -5.67303,-2.82399 -10.21006,-4.53695 -13.61111,-5.13888 7.81242,-1.09367 14.68742,-4.99992 20.625,-11.71875 5.9374,-6.71865 9.0624,-15.31239 9.375,-25.78125 -0.50233,-10.44072 -4.855,-18.68848 -13.05803,-24.74331 -8.20321,-6.05454 -17.24338,-9.14605 -27.120538,-9.27455 -7.974388,0.20663 -16.668576,1.73565 -26.082591,4.58706 -9.414093,2.85171 -16.702031,5.78697 -21.863838,8.8058 z" />
+      <path
+         id="path10719"
+         style="fill:#000000;font-family:Russian Road Sign;-inkscape-font-specification:Russian Road Sign"
+         d="m 221.62166,825.48706 c -15.23443,0.39077 -27.42192,7.57826 -36.56251,21.56249 -9.14064,13.9845 -13.82814,32.42198 -14.06249,55.31251 0.23435,22.89067 4.92185,41.32816 14.06249,55.3125 9.14059,13.98438 21.32808,21.17187 36.56251,21.5625 15.23429,-0.39062 27.42178,-7.57812 36.5625,-21.5625 9.14051,-13.98435 13.82801,-32.42183 14.0625,-55.3125 -0.23449,-21.83584 -4.92199,-39.97198 -14.0625,-54.40849 -9.14072,-14.43624 -21.32821,-21.92507 -36.5625,-22.46651 z m 0,23.30357 c 7.34367,-0.11148 13.2142,4.12959 17.61161,12.72321 4.39723,8.59385 6.65169,22.20991 6.76339,40.84822 -0.1117,18.63845 -2.36617,32.25451 -6.7634,40.84821 -4.3974,8.59377 -10.26793,12.83484 -17.6116,12.72322 -7.34381,0.11163 -13.21435,-4.12944 -17.61161,-12.72322 -4.39737,-8.59371 -6.65183,-22.20977 -6.76339,-40.84821 0.11156,-18.6383 2.36602,-32.25436 6.76339,-40.84822 4.39727,-8.59363 10.2678,-12.83469 17.61161,-12.72321 z" />
+      <path
+         id="path10721"
+         style="fill:#000000;font-family:Russian Road Sign;-inkscape-font-specification:Russian Road Sign"
+         d="m 345.44203,825.48706 c -15.23443,0.39077 -27.42192,7.57826 -36.5625,21.56249 -9.14065,13.9845 -13.82814,32.42198 -14.0625,55.31251 0.23436,22.89067 4.92185,41.32816 14.0625,55.3125 9.14058,13.98438 21.32807,21.17187 36.5625,21.5625 15.23429,-0.39062 27.42178,-7.57812 36.5625,-21.5625 9.14051,-13.98435 13.82801,-32.42183 14.0625,-55.3125 -0.23449,-21.83584 -4.92199,-39.97198 -14.0625,-54.40849 -9.14072,-14.43624 -21.32821,-21.92507 -36.5625,-22.46651 z m 0,23.30357 c 7.34368,-0.11148 13.21421,4.12959 17.61161,12.72321 4.39723,8.59385 6.6517,22.20991 6.76339,40.84822 -0.1117,18.63845 -2.36616,32.25451 -6.76339,40.84821 -4.3974,8.59377 -10.26793,12.83484 -17.61161,12.72322 -7.34381,0.11163 -13.21434,-4.12944 -17.61161,-12.72322 -4.39736,-8.59371 -6.65182,-22.20977 -6.76339,-40.84821 0.11157,-18.6383 2.36603,-32.25436 6.7634,-40.84822 4.39726,-8.59363 10.26779,-12.83469 17.6116,-12.72321 z" />
+    </g>
+    <g
+       style="font-size:163.321px;line-height:1.15;font-family:IrisUPC;-inkscape-font-specification:'IrisUPC, Normal';stroke-width:4.08303"
+       id="text861"
+       aria-label="m">
+      <path
+         id="path863"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'IndorSoft RoadSign Letters';-inkscape-font-specification:'IndorSoft RoadSign Letters';stroke-width:4.08303"
+         d="m 435.1843,977.36206 v -85.65787 h 15.33683 l 3.1,9.21842 q 0.65263,-2.03947 1.71316,-3.67105 1.06052,-1.63158 2.44737,-2.85526 1.38684,-1.22369 3.01842,-2.12105 1.71315,-0.89737 3.42631,-1.55 1.79474,-0.65263 3.58947,-1.06053 1.87632,-0.40789 3.67105,-0.57105 1.79474,-0.24474 3.42632,-0.32632 1.71316,-0.0816 3.18158,-0.0816 1.46842,0 3.1,0.16316 1.71315,0.0816 3.42631,0.48948 1.71316,0.32631 3.34474,0.89736 1.71315,0.48948 3.34473,1.30527 1.63158,0.73421 3.1,1.79473 1.46842,1.06053 2.77368,2.36579 1.30527,1.30526 2.36579,3.01842 1.06053,1.63158 1.87632,3.58947 0.73421,-1.95789 1.79473,-3.50789 1.14211,-1.63158 2.52895,-2.85526 1.38684,-1.30526 3.01842,-2.28421 1.63158,-0.97895 3.34474,-1.63158 1.79473,-0.73421 3.67105,-1.22368 1.87631,-0.48948 3.75263,-0.73421 1.87631,-0.32632 3.75263,-0.4079 1.95789,-0.16316 3.67105,-0.16316 2.12105,0 4.2421,0.16316 2.12106,0.16316 4.24211,0.65263 2.12105,0.4079 4.07894,1.14211 2.03948,0.73421 3.83421,1.87631 1.79474,1.06053 3.26316,2.61053 1.46842,1.55 2.52895,3.67105 1.1421,2.03947 1.71315,4.65 0.57106,2.52894 0.57106,5.7921 v 67.30261 H 533.079 v -61.18419 q 0,-3.01842 -0.97895,-5.13947 -0.89737,-2.12105 -2.44736,-3.34474 -1.55,-1.30526 -3.5079,-1.87631 -1.87631,-0.57106 -3.83421,-0.57106 -1.46842,0 -3.1,0.32632 -1.55,0.24474 -3.26315,0.81579 -1.63158,0.57105 -3.26316,1.46842 -1.63158,0.81579 -3.18158,1.95789 -1.46842,1.06053 -2.77368,2.44737 -1.22369,1.30526 -2.20263,2.93684 -0.89737,1.55 -1.46842,3.34474 -0.57106,1.79474 -0.57106,3.75263 v 55.06577 h -18.27367 v -61.18419 q 0,-2.28421 -0.81579,-4.2421 -0.81579,-2.03948 -2.20263,-3.5079 -1.38685,-1.46842 -3.34474,-2.28421 -1.87631,-0.89737 -4.07895,-0.89737 -1.54999,0 -3.26315,0.32632 -1.71316,0.24474 -3.42632,0.81579 -1.63158,0.57105 -3.34473,1.38684 -1.63158,0.81579 -3.18158,1.9579 -1.46842,1.06052 -2.77368,2.44736 -1.30527,1.30527 -2.20263,2.93684 -0.89737,1.55 -1.46843,3.34474 -0.48947,1.79474 -0.48947,3.83421 v 55.06577 z" />
+    </g>
+  </g>
+</svg>

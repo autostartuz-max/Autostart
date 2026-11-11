@@ -74,7 +74,8 @@ export function useBelgilar(): BelgiQator[] {
     let tirik = true;
     api.signs()
       .then((r: BelgiQator[]) => {
-        if (!Array.isArray(r) || !r.length) return; // server eski yoki bo'sh — ichki nusxa qoladi
+        // Server bo'sh yoki eski formatda ({name, category…}) — ichki nusxa qoladi
+        if (!Array.isArray(r) || !r.length || !r.every((b) => b && b.toifa > 0 && typeof b.nom === 'string')) return;
         oxirgi = r;
         if (tirik) setRoyxat(r);
       })

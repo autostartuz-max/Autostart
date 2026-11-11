@@ -1106,3 +1106,20 @@
 /* Foydalanuvchilar: keyingi 200 tasini yuklash */
 .adm-yana { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 18px 0 8px;
   color: var(--db-muted); font-size: 13px; }
+
+/* Foydalanuvchilar: Owner/Adminlar alohida ustunda, talabalar yonida */
+.fy-ustunlar { display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); gap: 22px; align-items: start; }
+.fy-ustun { min-width: 0; }
+.fy-ustun-sarlavha { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 12.5px; font-weight: 800;
+  letter-spacing: .5px; text-transform: uppercase; color: var(--db-muted); }
+.fy-ustun-sarlavha i { font-style: normal; background: var(--db-card2); color: var(--db-text); border-radius: 20px; padding: 2px 9px; letter-spacing: 0; }
+.fy-xodimlar { background: rgba(255, 214, 0, .04); border: 1px solid rgba(255, 214, 0, .18); border-radius: 14px; padding: 14px; }
+.fy-xodimlar .fy-ustun-sarlavha { color: var(--db-yellow); }
+.fy-xodimlar .adm-row { padding: 10px 12px; gap: 10px; }
+.fy-bosh { color: var(--db-muted); font-size: 13.5px; padding: 18px 4px; }
+.fy-qidirilmoqda { color: var(--db-muted); font-size: 13px; }
+.fy-tozala { display: inline-flex; background: none; border: none; color: var(--db-muted); cursor: pointer; padding: 0; }
+.fy-tozala:hover { color: var(--db-text); }
+@media (max-width: 1150px) { .fy-ustunlar { grid-template-columns: 1fr; } }
+/* Ishlaydigan qidiruv (admin sahifalari) telefonda ham ko'rinadi — bosh sahifadagi bezak qidiruvidan farqli */
+@media (max-width: 760px) { .db-search.ish { display: flex; max-width: none; } }

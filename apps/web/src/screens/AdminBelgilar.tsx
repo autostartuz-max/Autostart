@@ -140,7 +140,7 @@ export default function AdminBelgilar() {
       <div className="db-main">
         <header className="db-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
-          <div className="db-search">
+          <div className="db-search ish">
             <Search size={17} />
             <input placeholder="Belgi nomi, raqami yoki tavsifi…" value={q} onChange={(e) => setQ(e.target.value)} />
           </div>

@@ -234,35 +234,47 @@ const userDetailSelect = {
   ...userSelect, lang: true, alphabet: true, category: true, examDate: true,
 };
 
-// Ro'yxat (ism yoki telefon bo'yicha qidiruv)
+// O'zbekcha tutuq belgisining turlari: "G'ayrat" bazada "Gʻayrat" bo'lishi mumkin
+const TUTUQLAR = ["'", 'ʻ', 'ʼ', '’', '‘', '`'];
+
+/** Qidiruv sharti: ism/pochta (katta-kichik harf farqsiz, tutuq turlari bilan) va telefon (faqat raqamlari bo'yicha) */
+function foydalanuvchiQidiruv(q: string) {
+  if (!q) return {};
+  const variantlar = /['ʻʼ’‘`]/.test(q) ? TUTUQLAR.map((t) => q.replace(/['ʻʼ’‘`]/g, t)) : [q];
+  const OR: any[] = variantlar.flatMap((v) => [
+    { firstName: { contains: v, mode: 'insensitive' as const } },
+    { email: { contains: v, mode: 'insensitive' as const } },
+  ]);
+  // "+998 90 123-45-67", "90 123 45 67" — telefon bazada "+998901234567" ko'rinishida
+  const raqam = q.replace(/\D/g, '');
+  if (raqam.length >= 2) OR.push({ phone: { contains: raqam } });
+  return { OR };
+}
+const XODIM_ROLLARI = ['owner', 'admin'];
+
+// Ro'yxat: xodimlar (owner/admin) alohida — hammasi, talabalar — 200 tadan sahifalab
 adminRouter.get(
   '/users',
   requireOwner,
   ah(async (req, res) => {
-    const q = String(req.query.q || '').trim();
-    const where = q
-      ? {
-          OR: [
-            { firstName: { contains: q, mode: 'insensitive' as const } },
-            { phone: { contains: q } },
-            { email: { contains: q, mode: 'insensitive' as const } },
-          ],
-        }
-      : {};
-    // Sahifalab: 200 tadan; "Yana ko'rsatish" keyingisini skip bilan so'raydi. total — jami son (sarlavha uchun)
+    const q = String(req.query.q || '').trim().slice(0, 100);
+    const qidiruv = foydalanuvchiQidiruv(q);
+    const talabaShart = { AND: [qidiruv, { role: { notIn: XODIM_ROLLARI } }] };
+    // "Yana ko'rsatish" keyingisini skip bilan so'raydi. total — talabalar jami soni (qidiruvga mos)
     const skip = Math.max(0, Math.floor(Number(req.query.skip) || 0));
-    const [users, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        select: userSelect,
-        orderBy: [{ role: 'asc' }, { id: 'desc' }], // adminlar tepada
-        skip,
-        take: 200,
-      }),
-      prisma.user.count({ where }),
+    const [staff, users, total] = await Promise.all([
+      skip
+        ? Promise.resolve(undefined)
+        : prisma.user.findMany({
+            where: { AND: [qidiruv, { role: { in: XODIM_ROLLARI } }] },
+            select: userSelect,
+            orderBy: [{ role: 'desc' }, { id: 'asc' }], // owner, keyin admin
+          }),
+      prisma.user.findMany({ where: talabaShart, select: userSelect, orderBy: { id: 'desc' }, skip, take: 200 }),
+      prisma.user.count({ where: talabaShart }),
     ]);
     // O'z satrini UI da ajratish uchun — kim so'rayotganini qaytaramiz
-    res.json({ users, total, meId: (req as any).userId ?? null });
+    res.json({ staff, users, total, meId: (req as any).userId ?? null });
   })
 );
 

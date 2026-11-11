@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { api, setToken, hasToken, clearToken, tokenniTikla } from './api';
-import { initTelegram, getInitData, getGuestId, isTelegram } from './telegram';
+import { initTelegram, getInitData, isTelegram } from './telegram';
 import Landing from './screens/Landing';
 import Login from './screens/Login';
 import Register from './screens/Register';
@@ -77,10 +77,10 @@ export default function App() {
           else { setAuthed(true); setChecking(false); return; }
         }
       }
-      // 2) Telegram WebApp ichida — avtomatik kiramiz (seamless)
+      // 2) Telegram WebApp ichida — shu Telegram bilan bog'langan hisob bo'lsa avtomatik kiramiz (mehmon hisobi yo'q)
       if (isTelegram()) {
         try {
-          const r = await api.authTelegram(getInitData(), getGuestId());
+          const r = await api.authTelegram(getInitData());
           setToken(r.token);
           setAuthed(true);
         } catch { /* login ekrani ko'rsatiladi */ }

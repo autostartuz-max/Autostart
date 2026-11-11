@@ -97,25 +97,22 @@ userRouter.post(
       }
     }
 
-    // 2) Telegram foydalanuvchisi aniqlanmadi — web saytda qurilma bo'yicha mehmon hisobi
+    // 2) Mehmon (qurilma bo'yicha) hisobi YO'Q — dasturga faqat ro'yxatdan o'tib kiriladi (2026-11-11).
+    //    Faqat lokal ishlab chiqishda (DEV_AUTH) umumiy demo foydalanuvchi.
     if (!tgId) {
-      const guestId = req.body?.guestId ? String(req.body.guestId).slice(0, 80) : '';
-      if (guestId) {
-        tgId = 'guest-' + guestId;
-        firstName = 'Mehmon';
-      } else if (DEV_AUTH) {
-        tgId = 'dev-user';
-        firstName = 'Demo foydalanuvchi';
-      } else {
-        return res.status(401).json({ error: 'Maʼlumot yoʻq' });
-      }
+      if (!DEV_AUTH) return res.status(401).json({ error: 'Kirish uchun ro‘yxatdan o‘ting' });
+      const demo = await prisma.user.upsert({
+        where: { tgId: 'dev-user' },
+        update: {},
+        create: { tgId: 'dev-user', firstName: 'Demo foydalanuvchi' },
+      });
+      return res.json({ token: signUserToken(demo.id), user: safeUser(demo) });
     }
 
-    const user = await prisma.user.upsert({
-      where: { tgId },
-      update: { firstName, avatarUrl },
-      create: { tgId, firstName, avatarUrl },
-    });
+    // Telegram orqali — faqat shu Telegram bilan bog'langan MAVJUD hisobga kiriladi, yangi hisob ochilmaydi
+    const bor = await prisma.user.findUnique({ where: { tgId } });
+    if (!bor) return res.status(401).json({ error: 'Kirish uchun ro‘yxatdan o‘ting' });
+    const user = await prisma.user.update({ where: { id: bor.id }, data: { firstName, avatarUrl } });
     res.json({ token: signUserToken(user.id), user: safeUser(user) });
   })
 );
@@ -311,6 +308,8 @@ userRouter.get(
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
     const user = await prisma.user.findUnique({ where: { id: userId } });
+    // Hisob o'chirilgan (masalan mehmonlar tozalangan) — eski token bilan kirib qolmasin: kirish oynasiga
+    if (!user) return res.status(401).json({ error: 'Hisob topilmadi. Qaytadan kiring yoki ro‘yxatdan o‘ting.' });
     // ?manba=ilova — mobil ilova: statistika faqat ilovada berilgan javoblardan
     // (saytdagi eski javoblar ilovada hisobga kirmaydi). Parametrsiz — avvalgidek.
     const jw: any = { userId, ...(req.query.manba === 'ilova' ? { source: 'ilova' } : {}) };

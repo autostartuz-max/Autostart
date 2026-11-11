@@ -313,8 +313,8 @@ export const oktagon = {
 };
 
 export const api = {
-  authTelegram: (initData: string, guestId?: string) =>
-    req('/auth/telegram', { method: 'POST', body: JSON.stringify({ initData, guestId }) }),
+  authTelegram: (initData: string) =>
+    req('/auth/telegram', { method: 'POST', body: JSON.stringify({ initData }) }),
   // promo — do'stining promokodi (ilova); bo'sh bo'lsa yuborilmaydi
   register: (name: string, phone: string, password: string, email = '', promo = '') =>
     req('/auth/register', { method: 'POST', body: JSON.stringify({ name, phone, email, password, ...(promo ? { promo } : {}) }) }),

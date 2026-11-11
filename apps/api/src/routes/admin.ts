@@ -251,8 +251,10 @@ function foydalanuvchiQidiruv(q: string) {
   return { OR };
 }
 const XODIM_ROLLARI = ['owner', 'admin'];
+// Talabalar bir so'rovda shuncha — amalda hammasi birdan ko'rinadi; ko'payib ketsa "Yana ko'rsatish" ishlaydi
+const SAHIFA = 2000;
 
-// Ro'yxat: xodimlar (owner/admin) alohida — hammasi, talabalar — 200 tadan sahifalab
+// Ro'yxat: xodimlar (owner/admin) alohida, talabalar — SAHIFA tadan (amalda hammasi)
 adminRouter.get(
   '/users',
   requireOwner,
@@ -270,7 +272,7 @@ adminRouter.get(
             select: userSelect,
             orderBy: [{ role: 'desc' }, { id: 'asc' }], // owner, keyin admin
           }),
-      prisma.user.findMany({ where: talabaShart, select: userSelect, orderBy: { id: 'desc' }, skip, take: 200 }),
+      prisma.user.findMany({ where: talabaShart, select: userSelect, orderBy: { id: 'desc' }, skip, take: SAHIFA }),
       prisma.user.count({ where: talabaShart }),
     ]);
     // O'z satrini UI da ajratish uchun — kim so'rayotganini qaytaramiz

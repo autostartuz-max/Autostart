@@ -32,8 +32,8 @@ const roleOf = (r: string): Role => (r === 'owner' || r === 'admin' ? r : 'user'
 const mehmon = (u: AdminUserRow) => !!u.tgId?.startsWith('guest-');
 
 /**
- * Foydalanuvchilar (faqat Owner): chap ustunda Owner va Adminlar (hammasi), o'ngda talabalar
- * (200 tadan, "Yana ko'rsatish"). Qidiruv yozilgan sari ishlaydi — ism, telefon (raqamlari), pochta.
+ * Foydalanuvchilar (faqat Owner): sarlavhadan keyin Owner va Adminlar bo'limi, uning ostida talabalar
+ * (hammasi birdan; juda ko'payib ketsa — "Yana ko'rsatish"). Qidiruv yozilgan sari ishlaydi — ism, telefon (raqamlari), pochta.
  */
 export default function AdminUsers() {
   const nav = useNavigate();
@@ -93,7 +93,7 @@ export default function AdminUsers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed, q]);
 
-  /** Keyingi 200 ta talaba (o'sha qidiruv bilan) */
+  /** Keyingi talabalar (o'sha qidiruv bilan) */
   const yanaYukla = () => {
     const n = sorov.current;
     setYanaYuklanmoqda(true);
@@ -254,7 +254,7 @@ export default function AdminUsers() {
                       <div className="adm-yana">
                         <span>Ko‘rsatilgan: {list.length} / {total}</span>
                         <button className="adm-btn sec" disabled={yanaYuklanmoqda} onClick={yanaYukla}>
-                          {yanaYuklanmoqda ? 'Yuklanmoqda…' : `Yana ${Math.min(200, qoldi)} ta ko‘rsatish`}
+                          {yanaYuklanmoqda ? 'Yuklanmoqda…' : `Yana ko‘rsatish (qoldi ${qoldi})`}
                         </button>
                       </div>
                     )}

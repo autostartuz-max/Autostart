@@ -593,7 +593,7 @@ export const adminApi = {
   },
 
   /* ---- Foydalanuvchilar va rollar ---- */
-  /** staff — Owner va Adminlar (hammasi, faqat skip=0 da); users — talabalar 200 tadan; total — talabalar jami (qidiruvga mos) */
+  /** staff — Owner va Adminlar (hammasi, faqat skip=0 da); users — talabalar (2000 tadan); total — talabalar jami (qidiruvga mos) */
   users: (q = '', skip = 0): Promise<{ staff?: AdminUserRow[]; users: AdminUserRow[]; total?: number; meId: number | null }> =>
     areq('/admin/users?q=' + encodeURIComponent(q) + (skip ? '&skip=' + skip : '')),
   user: (id: number): Promise<{ user: AdminUserDetail; stats: AdminUserStats }> =>

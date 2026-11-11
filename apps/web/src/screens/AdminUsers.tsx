@@ -40,6 +40,10 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [busyId, setBusyId] = useState<number | null>(null);
+  // Server 200 tadan beradi: total — jami (qidiruvga mos), qYuklangan — ro'yxat qaysi qidiruv bilan olingani
+  const [total, setTotal] = useState<number | null>(null);
+  const [qYuklangan, setQYuklangan] = useState('');
+  const [yanaYuklanmoqda, setYanaYuklanmoqda] = useState(false);
 
   // Batafsil — alohida sahifa (/foydalanuvchilar/:id)
   const ochish = (id: number) => nav('/foydalanuvchilar/' + id);
@@ -47,9 +51,10 @@ export default function AdminUsers() {
   const load = () => {
     setLoading(true);
     setErr('');
+    const qq = q.trim();
     adminApi
-      .users(q)
-      .then((r) => { setList(r.users || []); setMeId(r.meId ?? null); })
+      .users(qq)
+      .then((r) => { setList(r.users || []); setTotal(r.total ?? null); setQYuklangan(qq); setMeId(r.meId ?? null); })
       .catch((e: any) => {
         // Xatoni jimgina yutmaymiz — aks holda ro'yxat "bo'sh" bo'lib ko'rinadi
         if (e?.status === 401) {
@@ -72,6 +77,21 @@ export default function AdminUsers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
 
+  /** Keyingi 200 ta (o'sha qidiruv bilan) */
+  const yanaYukla = () => {
+    setYanaYuklanmoqda(true);
+    setErr('');
+    adminApi
+      .users(qYuklangan, list.length)
+      .then((r) => {
+        setList((l) => [...l, ...(r.users || []).filter((u) => !l.some((x) => x.id === u.id))]);
+        if (r.total != null) setTotal(r.total);
+      })
+      .catch((e: any) => setErr(e?.message || 'Yuklab bo‘lmadi'))
+      .finally(() => setYanaYuklanmoqda(false));
+  };
+  const qoldi = total != null ? Math.max(0, total - list.length) : 0;
+
   // Rolni o'zgartirish — faqat foydalanuvchi sahifasida (ro'yxatda emas)
   const ochir = async (u: AdminUserRow) => {
     const savol = `${u.firstName} o‘chirilsinmi?\n\nUning barcha javoblari, saqlangan savollari va shikoyatlari ham o‘chadi. Buni qaytarib bo‘lmaydi.`;
@@ -81,6 +101,7 @@ export default function AdminUsers() {
     try {
       await adminApi.deleteUser(u.id);
       setList((l) => l.filter((x) => x.id !== u.id));
+      setTotal((t) => (t != null ? t - 1 : t));
     } catch (e: any) {
       setErr(e?.message || 'O‘chirib bo‘lmadi');
     } finally {
@@ -115,7 +136,7 @@ export default function AdminUsers() {
           ) : (
             <>
               <div className="adm-head">
-                <h1 className="adm-title">Foydalanuvchilar ({list.length})</h1>
+                <h1 className="adm-title">Foydalanuvchilar ({total ?? list.length})</h1>
                 <div className="adm-head-btns">
                   <button className="adm-btn primary" onClick={() => nav('/foydalanuvchilar/yangi')}>
                     <Plus size={17} /> Yangi foydalanuvchi
@@ -175,6 +196,15 @@ export default function AdminUsers() {
                   );
                 })}
               </div>
+
+              {!loading && qoldi > 0 && (
+                <div className="adm-yana">
+                  <span>Ko‘rsatilgan: {list.length} / {total}</span>
+                  <button className="adm-btn sec" disabled={yanaYuklanmoqda} onClick={yanaYukla}>
+                    {yanaYuklanmoqda ? 'Yuklanmoqda…' : `Yana ${Math.min(200, qoldi)} ta ko‘rsatish`}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

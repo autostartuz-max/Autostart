@@ -249,14 +249,20 @@ adminRouter.get(
           ],
         }
       : {};
-    const users = await prisma.user.findMany({
-      where,
-      select: userSelect,
-      orderBy: [{ role: 'asc' }, { id: 'desc' }], // adminlar tepada
-      take: 200,
-    });
+    // Sahifalab: 200 tadan; "Yana ko'rsatish" keyingisini skip bilan so'raydi. total — jami son (sarlavha uchun)
+    const skip = Math.max(0, Math.floor(Number(req.query.skip) || 0));
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        select: userSelect,
+        orderBy: [{ role: 'asc' }, { id: 'desc' }], // adminlar tepada
+        skip,
+        take: 200,
+      }),
+      prisma.user.count({ where }),
+    ]);
     // O'z satrini UI da ajratish uchun — kim so'rayotganini qaytaramiz
-    res.json({ users, meId: (req as any).userId ?? null });
+    res.json({ users, total, meId: (req as any).userId ?? null });
   })
 );
 

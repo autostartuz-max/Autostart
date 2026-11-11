@@ -593,8 +593,9 @@ export const adminApi = {
   },
 
   /* ---- Foydalanuvchilar va rollar ---- */
-  users: (q = ''): Promise<{ users: AdminUserRow[]; meId: number | null }> =>
-    areq('/admin/users' + (q ? '?q=' + encodeURIComponent(q) : '')),
+  /** 200 tadan sahifalab; total — qidiruvga mos jami son */
+  users: (q = '', skip = 0): Promise<{ users: AdminUserRow[]; total?: number; meId: number | null }> =>
+    areq('/admin/users?q=' + encodeURIComponent(q) + (skip ? '&skip=' + skip : '')),
   user: (id: number): Promise<{ user: AdminUserDetail; stats: AdminUserStats }> =>
     areq('/admin/users/' + id),
   createUser: (data: {

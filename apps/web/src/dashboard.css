@@ -1102,3 +1102,7 @@
   .ab-raqam { width: 100%; }
   .ab-id { width: auto; }
 }
+
+/* Foydalanuvchilar: keyingi 200 tasini yuklash */
+.adm-yana { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 18px 0 8px;
+  color: var(--db-muted); font-size: 13px; }

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Menu, X } from 'lucide-react';
 import { adminApi, hasAdmin, isOwner, clearAdmin, ROLE_LABEL, type Role } from '../api';
 import AppSidebar from '../components/AppSidebar';
+import ToldirilmasInput from '../components/ToldirilmasInput';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
 
@@ -117,21 +118,21 @@ export default function AdminUserForm() {
           ) : (
             <div className="adm-form">
               <label className="adm-f-lab">Ism <span className="auth-req">*</span></label>
-              <input className="adm-f-inp" value={firstName} placeholder="Foydalanuvchi ismi"
+              <ToldirilmasInput className="adm-f-inp" value={firstName} placeholder="Foydalanuvchi ismi"
                 onChange={(e) => setFirstName(e.target.value)} />
 
               <label className="adm-f-lab">Telefon</label>
-              <input className="adm-f-inp" type="tel" inputMode="tel" value={phone} placeholder="+998 90 123 45 67"
+              <ToldirilmasInput className="adm-f-inp" type="tel" inputMode="tel" value={phone} placeholder="+998 90 123 45 67"
                 onChange={(e) => setPhone(e.target.value)} />
 
               <label className="adm-f-lab">Pochta</label>
-              <input className="adm-f-inp" type="email" inputMode="email" value={email} placeholder="ism@example.com"
+              <ToldirilmasInput className="adm-f-inp" type="email" inputMode="email" value={email} placeholder="ism@example.com"
                 onChange={(e) => setEmail(e.target.value)} />
 
               <label className="adm-f-lab">
                 {tahrir ? 'Yangi parol' : 'Parol'} {!tahrir && <span className="auth-req">*</span>}
               </label>
-              <input className="adm-f-inp" type="password" value={password}
+              <ToldirilmasInput className="adm-f-inp" type="password" value={password}
                 placeholder={tahrir ? 'Bo‘sh qoldirilsa parol o‘zgarmaydi' : 'Kamida 4 ta belgi'}
                 onChange={(e) => setPassword(e.target.value)} />
 

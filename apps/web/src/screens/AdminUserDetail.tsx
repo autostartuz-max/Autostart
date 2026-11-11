@@ -10,6 +10,7 @@ import {
   type AdminUserDetail as UserDetail, type AdminUserStats, type Role,
 } from '../api';
 import AppSidebar from '../components/AppSidebar';
+import ToldirilmasInput from '../components/ToldirilmasInput';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
 
@@ -349,21 +350,21 @@ export default function AdminUserDetailScreen() {
                       {tahrir && x.edit && (
                         <div className="ud-vwrap">
                           {x.edit === 'ism' && (
-                            <input className={inpCls('ism')} value={fIsm} placeholder="Ism"
+                            <ToldirilmasInput className={inpCls('ism')} value={fIsm} placeholder="Ism"
                               onChange={(e) => { setFIsm(e.target.value); setXato(null); }} />
                           )}
                           {x.edit === 'tel' && (
-                            <input className={inpCls('tel')} type="tel" inputMode="tel" value={fTel}
+                            <ToldirilmasInput className={inpCls('tel')} type="tel" inputMode="tel" value={fTel}
                               placeholder="+998901234567"
                               onChange={(e) => { setFTel(e.target.value); setXato(null); }} />
                           )}
                           {x.edit === 'pochta' && (
-                            <input className={inpCls('pochta')} type="email" inputMode="email" value={fPochta}
+                            <ToldirilmasInput className={inpCls('pochta')} type="email" inputMode="email" value={fPochta}
                               placeholder="ism@example.com"
                               onChange={(e) => { setFPochta(e.target.value); setXato(null); }} />
                           )}
                           {x.edit === 'parol' && (
-                            <input className={inpCls('parol')} type="password" value={fParol}
+                            <ToldirilmasInput className={inpCls('parol')} type="password" value={fParol}
                               placeholder="Yangi parol"
                               onChange={(e) => { setFParol(e.target.value); setXato(null); }} />
                           )}

@@ -330,8 +330,8 @@ export const api = {
   login: (login: string, password: string) =>
     req('/auth/login', { method: 'POST', body: JSON.stringify({ login, password }) }),
   me: async () => {
-    // Ilovada statistika faqat ilova javoblaridan
-    const r = await req('/me' + (ilovaManbasi() ? '?manba=ilova' : ''));
+    // Statistika sayt va ilovada bir xil — barcha javoblar
+    const r = await req('/me');
     rememberRole(r?.user?.role);
     oxirgiYoz('me', r);
     return r;
@@ -372,7 +372,7 @@ export const api = {
       return { isCorrect, correctOptionIds: togri, offline: true };
     }
   },
-  mistakes: () => req('/mistakes' + (ilovaManbasi() ? '?manba=ilova' : '')),
+  mistakes: () => req('/mistakes'),
   rating: (limit = 100): Promise<{ list: RatingRow[]; meId: number }> =>
     req('/rating?limit=' + limit),
   solved: () => req('/solved'),
@@ -380,13 +380,13 @@ export const api = {
    * Har savol bo'yicha OXIRGI javobim — yengil ro'yxat (savolning o'zisiz).
    * Test oynasi shu bilan yechilgan savollarni tiklaydi.
    */
-  myAnswers: (manba?: 'ilova'): Promise<{
+  myAnswers: (): Promise<{
     list: Array<{ questionId: number; chosen: number[]; isCorrect: boolean }>;
-  }> => req('/progress/answers' + (manba ? '?manba=' + manba : '')),
+  }> => req('/progress/answers'),
   /** Har shablon bo'yicha progress (yechilgan va to'g'ri javoblar) */
-  // Ilovada — faqat ilovada berilgan javoblar (bosh sahifa va xatolar bilan bir xil)
+  // Sayt va ilovada bir xil — barcha javoblar
   shablonProgress: (): Promise<{ list: ShablonProgress[] }> =>
-    req('/progress/shablon' + (ilovaManbasi() ? '?manba=ilova' : '')),
+    req('/progress/shablon'),
   /** Hozir nechta foydalanuvchi ishlayapti (oxirgi 5 daqiqada faol) */
   online: (): Promise<{ count: number; minutes: number; list?: OnlineRow[] }> => req('/online'),
   /** Aloqa formasi — kirmagan mehmon ham yubora oladi */

@@ -310,9 +310,8 @@ userRouter.get(
     const user = await prisma.user.findUnique({ where: { id: userId } });
     // Hisob o'chirilgan (masalan mehmonlar tozalangan) — eski token bilan kirib qolmasin: kirish oynasiga
     if (!user) return res.status(401).json({ error: 'Hisob topilmadi. Qaytadan kiring yoki ro‘yxatdan o‘ting.' });
-    // ?manba=ilova — mobil ilova: statistika faqat ilovada berilgan javoblardan
-    // (saytdagi eski javoblar ilovada hisobga kirmaydi). Parametrsiz — avvalgidek.
-    const jw: any = { userId, ...(req.query.manba === 'ilova' ? { source: 'ilova' } : {}) };
+    // Sayt va ilova statistikasi BIR XIL — barcha javoblar (2026-11-11). Eski ilovalar yuborgan ?manba=ilova e'tiborsiz.
+    const jw: any = { userId };
     const total = await prisma.userAnswer.count({ where: jw });
     const correct = await prisma.userAnswer.count({ where: { ...jw, isCorrect: true } });
     const solvedQuestions = await prisma.userAnswer.findMany({
@@ -516,7 +515,7 @@ userRouter.get(
 
     // Xatolar (oxirgi javob noto'g'ri bo'lganlar)
     if (mode === 'mistakes') {
-      return res.json(await getMistakes(userId, req.query.manba === 'ilova'));
+      return res.json(await getMistakes(userId));
     }
 
     // Mashq: xato qilgan YOKI hali to'g'ri yechilmagan savollar (Test yechish tugmasi)
@@ -616,7 +615,7 @@ userRouter.post(
     const questionId = Number(req.body?.questionId);
     const chosen: number[] = Array.isArray(req.body?.chosen) ? req.body.chosen.map(Number) : [];
     const timeMs = Number(req.body?.timeMs || 0);
-    // Mobil ilovadan kelgan javob belgilanadi (ilova faqat o'zinikini tiklaydi)
+    // Mobil ilovadan kelgan javob belgilanadi (faqat tahlil uchun — ko'rsatishda sayt va ilova bir xil)
     const source = req.body?.manba === 'ilova' ? 'ilova' : null;
 
     const question = await prisma.question.findUnique({
@@ -661,10 +660,10 @@ async function getPractice(userId: number) {
   return all.filter((q) => latest.get(q.id) !== true);
 }
 
-/** faqatIlova — faqat mobil ilovada berilgan javoblar (ilova "Xatolarni tuzatish") */
-async function getMistakes(userId: number, faqatIlova = false) {
+/** Xatolar — sayt va ilovada bir xil (barcha javoblar bo'yicha) */
+async function getMistakes(userId: number) {
   const answers = await prisma.userAnswer.findMany({
-    where: { userId, ...(faqatIlova ? { source: 'ilova' } : {}) },
+    where: { userId },
     orderBy: { answeredAt: 'desc' },
     select: { questionId: true, isCorrect: true, chosen: true },
   });
@@ -802,12 +801,9 @@ userRouter.get(
   requireUser,
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
-    // ?manba=ilova — faqat mobil ilovada berilgan javoblar (saytdagi eski
-    // javoblar ilovaning test oynasida "yechilgan" bo'lib chiqmasin)
-    const faqatIlova = req.query.manba === 'ilova';
-
+    // Sayt va ilovada bir xil — barcha javoblar (?manba=ilova e'tiborsiz)
     const answers = await prisma.userAnswer.findMany({
-      where: { userId, ...(faqatIlova ? { source: 'ilova' } : {}) },
+      where: { userId },
       orderBy: { answeredAt: 'desc' },
       select: { questionId: true, isCorrect: true, chosen: true },
     });
@@ -845,12 +841,9 @@ userRouter.get(
   requireUser,
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
-    // ?manba=ilova — mobil ilova: faqat ilovada berilgan javoblar (saytdagi
-    // javoblar ilovadagi shablon natijalariga qo'shilmaydi). Parametrsiz — avvalgidek.
-    const faqatIlova = req.query.manba === 'ilova';
-
+    // Sayt va ilovada bir xil — barcha javoblar (?manba=ilova e'tiborsiz)
     const answers = await prisma.userAnswer.findMany({
-      where: { userId, ...(faqatIlova ? { source: 'ilova' } : {}) },
+      where: { userId },
       orderBy: { answeredAt: 'desc' },
       select: { questionId: true, isCorrect: true },
     });
@@ -1043,7 +1036,7 @@ userRouter.get(
 userRouter.get(
   '/mistakes',
   requireUser,
-  ah(async (req, res) => res.json(await getMistakes((req as any).userId, req.query.manba === 'ilova')))
+  ah(async (req, res) => res.json(await getMistakes((req as any).userId)))
 );
 
 /* ---------- Saqlanganlar ---------- */

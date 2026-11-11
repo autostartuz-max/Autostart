@@ -284,8 +284,6 @@ export default function TestPlayer() {
     const params: Record<string, string> = { mode };
     // Ilovadagi "Barcha testlar" savollari shablon tartibida keladi
     if (mobil && mode === 'all') params.tartib = 'shablon';
-    // Ilovadagi "Xatolarni tuzatish" — faqat ilovada xato qilinganlar
-    if (mobil && mode === 'mistakes') params.manba = 'ilova';
     // Ilovadagi "Raqamli savollar" — javobi son bo'lgan savollar avtomatik aniqlanadi
     if (mobil && mode === 'numeric') params.avto = '1';
     if (topicId) params.topicId = topicId;
@@ -406,12 +404,11 @@ export default function TestPlayer() {
             Imtihon rejimi bundan mustasno: u har safar toza boshlanadi.
           */
           let oldin: Record<number, Answered> = {};
-          // Faqat ILOVADA va faqat ilovada berilgan javoblar: saytda (yoki
-          // ilovadan oldin) yechilganlar bu yerda "yechilgan" bo'lib chiqmaydi.
+          // Ilovada: serverdagi barcha javoblar (sayt va ilova — bir xil ma'lumot).
           // Saytning test oynasi avvalgidek — faqat shu brauzerdagi sessiya.
           if (!examMode && mobil) {
             try {
-              const { list } = await api.myAnswers('ilova');
+              const { list } = await api.myAnswers();
               for (const a of list)
                 oldin[a.questionId] = { chosen: a.chosen, isCorrect: a.isCorrect };
             } catch {

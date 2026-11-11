@@ -531,6 +531,10 @@ async function aupload(path: string, field: string, file: File, _retried = false
   return res.json();
 }
 
+/** Yo'l belgisi (admin va ilova uchun bir xil ko'rinish) */
+export interface AdminBelgi { id: number; toifa: number; raqam: string; nom: string; tavsif: string; rasm: string | null }
+export interface BelgiMaydon { toifa: number; raqam: string; nom: string; tavsif: string; toifaNomi?: string }
+
 export const adminApi = {
   login: async (login: string, password: string) => {
     const res = await fetch(API + '/admin/login', {
@@ -564,6 +568,14 @@ export const adminApi = {
   /** Video tushuncha — mobil ilovada "O'rganish → Video" da ko'rinadi */
   uploadVideo: (id: number, file: File) => aupload('/admin/questions/' + id + '/video', 'video', file),
   deleteVideo: (id: number) => areq('/admin/questions/' + id + '/video', { method: 'DELETE' }),
+  /** Yo'l belgilari (ilova va saytdagi "Yo'l belgilari" bo'limi) */
+  signs: (): Promise<AdminBelgi[]> => areq('/admin/signs'),
+  createSign: (data: BelgiMaydon): Promise<AdminBelgi> => areq('/admin/signs', { method: 'POST', body: JSON.stringify(data) }),
+  updateSign: (id: number, data: BelgiMaydon): Promise<AdminBelgi> =>
+    areq('/admin/signs/' + id, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteSign: (id: number) => areq('/admin/signs/' + id, { method: 'DELETE' }),
+  uploadSignImage: (id: number, file: File): Promise<AdminBelgi> => aupload('/admin/signs/' + id + '/image', 'image', file),
+  deleteSignImage: (id: number): Promise<AdminBelgi> => areq('/admin/signs/' + id + '/image', { method: 'DELETE' }),
   recolorImage: async (
     file: File,
     pairs: { object: string; color: string }[]

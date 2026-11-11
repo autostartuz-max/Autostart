@@ -178,12 +178,26 @@ model Complaint {
   createdAt  DateTime @default(now())
 }
 
+/// Yo'l belgisi (Yo'l harakati qoidalari, 1-ilova + 176-band taniqlik belgilari). Admin qo'shadi/tahrirlaydi.
+/// imageUrl: ilova/sayt ichidagi rasm ("/belgi-rasm/1.1.svg") yoki admin yuklagani ("/api/signs/:id/image?v=…").
 model RoadSign {
-  id          Int     @id @default(autoincrement())
-  category    String
+  id          Int            @id @default(autoincrement())
+  category    String         @default("") // eski maydon (toifa nomi); endi toifa raqami ishlatiladi
   name        String
   imageUrl    String?
-  description String  @default("")
+  description String         @default("")
+  toifa       Int            @default(0) // 1 Ogohlantiruvchi … 8 Taniqlik belgilari
+  raqam       String         @default("") // "1.1", "1.4.3"; taniqlik belgilarida "T1"…
+  image       RoadSignImage?
+  createdAt   DateTime       @default(now())
+}
+
+model RoadSignImage {
+  id     Int      @id @default(autoincrement())
+  signId Int      @unique
+  sign   RoadSign @relation(fields: [signId], references: [id], onDelete: Cascade)
+  data   Bytes
+  mime   String   @default("image/png")
 }
 
 model AdminUser {

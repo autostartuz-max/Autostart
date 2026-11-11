@@ -42,6 +42,7 @@ import AdminQuestionForm from './screens/AdminQuestionForm';
 import AdminImport from './screens/AdminImport';
 import Lessons from './screens/Lessons';
 import AdminLessons from './screens/AdminLessons';
+import AdminBelgilar from './screens/AdminBelgilar';
 
 export default function App() {
   const [checking, setChecking] = useState(true);
@@ -159,6 +160,8 @@ export default function App() {
         <Route path="/test" element={<TestPlayer />} />
         {/* Yo'l belgilari: ilovada yangi ko'rinish (toifalar, qidiruv), saytda ro'yxat — ma'lumot bitta katalogdan */}
         <Route path="/belgilar" element={mobilIlova() ? <BelgilarIlova /> : <Signs />} />
+        {/* Belgilarni qo'shish/tahrirlash — faqat admin, faqat saytda */}
+        {!mobilIlova() && <Route path="/belgilar/boshqaruv" element={<AdminBelgilar />} />}
         <Route path="/amaliy" element={<Lessons />} />
         {!mobilIlova() && <Route path="/amaliy/boshqaruv" element={<AdminLessons />} />}
         <Route path="/profil" element={<Profile />} />

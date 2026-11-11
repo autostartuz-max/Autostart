@@ -124,6 +124,9 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
             <button className={'db-navi' + (active === '/amaliy/boshqaruv' ? ' active' : '')} onClick={() => go('/amaliy/boshqaruv')}>
               <Video size={18} /> <span>Video joylash</span>
             </button>
+            <button className={'db-navi' + (active === '/belgilar/boshqaruv' ? ' active' : '')} onClick={() => go('/belgilar/boshqaruv')}>
+              <SignpostBig size={18} /> <span>Yo‘l belgilari</span>
+            </button>
             <button className={'db-navi' + (active === '/xabarlar' ? ' active' : '')} onClick={() => go('/xabarlar')}>
               <MessageCircle size={18} /> <span>Xabarlar</span>
             </button>

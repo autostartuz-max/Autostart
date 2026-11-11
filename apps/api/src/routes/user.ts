@@ -12,6 +12,7 @@ import { telegramgaYubor, esc } from '../notify';
 import { lessonFilePath, mobilFilePath, TOIFALAR, savolVideoYoli } from '../uploads';
 import { mobilNusxaBormi } from '../video';
 import { xatoStatistikasi, qiyinSavolIdlari } from '../qiyinlik';
+import { BELGI_TANLOV, belgiJson, belgiTartibi } from '../belgilar';
 
 // Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi
 function normPhone(raw: any): string | null {
@@ -1075,10 +1076,28 @@ userRouter.post(
   })
 );
 
-/* ---------- Yo'l belgilari ---------- */
+/* ---------- Yo'l belgilari (public; admin boshqaradi — routes/admin.ts) ---------- */
 userRouter.get(
   '/signs',
-  ah(async (_req, res) => res.json(await prisma.roadSign.findMany({ orderBy: { id: 'asc' } })))
+  ah(async (_req, res) => {
+    const rows = await prisma.roadSign.findMany({ where: { toifa: { gt: 0 } }, select: BELGI_TANLOV });
+    res.json(rows.sort(belgiTartibi).map(belgiJson));
+  })
+);
+
+/* Admin yuklagan belgi rasmi */
+userRouter.get(
+  '/signs/:id/image',
+  ah(async (req, res) => {
+    const img = await prisma.roadSignImage.findUnique({ where: { signId: Number(req.params.id) } });
+    if (!img) return res.status(404).json({ error: 'Rasm yoʻq' });
+    res.setHeader('Content-Type', img.mime || 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // manzilda ?v= bor — almashtirilsa manzil o'zgaradi
+    // SVG ichidagi skript to'g'ridan-to'g'ri ochilganda ham ishlamasin
+    res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; img-src data:");
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(Buffer.from(img.data));
+  })
 );
 
 /* ---------- Shikoyat ---------- */

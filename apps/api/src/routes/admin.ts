@@ -14,6 +14,7 @@ import {
 import { mobilNusxaNavbatga } from '../video';
 import { xatoStatistikasi } from '../qiyinlik';
 import { BALL, ballQosh } from '../ball';
+import { BELGI_TANLOV, TOIFA_SONI, belgiJson, belgiTartibi } from '../belgilar';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
@@ -948,6 +949,110 @@ adminRouter.delete(
     await prisma.questionImage.deleteMany({ where: { questionId: id } });
     await prisma.question.update({ where: { id }, data: { imageUrl: null } });
     res.json({ ok: true });
+  })
+);
+
+/* ---------- Yo'l belgilari (ilovadagi "Yo'l belgilari" oynasi; Owner va Admin) ---------- */
+/** So'rov tanasidan belgi maydonlari; xato bo'lsa — matn */
+function belgiMaydonlari(b: any): { data?: { toifa: number; category: string; raqam: string; name: string; description: string }; xato?: string } {
+  const toifa = Number(b?.toifa);
+  const name = String(b?.nom ?? '').trim();
+  if (!Number.isInteger(toifa) || toifa < 1 || toifa > TOIFA_SONI) return { xato: 'Toifani tanlang' };
+  if (!name) return { xato: 'Belgi nomini kiriting' };
+  if (name.length > 300) return { xato: 'Nom juda uzun (300 belgigacha)' };
+  return {
+    data: {
+      toifa,
+      category: String(b?.toifaNomi ?? '').slice(0, 200),
+      raqam: String(b?.raqam ?? '').trim().slice(0, 30),
+      name,
+      description: String(b?.tavsif ?? '').trim().slice(0, 5000),
+    },
+  };
+}
+
+adminRouter.get(
+  '/signs',
+  ah(async (_req, res) => {
+    const rows = await prisma.roadSign.findMany({ where: { toifa: { gt: 0 } }, select: BELGI_TANLOV });
+    res.json(rows.sort(belgiTartibi).map(belgiJson));
+  })
+);
+
+adminRouter.post(
+  '/signs',
+  ah(async (req, res) => {
+    const { data, xato } = belgiMaydonlari(req.body);
+    if (!data) return res.status(400).json({ error: xato });
+    const r = await prisma.roadSign.create({ data, select: BELGI_TANLOV });
+    res.json(belgiJson(r));
+  })
+);
+
+adminRouter.put(
+  '/signs/:id',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const { data, xato } = belgiMaydonlari(req.body);
+    if (!data) return res.status(400).json({ error: xato });
+    const bor = await prisma.roadSign.findUnique({ where: { id }, select: { id: true } });
+    if (!bor) return res.status(404).json({ error: 'Belgi topilmadi' });
+    const r = await prisma.roadSign.update({ where: { id }, data, select: BELGI_TANLOV });
+    res.json(belgiJson(r));
+  })
+);
+
+adminRouter.delete(
+  '/signs/:id',
+  ah(async (req, res) => {
+    await prisma.roadSign.deleteMany({ where: { id: Number(req.params.id) } }); // rasmi ham (onDelete: Cascade)
+    res.json({ ok: true });
+  })
+);
+
+/** Fayl ichi e'lon qilingan turga mos (kengaytmasi o'zgartirilgan HTML va h.k. o'tmaydi) */
+function haqiqiyRasm(b: Buffer, mime: string): boolean {
+  const bosh = (s: string) => b.subarray(0, s.length).toString('latin1') === s;
+  if (mime === 'image/png') return bosh('\x89PNG');
+  if (mime === 'image/jpeg' || mime === 'image/jpg') return b[0] === 0xff && b[1] === 0xd8;
+  if (mime === 'image/gif') return bosh('GIF8');
+  if (mime === 'image/webp') return bosh('RIFF') && b.subarray(8, 12).toString('latin1') === 'WEBP';
+  if (mime === 'image/svg+xml') return /<svg[\s>]/i.test(b.subarray(0, 65536).toString('utf8'));
+  return false;
+}
+
+/* Belgi rasmi: PNG/JPG/SVG/WEBP, 3 MB gacha — bazaga yoziladi, /api/signs/:id/image orqali beriladi */
+adminRouter.post(
+  '/signs/:id/image',
+  upload.single('image'),
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    if (!req.file) return res.status(400).json({ error: 'Fayl yuklanmadi' });
+    if (!/^image\/(png|jpe?g|svg\+xml|webp|gif)$/.test(req.file.mimetype || '')) return res.status(400).json({ error: 'Faqat rasm (PNG, JPG, SVG, WEBP)' });
+    if (req.file.size > 3 * 1024 * 1024) return res.status(400).json({ error: 'Rasm 3 MB dan katta' });
+    if (!haqiqiyRasm(req.file.buffer, req.file.mimetype)) return res.status(400).json({ error: 'Fayl rasm emas yoki buzilgan' });
+    const bor = await prisma.roadSign.findUnique({ where: { id }, select: { id: true } });
+    if (!bor) return res.status(404).json({ error: 'Belgi topilmadi' });
+    const data = new Uint8Array(req.file.buffer);
+    await prisma.roadSignImage.upsert({
+      where: { signId: id },
+      update: { data, mime: req.file.mimetype },
+      create: { signId: id, data, mime: req.file.mimetype },
+    });
+    const r = await prisma.roadSign.update({ where: { id }, data: { imageUrl: `/api/signs/${id}/image?v=${Date.now()}` }, select: BELGI_TANLOV });
+    res.json(belgiJson(r));
+  })
+);
+
+adminRouter.delete(
+  '/signs/:id/image',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const bor = await prisma.roadSign.findUnique({ where: { id }, select: { id: true } });
+    if (!bor) return res.status(404).json({ error: 'Belgi topilmadi' });
+    await prisma.roadSignImage.deleteMany({ where: { signId: id } });
+    const r = await prisma.roadSign.update({ where: { id }, data: { imageUrl: null }, select: BELGI_TANLOV });
+    res.json(belgiJson(r));
   })
 );
 

@@ -4,33 +4,31 @@ import { ChevronLeft, Search, X } from 'lucide-react';
 import { useOrqaga } from '../../orqaga';
 import { ilovaEkrani } from '../../native';
 import PastkiOyna from '../../components/PastkiOyna';
-import { BELGILAR, TOIFALAR, belgiRasm, type Belgi } from '../../belgilar/katalog';
+import {
+  TOIFALAR, belgiRasmUrl, guruhRaqami, guruhi, raqamKorinadi, useBelgilar, type BelgiQator,
+} from '../../belgilar/katalog';
 import '../../ilova/tema.css';
 import '../../ilova/belgilar.css';
 
-/** Ro'yxatdagi bitta belgi: guruhli yozuvlar (1.4.1 — 1.4.6) har bir raqami alohida karta */
-interface Karta { kalit: string; raqam: string; fayl: string | null; belgi: Belgi }
-const kartalar = (bb: Belgi[]): Karta[] =>
-  bb.flatMap((b) => b.rasmlar.map((r) => ({ kalit: b.toifa + ':' + r.raqam, raqam: r.raqam, fayl: r.fayl, belgi: b })));
-/** Taniqlik belgilarining rasmiy raqami yo'q (ichki T1, T2…) — ko'rsatilmaydi */
-const raqamKorinadi = (raqam: string) => !/^T\d/.test(raqam);
 const norm = (s: string) => s.toLowerCase().replace(/[ʻʼ'`’‘]/g, "'");
+const kalit = (b: BelgiQator, i: number) => (b.id != null ? 'b' + b.id : `${b.toifa}:${b.raqam}:${i}`);
 
-/** Belgi rasmi; rasm yo'q bo'lsa — raqami yozilgan o'rinbosar */
-function Rasm({ fayl, raqam, katta }: { fayl: string | null; raqam: string; katta?: boolean }) {
-  return fayl
-    ? <img className={'ilv-bl-img' + (katta ? ' katta' : '')} src={belgiRasm(fayl)} alt="" loading="lazy" decoding="async" />
-    : <span className={'ilv-bl-yoq' + (katta ? ' katta' : '')} aria-hidden="true">{raqam}</span>;
+/** Belgi rasmi; rasm yo'q (yoki yuklanmasa) — raqami yozilgan o'rinbosar */
+function Rasm({ rasm, raqam, katta }: { rasm: string | null; raqam: string; katta?: boolean }) {
+  const [xato, setXato] = useState(false);
+  return rasm && !xato
+    ? <img className={'ilv-bl-img' + (katta ? ' katta' : '')} src={belgiRasmUrl(rasm)} alt="" loading="lazy" decoding="async" onError={() => setXato(true)} />
+    : <span className={'ilv-bl-yoq' + (katta ? ' katta' : '')} aria-hidden="true">{raqamKorinadi(raqam) ? raqam : ''}</span>;
 }
 
-function BelgiKartalari({ royxat, onOch }: { royxat: Karta[]; onOch: (k: Karta) => void }) {
+function BelgiKartalari({ royxat, onOch }: { royxat: BelgiQator[]; onOch: (b: BelgiQator) => void }) {
   return (
     <div className="ilv-bl-tor">
-      {royxat.map((k) => (
-        <button key={k.kalit} type="button" className="ilv-bl-karta" onClick={() => onOch(k)}>
-          <span className="ilv-bl-rasm-joy"><Rasm fayl={k.fayl} raqam={k.raqam} /></span>
-          {raqamKorinadi(k.raqam) && <span className="ilv-bl-raqam">{k.raqam}</span>}
-          <span className="ilv-bl-nom">{k.belgi.nom}</span>
+      {royxat.map((b, i) => (
+        <button key={kalit(b, i)} type="button" className="ilv-bl-karta" onClick={() => onOch(b)}>
+          <span className="ilv-bl-rasm-joy"><Rasm rasm={b.rasm} raqam={b.raqam} /></span>
+          {raqamKorinadi(b.raqam) && <span className="ilv-bl-raqam">{b.raqam}</span>}
+          <span className="ilv-bl-nom">{b.nom}</span>
         </button>
       ))}
     </div>
@@ -41,6 +39,7 @@ function BelgiKartalari({ royxat, onOch }: { royxat: Karta[]; onOch: (k: Karta) 
  * Ilova: "Yo'l belgilari" (/belgilar). Avval toifalar (2 ustunli kartalar: belgi, nomi, soni),
  * toifa bosilganda — /belgilar?toifa=N: shu toifadagi belgilar 3 ustunda. Belgi bosilsa — katta
  * rasm va qoidadagi tavsif. Qidiruv barcha toifalardan izlaydi.
+ * Ro'yxat serverdan (admin qo'shgan/tahrirlaganlari bilan); internet bo'lmasa — ichki nusxa.
  */
 export default function BelgilarIlova() {
   const nav = useNavigate();
@@ -50,7 +49,8 @@ export default function BelgilarIlova() {
   const orqaga = useOrqaga();
   const toifalargaQayt = useOrqaga('/belgilar');
   const [qidiruv, setQidiruv] = useState('');
-  const [ochiq, setOchiq] = useState<Karta | null>(null);
+  const [ochiq, setOchiq] = useState<BelgiQator | null>(null);
+  const belgilar = useBelgilar();
 
   // Telefonning tepa/pastki chizig'i ham ekran rangida (Bosh sahifa va boshqa yangi ekranlardagidek)
   useEffect(() => {
@@ -62,10 +62,11 @@ export default function BelgilarIlova() {
 
   const q = norm(qidiruv.trim());
   const topilgan = useMemo(
-    () => (q ? kartalar(BELGILAR.filter((b) => norm(b.nom).includes(q) || b.raqam.includes(q) || norm(b.tavsif).includes(q))) : []),
-    [q],
+    () => (q ? belgilar.filter((b) => norm(b.nom).includes(q) || b.raqam.includes(q) || norm(b.tavsif).includes(q)) : []),
+    [q, belgilar],
   );
-  const toifaKartalari = useMemo(() => (toifa ? kartalar(BELGILAR.filter((b) => b.toifa === toifa.n)) : []), [toifa]);
+  const toifaBelgilari = useMemo(() => (toifa ? belgilar.filter((b) => b.toifa === toifa.n) : []), [toifa, belgilar]);
+  const ochiqGuruh = ochiq ? guruhi(belgilar, ochiq) : [];
 
   return (
     <div className="ilv ilv-bl">
@@ -79,7 +80,7 @@ export default function BelgilarIlova() {
       {toifa ? (
         <>
           {toifa.tavsif && <p className="ilv-bl-toifa-tavsif">{toifa.tavsif.split('\n')[0]}</p>}
-          <BelgiKartalari royxat={toifaKartalari} onOch={setOchiq} />
+          <BelgiKartalari royxat={toifaBelgilari} onOch={setOchiq} />
         </>
       ) : (
         <>
@@ -107,13 +108,13 @@ export default function BelgilarIlova() {
           ) : (
             <div className="ilv-bl-toifalar">
               {TOIFALAR.map((t) => {
-                const kk = kartalar(BELGILAR.filter((b) => b.toifa === t.n));
-                const belgi = kk.find((k) => k.fayl);
+                const bb = belgilar.filter((b) => b.toifa === t.n);
+                const namuna = bb.find((b) => b.rasm);
                 return (
                   <button key={t.n} type="button" className="ilv-bl-toifa" onClick={() => nav(`/belgilar?toifa=${t.n}`)}>
-                    <span className="ilv-bl-toifa-rasm">{belgi && <Rasm fayl={belgi.fayl} raqam={belgi.raqam} />}</span>
+                    <span className="ilv-bl-toifa-rasm">{namuna && <Rasm rasm={namuna.rasm} raqam={namuna.raqam} />}</span>
                     <span className="ilv-bl-toifa-nom">{t.nom}</span>
-                    <span className="ilv-bl-toifa-son">{kk.length} ta</span>
+                    <span className="ilv-bl-toifa-son">{bb.length} ta</span>
                   </button>
                 );
               })}
@@ -124,21 +125,21 @@ export default function BelgilarIlova() {
 
       {ochiq && (
         <PastkiOyna
-          title={ochiq.belgi.nom}
-          subtitle={raqamKorinadi(ochiq.raqam) ? ochiq.belgi.raqam : TOIFALAR.find((t) => t.n === ochiq.belgi.toifa)?.nom}
+          title={ochiq.nom}
+          subtitle={guruhRaqami(ochiqGuruh) || TOIFALAR.find((t) => t.n === ochiq.toifa)?.nom}
           onClose={() => setOchiq(null)}
         >
           <div className="bl-oyna">
-            <div className={'ilv-bl-oyna-rasmlar' + (ochiq.belgi.rasmlar.length > 1 ? ' kop' : '')}>
-              {ochiq.belgi.rasmlar.map((r) => (
-                <figure key={r.raqam} className={'ilv-bl-oyna-rasm' + (r.raqam === ochiq.raqam ? ' tanlangan' : '')}>
-                  <Rasm fayl={r.fayl} raqam={r.raqam} katta />
-                  {ochiq.belgi.rasmlar.length > 1 && <figcaption>{r.raqam}</figcaption>}
+            <div className={'ilv-bl-oyna-rasmlar' + (ochiqGuruh.length > 1 ? ' kop' : '')}>
+              {ochiqGuruh.map((b, i) => (
+                <figure key={kalit(b, i)} className={'ilv-bl-oyna-rasm' + (b.raqam === ochiq.raqam && b.id === ochiq.id ? ' tanlangan' : '')}>
+                  <Rasm rasm={b.rasm} raqam={b.raqam} katta />
+                  {ochiqGuruh.length > 1 && raqamKorinadi(b.raqam) && <figcaption>{b.raqam}</figcaption>}
                 </figure>
               ))}
             </div>
-            {ochiq.belgi.tavsif
-              ? ochiq.belgi.tavsif.split('\n').map((x, i) => <p key={i} className="ilv-bl-tavsif">{x}</p>)
+            {ochiq.tavsif
+              ? ochiq.tavsif.split('\n').map((x, i) => <p key={i} className="ilv-bl-tavsif">{x}</p>)
               : <p className="ilv-bl-tavsif ilv-bl-tavsif-yoq">Qoidalarda alohida izoh berilmagan.</p>}
           </div>
         </PastkiOyna>

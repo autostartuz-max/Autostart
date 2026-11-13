@@ -508,7 +508,7 @@ async function areq(path: string, opts: RequestInit = {}, _retried = false): Pro
     const b = await res.json().catch(() => ({}));
     // Statusni xatoga biriktiramiz — chaqiruvchi 401/403 ni ajrata olsin
     // (token eskirganda ro'yxat "bo'sh" bo'lib ko'rinmasligi uchun).
-    throw Object.assign(new Error(b.error || res.statusText), { status: res.status });
+    throw Object.assign(new Error(b.error || res.statusText), { status: res.status, data: b });
   }
   return res.json();
 }
@@ -526,7 +526,7 @@ async function aupload(path: string, field: string, file: File, _retried = false
   }
   if (!res.ok) {
     const b = await res.json().catch(() => ({}));
-    throw Object.assign(new Error(b.error || res.statusText), { status: res.status });
+    throw Object.assign(new Error(b.error || res.statusText), { status: res.status, data: b });
   }
   return res.json();
 }
@@ -557,6 +557,8 @@ export const adminApi = {
   categories: (): Promise<any[]> => areq('/admin/categories'),
   topics: (): Promise<any[]> => areq('/admin/topics'),
   createTopic: (name: string): Promise<any> => areq('/admin/topics', { method: 'POST', body: JSON.stringify({ name }) }),
+  /** Shablonlar soni: kamida 63, yangi shablonga savol qo'shilsa ko'payadi */
+  shablonSoni: (): Promise<{ soni: number }> => areq('/admin/shablonlar'),
   translate: (text: string, to = 'ru'): Promise<{ text: string }> =>
     areq('/admin/translate?to=' + to + '&text=' + encodeURIComponent(text)),
   extractQuestion: (file: File): Promise<{ textLat: string; options: string[]; shablon: number | null; tartib: number | null; correctIndex: number | null; izoh: string; topicId: number | null }> =>

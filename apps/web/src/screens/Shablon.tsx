@@ -8,6 +8,7 @@ import { rusBor } from '../i18n';
 import AppSidebar from '../components/AppSidebar';
 import '../shablon.css';
 
+// Rasmiy biletlar 63 ta; admin yangi shablonga savol qo'shsa (64, 65…) — u ham chiqadi
 const COUNT = 63;
 // Progress doirasi uzunligi (r=18)
 const RING = 2 * Math.PI * 18;
@@ -106,7 +107,7 @@ export default function Shablon() {
         <div className="wl-content">
           <h1 className="wl-h1">Shablon testlar (Imtihon)</h1>
           <div className="wl-grid">
-            {Array.from({ length: COUNT }, (_, i) => i + 1).map((n) => {
+            {Array.from({ length: Math.max(COUNT, ...Object.keys(progress).map(Number)) }, (_, i) => i + 1).map((n) => {
               const pr = progress[n] || { shablon: n, total: 0, answered: 0, correct: 0, percent: 0 };
               return (
               <div className={'wl-card' + (pr.answered ? ' boshlangan' : '')} key={n} onClick={() => { setSelected(n); setCfgLang(null); }}>

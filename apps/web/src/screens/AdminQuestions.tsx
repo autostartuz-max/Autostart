@@ -6,6 +6,7 @@ import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
 import '../dashboard.css';
 
+// Rasmiy biletlar 63 ta; yangi shablonga (64, 65…) savol qo'shilsa — kartalar ko'payadi
 const SHABLON_COUNT = 63;
 
 export default function AdminQuestions() {
@@ -68,6 +69,7 @@ export default function AdminQuestions() {
     counts.set(k, (counts.get(k) || 0) + 1);
   }
   const noShab = counts.get(0) || 0;
+  const shablonSoni = Math.max(SHABLON_COUNT, ...list.map((x) => x.shablon || 0));
 
   // Tanlangan shablon savollari
   const selItems = sel != null ? list.filter((x) => (x.shablon || 0) === sel) : [];
@@ -115,7 +117,7 @@ export default function AdminQuestions() {
                 <div className="adm-empty">Savollar topilmadi.</div>
               )}
               <div className="adm-shab-grid">
-                {Array.from({ length: SHABLON_COUNT }, (_, i) => i + 1).map((n) => {
+                {Array.from({ length: shablonSoni }, (_, i) => i + 1).map((n) => {
                   const c = counts.get(n) || 0;
                   return (
                     <div className={'adm-shab-card' + (c ? ' has' : '')} key={n} onClick={() => setSel(n)}>
@@ -127,6 +129,14 @@ export default function AdminQuestions() {
                     </div>
                   );
                 })}
+                {/* Yangi shablon — keyingi raqam bilan yangi savol formasi ochiladi */}
+                <div className="adm-shab-card adm-shab-yangi" onClick={() => nav(`/savollar/yangi?shablon=${shablonSoni + 1}&order=1`)}>
+                  <div className="adm-shab-num">{shablonSoni + 1}-SHABLON</div>
+                  <div className="adm-shab-row">
+                    <span className="adm-shab-count"><Plus size={20} /></span>
+                    <div className="adm-shab-info">Yangi shablon qo‘shish</div>
+                  </div>
+                </div>
                 {noShab > 0 && (
                   <div className="adm-shab-card has" onClick={() => setSel(0)}>
                     <div className="adm-shab-num">SHABLONSIZ</div>

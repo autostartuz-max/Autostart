@@ -1076,6 +1076,32 @@ adminRouter.delete(
   })
 );
 
+/* ---------- Shablonlar soni ---------- */
+// Rasmiy biletlar 63 ta; admin yangi shablonga (64, 65…) savol qo'shsa — soni o'sadi
+const SHABLON_ASOSIY = 63;
+adminRouter.get(
+  '/shablonlar',
+  ah(async (_req, res) => {
+    const r = await prisma.question.aggregate({ _max: { shablon: true } });
+    res.json({ soni: Math.max(SHABLON_ASOSIY, r._max.shablon || 0) });
+  })
+);
+
+/* ---------- Mavzu qo'shish: nom tekshiriladi, takror bo'lmaydi, yangi mavzu ro'yxat oxiriga ---------- */
+adminRouter.post(
+  '/topics',
+  ah(async (req, res) => {
+    const name = String(req.body?.name ?? '').replace(/\s+/g, ' ').trim();
+    if (!name) return res.status(400).json({ error: 'Mavzu nomini kiriting' });
+    if (name.length > 150) return res.status(400).json({ error: 'Mavzu nomi juda uzun (150 belgigacha)' });
+    const bor = await prisma.topic.findFirst({ where: { name: { equals: name, mode: 'insensitive' } } });
+    if (bor) return res.status(409).json({ error: `«${bor.name}» mavzusi allaqachon bor`, topic: bor });
+    const oxirgi = await prisma.topic.aggregate({ _max: { order: true } });
+    const topic = await prisma.topic.create({ data: { name, order: (oxirgi._max.order ?? 0) + 1 } });
+    res.json(topic);
+  })
+);
+
 /* ---------- Katalog (mavzu / bilet / toifa) ---------- */
 for (const [path, model] of [
   ['topics', 'topic'],
@@ -1086,6 +1112,7 @@ for (const [path, model] of [
     `/${path}`,
     ah(async (_req, res) => res.json(await (prisma as any)[model].findMany({ orderBy: { id: 'asc' } })))
   );
+  // topics uchun POST yuqorida (tekshiruvli) — u birinchi turgani uchun bu yerga yetib kelmaydi
   adminRouter.post(
     `/${path}`,
     ah(async (req, res) => {

@@ -60,6 +60,12 @@ export default function AdminQuestionForm() {
     { textLat: '', textRus: '', isCorrect: false },
   ]);
   const [topics, setTopics] = useState<any[]>([]);
+  // Shablonlar soni (kamida 63) — ro'yxat oxirida "keyingi — yangi shablon" tanlovi turadi
+  const [shablonSoni, setShablonSoni] = useState(63);
+  // Yangi mavzu: null — forma yopiq, matn — kiritilayotgan nom
+  const [yangiMavzu, setYangiMavzu] = useState<string | null>(null);
+  const [mavzuBusy, setMavzuBusy] = useState(false);
+  const [mavzuXato, setMavzuXato] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imgPreview, setImgPreview] = useState<string | null>(null);
@@ -127,6 +133,7 @@ export default function AdminQuestionForm() {
   useEffect(() => {
     if (!authed) return;
     adminApi.topics().then(setTopics).catch(() => {});
+    adminApi.shablonSoni().then((r) => setShablonSoni(r.soni)).catch(() => {});
     if (editing)
       adminApi
         .question(Number(id))
@@ -316,6 +323,30 @@ export default function AdminQuestionForm() {
     return () => document.removeEventListener('paste', onPaste);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed, topics]);
+
+  /** Yangi mavzu yaratib, darhol shu savolga tanlash. Bunday nomli mavzu bo'lsa — o'shani tanlaydi */
+  const mavzuQosh = async () => {
+    const nom = (yangiMavzu || '').trim();
+    if (!nom) return;
+    setMavzuBusy(true);
+    setMavzuXato('');
+    try {
+      const t = await adminApi.createTopic(nom);
+      setTopics((l) => [...l, t]);
+      setTopicId(String(t.id));
+      setYangiMavzu(null);
+    } catch (e: any) {
+      const bor = e?.data?.topic;
+      if (e?.status === 409 && bor) {
+        setTopicId(String(bor.id));
+        setYangiMavzu(null);
+      } else {
+        setMavzuXato(e?.message || 'Mavzu qo‘shib bo‘lmadi');
+      }
+    } finally {
+      setMavzuBusy(false);
+    }
+  };
 
   const save = async () => {
     setErr('');
@@ -535,9 +566,14 @@ export default function AdminQuestionForm() {
                     </div>
                     <select className="adm-sel" value={shablon} onChange={(e) => setShablon(e.target.value)}>
                       <option value="">— tanlanmagan —</option>
-                      {Array.from({ length: 63 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}-shablon</option>)}
+                      {Array.from({ length: shablonSoni }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}-shablon</option>)}
+                      <option value={shablonSoni + 1}>{shablonSoni + 1}-shablon — yangi shablon</option>
                     </select>
-                    <div className="adm-hint">Bo‘sh qoldirilsa — savol shablonga biriktirilmaydi.</div>
+                    <div className="adm-hint">
+                      {Number(shablon) > shablonSoni
+                        ? `Yangi ${shablon}-shablon: shu savol saqlangach sayt va ilovadagi shablonlar ro‘yxatida paydo bo‘ladi.`
+                        : 'Yangi shablon kerak bo‘lsa — ro‘yxat oxiridagi «yangi shablon» ni tanlang.'}
+                    </div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--db-muted)', margin: '12px 0 6px' }}>Tartib raqami</div>
                     <input className="adm-inp" type="number" min={0} placeholder="0" value={order}
                       onChange={(e) => setOrder(e.target.value)} style={{ maxWidth: 140 }} />
@@ -553,6 +589,36 @@ export default function AdminQuestionForm() {
                       <option value="">— tanlanmagan —</option>
                       {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
+                    {yangiMavzu === null ? (
+                      <button type="button" className="adm-btn sec qf-yangi-btn" onClick={() => { setYangiMavzu(''); setMavzuXato(''); }}>
+                        <Plus size={15} /> Yangi mavzu
+                      </button>
+                    ) : (
+                      <>
+                        <div className="adm-addtopic">
+                          <input
+                            className="adm-inp"
+                            autoFocus
+                            placeholder="Yangi mavzu nomi"
+                            value={yangiMavzu}
+                            maxLength={150}
+                            onChange={(e) => { setYangiMavzu(e.target.value); setMavzuXato(''); }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') { e.preventDefault(); mavzuQosh(); }
+                              if (e.key === 'Escape') setYangiMavzu(null);
+                            }}
+                            disabled={mavzuBusy}
+                          />
+                          <button type="button" className="adm-btn primary" onClick={mavzuQosh} disabled={mavzuBusy || !yangiMavzu.trim()}>
+                            {mavzuBusy ? '…' : 'Qo‘shish'}
+                          </button>
+                          <button type="button" className="adm-btn sec" onClick={() => setYangiMavzu(null)} disabled={mavzuBusy} title="Bekor qilish">
+                            <X size={15} />
+                          </button>
+                        </div>
+                        {mavzuXato && <div className="adm-hint qf-xato">{mavzuXato}</div>}
+                      </>
+                    )}
                   </div>
 
                   <div className="qf-card">

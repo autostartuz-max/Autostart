@@ -12,6 +12,7 @@ import '../ilova-ekran.css';
  * Namuna: Oson Prava ilovasidagi "Biletlar" ekrani — bo'limlar (Barchasi /
  * Yangi / Xatolar) va qatorga 3 tadan kartochka.
  */
+// Rasmiy biletlar 63 ta; admin yangi shablonga savol qo'shsa (64, 65…) — u ham chiqadi
 const COUNT = 63;
 // Imtihonda 3 ta xato — yiqilgan hisoblanadi
 const MAX_XATO = 3;
@@ -101,7 +102,7 @@ export default function ShablonIlova() {
     return { p, xato, cls };
   };
 
-  const raqamlar = Array.from({ length: COUNT }, (_, i) => i + 1).filter((n) => {
+  const raqamlar = Array.from({ length: Math.max(COUNT, ...Object.keys(progress).map(Number)) }, (_, i) => i + 1).filter((n) => {
     if (bolim === 'barchasi') return true;
     const h = holat(n);
     return bolim === 'yangi' ? !h : !!h && h.xato > 0;

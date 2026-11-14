@@ -22,6 +22,49 @@ const QADAM = 50;
 // Xato foiziga qarab rang: qizil (og'ir) → sariq → yashil
 const daraja = (r: number) => (r >= 60 ? 'yuqori' : r >= 30 ? 'orta' : 'past');
 
+const HALQA_R = 18;
+const HALQA_UZ = 2 * Math.PI * HALQA_R;
+const ANIM_MS = 900;
+const harakatsiz = () => {
+  try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; }
+};
+
+/**
+ * Xato foizi — aylana ko'rsatgich (Shablon testlardagidek): sahifa ochilganda 0 dan o'z foizigacha
+ * aylanib to'ladi, raqam ham sanab chiqadi. Kadrlar React'ni qayta chizdirmaydi — to'g'ridan-to'g'ri
+ * elementga yoziladi (50 ta karta bir vaqtda jonlansa ham sahifa sekinlashmasin).
+ */
+function FoizHalqa({ foiz }: { foiz: number }) {
+  const doira = useRef<SVGCircleElement>(null);
+  const yozuv = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const qoy = (k: number) => {
+      if (doira.current) doira.current.style.strokeDashoffset = String(HALQA_UZ * (1 - k / 100));
+      if (yozuv.current) yozuv.current.textContent = Math.round(k) + '%';
+    };
+    if (harakatsiz()) { qoy(foiz); return; }
+    let kadr = 0;
+    const bosh = performance.now();
+    const qadam = (t: number) => {
+      const x = Math.min(1, (t - bosh) / ANIM_MS);
+      qoy(foiz * (1 - Math.pow(1 - x, 3))); // sekinlashib to'xtaydi
+      if (x < 1) kadr = requestAnimationFrame(qadam);
+    };
+    qoy(0);
+    kadr = requestAnimationFrame(qadam);
+    return () => cancelAnimationFrame(kadr);
+  }, [foiz]);
+  return (
+    <span className={'th-halqa ' + daraja(foiz)} role="img" aria-label={foiz + '% xato'}>
+      <svg viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r={HALQA_R} className="th-halqa-bg" />
+        <circle ref={doira} cx="22" cy="22" r={HALQA_R} className="th-halqa-fg" strokeDasharray={HALQA_UZ} strokeDashoffset={HALQA_UZ} />
+      </svg>
+      <b ref={yozuv} aria-hidden="true">0%</b>
+    </span>
+  );
+}
+
 export default function AdminAnalytics() {
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
@@ -132,7 +175,7 @@ export default function AdminAnalytics() {
                         title="Shu mavzudagi xato qilingan savollar"
                       >
                         <div className="th-head">
-                          <span className={'th-rate ' + daraja(m.rate)}>{m.rate}%</span>
+                          <FoizHalqa foiz={m.rate} />
                           <div className="th-q">
                             <div className="xt-q">{i + 1}. {m.name}</div>
                             <div className="xt-meta">
@@ -214,7 +257,7 @@ export default function AdminAnalytics() {
                 {korinadigan.slice(0, korsat).map((q, i) => (
                   <div className="xt-card th-card" key={q.id}>
                     <div className="th-head">
-                      <span className={'th-rate ' + daraja(q.rate)}>{q.rate}%</span>
+                      <FoizHalqa foiz={q.rate} />
                       <div className="th-q">
                         <div className="xt-q">{i + 1}. {q.textLat}</div>
                         <div className="xt-meta">

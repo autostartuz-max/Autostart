@@ -1,13 +1,14 @@
 import fs from 'fs';
 import { spawn } from 'child_process';
-import { lessonFilePath, mobilFilePath } from './uploads';
+import { lessonFilePath, mobilFilePath, posterFilePath } from './uploads';
 
 /**
- * MOBIL ILOVA UCHUN SIQILGAN NUSXA
+ * SIQILGAN NUSXA (720p) VA MUQOVA
  *
- * Saytdagi video O'ZGARMAYDI — asl fayl qanday bo'lsa shunday qoladi va
- * brauzerda o'sha beriladi. Ilova esa yonidagi siqilgan nusxani oladi:
- * 1.6 GB lik dars telefonda ~200 MB bo'ladi, mobil internetda ochiladi.
+ * Asl fayl (4K, 20–30 Mbit/s, 1,5–2,7 GB) diskda tegilmay qoladi. Ko'rish uchun sayt ham,
+ * ilova ham yonidagi siqilgan nusxani oladi (~0,9 Mbit/s, 20 baravar yengil) — 4K ni server
+ * ham, talabaning interneti ham tez bera olmasdi (2026-11-14). Ro'yxatlarda esa videoning
+ * o'zi emas, kichik JPEG muqova ko'rsatiladi.
  *
  * Siqish ffmpeg bilan, fonda bajariladi — admin yuklash tugagach kutib
  * turmaydi. ffmpeg o'rnatilmagan bo'lsa hech narsa buzilmaydi: nusxa
@@ -31,6 +32,38 @@ export function ffmpegBormi(): Promise<boolean> {
     p.on('error', () => { ffmpegHolati = false; resolve(false); });
     p.on('close', (kod) => { ffmpegHolati = kod === 0; resolve(ffmpegHolati); });
   });
+}
+
+/**
+ * Dars muqovasi: videoning 20-soniyasidagi kadr (boshidagi logotip emas — dars mazmuni; qisqa
+ * videoda 1-soniya), eni 640px JPEG (~30–60 KB). Bir marta yasaladi
+ * va diskda saqlanadi. Siqilgan nusxa bo'lsa o'shandan (tez), bo'lmasa asl fayldan.
+ * Bir vaqtda bitta fayl uchun bitta ffmpeg.
+ */
+const muqovaJarayon = new Map<string, Promise<boolean>>();
+export function muqovaYasa(fileName: string): Promise<boolean> {
+  const chiqish = posterFilePath(fileName);
+  try { if (fs.statSync(chiqish).size > 0) return Promise.resolve(true); } catch { /* hali yo'q */ }
+  const bor = muqovaJarayon.get(fileName);
+  if (bor) return bor;
+  const kirish = mobilNusxaBormi(fileName) ? mobilFilePath(fileName) : lessonFilePath(fileName);
+  const vaqtinchalik = chiqish + '.tmp';
+  // Bitta kadr: soniya — qayerdan; muvaffaqiyatli bo'lsa true
+  const kadr = (soniya: string) => new Promise<boolean>((resolve) => {
+    const f = spawn('ffmpeg', ['-y', '-ss', soniya, '-i', kirish, '-frames:v', '1', '-vf', 'scale=640:-2', '-q:v', '4', '-f', 'image2', vaqtinchalik]);
+    f.on('error', () => resolve(false));
+    f.on('close', (kod) => {
+      try {
+        if (kod === 0 && fs.statSync(vaqtinchalik).size > 0) { fs.renameSync(vaqtinchalik, chiqish); return resolve(true); }
+      } catch { /* pastda */ }
+      try { fs.unlinkSync(vaqtinchalik); } catch { /* yo'q */ }
+      resolve(false);
+    });
+  });
+  const p = (fs.existsSync(kirish) ? kadr('20').then((ok) => ok || kadr('1')) : Promise.resolve(false))
+    .finally(() => muqovaJarayon.delete(fileName));
+  muqovaJarayon.set(fileName, p);
+  return p;
 }
 
 /** Siqilgan nusxa tayyormi */
@@ -59,6 +92,9 @@ async function navbatniYurgiz() {
   ishlayapti = true;
   try {
     await siq(fileName);
+    // Muqova siqilgan nusxadan qayta yasalsin (yuklash paytida asl fayldan yasalgan bo'lishi mumkin)
+    try { fs.unlinkSync(posterFilePath(fileName)); } catch { /* yo'q */ }
+    await muqovaYasa(fileName);
   } catch (e: any) {
     console.error('[video] siqishda xato:', fileName, e?.message || e);
   } finally {

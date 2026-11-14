@@ -1173,3 +1173,8 @@
 
 /* Ilova: tepa paneli yo'q ekran (masalan Mavzular) — kontent telefonning holat qatori ostiga kirmasin */
 .cap .db-main > .db-content:first-child { padding-top: calc(22px + env(safe-area-inset-top)); }
+
+/* Video joylash: muqova tugmasi (bosilsa video ochiladi) */
+.am-thumb-btn { position: relative; padding: 0; border: none; cursor: pointer; overflow: hidden; display: block; }
+.am-thumb-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.am-thumb-btn .am-play { width: 46px; height: 46px; }

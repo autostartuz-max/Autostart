@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import { Menu, ChevronLeft, Play, Video, Clock } from 'lucide-react';
-import { api, lessonVideoUrl, canManageQuestions, hasAdmin, type Lesson } from '../api';
+import { api, lessonVideoUrl, lessonPosterUrl, canManageQuestions, hasAdmin, type Lesson } from '../api';
 import { TOIFALAR, TOIFA_IZOH, hajm, sana } from '../lessons';
 import AppSidebar from '../components/AppSidebar';
 import { mobilIlova } from '../native';
@@ -74,8 +74,9 @@ export default function Lessons() {
         />
       ) : (
         <button className="am-poster" onClick={() => setOchilgan(l.id)} aria-label={l.title + ' — ko‘rish'}>
-          {/* preload="metadata" — birinchi kadr uchun butun fayl yuklanmaydi */}
-          <video className="am-poster-v" src={lessonVideoUrl(l.id) + '#t=1'} preload="metadata" muted />
+          {/* Muqova — kichik rasm; video faqat bosilganda yuklanadi (4K asl faylning kadri sekin ochilardi) */}
+          <img className="am-poster-v" src={lessonPosterUrl(l.id)} alt="" loading="lazy" decoding="async"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
           <span className="am-play"><Play size={26} fill="currentColor" /></span>
           <span className="am-badge">{l.category}</span>
         </button>

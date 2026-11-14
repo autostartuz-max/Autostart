@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, ChevronLeft, Video, Upload, Trash2, Pencil, Check, X, Eye, EyeOff } from 'lucide-react';
-import { adminApi, canManageQuestions, hasAdmin, clearAdmin, lessonVideoUrl, type Lesson } from '../api';
+import { Menu, ChevronLeft, Video, Upload, Trash2, Pencil, Check, X, Eye, EyeOff, Play } from 'lucide-react';
+import { adminApi, canManageQuestions, hasAdmin, clearAdmin, lessonVideoUrl, lessonPosterUrl, type Lesson } from '../api';
 import { TOIFALAR, TOIFA_IZOH, hajm, sana } from '../lessons';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
@@ -31,6 +31,7 @@ export default function AdminLessons() {
   const [tahrirId, setTahrirId] = useState<number | null>(null);
   const [tahrir, setTahrir] = useState({ ...BOSH_FORMA });
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [korilayotgan, setKorilayotgan] = useState<number | null>(null); // ro'yxatda ochilgan video
 
   const load = () => {
     setLoading(true);
@@ -296,13 +297,16 @@ export default function AdminLessons() {
                       </div>
                     ) : (
                       <>
-                        <video
-                          className="am-thumb"
-                          src={lessonVideoUrl(l.id) + '#t=1'}
-                          preload="metadata"
-                          controls
-                          muted
-                        />
+                        {/* Muqova rasmi; bosilganda video shu joyda ochiladi (avval har dars 4K videosi yuklanardi) */}
+                        {korilayotgan === l.id ? (
+                          <video className="am-thumb" src={lessonVideoUrl(l.id)} controls autoPlay playsInline preload="metadata" />
+                        ) : (
+                          <button type="button" className="am-thumb am-thumb-btn" onClick={() => setKorilayotgan(l.id)} title="Ko‘rish">
+                            <img src={lessonPosterUrl(l.id)} alt="" loading="lazy" decoding="async"
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
+                            <span className="am-play"><Play size={22} fill="currentColor" /></span>
+                          </button>
+                        )}
                         <div className="am-row-body">
                           <div className="am-row-head">
                             <b>{l.title}</b>

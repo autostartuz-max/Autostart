@@ -40,11 +40,17 @@ export function mobilFilePath(fileName: string): string {
   return lessonFilePath(fileName) + '.mobil.mp4';
 }
 
+/** Dars muqovasi (ro'yxatda ko'rinadigan kichik JPEG) — asl fayl yonida: <fayl>.poster.jpg */
+export function posterFilePath(fileName: string): string {
+  return lessonFilePath(fileName) + '.poster.jpg';
+}
+
 /** Faylni o'chiradi; yo'q bo'lsa ham xato bermaydi */
 export function lessonFileniOchir(fileName: string) {
   try { fs.unlinkSync(lessonFilePath(fileName)); } catch { /* fayl allaqachon yo'q */ }
   // Siqilgan nusxa ham ketadi — aks holda diskda egasiz fayl qoladi
   try { fs.unlinkSync(mobilFilePath(fileName)); } catch { /* bo'lmasligi ham mumkin */ }
+  try { fs.unlinkSync(posterFilePath(fileName)); } catch { /* bo'lmasligi ham mumkin */ }
 }
 
 /** Savollarning video tushunchalari shu papkada (bazada faqat fayl nomi) */

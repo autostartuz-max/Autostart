@@ -9,9 +9,9 @@ import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } from '../auth';
 import { shifrla } from '../passwordVault';
 import { telegramgaYubor, esc } from '../notify';
-import { lessonFilePath, mobilFilePath, TOIFALAR, savolVideoYoli } from '../uploads';
-import { mobilNusxaBormi } from '../video';
-import { xatoUlushlari, qiyinSavolIdlari } from '../qiyinlik';
+import { lessonFilePath, mobilFilePath, posterFilePath, TOIFALAR, savolVideoYoli } from '../uploads';
+import { mobilNusxaBormi, muqovaYasa } from '../video';
+import { xatoUlushlari, xatoStatistikasi, qiyinSavolIdlari } from '../qiyinlik';
 import { keshla } from '../kesh';
 import { BELGI_TANLOV, belgiJson, belgiTartibi } from '../belgilar';
 import { AKSIYA_TANLOV, AKSIYA_TARTIBI, aksiyaJson } from '../aksiyalar';
@@ -972,6 +972,12 @@ export function keshlarniIsit() {
   reytingKesh.isit();
   xatoUlushlari.isit();
   nashrSavollari.isit();
+  xatoStatistikasi.isit(); // admin "Tahlil" sahifasi
+  // Dars muqovalari (yo'qlari) — birin-ketin, birinchi ochgan kutmasin
+  void (async () => {
+    const darslar = await prisma.lesson.findMany({ select: { fileName: true } });
+    for (const d of darslar) await muqovaYasa(d.fileName);
+  })().catch((e) => console.error('[muqova]', e?.message || e));
 }
 async function getRating(limit = 100) {
   return (await reytingKesh()).slice(0, limit);
@@ -1260,6 +1266,20 @@ userRouter.get(
 );
 
 /**
+ * Dars muqovasi (ro'yxatdagi kichik rasm). Birinchi so'rovda yasaladi (~1 s), keyin diskdan.
+ * Qoralama darslar ham — admin ro'yxatida ko'rinadi (rasm, videoning o'zi emas).
+ */
+userRouter.get(
+  '/lessons/:id/poster',
+  ah(async (req, res) => {
+    const l = await prisma.lesson.findUnique({ where: { id: Number(req.params.id) }, select: { fileName: true } });
+    if (!l) return res.status(404).json({ error: 'Dars yo‘q' });
+    if (!(await muqovaYasa(l.fileName))) return res.status(404).json({ error: 'Muqova yo‘q' });
+    res.sendFile(posterFilePath(l.fileName), { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=86400' } });
+  })
+);
+
+/**
  * Videoning o'zi. Savol rasmi/ovozi kabi ochiq (token talab qilmaydi) —
  * <video src> sarlavha yubora olmaydi, tokenni manzilga yozish esa uni
  * server jurnallariga tushirib yuborardi.
@@ -1273,10 +1293,9 @@ userRouter.get(
     const l = await prisma.lesson.findUnique({ where: { id: Number(req.params.id) } });
     if (!l || l.status !== 'published') return res.status(404).json({ error: 'Video yo‘q' });
 
-    // Mobil ilova `?mobil=1` bilan so'raydi — siqilgan nusxa tayyor bo'lsa
-    // o'shani beramiz (1.6 GB emas, ~200 MB). Tayyor bo'lmasa asl fayl ketadi,
-    // ya'ni ilova baribir ishlaydi. Saytda hech narsa o'zgarmaydi.
-    const mobil = req.query.mobil === '1' && mobilNusxaBormi(l.fileName);
+    // Sayt ham, ilova ham siqilgan 720p nusxani oladi (asl 4K — 20–30 Mbit/s, sekin ochilardi).
+    // Nusxa hali tayyor bo'lmasa asl fayl ketadi — video baribir ochiladi. `?asl=1` — asl fayl.
+    const mobil = req.query.asl !== '1' && mobilNusxaBormi(l.fileName);
     const fayl = mobil ? mobilFilePath(l.fileName) : lessonFilePath(l.fileName);
     if (!fs.existsSync(fayl)) return res.status(404).json({ error: 'Video fayli topilmadi' });
     res.sendFile(

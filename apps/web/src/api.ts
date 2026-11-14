@@ -452,6 +452,8 @@ export function mediaUrl(u?: string | null): string | undefined {
 
 export const lessonVideoUrl = (id: number) =>
   `${API}/lessons/${id}/video` + (ilovaIchida ? '?mobil=1' : '');
+/** Dars muqovasi — ro'yxatlarda videoning o'rniga kichik rasm (4K video yuklanmaydi) */
+export const lessonPosterUrl = (id: number) => `${API}/lessons/${id}/poster`;
 
 export interface CommentRow {
   id: number;

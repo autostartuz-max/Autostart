@@ -27,32 +27,28 @@ export function telHavola(raqam: string): string {
   return 'tel:' + (r.length === 9 ? '+998' + r : r);
 }
 
-/** "Nima uchun AUTOSTART avtomaktabi?" bo'limi */
-export const AFZALLIKLAR = [
-  'Ishsiz yoshlar va xotin-qizlar uchun',
-  'Rasmiy guvohnoma va kafolat',
-  'Sifatli ta’lim va amaliyot',
-  'Ishonchli va xavfsiz ta’lim',
-];
+/** "«Autostart» avtomaktab haqida qisqacha" bo'limi */
+export const HAQIDA = {
+  sarlavha: '«Autostart» avtomaktab haqida qisqacha',
+  bandlar: [
+    'Autostart avtomaktab 2009-yilda Farg‘ona viloyati Quva tumanida tashkil etilgan.',
+    '18 yildan ortiq tajribaga ega ishonchli avtomaktab hisoblanadi.',
+    'Autostartda ko‘p yillik tajribaga ega ustozlar bo‘lajak haydovchilarga ta’lim berib kelishadi.',
+    'Avtomaktab o‘zining avtodromi, avtomashinalari va moddiy-texnik bazasiga ega.',
+    'Barcha filiallarimiz litsenziya talablari asosida faoliyat yuritadi.',
+  ],
+  talimSarlavha: 'Ta’lim',
+  talim: [
+    'Avtomaktabimizda zamonaviy metodlar asosida sifatli ta’lim beriladi.',
+    'Amaliy mashg‘ulotlar imtihon markazi bilan birma-bir standart talablar asosida jihozlangan, litsenziyali avtodromimizda olib boriladi.',
+    'Barcha toifalarda belgilangan nazariy va amaliy mashg‘ulotlarga 80% qatnashgan o‘quvchilarga imtihondan o‘tishlari kafolatlanadi.',
+    'Ayol-qizlarimiz uchun alohida ayol instruktorlar faoliyat yuritadi.',
+  ],
+  shior: 'Autostart — professionallardan o‘rganing!',
+};
 
-/** Uchta ma'lumot kartasi */
-export const KARTALAR = [
-  {
-    sarlavha: 'Shu toifalarga to‘g‘ri keladi',
-    matn: 'Shartnoma BHM × 8 barobari miqdorida.',
-    rang: 'k' as const,
-  },
-  {
-    sarlavha: 'To‘lov shartlari',
-    matn: 'Ushbu summa davlatimiz tomonidan to‘lab beriladi.',
-    rang: 's' as const,
-  },
-  {
-    sarlavha: 'Sizdan endi',
-    matn: 'B toifani 1 800 000 so‘mdan ko‘pi bilan 2 300 000 so‘m evaziga.',
-    rang: 'v' as const,
-  },
-];
+/** Futerning eng pastki qatori: tovar belgisi guvohnomasi */
+export const GUVOHNOMA = '«Autostart» © 2026. Tovar belgisi guvohnomasi № MGU 68484, 11.03.2026-yilda berilgan.';
 
 export const CTA = {
   yuqori: 'Kelajakdagi kasbingiz sari birinchi qadamni',

@@ -1,25 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Menu, Phone, Send, Mail, Check, MessageCircle,
-  Users, Wallet, CreditCard, Camera, Headset, PhoneCall, MapPin,
+  Camera, Headset, PhoneCall, MapPin, BadgePercent, GraduationCap,
 } from 'lucide-react';
-import { api, hasToken } from '../api';
+import { api, hasToken, mediaUrl, type Aksiya } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import {
-  TELEFONLAR, ALOQA_MARKAZI, telHavola, AFZALLIKLAR, KARTALAR,
+  TELEFONLAR, ALOQA_MARKAZI, telHavola, HAQIDA, GUVOHNOMA,
   FUTER_HAVOLALAR, FUTER_TAVSIF, IJTIMOIY,
 } from '../contact';
 import '../dashboard.css';
-
-const KARTA_IC = { k: Users, s: Wallet, v: CreditCard };
 
 export default function Contact() {
   const nav = useNavigate();
   const orqaga = useOrqaga();
   const [open, setOpen] = useState(false);
   const kirgan = hasToken();
+  // Aksiyalar — admin paneldan qo'shiladi (null — hali yuklanmoqda)
+  const [aksiyalar, setAksiyalar] = useState<Aksiya[] | null>(null);
+  useEffect(() => {
+    api.aksiyalar().then((r) => setAksiyalar(Array.isArray(r) ? r : [])).catch(() => setAksiyalar([]));
+  }, []);
 
   const [ism, setIsm] = useState('');
   const [tel, setTel] = useState('');
@@ -163,30 +166,41 @@ export default function Contact() {
             </form>
           </div>
 
-          {/* Nima uchun */}
+          {/* Avtomaktab haqida qisqacha */}
           <div className="ct-card ct-why">
-            <div className="ct-why-h">Nima uchun «AUTOSTART» avtomaktabi?</div>
-            <div className="ct-why-grid">
-              {AFZALLIKLAR.map((a) => (
+            <div className="ct-why-h">{HAQIDA.sarlavha}</div>
+            <div className="ct-haqida">
+              {HAQIDA.bandlar.map((a) => (
                 <div className="ct-why-i" key={a}><Check size={18} /> <span>{a}</span></div>
               ))}
             </div>
+            <div className="ct-haqida-h"><GraduationCap size={20} /> {HAQIDA.talimSarlavha}</div>
+            <div className="ct-haqida">
+              {HAQIDA.talim.map((a) => (
+                <div className="ct-why-i" key={a}><Check size={18} /> <span>{a}</span></div>
+              ))}
+            </div>
+            <div className="ct-shior">{HAQIDA.shior}</div>
           </div>
 
-          {/* Uchta karta */}
-          <div className="ct-info">
-            {KARTALAR.map((k) => {
-              const Ic = KARTA_IC[k.rang];
-              return (
-                <div className="ct-info-c" key={k.sarlavha}>
-                  <span className={'ct-info-ic ' + k.rang}><Ic size={24} /></span>
-                  <div>
-                    <b>{k.sarlavha}:</b>
-                    <span>{k.matn}</span>
+          {/* Aksiyalar — admin paneldan boshqariladi (/aksiyalar/boshqaruv) */}
+          <div className="ct-aksiya">
+            <div className="ct-h"><BadgePercent size={18} /> Aksiyalar</div>
+            {aksiyalar === null ? null : aksiyalar.length === 0 ? (
+              <div className="ct-aksiya-bosh">Hozircha aksiyalar yo‘q. Yangi aksiyalar shu yerda e’lon qilinadi.</div>
+            ) : (
+              <div className="ct-aksiya-grid">
+                {aksiyalar.map((a) => (
+                  <div className="ct-aksiya-c" key={a.id}>
+                    {a.rasm && <img src={mediaUrl(a.rasm)} alt="" loading="lazy" />}
+                    <div className="ct-aksiya-t">
+                      <b>{a.sarlavha}</b>
+                      {a.matn && a.matn.split('\n').map((x, i) => <p key={i}>{x}</p>)}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Futer */}
@@ -207,25 +221,10 @@ export default function Contact() {
                 ))}
               </div>
 
-              <div>
-                <div className="ct-f-h">Biz bilan bog‘laning</div>
-                <a className="ct-f-row" href={telHavola(ALOQA_MARKAZI.raqam)}
-                  onClick={(e) => telBos(e, ALOQA_MARKAZI.raqam)} title="Bosing: raqamdan nusxa olinadi">
-                  <PhoneCall size={14} />
-                  <span><b>{ALOQA_MARKAZI.raqam}</b> Yagona aloqa markazi</span>
-                </a>
-                {TELEFONLAR.map((t) => (
-                  <a key={t.raqam} className="ct-f-row" href={telHavola(t.raqam)}
-                    onClick={(e) => telBos(e, t.raqam)} title="Bosing: raqamdan nusxa olinadi">
-                    {t.whatsapp ? <MessageCircle size={14} /> : <Phone size={14} />}
-                    <span><b>{t.raqam}</b> {t.manzil}</span>
-                  </a>
-                ))}
-              </div>
             </div>
 
             <div className="ct-f-bottom">
-              <span>© {new Date().getFullYear()} AUTOSTART Avtomaktabi. Barcha huquqlar himoyalangan.</span>
+              <span>{GUVOHNOMA}</span>
               {(IJTIMOIY.telegram || IJTIMOIY.instagram) && (
                 <div className="ct-f-soc">
                   {IJTIMOIY.telegram && (

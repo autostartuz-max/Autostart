@@ -13,6 +13,7 @@ import { lessonFilePath, mobilFilePath, TOIFALAR, savolVideoYoli } from '../uplo
 import { mobilNusxaBormi } from '../video';
 import { xatoStatistikasi, qiyinSavolIdlari } from '../qiyinlik';
 import { BELGI_TANLOV, belgiJson, belgiTartibi } from '../belgilar';
+import { AKSIYA_TANLOV, AKSIYA_TARTIBI, aksiyaJson } from '../aksiyalar';
 
 // Telefon raqamni +998XXXXXXXXX ko'rinishiga keltiradi
 function normPhone(raw: any): string | null {
@@ -1086,6 +1087,28 @@ userRouter.get(
     res.setHeader('Content-Type', img.mime || 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=86400'); // manzilda ?v= bor — almashtirilsa manzil o'zgaradi
     // SVG ichidagi skript to'g'ridan-to'g'ri ochilganda ham ishlamasin
+    res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; img-src data:");
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(Buffer.from(img.data));
+  })
+);
+
+/* ---------- Aksiyalar (Aloqa sahifasi; kirmagan mehmon ham ko'radi) ---------- */
+userRouter.get(
+  '/aksiyalar',
+  ah(async (_req, res) => {
+    const rows = await prisma.aksiya.findMany({ where: { faol: true }, orderBy: AKSIYA_TARTIBI, select: AKSIYA_TANLOV });
+    res.json(rows.map(aksiyaJson));
+  })
+);
+
+userRouter.get(
+  '/aksiyalar/:id/rasm',
+  ah(async (req, res) => {
+    const img = await prisma.aksiyaRasm.findUnique({ where: { aksiyaId: Number(req.params.id) } });
+    if (!img) return res.status(404).json({ error: 'Rasm yoʻq' });
+    res.setHeader('Content-Type', img.mime || 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // manzilda ?v= bor — almashtirilsa manzil o'zgaradi
     res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; img-src data:");
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.send(Buffer.from(img.data));

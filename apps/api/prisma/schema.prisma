@@ -200,6 +200,28 @@ model RoadSignImage {
   mime   String   @default("image/png")
 }
 
+/// Aksiya — Aloqa sahifasidagi "Aksiyalar" bo'limi (sayt va ilova). Admin panelda qo'shiladi/yashiriladi.
+/// rasmUrl: admin yuklagan rasm ("/api/aksiyalar/:id/rasm?v=…") yoki null.
+model Aksiya {
+  id        Int         @id @default(autoincrement())
+  sarlavha  String
+  matn      String      @default("")
+  rasmUrl   String?
+  faol      Boolean     @default(true) // false — saytda/ilovada ko'rinmaydi (qoralama yoki tugagan)
+  tartib    Int         @default(0)    // kichigi yuqorida
+  rasm      AksiyaRasm?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model AksiyaRasm {
+  id       Int    @id @default(autoincrement())
+  aksiyaId Int    @unique
+  aksiya   Aksiya @relation(fields: [aksiyaId], references: [id], onDelete: Cascade)
+  data     Bytes
+  mime     String @default("image/png")
+}
+
 model AdminUser {
   id           Int    @id @default(autoincrement())
   login        String @unique

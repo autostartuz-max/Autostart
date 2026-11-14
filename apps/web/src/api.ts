@@ -397,6 +397,8 @@ export const api = {
   bookmarks: (): Promise<number[]> => req('/bookmarks'),
   toggleBookmark: (id: number) => req('/bookmarks/' + id, { method: 'POST' }),
   signs: () => req('/signs'),
+  /** Aloqa sahifasidagi aksiyalar (faqat faollari) */
+  aksiyalar: (): Promise<Aksiya[]> => req('/aksiyalar'),
   complaint: (questionId: number, reason: string) =>
     req('/complaints', { method: 'POST', body: JSON.stringify({ questionId, reason }) }),
   /** Amaliy mashg'ulotlar — faqat e'lon qilinganlari */
@@ -532,6 +534,10 @@ async function aupload(path: string, field: string, file: File, _retried = false
 }
 
 /** Yo'l belgisi (admin va ilova uchun bir xil ko'rinish) */
+/** Aksiya (Aloqa sahifasi). rasm — "/api/aksiyalar/:id/rasm?v=…" yoki null */
+export interface Aksiya { id: number; sarlavha: string; matn: string; rasm: string | null; faol: boolean; tartib: number; sana: string }
+export interface AksiyaMaydon { sarlavha: string; matn: string; faol: boolean; tartib: number }
+
 export interface AdminBelgi { id: number; toifa: number; raqam: string; nom: string; tavsif: string; rasm: string | null }
 export interface BelgiMaydon { toifa: number; raqam: string; nom: string; tavsif: string; toifaNomi?: string }
 
@@ -578,6 +584,13 @@ export const adminApi = {
   deleteSign: (id: number) => areq('/admin/signs/' + id, { method: 'DELETE' }),
   uploadSignImage: (id: number, file: File): Promise<AdminBelgi> => aupload('/admin/signs/' + id + '/image', 'image', file),
   deleteSignImage: (id: number): Promise<AdminBelgi> => areq('/admin/signs/' + id + '/image', { method: 'DELETE' }),
+  /** Aksiyalar (Aloqa sahifasi) — hammasi, yashirinlari ham */
+  aksiyalar: (): Promise<Aksiya[]> => areq('/admin/aksiyalar'),
+  createAksiya: (data: AksiyaMaydon): Promise<Aksiya> => areq('/admin/aksiyalar', { method: 'POST', body: JSON.stringify(data) }),
+  updateAksiya: (id: number, data: AksiyaMaydon): Promise<Aksiya> => areq('/admin/aksiyalar/' + id, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAksiya: (id: number) => areq('/admin/aksiyalar/' + id, { method: 'DELETE' }),
+  uploadAksiyaRasm: (id: number, file: File): Promise<Aksiya> => aupload('/admin/aksiyalar/' + id + '/rasm', 'image', file),
+  deleteAksiyaRasm: (id: number): Promise<Aksiya> => areq('/admin/aksiyalar/' + id + '/rasm', { method: 'DELETE' }),
   recolorImage: async (
     file: File,
     pairs: { object: string; color: string }[]

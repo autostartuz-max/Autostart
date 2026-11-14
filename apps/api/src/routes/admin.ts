@@ -15,6 +15,7 @@ import { mobilNusxaNavbatga } from '../video';
 import { xatoStatistikasi } from '../qiyinlik';
 import { BALL, ballQosh } from '../ball';
 import { BELGI_TANLOV, TOIFA_SONI, belgiJson, belgiTartibi } from '../belgilar';
+import { AKSIYA_TANLOV, AKSIYA_TARTIBI, aksiyaJson } from '../aksiyalar';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
@@ -1073,6 +1074,91 @@ adminRouter.delete(
     await prisma.roadSignImage.deleteMany({ where: { signId: id } });
     const r = await prisma.roadSign.update({ where: { id }, data: { imageUrl: null }, select: BELGI_TANLOV });
     res.json(belgiJson(r));
+  })
+);
+
+/* ---------- Aksiyalar (Aloqa sahifasidagi bo'lim; Owner va Admin) ---------- */
+function aksiyaMaydonlari(b: any): { data?: { sarlavha: string; matn: string; faol: boolean; tartib: number }; xato?: string } {
+  const sarlavha = String(b?.sarlavha ?? '').trim();
+  const matn = String(b?.matn ?? '').trim();
+  if (!sarlavha) return { xato: 'Aksiya sarlavhasini kiriting' };
+  if (sarlavha.length > 150) return { xato: 'Sarlavha juda uzun (150 belgigacha)' };
+  if (matn.length > 3000) return { xato: 'Matn juda uzun (3000 belgigacha)' };
+  const tartib = Math.trunc(Number(b?.tartib) || 0);
+  return { data: { sarlavha, matn, faol: b?.faol !== false, tartib } };
+}
+
+adminRouter.get(
+  '/aksiyalar',
+  ah(async (_req, res) => {
+    const rows = await prisma.aksiya.findMany({ orderBy: AKSIYA_TARTIBI, select: AKSIYA_TANLOV });
+    res.json(rows.map(aksiyaJson));
+  })
+);
+
+adminRouter.post(
+  '/aksiyalar',
+  ah(async (req, res) => {
+    const { data, xato } = aksiyaMaydonlari(req.body);
+    if (!data) return res.status(400).json({ error: xato });
+    const r = await prisma.aksiya.create({ data, select: AKSIYA_TANLOV });
+    res.json(aksiyaJson(r));
+  })
+);
+
+adminRouter.put(
+  '/aksiyalar/:id',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const { data, xato } = aksiyaMaydonlari(req.body);
+    if (!data) return res.status(400).json({ error: xato });
+    const bor = await prisma.aksiya.findUnique({ where: { id }, select: { id: true } });
+    if (!bor) return res.status(404).json({ error: 'Aksiya topilmadi' });
+    const r = await prisma.aksiya.update({ where: { id }, data, select: AKSIYA_TANLOV });
+    res.json(aksiyaJson(r));
+  })
+);
+
+adminRouter.delete(
+  '/aksiyalar/:id',
+  ah(async (req, res) => {
+    await prisma.aksiya.deleteMany({ where: { id: Number(req.params.id) } }); // rasmi ham (Cascade)
+    res.json({ ok: true });
+  })
+);
+
+/* Aksiya rasmi: PNG/JPG/SVG/WEBP/GIF, 5 MB gacha — bazaga yoziladi, /api/aksiyalar/:id/rasm orqali beriladi */
+adminRouter.post(
+  '/aksiyalar/:id/rasm',
+  upload.single('image'),
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    if (!req.file) return res.status(400).json({ error: 'Fayl yuklanmadi' });
+    if (!/^image\/(png|jpe?g|svg\+xml|webp|gif)$/.test(req.file.mimetype || '')) return res.status(400).json({ error: 'Faqat rasm (PNG, JPG, SVG, WEBP)' });
+    if (req.file.size > 5 * 1024 * 1024) return res.status(400).json({ error: 'Rasm 5 MB dan katta' });
+    if (!haqiqiyRasm(req.file.buffer, req.file.mimetype)) return res.status(400).json({ error: 'Fayl rasm emas yoki buzilgan' });
+    const bor = await prisma.aksiya.findUnique({ where: { id }, select: { id: true } });
+    if (!bor) return res.status(404).json({ error: 'Aksiya topilmadi' });
+    const data = new Uint8Array(req.file.buffer);
+    await prisma.aksiyaRasm.upsert({
+      where: { aksiyaId: id },
+      update: { data, mime: req.file.mimetype },
+      create: { aksiyaId: id, data, mime: req.file.mimetype },
+    });
+    const r = await prisma.aksiya.update({ where: { id }, data: { rasmUrl: `/api/aksiyalar/${id}/rasm?v=${Date.now()}` }, select: AKSIYA_TANLOV });
+    res.json(aksiyaJson(r));
+  })
+);
+
+adminRouter.delete(
+  '/aksiyalar/:id/rasm',
+  ah(async (req, res) => {
+    const id = Number(req.params.id);
+    const bor = await prisma.aksiya.findUnique({ where: { id }, select: { id: true } });
+    if (!bor) return res.status(404).json({ error: 'Aksiya topilmadi' });
+    await prisma.aksiyaRasm.deleteMany({ where: { aksiyaId: id } });
+    const r = await prisma.aksiya.update({ where: { id }, data: { rasmUrl: null }, select: AKSIYA_TANLOV });
+    res.json(aksiyaJson(r));
   })
 );
 

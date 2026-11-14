@@ -736,7 +736,7 @@
 /* --- Chaqiruv banneri --- */
 /* --- Futer --- */
 .ct-footer { margin-top: 34px; border-top: 1px solid var(--db-border); padding-top: 30px; }
-.ct-f-grid { display: grid; grid-template-columns: 1.4fr 1fr 1.5fr; gap: 44px; }
+.ct-f-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 44px; }
 .ct-f-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .ct-f-logo img { height: 42px; width: auto; }
 .ct-f-logo span { display: grid; grid-template-columns: auto auto; align-items: baseline;
@@ -1141,3 +1141,32 @@
 .ct-markaz { border-color: rgba(255, 184, 0, .45); }
 .ct-markaz .ct-tel-ic { color: #ffb800; }
 .ct-h-filial { margin-top: 16px; }
+
+/* Aloqa: "haqida qisqacha" (bir ustunli ro'yxat), Ta'lim sarlavhasi, shior */
+.ct-haqida { display: flex; flex-direction: column; gap: 14px; }
+.ct-haqida .ct-why-i { align-items: flex-start; line-height: 1.6; font-size: 15.5px; }
+.ct-haqida .ct-why-i > svg { margin-top: 1px; }
+.ct-haqida-h { display: flex; align-items: center; gap: 10px; margin: 26px 0 16px; font-size: 17px; font-weight: 800; color: var(--db-text); }
+.ct-haqida-h > svg { color: #ffb800; }
+.ct-shior { margin-top: 24px; text-align: center; font-size: 19px; font-weight: 800; color: #ffb800; }
+
+/* Aloqa: Aksiyalar */
+.ct-aksiya { background: var(--db-card); border: 1px solid var(--db-border); border-radius: 20px; padding: 28px 30px; margin-bottom: 22px; }
+.ct-aksiya-bosh { color: var(--db-muted); font-size: 15px; line-height: 1.6; }
+.ct-aksiya-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+.ct-aksiya-c { background: var(--db-card2); border: 1px solid var(--db-border); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+.ct-aksiya-c img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000; }
+.ct-aksiya-t { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; }
+.ct-aksiya-t b { color: #ffb800; font-size: 16px; font-weight: 800; }
+.ct-aksiya-t p { margin: 0; color: var(--db-text); font-size: 14.5px; line-height: 1.6; }
+@media (max-width: 640px) { .ct-aksiya { padding: 22px 18px; } }
+
+/* Admin: aksiyalar */
+.ak-row.yashirin { opacity: .62; border-style: dashed; }
+.ak-thumb { width: 96px; height: 54px; flex-shrink: 0; border-radius: 9px; object-fit: cover; background: #000; border: 1px solid var(--db-border); }
+.ak-thumb-yoq { display: inline-flex; align-items: center; justify-content: center; background: var(--db-card2); color: #ffb800; }
+.ak-rasm-joy img, .ak-rasm-joy .ab-rasm-yoq { height: auto; aspect-ratio: 16 / 9; }
+.ak-rasm-joy img { object-fit: cover; padding: 0; background: #000; }
+.ak-rasm-joy { width: 260px; }
+.ak-rasm-joy img, .ak-rasm-joy .ab-rasm-yoq { width: 260px; }
+@media (max-width: 720px) { .ak-rasm-joy, .ak-rasm-joy img, .ak-rasm-joy .ab-rasm-yoq { width: 100%; } }

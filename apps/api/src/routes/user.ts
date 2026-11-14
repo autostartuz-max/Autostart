@@ -316,22 +316,12 @@ userRouter.get(
     const jw: any = { userId };
     const total = await prisma.userAnswer.count({ where: jw });
     const correct = await prisma.userAnswer.count({ where: { ...jw, isCorrect: true } });
-    const solvedQuestions = await prisma.userAnswer.findMany({
-      where: jw,
-      distinct: ['questionId'],
-      select: { questionId: true },
-    });
-    // Menyudagi nishon "Xato qilgan savollarim" sahifasidagi son bilan bir xil
-    // bo'lishi uchun: har savolning OXIRGI javobi xato bo'lganlar soni.
+    // Har savolning OXIRGI javobi: yechilgan savollar soni va menyudagi nishon ("Xato qilgan
+    // savollarim" sahifasidagi son bilan bir xil — oxirgi javobi xato bo'lganlar).
     // (stats.wrong esa umuman xato javoblar soni — qayta urinishlar bilan.)
-    const barchaJavoblar = await prisma.userAnswer.findMany({
-      where: jw,
-      orderBy: { answeredAt: 'desc' },
-      select: { questionId: true, isCorrect: true },
-    });
-    const oxirgiJavob = new Map<number, boolean>();
-    for (const a of barchaJavoblar) if (!oxirgiJavob.has(a.questionId)) oxirgiJavob.set(a.questionId, a.isCorrect);
-    const mistakes = [...oxirgiJavob.values()].filter((ok) => !ok).length;
+    const oxirgiJavob = await oxirgiJavoblar(userId);
+    const solvedQuestions = oxirgiJavob;
+    const mistakes = oxirgiJavob.filter((a) => !a.isCorrect).length;
 
     const bookmarks = await prisma.bookmark.count({ where: { userId } });
     const totalQuestions = await prisma.question.count({ where: { status: 'published' } });
@@ -652,26 +642,27 @@ async function getPractice(userId: number) {
     include: questionInclude,
     orderBy: { id: 'asc' },
   });
-  const answers = await prisma.userAnswer.findMany({
-    where: { userId },
-    orderBy: { answeredAt: 'desc' },
-    select: { questionId: true, isCorrect: true },
-  });
-  const latest = new Map<number, boolean>();
-  for (const a of answers) if (!latest.has(a.questionId)) latest.set(a.questionId, a.isCorrect);
+  const latest = new Map((await oxirgiJavoblar(userId)).map((a) => [a.questionId, a.isCorrect]));
   return all.filter((q) => latest.get(q.id) !== true);
+}
+
+/**
+ * Foydalanuvchining har savolga OXIRGI javobi — baza tanlaydi (DISTINCT ON, indeks
+ * [userId, questionId, answeredAt]). Avval barcha javoblari (faol talabada 40 mingdan ortiq)
+ * xotiraga yuklanib, JS da saralanardi — ko'p kishi kirganda server qotardi.
+ * Natija: savol id bo'yicha tartiblangan, ko'pi bilan savollar soncha qator.
+ */
+async function oxirgiJavoblar(userId: number) {
+  return prisma.$queryRaw<{ questionId: number; isCorrect: boolean; chosen: string; answeredAt: Date }[]>`
+    SELECT DISTINCT ON ("questionId") "questionId", "isCorrect", chosen, "answeredAt"
+    FROM "UserAnswer"
+    WHERE "userId" = ${userId}
+    ORDER BY "questionId", "answeredAt" DESC, id DESC`;
 }
 
 /** Xatolar — sayt va ilovada bir xil (barcha javoblar bo'yicha) */
 async function getMistakes(userId: number) {
-  const answers = await prisma.userAnswer.findMany({
-    where: { userId },
-    orderBy: { answeredAt: 'desc' },
-    select: { questionId: true, isCorrect: true, chosen: true },
-  });
-  const latest = new Map<number, { ok: boolean; chosen: string }>();
-  for (const a of answers)
-    if (!latest.has(a.questionId)) latest.set(a.questionId, { ok: a.isCorrect, chosen: a.chosen });
+  const latest = new Map((await oxirgiJavoblar(userId)).map((a) => [a.questionId, { ok: a.isCorrect, chosen: a.chosen }]));
   const wrong = [...latest.entries()].filter(([, v]) => !v.ok);
   if (!wrong.length) return [];
   const wrongIds = wrong.map(([qid]) => qid);
@@ -707,15 +698,9 @@ userRouter.get(
   requireUser,
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
-    const answers = await prisma.userAnswer.findMany({
-      where: { userId },
-      orderBy: { answeredAt: 'desc' },
-      select: { questionId: true, isCorrect: true, chosen: true, answeredAt: true },
-    });
-    const oxirgi = new Map<number, { ok: boolean; chosen: string; at: Date }>();
-    for (const a of answers) {
-      if (!oxirgi.has(a.questionId)) oxirgi.set(a.questionId, { ok: a.isCorrect, chosen: a.chosen, at: a.answeredAt });
-    }
+    const oxirgi = new Map(
+      (await oxirgiJavoblar(userId)).map((a) => [a.questionId, { ok: a.isCorrect, chosen: a.chosen, at: a.answeredAt }]),
+    );
     if (!oxirgi.size) return res.json([]);
 
     const questions = await prisma.question.findMany({
@@ -804,15 +789,10 @@ userRouter.get(
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
     // Sayt va ilovada bir xil — barcha javoblar (?manba=ilova e'tiborsiz)
-    const answers = await prisma.userAnswer.findMany({
-      where: { userId },
-      orderBy: { answeredAt: 'desc' },
-      select: { questionId: true, isCorrect: true, chosen: true },
-    });
+    const answers = (await oxirgiJavoblar(userId)).sort((a, b) => +b.answeredAt - +a.answeredAt);
 
     const oxirgi = new Map<number, { chosen: number[]; isCorrect: boolean }>();
     for (const a of answers) {
-      if (oxirgi.has(a.questionId)) continue;
       let chosen: number[] = [];
       try {
         chosen = JSON.parse(a.chosen || '[]');
@@ -844,13 +824,7 @@ userRouter.get(
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
     // Sayt va ilovada bir xil — barcha javoblar (?manba=ilova e'tiborsiz)
-    const answers = await prisma.userAnswer.findMany({
-      where: { userId },
-      orderBy: { answeredAt: 'desc' },
-      select: { questionId: true, isCorrect: true },
-    });
-    const oxirgi = new Map<number, boolean>();
-    for (const a of answers) if (!oxirgi.has(a.questionId)) oxirgi.set(a.questionId, a.isCorrect);
+    const oxirgi = new Map((await oxirgiJavoblar(userId)).map((a) => [a.questionId, a.isCorrect]));
 
     const savollar = await prisma.question.findMany({
       where: { status: 'published', shablon: { not: null } },

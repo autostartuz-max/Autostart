@@ -62,6 +62,15 @@ const questionInclude = {
   category: true,
 };
 
+/**
+ * Nashr qilingan barcha savollar (variant, mavzu, bilet, toifa bilan) — test so'rovlarining asosi.
+ * Har so'rovda bazadan qayta yuklanardi (1260 savol, ~5000 variant); endi xotirada, 5 daqiqa.
+ * Admin biror narsani o'zgartirsa darhol tozalanadi (admin.ts). Qaytgan obyektlarni O'ZGARTIRMANG.
+ */
+export const nashrSavollari = keshla(5 * 60_000, () =>
+  prisma.question.findMany({ where: { status: 'published' }, include: questionInclude, orderBy: { id: 'asc' } }),
+);
+
 function sameSet(a: number[], b: number[]) {
   if (a.length !== b.length) return false;
   const s = new Set(a);
@@ -560,13 +569,21 @@ userRouter.get(
     // Shablonga biriktirilmagan savollar oxirida. Parametr berilmasa tartib
     // avvalgidek — sayt o'zgarmaydi.
     const shablonTartibi = mode === 'all' && req.query.tartib === 'shablon';
-    let questions = await prisma.question.findMany({
-      where: base,
-      include: questionInclude,
-      orderBy: shablonTartibi
-        ? [{ shablon: { sort: 'asc', nulls: 'last' } }, { order: 'asc' }, { id: 'asc' }]
-        : [{ order: 'asc' }, { id: 'asc' }],
-    });
+    // Filtr va tartib xotirada — avvalgi baza so'rovi (where: base, orderBy) bilan aynan bir xil
+    const raqamliId: Set<number> | null = base.id?.in ? new Set(base.id.in as number[]) : null;
+    let questions = (await nashrSavollari())
+      .filter((q) =>
+        (!topicId || q.topicId === topicId) &&
+        (!ticketId || q.ticketId === ticketId) &&
+        (!shablon || q.shablon === shablon) &&
+        (!raqamliId || raqamliId.has(q.id)) &&
+        (base.isNumeric !== true || q.isNumeric === true))
+      .sort((a, b) =>
+        (shablonTartibi
+          ? (a.shablon == null ? 1 : 0) - (b.shablon == null ? 1 : 0) || (a.shablon ?? 0) - (b.shablon ?? 0)
+          : 0) ||
+        a.order - b.order ||
+        a.id - b.id);
 
     // XAVFSIZLIK (ko'chirishga qarshi): bitta so'rovda butun savol banki
     // qaytarilmaydi. Avval mode=all HAMMA 1238 savolni javoblari bilan berardi —
@@ -637,11 +654,7 @@ userRouter.post(
 
 // To'g'ri yechilmagan (xato yoki umuman javob berilmagan) savollar
 async function getPractice(userId: number) {
-  const all = await prisma.question.findMany({
-    where: { status: 'published' },
-    include: questionInclude,
-    orderBy: { id: 'asc' },
-  });
+  const all = await nashrSavollari();
   const latest = new Map((await oxirgiJavoblar(userId)).map((a) => [a.questionId, a.isCorrect]));
   return all.filter((q) => latest.get(q.id) !== true);
 }
@@ -959,6 +972,7 @@ const reytingKesh = keshla(60_000, () => reytingniHisobla(200));
 export function keshlarniIsit() {
   reytingKesh.isit();
   xatoUlushlari.isit();
+  nashrSavollari.isit();
 }
 async function getRating(limit = 100) {
   return (await reytingKesh()).slice(0, limit);

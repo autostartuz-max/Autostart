@@ -9,12 +9,15 @@ export function keshla<T>(ms: number, hisobla: () => Promise<T>) {
   let qiymat: T | undefined;
   let vaqt = 0;
   let jarayon: Promise<T> | null = null;
+  let avlod = 0; // tozala() oshiradi — tozalashdan oldin boshlangan hisob eski natijani yozib qo'ymasin
 
-  const yangila = () => {
+  const yangila = (): Promise<T> => {
     if (!jarayon) {
-      jarayon = hisobla()
-        .then((v) => { qiymat = v; vaqt = Date.now(); return v; })
-        .finally(() => { jarayon = null; });
+      const bu = avlod;
+      const p: Promise<T> = hisobla()
+        .then((v) => { if (bu === avlod) { qiymat = v; vaqt = Date.now(); } return v; })
+        .finally(() => { if (jarayon === p) jarayon = null; });
+      jarayon = p;
     }
     return jarayon;
   };
@@ -24,6 +27,8 @@ export function keshla<T>(ms: number, hisobla: () => Promise<T>) {
     if (Date.now() - vaqt >= ms) yangila().catch((e) => console.error('[kesh]', e?.message || e)); // fonda
     return Promise.resolve(qiymat);
   };
+  /** Ma'lumot o'zgardi (masalan admin savolni tahrirladi) — keyingi so'rov yangisini hisoblaydi */
+  ol.tozala = () => { avlod++; qiymat = undefined; vaqt = 0; jarayon = null; };
   /** Server ishga tushganda keshni oldindan to'ldirish (xato bo'lsa — jim) */
   ol.isit = () => { yangila().catch((e) => console.error('[kesh]', e?.message || e)); };
   return ol;

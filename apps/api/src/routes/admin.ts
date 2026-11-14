@@ -16,6 +16,7 @@ import { xatoStatistikasi } from '../qiyinlik';
 import { BALL, ballQosh } from '../ball';
 import { BELGI_TANLOV, TOIFA_SONI, belgiJson, belgiTartibi } from '../belgilar';
 import { AKSIYA_TANLOV, AKSIYA_TARTIBI, aksiyaJson } from '../aksiyalar';
+import { nashrSavollari } from './user';
 import { GEMINI_API_KEY, GEMINI_IMAGE_MODEL, GROQ_API_KEY, GROQ_VISION_MODEL, OPENAI_API_KEY, OPENAI_VISION_MODEL } from '../env';
 
 export const adminRouter = Router();
@@ -61,6 +62,13 @@ adminRouter.post(
 );
 
 adminRouter.use(requireAdmin);
+
+// Admin biror narsani o'zgartirsa (savol, variant, mavzu, rasm, import…) — foydalanuvchilarga
+// beriladigan savollar keshi darhol yangilansin (user.ts → nashrSavollari)
+adminRouter.use((req, res, next) => {
+  if (req.method !== 'GET') res.on('finish', () => nashrSavollari.tozala());
+  next();
+});
 
 /* ---------- Tahlil: eng ko'p xato qilinadigan savollar ---------- */
 /**

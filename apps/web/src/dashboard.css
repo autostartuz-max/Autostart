@@ -1178,3 +1178,6 @@
 .am-thumb-btn { position: relative; padding: 0; border: none; cursor: pointer; overflow: hidden; display: block; }
 .am-thumb-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .am-thumb-btn .am-play { width: 46px; height: 46px; }
+
+/* Tahlil: kartalar bo'lib chiziladi — ro'yxat oxirida keyingilari */
+.th-yana { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 18px 0 8px; color: var(--db-muted); font-size: 13px; }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, ChevronLeft, TrendingUp, Pencil, Check, X, BookOpen, ChevronRight } from 'lucide-react';
 import {
@@ -15,6 +15,9 @@ const MIN_FILTR: [number, string][] = [[1, 'Hammasi'], [3, '3+ talaba'], [5, '5+
 // Xato foizi bo'yicha filtr: "kamida shuncha % talaba xato qilgan" savollar.
 // Aniq qiymat kerak bo'lsa yonidagi maydonga istalgan son yoziladi.
 const FOIZ_FILTR: [number, string][] = [[0, 'Hammasi'], [25, '25%+'], [50, '50%+'], [75, '75%+'], [100, '100%']];
+
+// Kartalar bo'lib chiziladi: 1000 tasi birdan chizilsa telefonda ~5 s ketardi (27 ming element)
+const QADAM = 50;
 
 // Xato foiziga qarab rang: qizil (og'ir) → sariq → yashil
 const daraja = (r: number) => (r >= 60 ? 'yuqori' : r >= 30 ? 'orta' : 'past');
@@ -60,7 +63,24 @@ export default function AdminAnalytics() {
 
   // Filtr brauzerda qo'llanadi — server xatosi bor barcha savollarni qaytaradi,
   // shuning uchun chegarani surganda qayta so'rov ketmaydi.
-  const korinadigan = list.filter((q) => q.rate >= foiz && (!mavzuFiltr || (q.topic || 'Mavzusiz savollar') === mavzuFiltr));
+  const korinadigan = useMemo(
+    () => list.filter((q) => q.rate >= foiz && (!mavzuFiltr || (q.topic || 'Mavzusiz savollar') === mavzuFiltr)),
+    [list, foiz, mavzuFiltr],
+  );
+
+  // Avval QADAM ta karta; pastga yetganda (yoki tugma bosilsa) yana QADAM ta qo'shiladi.
+  // Filtr o'zgarsa — yana boshidan.
+  const [korsat, setKorsat] = useState(QADAM);
+  useEffect(() => setKorsat(QADAM), [min, foiz, mavzuFiltr, bolim]);
+  const pastRef = useRef<HTMLDivElement>(null);
+  const qolgan = korinadigan.length - korsat;
+  useEffect(() => {
+    const el = pastRef.current;
+    if (!el || qolgan <= 0 || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver((e) => { if (e[0]?.isIntersecting) setKorsat((k) => k + QADAM); }, { rootMargin: '800px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [qolgan]);
 
   return (
     <div className="db">
@@ -191,7 +211,7 @@ export default function AdminAnalytics() {
               )}
 
               <div className="xt-list">
-                {korinadigan.map((q, i) => (
+                {korinadigan.slice(0, korsat).map((q, i) => (
                   <div className="xt-card th-card" key={q.id}>
                     <div className="th-head">
                       <span className={'th-rate ' + daraja(q.rate)}>{q.rate}%</span>
@@ -230,6 +250,14 @@ export default function AdminAnalytics() {
                   </div>
                 ))}
               </div>
+              {qolgan > 0 && (
+                <div className="th-yana" ref={pastRef}>
+                  <span>Ko‘rsatilgan: {korsat} / {korinadigan.length}</span>
+                  <button type="button" className="adm-btn sec" onClick={() => setKorsat((k) => k + QADAM)}>
+                    Yana {Math.min(QADAM, qolgan)} ta ko‘rsatish
+                  </button>
+                </div>
+              )}
               </>
               )}
             </>

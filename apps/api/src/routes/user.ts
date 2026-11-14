@@ -323,26 +323,25 @@ userRouter.get(
     if (!user) return res.status(401).json({ error: 'Hisob topilmadi. Qaytadan kiring yoki ro‘yxatdan o‘ting.' });
     // Sayt va ilova statistikasi BIR XIL — barcha javoblar (2026-11-11). Eski ilovalar yuborgan ?manba=ilova e'tiborsiz.
     const jw: any = { userId };
-    const total = await prisma.userAnswer.count({ where: jw });
-    const correct = await prisma.userAnswer.count({ where: { ...jw, isCorrect: true } });
-    // Har savolning OXIRGI javobi: yechilgan savollar soni va menyudagi nishon ("Xato qilgan
-    // savollarim" sahifasidagi son bilan bir xil — oxirgi javobi xato bo'lganlar).
-    // (stats.wrong esa umuman xato javoblar soni — qayta urinishlar bilan.)
-    const oxirgiJavob = await oxirgiJavoblar(userId);
+    // So'rovlar bir vaqtda (avval ketma-ket 7 ta edi). Har savolning OXIRGI javobi: yechilgan
+    // savollar soni va menyudagi nishon ("Xato qilgan savollarim" sahifasidagi son bilan bir xil —
+    // oxirgi javobi xato bo'lganlar). (stats.wrong esa umuman xato javoblar soni — qayta urinishlar bilan.)
+    // Ketma-ketlik (streak): har kuni kamida bitta javob berilgan kunlar — oxirgi 2000 javobdan.
+    const [total, correct, oxirgiJavob, bookmarks, totalQuestions, kunlar] = await Promise.all([
+      prisma.userAnswer.count({ where: jw }),
+      prisma.userAnswer.count({ where: { ...jw, isCorrect: true } }),
+      oxirgiJavoblar(userId),
+      prisma.bookmark.count({ where: { userId } }),
+      nashrSavollari().then((s) => s.length), // nashr qilingan savollar soni — keshdan
+      prisma.userAnswer.findMany({
+        where: jw,
+        select: { answeredAt: true },
+        orderBy: { answeredAt: 'desc' },
+        take: 2000,
+      }),
+    ]);
     const solvedQuestions = oxirgiJavob;
     const mistakes = oxirgiJavob.filter((a) => !a.isCorrect).length;
-
-    const bookmarks = await prisma.bookmark.count({ where: { userId } });
-    const totalQuestions = await prisma.question.count({ where: { status: 'published' } });
-
-    // Ketma-ketlik: bugundan (yoki kechadan) orqaga qarab, har kuni kamida bitta
-    // javob berilgan kunlar soni. Avval bu raqam kodda "15 kun" deb qotirilgandi.
-    const kunlar = await prisma.userAnswer.findMany({
-      where: jw,
-      select: { answeredAt: true },
-      orderBy: { answeredAt: 'desc' },
-      take: 2000,
-    });
     const kunSet = new Set(kunlar.map((k) => kunKaliti(k.answeredAt)));
     let streak = 0;
     const d = new Date();

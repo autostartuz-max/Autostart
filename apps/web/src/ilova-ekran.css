@@ -160,3 +160,8 @@
 
 @keyframes ie-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes ie-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Oyna (til tanlash) ochiq — orqadagi ro'yxat qimirlamasin: ekran qulflanadi, oyna o'zida aylanadi */
+.ie.ie-qulf { overflow: hidden; }
+.ie .cfg-overlay { overflow-y: auto; overscroll-behavior: contain; align-items: flex-start; }
+.ie .cfg-overlay > * { margin: auto; }

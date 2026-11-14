@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Menu, Phone, Send, Mail, Check, MessageCircle,
-  Users, Wallet, CreditCard, Camera,
+  Users, Wallet, CreditCard, Camera, Headset, PhoneCall, MapPin,
 } from 'lucide-react';
 import { api, hasToken } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import {
-  TELEFONLAR, AFZALLIKLAR, KARTALAR,
+  TELEFONLAR, ALOQA_MARKAZI, telHavola, AFZALLIKLAR, KARTALAR,
   FUTER_HAVOLALAR, FUTER_TAVSIF, IJTIMOIY,
 } from '../contact';
 import '../dashboard.css';
@@ -99,10 +99,22 @@ export default function Contact() {
           <div className="ct-panel">
             {/* Chap: aloqa ma'lumotlari */}
             <div className="ct-col ct-col-l">
-              <div className="ct-h"><Phone size={18} /> To‘liq ma’lumot</div>
+              {/* Yagona aloqa markazi (call markaz) — eng tepada */}
+              <div className="ct-h"><Headset size={18} /> Yagona aloqa markazi</div>
+              <a className="ct-tel ct-markaz" href={telHavola(ALOQA_MARKAZI.raqam)}
+                onClick={(e) => telBos(e, ALOQA_MARKAZI.raqam)} title="Bosing: raqamdan nusxa olinadi">
+                <span className="ct-tel-ic"><PhoneCall size={22} /></span>
+                <span className="ct-tel-t">
+                  <b>{ALOQA_MARKAZI.raqam}</b>{' '}
+                  <span className={nusxa === ALOQA_MARKAZI.raqam ? 'ct-nusxa' : ''}>
+                    {nusxa === ALOQA_MARKAZI.raqam ? 'Nusxa olindi' : ALOQA_MARKAZI.nom}
+                  </span>
+                </span>
+              </a>
 
+              <div className="ct-h ct-h-filial"><MapPin size={18} /> Bizning filiallarimiz</div>
               {TELEFONLAR.map((t) => (
-                <a className="ct-tel" key={t.raqam} href={'tel:' + t.raqam.replace(/[^\d+]/g, '')}
+                <a className="ct-tel" key={t.raqam} href={telHavola(t.raqam)}
                   onClick={(e) => telBos(e, t.raqam)} title="Bosing: raqamdan nusxa olinadi">
                   <span className={'ct-tel-ic' + (t.whatsapp ? ' wa' : '')}>
                     {t.whatsapp ? <MessageCircle size={22} /> : <Phone size={22} />}
@@ -197,8 +209,13 @@ export default function Contact() {
 
               <div>
                 <div className="ct-f-h">Biz bilan bog‘laning</div>
+                <a className="ct-f-row" href={telHavola(ALOQA_MARKAZI.raqam)}
+                  onClick={(e) => telBos(e, ALOQA_MARKAZI.raqam)} title="Bosing: raqamdan nusxa olinadi">
+                  <PhoneCall size={14} />
+                  <span><b>{ALOQA_MARKAZI.raqam}</b> Yagona aloqa markazi</span>
+                </a>
                 {TELEFONLAR.map((t) => (
-                  <a key={t.raqam} className="ct-f-row" href={'tel:' + t.raqam.replace(/[^\d+]/g, '')}
+                  <a key={t.raqam} className="ct-f-row" href={telHavola(t.raqam)}
                     onClick={(e) => telBos(e, t.raqam)} title="Bosing: raqamdan nusxa olinadi">
                     {t.whatsapp ? <MessageCircle size={14} /> : <Phone size={14} />}
                     <span><b>{t.raqam}</b> {t.manzil}</span>

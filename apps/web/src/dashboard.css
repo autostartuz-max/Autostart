@@ -1136,3 +1136,8 @@
 .adm-shab-yangi { border-style: dashed; border-color: rgba(0, 230, 118, .45); }
 .adm-shab-yangi .adm-shab-count { border-color: #00e676; color: #00e676; }
 .adm-shab-yangi .adm-shab-info { color: #00e676; }
+
+/* Aloqa: yagona aloqa markazi (call markaz) — ajralib tursin; filiallar sarlavhasi pastroqda */
+.ct-markaz { border-color: rgba(255, 184, 0, .45); }
+.ct-markaz .ct-tel-ic { color: #ffb800; }
+.ct-h-filial { margin-top: 16px; }

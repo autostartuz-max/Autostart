@@ -115,7 +115,7 @@ export default function ShablonIlova() {
   };
 
   return (
-    <div className="ie">
+    <div className={'ie' + (selected != null ? ' ie-qulf' : '')}>
       <div className="ie-head">
         <div className="ie-top">
           <button className="ie-back" onClick={orqaga} aria-label="Orqaga"><ChevronLeft size={22} /></button>

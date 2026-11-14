@@ -11,12 +11,21 @@ export interface Telefon {
   whatsapp?: boolean;
 }
 
+/** Yagona aloqa markazi (call markaz) — sahifada eng tepada, filiallardan alohida */
+export const ALOQA_MARKAZI = { nom: 'Call markaz', raqam: '78 555 07 17' };
+
+/** Bizning filiallarimiz (har biri o'z telefoni bilan) */
 export const TELEFONLAR: Telefon[] = [
   { raqam: '94 039 11 11', manzil: 'Quva shahar sobiq avtobaza' },
-  { raqam: '91 108 86 68', manzil: 'Quva shahar sobiq avtobaza' },
-  { raqam: '(33) 051-58-58', manzil: 'Farg‘ona shahar O‘lkashunoslik muzeyi', whatsapp: true },
+  { raqam: '(33) 051-58-58', manzil: 'Farg‘ona shahar O‘lkashunoslik muzeyi' },
   { raqam: '(95) 838-07-17', manzil: 'Toshloq tumani pochta binosi 2-qavat' },
 ];
+
+/** tel: havolasi — 9 xonali O'zbekiston raqamiga +998 qo'shiladi (har qanday telefondan qo'ng'iroq bo'lsin) */
+export function telHavola(raqam: string): string {
+  const r = raqam.replace(/\D/g, '');
+  return 'tel:' + (r.length === 9 ? '+998' + r : r);
+}
 
 /** "Nima uchun AUTOSTART avtomaktabi?" bo'limi */
 export const AFZALLIKLAR = [

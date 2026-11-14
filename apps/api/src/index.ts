@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import { PORT, HOST, DEV_AUTH } from './env';
-import { userRouter } from './routes/user';
+import { userRouter, keshlarniIsit } from './routes/user';
 import { oktagonRouter } from './routes/oktagon';
 import { ballRouter } from './routes/ball';
 import { adminRouter } from './routes/admin';
@@ -74,6 +74,8 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 app.listen(PORT, HOST, () => {
+  // Reyting va qiyin savollar keshi — server tinchlangach oldindan hisoblanadi
+  setTimeout(keshlarniIsit, 5000);
   console.log(`✅ Autostart API ishga tushdi: http://${HOST}:${PORT}  (DEV_AUTH=${DEV_AUTH})`);
   if (fs.existsSync(webDist)) console.log('   Frontend (web + admin) shu serverdan xizmat qilinmoqda.');
 });

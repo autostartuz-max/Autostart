@@ -980,6 +980,12 @@ userRouter.get(
  * natija 1 daqiqa keshlanadi (bosh sahifa har ochilganda qayta hisoblanmaydi).
  */
 const reytingKesh = keshla(60_000, () => reytingniHisobla(200));
+
+/** Server ishga tushganda og'ir keshlarni oldindan to'ldirish — birinchi foydalanuvchi kutmasin */
+export function keshlarniIsit() {
+  reytingKesh.isit();
+  xatoUlushlari.isit();
+}
 async function getRating(limit = 100) {
   return (await reytingKesh()).slice(0, limit);
 }

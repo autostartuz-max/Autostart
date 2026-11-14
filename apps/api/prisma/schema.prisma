@@ -156,6 +156,11 @@ model UserAnswer {
   /// Javob qayerdan berilgan: "ilova" — mobil ilova; null — sayt yoki Telegram.
   /// Ilovadagi test oynasi faqat ilovada berilgan javoblarni tiklaydi.
   source     String?
+
+  // Har foydalanuvchining javoblari (statistika, xatolar, progress) va "oxirgi javob" (reyting,
+  // qiyin savollar — DISTINCT ON) shu indeks bilan o'qiladi; usiz 600 ming qator to'liq ko'rilardi.
+  @@index([userId, questionId, answeredAt])
+  @@index([questionId])
 }
 
 model Bookmark {

@@ -11,7 +11,8 @@ import { shifrla } from '../passwordVault';
 import { telegramgaYubor, esc } from '../notify';
 import { lessonFilePath, mobilFilePath, TOIFALAR, savolVideoYoli } from '../uploads';
 import { mobilNusxaBormi } from '../video';
-import { xatoStatistikasi, qiyinSavolIdlari } from '../qiyinlik';
+import { xatoUlushlari, qiyinSavolIdlari } from '../qiyinlik';
+import { keshla } from '../kesh';
 import { BELGI_TANLOV, belgiJson, belgiTartibi } from '../belgilar';
 import { AKSIYA_TANLOV, AKSIYA_TARTIBI, aksiyaJson } from '../aksiyalar';
 
@@ -530,7 +531,7 @@ userRouter.get(
     // Endi haqiqiy javoblardan hisoblanadi (Tahlil sahifasi bilan bir xil ta'rif).
     if (mode === 'tricky') {
       const n = Math.min(limit || 40, 120);
-      const jam = await xatoStatistikasi();
+      const jam = await xatoUlushlari(); // baza hisoblaydi, 10 daqiqa keshlanadi
       // Odatda kamida 2 talaba javob bergan savollar olinadi (bitta odamning
       // bitta xatosi hali "qiyin" degani emas). Ammo ma'lumot hali kam bo'lsa
       // shart bo'shashadi — oyna bo'sh ochilib qolmasligi kerak.
@@ -973,23 +974,26 @@ userRouter.get(
  *   turadi — shunda 1 ta savolga to'g'ri javob bergan odam 100% bilan
  *   o'nlab savol yechgandan o'tib ketmaydi.
  */
+/**
+ * Reyting (har savolning OXIRGI javobi bo'yicha). Avval 600 mingdan ortiq javob har so'rovda
+ * xotiraga yuklanib sanalardi (5–6 soniya, ~1 GB xotira) — endi baza o'zi hisoblaydi va
+ * natija 1 daqiqa keshlanadi (bosh sahifa har ochilganda qayta hisoblanmaydi).
+ */
+const reytingKesh = keshla(60_000, () => reytingniHisobla(200));
 async function getRating(limit = 100) {
-  const answers = await prisma.userAnswer.findMany({
-    select: { userId: true, questionId: true, isCorrect: true },
-    orderBy: { answeredAt: 'desc' },
-  });
+  return (await reytingKesh()).slice(0, limit);
+}
 
-  const korilgan = new Set<string>();
-  const jam = new Map<number, { total: number; correct: number }>();
-  for (const a of answers) {
-    const k = a.userId + ':' + a.questionId;
-    if (korilgan.has(k)) continue; // faqat oxirgi javob
-    korilgan.add(k);
-    const g = jam.get(a.userId) || { total: 0, correct: 0 };
-    g.total++;
-    if (a.isCorrect) g.correct++;
-    jam.set(a.userId, g);
-  }
+async function reytingniHisobla(limit: number) {
+  const rows = await prisma.$queryRaw<{ userId: number; total: number; correct: number }[]>`
+    SELECT t."userId", count(*)::int AS total, count(*) FILTER (WHERE t."isCorrect")::int AS correct
+    FROM (
+      SELECT DISTINCT ON ("userId", "questionId") "userId", "isCorrect"
+      FROM "UserAnswer"
+      ORDER BY "userId", "questionId", "answeredAt" DESC, id DESC
+    ) t
+    GROUP BY t."userId"`;
+  const jam = new Map(rows.map((r) => [r.userId, { total: r.total, correct: r.correct }]));
   if (!jam.size) return [];
 
   const users = await prisma.user.findMany({

@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { keshla } from './kesh';
 
 export interface SavolStat {
   /** Nechta talaba bu savolga javob bergan */
@@ -14,34 +15,31 @@ export interface SavolStat {
 }
 
 /**
- * Har savol bo'yicha xato statistikasi.
+ * Har savol bo'yicha xato statistikasi (admin "Tahlil" sahifasi).
  *
  * Qoidalar (Tahlil sahifasi va "Qiyin savollar" bir xil ta'rifga tayanadi —
  * aks holda ikki oyna bir-biriga zid ro'yxat ko'rsatardi):
  *   - har (talaba, savol) juftligidan faqat OXIRGI javob hisoblanadi, ya'ni
  *     qayta yechib to'g'irlagan talaba endi xato qilgan hisoblanmaydi;
  *   - mehmon hisoblari (tgId 'guest-...') umuman kirmaydi.
+ *
+ * Oxirgi javoblarni bazaning o'zi tanlaydi (DISTINCT ON) — 600 mingdan ortiq javob
+ * xotiraga yuklanmaydi; natija 5 daqiqa keshlanadi.
  */
-export async function xatoStatistikasi(): Promise<Map<number, SavolStat>> {
-  const mehmonlar = await prisma.user.findMany({
-    where: { tgId: { startsWith: 'guest-' } },
-    select: { id: true },
-  });
-  const mehmonId = new Set(mehmonlar.map((u) => u.id));
+export const xatoStatistikasi = keshla(5 * 60_000, xatoStatistikasiniHisobla);
 
-  const answers = await prisma.userAnswer.findMany({
-    orderBy: { answeredAt: 'desc' },
-    // `chosen` — talaba belgilagan variant id'lari (JSON massiv matn ko'rinishida)
-    select: { userId: true, questionId: true, isCorrect: true, chosen: true },
-  });
+async function xatoStatistikasiniHisobla(): Promise<Map<number, SavolStat>> {
+  const answers = await prisma.$queryRaw<{ userId: number; questionId: number; isCorrect: boolean; chosen: string | null }[]>`
+    SELECT DISTINCT ON (ua."userId", ua."questionId")
+      ua."userId", ua."questionId", ua."isCorrect",
+      CASE WHEN ua."isCorrect" THEN NULL ELSE ua.chosen END AS chosen
+    FROM "UserAnswer" ua
+    JOIN "User" u ON u.id = ua."userId"
+    WHERE u."tgId" IS NULL OR u."tgId" NOT LIKE 'guest-%'
+    ORDER BY ua."userId", ua."questionId", ua."answeredAt" DESC, ua.id DESC`;
 
-  const korilgan = new Set<string>();
   const jam = new Map<number, SavolStat>();
   for (const a of answers) {
-    if (mehmonId.has(a.userId)) continue;
-    const k = a.userId + ':' + a.questionId;
-    if (korilgan.has(k)) continue; // eng yangisi birinchi keladi
-    korilgan.add(k);
     const g = jam.get(a.questionId) || {
       total: 0, wrong: 0, tanlov: new Map<number, number>(), talabalar: new Set<number>(), xatoTalabalar: new Set<number>(),
     };
@@ -59,7 +57,7 @@ export async function xatoStatistikasi(): Promise<Map<number, SavolStat>> {
 }
 
 /** '[12,15]' -> [12, 15]. Buzuq yoki bo'sh qiymat xatoga olib kelmaydi. */
-function tanlovlar(chosen: string): number[] {
+function tanlovlar(chosen: string | null): number[] {
   try {
     const x = JSON.parse(chosen || '[]');
     return Array.isArray(x) ? x.map(Number).filter((v) => Number.isFinite(v)) : [];
@@ -69,6 +67,25 @@ function tanlovlar(chosen: string): number[] {
 }
 
 /**
+ * "Qiyin savollar" uchun yengil hisob: har savol bo'yicha nechta talaba javob bergan va nechtasi
+ * oxirgi urinishida xato qilgan (o'sha ta'rif — oxirgi javob, mehmonlarsiz). Hammasini baza
+ * hisoblaydi, 10 daqiqa keshlanadi — foydalanuvchi oynasi tez ochilsin.
+ */
+export const xatoUlushlari = keshla(10 * 60_000, async () => {
+  const rows = await prisma.$queryRaw<{ questionId: number; total: number; wrong: number }[]>`
+    SELECT t."questionId", count(*)::int AS total, count(*) FILTER (WHERE NOT t."isCorrect")::int AS wrong
+    FROM (
+      SELECT DISTINCT ON (ua."userId", ua."questionId") ua."questionId", ua."isCorrect"
+      FROM "UserAnswer" ua
+      JOIN "User" u ON u.id = ua."userId"
+      WHERE u."tgId" IS NULL OR u."tgId" NOT LIKE 'guest-%'
+      ORDER BY ua."userId", ua."questionId", ua."answeredAt" DESC, ua.id DESC
+    ) t
+    GROUP BY t."questionId"`;
+  return new Map(rows.map((r) => [r.questionId, { total: r.total, wrong: r.wrong }]));
+});
+
+/**
  * Talabalar eng ko'p xato qiladigan savol id'lari — xato ULUSHI bo'yicha
  * kamayish tartibida.
  *
@@ -76,7 +93,7 @@ function tanlovlar(chosen: string): number[] {
  * "qiyin" degani emas. Teng ulushda ko'proq odam yechgani yuqori turadi.
  */
 export function qiyinSavolIdlari(
-  jam: Map<number, SavolStat>,
+  jam: Map<number, { total: number; wrong: number }>,
   opts: { minJavob?: number; limit?: number } = {}
 ): number[] {
   const min = opts.minJavob ?? 2;

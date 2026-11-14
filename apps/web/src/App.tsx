@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { api, setToken, hasToken, clearToken, tokenniTikla } from './api';
 import { initTelegram, getInitData, isTelegram } from './telegram';
@@ -18,7 +18,8 @@ import KomponentKorik from './ilova/komponentlar/KomponentKorik';
 import TestlarIlova from './screens/ilova/Testlar';
 import OrganishIlova from './screens/ilova/Organish';
 import ProfilIlova from './screens/ilova/Profil';
-import AdminPromo from './screens/AdminPromo';
+// Admin sahifalari alohida JS bo'lakda (talabalar ularni yuklamaydi) — sahifa ochilganda yuklanadi
+const AdminPromo = lazy(() => import('./screens/AdminPromo'));
 import RandomTests from './screens/RandomTests';
 import Topics from './screens/Topics';
 import Tickets from './screens/Tickets';
@@ -27,23 +28,23 @@ import Rating from './screens/Rating';
 import Solved from './screens/Solved';
 import Legal from './screens/Legal';
 import Contact from './screens/Contact';
-import AdminMessages from './screens/AdminMessages';
-import AdminAnalytics from './screens/AdminAnalytics';
+const AdminMessages = lazy(() => import('./screens/AdminMessages'));
+const AdminAnalytics = lazy(() => import('./screens/AdminAnalytics'));
 import TestPlayer from './screens/TestPlayer';
 import Signs from './screens/Signs';
 import BelgilarIlova from './screens/ilova/Belgilar';
 import Profile from './screens/Profile';
 import Placeholder from './screens/Placeholder';
-import AdminQuestions from './screens/AdminQuestions';
-import AdminUsers from './screens/AdminUsers';
-import AdminUserDetail from './screens/AdminUserDetail';
-import AdminUserForm from './screens/AdminUserForm';
-import AdminQuestionForm from './screens/AdminQuestionForm';
-import AdminImport from './screens/AdminImport';
+const AdminQuestions = lazy(() => import('./screens/AdminQuestions'));
+const AdminUsers = lazy(() => import('./screens/AdminUsers'));
+const AdminUserDetail = lazy(() => import('./screens/AdminUserDetail'));
+const AdminUserForm = lazy(() => import('./screens/AdminUserForm'));
+const AdminQuestionForm = lazy(() => import('./screens/AdminQuestionForm'));
+const AdminImport = lazy(() => import('./screens/AdminImport'));
 import Lessons from './screens/Lessons';
-import AdminLessons from './screens/AdminLessons';
-import AdminBelgilar from './screens/AdminBelgilar';
-import AdminAksiyalar from './screens/AdminAksiyalar';
+const AdminLessons = lazy(() => import('./screens/AdminLessons'));
+const AdminBelgilar = lazy(() => import('./screens/AdminBelgilar'));
+const AdminAksiyalar = lazy(() => import('./screens/AdminAksiyalar'));
 import DarajaTabrik from './ilova/DarajaTabrik';
 
 export default function App() {
@@ -143,6 +144,7 @@ export default function App() {
     <div className="app">
       {/* Yangi darajaga chiqqanda tabrik (faqat ilovada) */}
       {mobilIlova() && <DarajaTabrik />}
+      <Suspense fallback={<div className="splash"><div className="spinner" /><div>Yuklanmoqda…</div></div>}>
       <Routes>
         {/* Mobil ilovada telefon uchun yasalgan bosh sahifa (plitkalar),
             saytda esa avvalgidek Dashboard — sayt o'zgarmaydi. */}
@@ -200,6 +202,7 @@ export default function App() {
         {(import.meta as any).env?.DEV && <Route path="/ilv-komponent" element={<KomponentKorik />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
     </div>
   );
 }

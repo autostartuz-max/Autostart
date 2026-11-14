@@ -753,10 +753,22 @@ adminRouter.get(
     // Cheklov savollar soniga qarab: 300 ta bo'lsa shablonlarning faqat boshi ko'rinib qolardi
     const takeRaw = Number(req.query.take);
     const take = Number.isFinite(takeRaw) && takeRaw > 0 ? Math.min(takeRaw, 5000) : 3000;
+    const orderBy = [{ shablon: 'asc' as const }, { order: 'asc' as const }, { id: 'asc' as const }]; // shablon, keyin tartib
+    // ?royxat=1 — sayt admin ro'yxati: faqat ko'rinadigan maydonlar (to'liq ro'yxat ~2,3 MB edi)
+    if (req.query.royxat === '1') {
+      const rows = await prisma.question.findMany({
+        where, orderBy, take,
+        select: {
+          id: true, shablon: true, order: true, textLat: true, imageUrl: true,
+          topic: { select: { name: true } }, _count: { select: { options: true } },
+        },
+      });
+      return res.json(rows.map(({ _count, ...q }) => ({ ...q, optionsSoni: _count.options })));
+    }
     const questions = await prisma.question.findMany({
       where,
       include: { options: { orderBy: { order: 'asc' } }, topic: true, ticket: true, category: true },
-      orderBy: [{ shablon: 'asc' }, { order: 'asc' }, { id: 'asc' }], // shablon, keyin tartib
+      orderBy,
       take,
     });
     res.json(questions);

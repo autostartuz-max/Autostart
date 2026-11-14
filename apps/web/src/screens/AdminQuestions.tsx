@@ -176,7 +176,7 @@ export default function AdminQuestions() {
                       {item.textLat}
                     </span>
                     <span className="adm-badge">{item.topic?.name || '—'}</span>
-                    <span className="adm-badge b2">{item.options?.length || 0} variant</span>
+                    <span className="adm-badge b2">{item.optionsSoni ?? item.options?.length ?? 0} variant</span>
                     <button className="adm-mini" onClick={(e) => { e.stopPropagation(); nav('/savollar/' + item.id); }}>
                       <Pencil size={15} /> Tahrir
                     </button>

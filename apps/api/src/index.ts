@@ -60,10 +60,19 @@ if (fs.existsSync(adminDist)) {
 
 // Mini App — ildizda
 if (fs.existsSync(webDist)) {
-  app.use(express.static(webDist));
+  // Vite fayllari nomida hash bor (assets/index-AbC123.js) — o'zgarsa nomi o'zgaradi: 1 yil keshlanadi.
+  // index.html har safar tekshiriladi (yangi versiya darhol ko'rinsin); qolgan rasmlar — 1 soat.
+  app.use(express.static(webDist, {
+    setHeaders: (res, fayl) => {
+      if (fayl.includes(path.sep + 'assets' + path.sep)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      else if (fayl.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
+      else res.setHeader('Cache-Control', 'public, max-age=3600');
+    },
+  }));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(webDist, 'index.html'));
+    // SPA sahifalari (/tahlil, /amaliy…) — index.html keshlanmaydi: deploydan keyin yangi JS darhol olinadi
+    res.sendFile(path.join(webDist, 'index.html'), { headers: { 'Cache-Control': 'no-cache' } });
   });
 }
 

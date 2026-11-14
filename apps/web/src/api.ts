@@ -579,8 +579,9 @@ export const adminApi = {
     setAdminToken(data.token);
     return data;
   },
+  /** Sayt admin ro'yxati — yengil (royxat=1): id, shablon, tartib, matn, rasm, mavzu, variantlar soni */
   questions: (q = ''): Promise<any[]> =>
-    areq('/admin/questions' + (q ? '?q=' + encodeURIComponent(q) : '')),
+    areq('/admin/questions?royxat=1' + (q ? '&q=' + encodeURIComponent(q) : '')),
   question: (id: number) => areq('/admin/questions/' + id),
   createQuestion: (data: any) => areq('/admin/questions', { method: 'POST', body: JSON.stringify(data) }),
   updateQuestion: (id: number, data: any) =>

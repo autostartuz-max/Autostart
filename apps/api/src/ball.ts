@@ -1,8 +1,9 @@
 import { prisma } from './prisma';
 
 /**
- * Daraja tizimi: foydalanuvchi ilovadan foydalanib ball yig'adi va darajasi
- * oshadi (Piyoda → Yo'lovchi → Haydovchi → Professional).
+ * Daraja tizimi: foydalanuvchi ilovadan foydalanib coin yig'adi va darajasi
+ * oshadi (Piyoda → Velosipedchi → Skuterchi → Haydovchi → Pilot; 2026-11-14).
+ * Ilova yangi darajaga chiqqanda tabrik ko'rsatadi (web: ilova/DarajaTabrik.tsx — nomlar shu yerdagidek).
  *
  * Har ball BallTarix ga yoziladi; kalit takrorlanmasligi (userId + kalit unique)
  * bir savol, video, shablon yoki kun uchun ball faqat bir marta berilishini
@@ -10,21 +11,28 @@ import { prisma } from './prisma';
  */
 export const DARAJALAR = [
   { nom: 'Piyoda', dan: 0 },
-  { nom: 'Yo‘lovchi', dan: 300 },
+  { nom: 'Velosipedchi', dan: 250 },
+  { nom: 'Skuterchi', dan: 500 },
   { nom: 'Haydovchi', dan: 1000 },
-  { nom: 'Professional', dan: 3000 },
+  { nom: 'Pilot', dan: 2000 },
 ] as const;
 
 export const BALL = {
   javob: 1, // savolga birinchi marta to'g'ri javob
+  faollik: 5, // kunning birinchi javobi
+  seriya: 20, // 15 kun uzluksiz faollik (15, 30, 45… kunlarda)
   shablon: 20, // shablonni yiqilmasdan (3 tadan kam xato) tugatish
   imtihon: 30, // real imtihondan o'tish
-  video: 10, // amaliy mashg'ulot videosini oxirigacha ko'rish
+  sharh: 20, // shablondagi barcha savollarning video sharhini ko'rish (har shablon bir marta)
+  nazariy: 20, // nazariy video darslik (har mashg'ulot) — Darslik bo'limi hali yo'q, tez orada
+  video: 20, // avtodromdagi amaliy mashg'ulot videosini oxirigacha ko'rish (har video)
   oktagonJang: 1,
   oktagonGalaba: 5,
-  faollik: 5, // kunning birinchi javobi
   taklif: 100, // promokod bilan kelgan do'st maktabga yozildi
 } as const;
+
+/** Uzluksiz faollik seriyasi: shuncha kun ketma-ket faol bo'lsa — BALL.seriya */
+export const SERIYA_KUN = 15;
 
 // Kuniga ko'pi bilan shuncha Oktagon jangi va real imtihon ball beradi (bot bilan "yig'ish"ga qarshi)
 export const KUNLIK_OKTAGON = 20;
@@ -61,8 +69,45 @@ export async function bugungiSoni(userId: number, sabab: string) {
   return prisma.ballTarix.count({ where: { userId, sabab, kalit: { startsWith: `${sabab}:${kun()}` } } });
 }
 
-/** Kunning birinchi faolligi — +5 (kuniga bir marta) */
-export const faollik = (userId: number) => ballQosh(userId, 'faollik', BALL.faollik, `faollik:${kun()}`);
+/**
+ * Kunning birinchi faolligi — +5 (kuniga bir marta). Shu kun bilan uzluksiz seriya
+ * 15 ga (30, 45…) yetsa — qo'shimcha +20 (o'sha kun uchun bir marta).
+ */
+export async function faollik(userId: number) {
+  const yangi = await ballQosh(userId, 'faollik', BALL.faollik, `faollik:${kun()}`);
+  if (yangi) {
+    const n = await streak(userId);
+    if (n > 0 && n % SERIYA_KUN === 0) await ballQosh(userId, 'seriya', BALL.seriya, `seriya:${kun()}`);
+  }
+  return yangi;
+}
+
+/**
+ * Savolning video sharhi oxirigacha ko'rildi. Shablonning HAMMA savolida video bo'lsa va
+ * foydalanuvchi ularning barchasini ko'rgan bo'lsa — +20 (har shablon uchun bir marta).
+ */
+export async function sharhKorildi(userId: number, questionId: number) {
+  const q = await prisma.question.findUnique({ where: { id: questionId }, select: { id: true, shablon: true, videoUrl: true } });
+  if (!q || !q.videoUrl) return { ok: false as const };
+  await prisma.sharhKorish.upsert({
+    where: { userId_questionId: { userId, questionId } },
+    update: {},
+    create: { userId, questionId },
+  });
+  if (!q.shablon) return { ok: true as const, ball: 0 };
+  const savollar = await prisma.question.findMany({
+    where: { shablon: q.shablon, status: 'published' },
+    select: { id: true, videoUrl: true },
+  });
+  const hammasidaVideo = savollar.length > 0 && savollar.every((s) => !!s.videoUrl);
+  const korilgan = await prisma.sharhKorish.count({ where: { userId, questionId: { in: savollar.map((s) => s.id) } } });
+  const jami = savollar.length;
+  let ball = 0;
+  if (hammasidaVideo && korilgan >= jami) {
+    if (await ballQosh(userId, 'sharh', BALL.sharh, `sharh:${q.shablon}`)) ball = BALL.sharh;
+  }
+  return { ok: true as const, shablon: q.shablon, korilgan, jami, ball };
+}
 
 /** Necha kun ketma-ket faol (bugun yoki kecha tugagan zanjir) */
 export async function streak(userId: number) {

@@ -1170,3 +1170,6 @@
 .ak-rasm-joy { width: 260px; }
 .ak-rasm-joy img, .ak-rasm-joy .ab-rasm-yoq { width: 260px; }
 @media (max-width: 720px) { .ak-rasm-joy, .ak-rasm-joy img, .ak-rasm-joy .ab-rasm-yoq { width: 100%; } }
+
+/* Ilova: tepa paneli yo'q ekran (masalan Mavzular) — kontent telefonning holat qatori ostiga kirmasin */
+.cap .db-main > .db-content:first-child { padding-top: calc(22px + env(safe-area-inset-top)); }

@@ -3,10 +3,11 @@ import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap,
   CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare,
-  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark, Trash2, TriangleAlert,
+  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark, Trash2, TriangleAlert, Languages,
 } from 'lucide-react';
 import { api, clearToken, ROLE_LABEL, type Role } from '../api';
 import AppSidebar from '../components/AppSidebar';
+import LangTheme from '../components/LangTheme';
 import { mobilIlova } from '../native';
 import '../dashboard.css';
 
@@ -122,6 +123,14 @@ export default function Profile() {
                   ))}
                 </div>
               </div>
+
+              {/* Ilovada sozlamalar bitta joyda: til va ko'rinish (yorug'/qorong'i) shu yerda */}
+              {mobilIlova() && (
+                <div className="ud-card">
+                  <div className="ud-card-h"><Languages size={16} /> Til va ko‘rinish</div>
+                  <div className="ud-til"><LangTheme /></div>
+                </div>
+              )}
 
               {/* App Store va Play Market talabi: foydalanuvchi akkauntini
                   ilovaning o'zida o'chira olishi kerak. Saytda ko'rinmaydi —

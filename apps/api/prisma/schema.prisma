@@ -32,31 +32,31 @@ model Ticket {
 }
 
 model Question {
-  id          Int          @id @default(autoincrement())
+  id          Int               @id @default(autoincrement())
   categoryId  Int?
-  category    Category?    @relation(fields: [categoryId], references: [id])
+  category    Category?         @relation(fields: [categoryId], references: [id])
   topicId     Int?
-  topic       Topic?       @relation(fields: [topicId], references: [id])
+  topic       Topic?            @relation(fields: [topicId], references: [id])
   ticketId    Int?
-  ticket      Ticket?      @relation(fields: [ticketId], references: [id])
+  ticket      Ticket?           @relation(fields: [ticketId], references: [id])
   textLat     String
-  textCyr     String       @default("")
-  textRus     String       @default("") // rus tili (tarjima)
+  textCyr     String            @default("")
+  textRus     String            @default("") // rus tili (tarjima)
   imageUrl    String?
-  shablon     Int?         // qaysi shablon (1-63) ga tegishli
+  shablon     Int? // qaysi shablon (1-63) ga tegishli
   /// Video tushuncha (mobil ilovada "O'rganish → Video"). Fayl diskda:
   /// uploads/savol-video/<videoFile>. videoUrl — imageUrl kabi ochiq manzil.
   videoUrl    String?
   videoFile   String?
-  order       Int          @default(0) // admin belgilagan tartib raqami
-  explanation String       @default("")
+  order       Int               @default(0) // admin belgilagan tartib raqami
+  explanation String            @default("")
   ruleRef     String?
-  difficulty  Int          @default(1)
-  isNumeric   Boolean      @default(false)
-  isTricky    Boolean      @default(false)
-  status      String       @default("published") // draft | published
-  hasAudio    Boolean      @default(false) // Tushuncha uchun ovoz yuklanganmi
-  createdAt   DateTime     @default(now())
+  difficulty  Int               @default(1)
+  isNumeric   Boolean           @default(false)
+  isTricky    Boolean           @default(false)
+  status      String            @default("published") // draft | published
+  hasAudio    Boolean           @default(false) // Tushuncha uchun ovoz yuklanganmi
+  createdAt   DateTime          @default(now())
   options     Option[]
   answers     UserAnswer[]
   bookmarks   Bookmark[]
@@ -64,6 +64,7 @@ model Question {
   comments    QuestionComment[]
   audio       QuestionAudio?
   image       QuestionImage?
+  sharhlar    SharhKorish[]
 }
 
 model QuestionAudio {
@@ -97,48 +98,49 @@ model Option {
 }
 
 model User {
-  id           Int          @id @default(autoincrement())
-  tgId         String?      @unique
-  phone        String?      @unique
+  id               Int               @id @default(autoincrement())
+  tgId             String?           @unique
+  phone            String?           @unique
   // Telefon o'rniga pochta bilan ham ro'yxatdan o'tish mumkin.
   // Kamida bittasi (telefon yoki pochta) bo'lishi shart — buni API tekshiradi.
-  email        String?      @unique
-  passwordHash String?
+  email            String?           @unique
+  passwordHash     String?
   // Admin panelida parolni ko'rsatish uchun shifrlangan nusxa (AES-256-GCM).
   // Kirish tekshiruvi baribir passwordHash bo'yicha — bu faqat ko'rsatish uchun.
   // Eski hisoblarda bo'sh: bcrypt hashdan asl parolni tiklab bo'lmaydi.
-  passwordEnc  String?
-  firstName    String       @default("Foydalanuvchi")
+  passwordEnc      String?
+  firstName        String            @default("Foydalanuvchi")
   // owner | admin | user
   //   owner — to'liq huquq: savollar + rollarni tayinlash
   //   admin — faqat savollarni ko'rish/qo'shish/tahrirlash
   //   user  — oddiy talaba (standart)
   // PATCH /me bu maydonni QABUL QILMAYDI (huquq oshirishning oldini olish uchun);
   // faqat /admin/users/:id/role orqali, FAQAT owner tomonidan o'zgartiriladi.
-  role         String       @default("user")
-  avatarUrl  String?
-  lang       String       @default("uz")
-  alphabet   String       @default("lat") // lat | cyr
-  category   String       @default("B")
-  examDate   DateTime?
-  createdAt  DateTime     @default(now())
+  role             String            @default("user")
+  avatarUrl        String?
+  lang             String            @default("uz")
+  alphabet         String            @default("lat") // lat | cyr
+  category         String            @default("B")
+  examDate         DateTime?
+  createdAt        DateTime          @default(now())
   // Oxirgi faollik vaqti — "hozir nechta odam ishlayapti" ni hisoblash uchun.
   // Har so'rovda emas, daqiqada bir marta yangilanadi (ortiqcha yozuvning oldini olish).
-  lastSeen   DateTime?
+  lastSeen         DateTime?
   // Oktagon (jang rejimi): ball va o'ynalgan janglar soni. Ball manfiy bo'lishi mumkin.
-  oktagonBall Int @default(0)
-  oktagonJang Int @default(0)
+  oktagonBall      Int               @default(0)
+  oktagonJang      Int               @default(0)
   // Daraja tizimi: jami ball (Piyoda → Yo'lovchi → Haydovchi → Professional), BallTarix yig'indisi
-  ball        Int     @default(0)
+  ball             Int               @default(0)
   // Shaxsiy promokod — do'stlarni Autostart maktabiga taklif qilish (birinchi so'rovda yaratiladi)
-  promoKod    String? @unique
+  promoKod         String?           @unique
   // Ro'yxatdan o'tishda kimning promokodi kiritilgan
   taklifQiluvchiId Int?
-  answers    UserAnswer[]
-  bookmarks  Bookmark[]
-  complaints Complaint[]
-  comments   QuestionComment[]
-  commentReports CommentReport[]
+  answers          UserAnswer[]
+  bookmarks        Bookmark[]
+  complaints       Complaint[]
+  comments         QuestionComment[]
+  commentReports   CommentReport[]
+  sharhlar         SharhKorish[]
 }
 
 model UserAnswer {
@@ -208,7 +210,7 @@ model Aksiya {
   matn      String      @default("")
   rasmUrl   String?
   faol      Boolean     @default(true) // false — saytda/ilovada ko'rinmaydi (qoralama yoki tugagan)
-  tartib    Int         @default(0)    // kichigi yuqorida
+  tartib    Int         @default(0) // kichigi yuqorida
   rasm      AksiyaRasm?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
@@ -355,4 +357,16 @@ model PromoTaklif {
   tasdiqlandi DateTime?
 
   @@index([egasiId])
+}
+
+/// Savolning video sharhi oxirigacha ko'rildi (har foydalanuvchi + savol bir marta).
+/// Shablondagi barcha savollarning sharhi ko'rilsa — +20 coin (ball.ts, sabab 'sharh').
+model SharhKorish {
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  vaqt       DateTime @default(now())
+
+  @@id([userId, questionId])
 }

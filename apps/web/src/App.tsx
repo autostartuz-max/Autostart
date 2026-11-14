@@ -44,6 +44,7 @@ import Lessons from './screens/Lessons';
 import AdminLessons from './screens/AdminLessons';
 import AdminBelgilar from './screens/AdminBelgilar';
 import AdminAksiyalar from './screens/AdminAksiyalar';
+import DarajaTabrik from './ilova/DarajaTabrik';
 
 export default function App() {
   const [checking, setChecking] = useState(true);
@@ -140,6 +141,8 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* Yangi darajaga chiqqanda tabrik (faqat ilovada) */}
+      {mobilIlova() && <DarajaTabrik />}
       <Routes>
         {/* Mobil ilovada telefon uchun yasalgan bosh sahifa (plitkalar),
             saytda esa avvalgidek Dashboard — sayt o'zgarmaydi. */}

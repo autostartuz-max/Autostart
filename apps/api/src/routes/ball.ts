@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '../prisma';
 import { requireUser } from '../auth';
-import { BALL, KUNLIK_IMTIHON, ballQosh, bugungiSoni, daraja, kun, promoKodi, streak } from '../ball';
+import { BALL, KUNLIK_IMTIHON, ballQosh, bugungiSoni, daraja, kun, promoKodi, sharhKorildi, streak } from '../ball';
 
 /** Daraja tizimi: ball, daraja, promokod (/api/ball) */
 export const ballRouter = Router();
@@ -88,6 +88,17 @@ ballRouter.post(
     if (n >= KUNLIK_IMTIHON) return res.json({ ok: false, sabab: 'kunlik chegara' });
     const ok = await ballQosh(men, 'imtihon', BALL.imtihon, `imtihon:${kun()}:${n + 1}`);
     res.json({ ok, ball: ok ? BALL.imtihon : 0 });
+  })
+);
+
+/** Savolning video sharhi oxirigacha ko'rildi: { questionId } — shablon to'liq ko'rilsa +20 */
+ballRouter.post(
+  '/sharh',
+  ah(async (req, res) => {
+    const men = (req as any).userId as number;
+    const id = Number(req.body?.questionId);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Savol noto‘g‘ri' });
+    res.json(await sharhKorildi(men, id));
   })
 );
 

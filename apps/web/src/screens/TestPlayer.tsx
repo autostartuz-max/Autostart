@@ -98,6 +98,11 @@ export default function TestPlayer() {
   const [showRule, setShowRule] = useState(false);
   // Mobil ilovada test oynasi telefon uchun alohida chiziladi (saytga tegmaydi)
   const mobil = mobilIlova();
+  // Test tugadi — ilovada coin/daraja yangilanadi (yangi darajaga chiqsa tabrik chiqadi)
+  useEffect(() => {
+    if (finished && mobil) api.ballMen().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
   const [fabOpen, setFabOpen] = useState(false); // "O'rganish" menyusi ochiqmi
   const [showVideo, setShowVideo] = useState(false); // "Video" oynasi
   // "Mavzuni to'liq ko'rish" — nazariy darslar hali tayyor emas, "tez orada" yoziladi
@@ -1155,7 +1160,7 @@ export default function TestPlayer() {
             <div className="grip" />
             <div className="tpm-video-q">{tx(q.textLat, q.textCyr, (q as any).textRus)}</div>
             {q.videoUrl ? (
-              <VideoTushuncha key={q.id} src={mediaUrl(q.videoUrl)!} />
+              <VideoTushuncha key={q.id} src={mediaUrl(q.videoUrl)!} onTugadi={() => { api.ballSharh(q.id).catch(() => {}); }} />
             ) : (
               <>
                 {q.imageUrl && <img className="tpm-video-img" src={mediaUrl(q.imageUrl)} alt="" />}

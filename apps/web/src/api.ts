@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { DARAJA_OSHDI, darajaIndeksi } from './ilova/darajalar';
 
 const API = (import.meta as any).env?.VITE_API || '/api';
 
@@ -45,6 +46,7 @@ export function clearToken() {
   tokenniZaxirala('');
   localStorage.removeItem(ROLE_KEY);
   oxirginiTozala(); // boshqa foydalanuvchi kirsa, avvalgisining raqamlari ko'rinmasin
+  try { localStorage.removeItem('yhq_daraja'); } catch { /* ignore */ }
   notifyAdminChanged();
 }
 
@@ -106,6 +108,25 @@ const ilovaManbasi = () => {
     return false;
   }
 };
+
+/**
+ * Daraja kuzatuvi (faqat ilovada): oxirgi ko'rilgan daraja eslab qolinadi. Yangi daraja oldingisidan
+ * yuqori bo'lsa — tabrik hodisasi (ilova/DarajaTabrik.tsx). Birinchi marta (yoki eski daraja nomlari)
+ * faqat eslab qolinadi — hamma birdaniga tabrik ko'rmasin.
+ */
+const DARAJA_KALIT = 'yhq_daraja';
+export function darajaniKuzat(nom?: string) {
+  if (!nom || !ilovaManbasi()) return;
+  const yangi = darajaIndeksi(nom);
+  if (yangi < 0) return;
+  let oldin: string | null = null;
+  try {
+    oldin = localStorage.getItem(DARAJA_KALIT);
+    localStorage.setItem(DARAJA_KALIT, nom);
+  } catch { return; }
+  const eski = darajaIndeksi(oldin);
+  if (oldin && eski >= 0 && yangi > eski) window.dispatchEvent(new CustomEvent(DARAJA_OSHDI, { detail: { nom } }));
+}
 
 /** Server javob bergan xatomi (true) yoki internet yo'qmi (false) */
 const serverXatosi = (e: any) => !!e?.serverdan;
@@ -253,7 +274,7 @@ export interface BallMen {
   orin: number | null;
   promoKod: string | null;
   taklif: { jami: number; tasdiqlangan: number };
-  qiymatlar: Record<'javob' | 'shablon' | 'imtihon' | 'video' | 'oktagonJang' | 'oktagonGalaba' | 'faollik' | 'taklif', number>;
+  qiymatlar: Record<'javob' | 'faollik' | 'seriya' | 'shablon' | 'imtihon' | 'sharh' | 'nazariy' | 'video' | 'oktagonJang' | 'oktagonGalaba' | 'taklif', number>;
   tarix: { kun: string; sabab: string; miqdor: number; soni: number }[];
 }
 
@@ -322,10 +343,13 @@ export const api = {
   ballMen: async (): Promise<BallMen> => {
     const r = await req('/ball/men', {}, false);
     oxirgiYoz('ballMen', r);
+    darajaniKuzat(r?.daraja?.nom); // yangi darajaga chiqqan bo'lsa — ilova tabrik ko'rsatadi
     return r;
   },
   ballImtihon: (savollar: number[]) => req('/ball/imtihon', { method: 'POST', body: JSON.stringify({ savollar }) }),
   ballVideo: (lessonId: number) => req('/ball/video', { method: 'POST', body: JSON.stringify({ lessonId }) }),
+  /** Savolning video sharhi oxirigacha ko'rildi — shablondagi hammasi ko'rilsa +20 coin */
+  ballSharh: (questionId: number) => req('/ball/sharh', { method: 'POST', body: JSON.stringify({ questionId }) }, false),
   /** login — telefon yoki pochta */
   login: (login: string, password: string) =>
     req('/auth/login', { method: 'POST', body: JSON.stringify({ login, password }) }),

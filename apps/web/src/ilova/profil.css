@@ -229,3 +229,11 @@
 .ilv .ilv-pr-sozlama:focus-visible,
 .ilv .ilv-pr-xato-tugma:focus-visible,
 .ilv .ilv-pr-til .lt .lt-b:focus-visible { outline: 2px solid var(--ilv-sariq); outline-offset: 2px; }
+
+/* Coin ro'yxati: hali ishlamaydigan bo'lim — "tez orada" nishoni, qiymati xiraroq */
+.ilv .ilv-pr-tez-orada {
+  display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; vertical-align: 1px;
+  font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: .2px; white-space: nowrap;
+  background: var(--ilv-toq); color: var(--ilv-sariq);
+}
+.ilv .ilv-pr-royxat li.tez-orada .ilv-pr-royxat-coin { opacity: .55; }

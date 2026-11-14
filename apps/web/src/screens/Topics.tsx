@@ -29,12 +29,11 @@ export default function Topics() {
       <AppSidebar active="/mavzular" open={open} onClose={() => setOpen(false)} />
 
       <div className="db-main">
+        {/* Ilovada tepa panel yo'q: undagi til, qo'ng'iroqcha va foydalanuvchi belgisi saytniki
+            (ilovada ishlamaydi), orqaga tugmasi esa sarlavha yonida bor */}
+        {!mobilIlova() && (
         <header className="db-top">
           <button className="db-burger" onClick={() => setOpen(true)}><Menu size={22} /></button>
-          {/* Ilovada yon menyu yo'q — orqaga qaytish tugmasi kerak */}
-          {mobilIlova() && (
-            <button className="adm-back" onClick={orqaga}><ChevronLeft size={18} /> {orqagaYozuvi()}</button>
-          )}
           <div className="db-search"><Search size={17} /><input placeholder="Qidirish…" /></div>
           <div className="db-top-right">
             <div className="db-chip">UZ</div>
@@ -45,6 +44,7 @@ export default function Topics() {
             </div>
           </div>
         </header>
+        )}
 
         <div className="db-content">
           <div className="mv-head">

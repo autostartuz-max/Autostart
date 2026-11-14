@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { CalendarDays, ChevronRight, Settings, Share2, Trophy, Zap } from 'lucide-react';
 import { api, oxirgiJavob, type BallMen } from '../../api';
-import LangTheme from '../../components/LangTheme';
 import Ekran from '../../ilova/komponentlar/Ekran';
 import TepaQator from '../../ilova/komponentlar/TepaQator';
 // Ekran sarlavhasi va asosiy karta bo'laklari (qiya chiziqlar, progress) — Bosh sahifa/Testlar bilan bitta manba
@@ -23,12 +22,16 @@ interface MeQisqa {
   stats?: { streak?: number };
 }
 
-const QIYMATLAR: [keyof BallMen['qiymatlar'], string][] = [
+// Uchinchi qiymat — hali ishlamaydigan bo'lim ("tez orada" bilan ko'rsatiladi)
+const QIYMATLAR: [keyof BallMen['qiymatlar'], string, boolean?][] = [
   ['javob', 'Savolga birinchi marta to‘g‘ri javob'],
   ['faollik', 'Kunlik faollik (kunning birinchi javobi)'],
+  ['seriya', '15 kun uzluksiz faollik'],
   ['shablon', 'Shablonni yiqilmasdan tugatish (3 tadan kam xato)'],
   ['imtihon', 'Real imtihondan o‘tish'],
-  ['video', 'Avtodrom videosini oxirigacha ko‘rish'],
+  ['sharh', 'Testlar video sharhlarini ko‘rish (har 20 talik shablon)'],
+  ['nazariy', 'Nazariy video darsliklarni ko‘rish (har mashg‘ulot)', true],
+  ['video', 'Avtodromda amaliy mashg‘ulotlarni kuzatish (har bir video)'],
   ['oktagonJang', 'Bellashuvda jang'],
   ['oktagonGalaba', 'Bellashuvda g‘alaba (qo‘shimcha)'],
   ['taklif', 'Taklif qilgan do‘stingiz maktabga yozilsa'],
@@ -218,9 +221,9 @@ export default function ProfilIlova() {
         <section className="ilv-pr-karta" aria-labelledby="ilv-pr-qiymat">
           <h2 id="ilv-pr-qiymat" className="ilv-pr-karta-sarlavha">Coin qanday yig‘iladi</h2>
           <ul className="ilv-pr-royxat">
-            {QIYMATLAR.filter(([k]) => typeof ball.qiymatlar[k] === 'number').map(([k, nom]) => (
-              <li key={k}>
-                <span>{nom}</span>
+            {QIYMATLAR.filter(([k]) => typeof ball.qiymatlar[k] === 'number').map(([k, nom, tezOrada]) => (
+              <li key={k} className={tezOrada ? 'tez-orada' : undefined}>
+                <span>{nom}{tezOrada && <em className="ilv-pr-tez-orada">tez orada</em>}</span>
                 <b className="ilv-pr-royxat-coin">+{ball.qiymatlar[k]} <Tanga className="ilv-pr-royxat-ik" /></b>
               </li>
             ))}
@@ -228,14 +231,7 @@ export default function ProfilIlova() {
         </section>
       )}
 
-      <button type="button" className="ilv-pr-sozlama" onClick={() => nav('/profil')}>
-        <Settings className="ilv-pr-sozlama-ik" aria-hidden="true" />
-        <span>Sozlamalar</span>
-        <ChevronRight className="ilv-pr-sozlama-strelka" aria-hidden="true" />
-      </button>
-
-      {/* Til va mavzu — ilovada yon menyu yo'q, shuning uchun shu yerda */}
-      <div className="ilv-pr-til"><LangTheme /></div>
+      {/* Sozlamalar (til, ko'rinish, hisob) — tepadagi tishli g'ildirak tugmasida */}
       {versiya && <div className="ilv-pr-versiya">Versiya {versiya}</div>}
     </Ekran>
   );

@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { X } from 'lucide-react';
 import '../ilova-ekran.css';
 
 /**
@@ -25,6 +26,7 @@ export default function PastkiOyna({ title, subtitle, onClose, children }: {
       <div className="ie-sheet-bg" onClick={onClose} />
       <div className="ie-sheet" role="dialog" aria-modal="true" aria-label={title}>
         <div className="ie-handle" />
+        <button type="button" className="ie-sh-x" onClick={onClose} aria-label="Yopish"><X aria-hidden="true" /></button>
         <div className="ie-sh-title">{title}</div>
         {subtitle && <div className="ie-sh-sub">{subtitle}</div>}
         {children}

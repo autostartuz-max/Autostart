@@ -15,7 +15,8 @@ const TEZLIKLAR = [1, 1.25, 1.5, 2, 0.75];
  * pastda yashil progress, ⏸/▶, 10 soniya orqaga/oldinga, vaqt,
  * tezlik va to'liq ekran.
  */
-export default function VideoTushuncha({ src }: { src: string }) {
+/** onTugadi — video oxirigacha ko'rildi (coin: shablon sharhlari to'liq ko'rilsa +20) */
+export default function VideoTushuncha({ src, onTugadi }: { src: string; onTugadi?: () => void }) {
   const v = useRef<HTMLVideoElement>(null);
   const quti = useRef<HTMLDivElement>(null);
   const [boshlandi, setBoshlandi] = useState(false);
@@ -63,7 +64,7 @@ export default function VideoTushuncha({ src }: { src: string }) {
         playsInline
         onPlay={() => setOynayapti(true)}
         onPause={() => setOynayapti(false)}
-        onEnded={() => setOynayapti(false)}
+        onEnded={() => { setOynayapti(false); onTugadi?.(); }}
         onTimeUpdate={(e) => setJoriy(e.currentTarget.currentTime)}
         onLoadedMetadata={(e) => setDavom(e.currentTarget.duration)}
         onClick={boshlandi ? almash : boshla}

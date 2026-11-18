@@ -36,7 +36,7 @@ export interface MashinaTuri {
 
 export const MASHINALAR: MashinaTuri[] = [
   {
-    id: 'cobalt', nom: 'Chevrolet Cobalt', shakl: 'cobalt', rang: '#f2f3f5',
+    id: 'cobalt', nom: 'Chevrolet Cobalt', shakl: 'cobalt', rang: '#e9ebee',
     uzunlik: 4.48, eni: 1.735, balandlik: 1.514, bazasi: 2.62, koleya: 1.48, oldiOsilma: 0.95, orqaOsilma: 0.91,
     gildirakR: 0.317, massa: 1240,
     salt: 800, maxAyl: 6200,

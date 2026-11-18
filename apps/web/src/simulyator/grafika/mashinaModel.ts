@@ -56,6 +56,15 @@ interface Kesim { bot: number; top: number; w: number }
 class Loft {
   private p: Nq[];
   constructor(readonly kesim: (z: number) => Kesim, profil: Nq[]) { this.p = profilZich(profil, 48); }
+  /** O'ng tomonda profil x/w nisbati `nisbat` ga tushadigan s (yuqoriga ko'tarilganda birinchi marta) */
+  sNisbat(nisbat: number): number {
+    const n = this.p.length - 1;
+    for (let i = 0; i < n; i++) {
+      const a = this.p[i][0], b = this.p[i + 1][0];
+      if ((a - nisbat) * (b - nisbat) <= 0 && a !== b && this.p[i][1] > 0.05) return ((i + (nisbat - a) / (b - a)) / n) / 2;
+    }
+    return 0.25;
+  }
   nuqta(z: number, s: number) {
     const k = this.kesim(z);
     const ong = s <= 0.5;
@@ -244,16 +253,17 @@ export function mashinaModel(t: MashinaTuri, rangHex: string, soya: boolean): Ma
   const kabinaProfil: Nq[] = [[1.0, 0.0], [0.975, 0.3], [0.94, 0.62], [0.88, 0.85], [0.78, 0.96], [0.6, 0.995], [0.3, 1.0], [0, 1.0]];
   const kabina = new Loft(kabinaKesim, kabinaProfil);
   mesh(kabina.yuza(zk0, zk1, 60, 0, 1, 40), oyna, kuzov, false).renderOrder = 2;
-  // Tom (bo'yoq) — ust va ichki shift
+  // Tom (bo'yoq) — ust va ichki shift. Tom cheti: profil x/w ≈ 0,84 (kesim parametri hisoblanadi)
   const tomZ0 = -0.92 + (zk0 + 1.45), tomZ1 = -0.04 + (zk1 - 0.8);
-  mesh(kabina.yuza(tomZ0, tomZ1, 24, 0.37, 0.63, 16, 0.004), boyoq);
-  mesh(kabina.yuza(tomZ0 - 0.08, tomZ1 + 0.04, 18, 0.34, 0.66, 12, -0.012, true), shift, kuzov, false);
+  const sTom = kabina.sNisbat(0.84), sUst = kabina.sNisbat(0.93);
+  mesh(kabina.yuza(tomZ0, tomZ1, 24, sTom, 1 - sTom, 20, 0.004), boyoq);
+  mesh(kabina.yuza(tomZ0 - 0.08, tomZ1 + 0.04, 18, sTom - 0.01, 1 - sTom + 0.01, 14, -0.012, true), shift, kuzov, false);
   // A ustunlar (old oyna yonlari), C ustunlar (orqa), B ustun (qora)
-  for (const [s0, s1] of [[0.335, 0.385], [0.615, 0.665]]) {
+  for (const [s0, s1] of [[sUst, sTom + 0.006], [1 - sTom - 0.006, 1 - sUst]]) {
     mesh(kabina.yuza(tomZ1 - 0.02, zk1, 22, s0, s1, 4, 0.004), boyoq);
     mesh(kabina.yuza(tomZ1 - 0.02, zk1, 12, s0, s1, 3, -0.01, true), ichki, kuzov, false);
   }
-  for (const [s0, s1] of [[0.0, 0.38], [0.62, 1.0]]) {
+  for (const [s0, s1] of [[0.0, sTom + 0.006], [1 - sTom - 0.006, 1.0]]) {
     mesh(kabina.yuza(zk0, tomZ0 + 0.02, 16, s0, s1, 14, 0.004), boyoq);
     mesh(kabina.yuza(zk0, tomZ0 + 0.02, 8, s0, s1, 8, -0.01, true), ichki, kuzov, false);
     mesh(kabina.yuza(-0.5, -0.38, 3, s0, s1, 10, 0.005), qoraYaltiroq);

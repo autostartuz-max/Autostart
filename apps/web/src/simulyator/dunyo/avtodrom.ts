@@ -3,6 +3,7 @@ import {
 } from '../asos/geom';
 import { Yol, yolBant, yoyBantAniq, quti, uzuqChiziq, yaxlitChiziq, tozala } from './quruvchi';
 import { birlashtir, chegaralar as chegaralarOl, chetChiziqlari } from './birlashtir';
+import { MASHQ_NOMI } from '../imtihon/qoidalar';
 import type { Boyoq, Belgi, Maydon, Qadam, Svetofor, Yozuv, Estakada, TemirYol, PiyodaYoli, AvariyaQurilma, MashqKodi, SignalNuqta } from './turlar';
 
 /** Avtodrom o'lchamlari formulalarida ishlatiladigan avtomobil o'lchamlari (3494-son qaror: B, D, K, S) */
@@ -23,20 +24,7 @@ const RK = 8;
 const ICH = 0.25;        // chet chizig'i bordyurdan ichkarida
 const r2 = (x: number) => Math.round(x * 100) / 100;
 
-export const MASHQ_NOMI: Record<MashqKodi, string> = {
-  start: 'Harakatni boshlash (Start)',
-  piyoda: 'Piyodalar o‘tish joyi',
-  estakada: 'To‘xtash va tik balandlikka ko‘tarilish (Estakada)',
-  burilish90: '90 gradus burchak ostida burilishlar',
-  chorraha: 'Harakat tartibga solingan chorraha',
-  ilon: 'Ilon izi',
-  boks: 'Tor joyda qayrilib olish uchun boksga kirish',
-  temir: 'Tartibga solinmagan temir yo‘l kesishmasi',
-  tezlashish: 'Tezlashish bo‘lagi',
-  avariya: 'Avariya holatda to‘xtash',
-  parallel: 'Orqaga harakatlanib parallel to‘xtash (parkovka)',
-  finish: 'Harakatni yakunlash (Finish)',
-};
+export { MASHQ_NOMI };
 
 export function avtodromQur(prm: AvtodromParam): Maydon {
   const { B, D } = prm;

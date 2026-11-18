@@ -141,6 +141,7 @@ model User {
   comments         QuestionComment[]
   commentReports   CommentReport[]
   sharhlar         SharhKorish[]
+  simNatijalar     SimNatija[]
 }
 
 model UserAnswer {
@@ -375,4 +376,33 @@ model SharhKorish {
   vaqt       DateTime @default(now())
 
   @@id([userId, questionId])
+}
+
+/// 3D avtodrom simulyatori sozlamalari (bitta yozuv, id=1): jarima ballari, vaqt, mashqlar — JSON.
+/// Ilova standart qiymatlar bilan birlashtiradi (yo'q maydonlar — standart).
+model SimSozlama {
+  id        Int      @id @default(1)
+  data      Json
+  updatedAt DateTime @updatedAt
+}
+
+/// 3D avtodrom simulyatori natijalari (imtihon yoki bitta mashq)
+model SimNatija {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rejim     String   // "imtihon" | "mashq"
+  mashq     String?  // mashq rejimida mashq kodi
+  mashina   String
+  jami      Int      // jarima ballari
+  otdi      Boolean
+  vaqt      Int      // soniya
+  bajarildi Int
+  jamiQadam Int
+  sabab     String   @default("")
+  xatolar   Json     // [{ kod, nom, ball, mashq, izoh }]
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
 }

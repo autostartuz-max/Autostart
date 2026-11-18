@@ -7,6 +7,8 @@ import { userRouter, keshlarniIsit } from './routes/user';
 import { oktagonRouter } from './routes/oktagon';
 import { ballRouter } from './routes/ball';
 import { adminRouter } from './routes/admin';
+import { simRouter, simAdminRouter } from './routes/sim';
+import { requireAdmin } from './auth';
 import { rateLimit } from './rateLimit';
 
 const app = express();
@@ -44,6 +46,8 @@ app.use('/api', (req, res, next) => {
 });
 
 app.use('/api/oktagon', oktagonRouter);
+app.use('/api/sim', simRouter);
+app.use('/api/admin/sim', requireAdmin, simAdminRouter);
 app.use('/api/ball', ballRouter);
 app.use('/api', userRouter);
 app.use('/api/admin', adminRouter);

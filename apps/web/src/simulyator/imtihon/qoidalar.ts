@@ -40,6 +40,22 @@ export const JARIMA_TURLARI: Record<JarimaKodi, JarimaTuri> = {
 
 export const JARIMA_KODLARI = Object.keys(JARIMA_TURLARI) as JarimaKodi[];
 
+/** Mashqlar nomi (3494-son qaror) */
+export const MASHQ_NOMI: Record<MashqKodi, string> = {
+  start: 'Harakatni boshlash (Start)',
+  piyoda: 'Piyodalar o‘tish joyi',
+  estakada: 'To‘xtash va tik balandlikka ko‘tarilish (Estakada)',
+  burilish90: '90 gradus burchak ostida burilishlar',
+  chorraha: 'Harakat tartibga solingan chorraha',
+  ilon: 'Ilon izi',
+  boks: 'Tor joyda qayrilib olish uchun boksga kirish',
+  temir: 'Tartibga solinmagan temir yo‘l kesishmasi',
+  tezlashish: 'Tezlashish bo‘lagi',
+  avariya: 'Avariya holatda to‘xtash',
+  parallel: 'Orqaga harakatlanib parallel to‘xtash (parkovka)',
+  finish: 'Harakatni yakunlash (Finish)',
+};
+
 export const MASHQ_KODLARI: MashqKodi[] = ['start', 'piyoda', 'estakada', 'burilish90', 'chorraha', 'ilon', 'boks', 'temir', 'tezlashish', 'avariya', 'parallel', 'finish'];
 
 /** Imtihon sozlamalari (admin o'zgartiradi). Rasmiy manbalarda aniqlangan qiymatlar izohda ko'rsatilgan. */
@@ -64,6 +80,10 @@ export interface ImtihonSozlama {
   qizilEhtimol: number;
   /** Avariya holatda to'xtagach avariya chirog'ini yoqish talab qilinadimi */
   avariyaChiroqKerak: boolean;
+  /** Menyuda ko'rinadigan avtomobillar (id → faol) */
+  mashinalar: Record<string, boolean>;
+  /** Jarima jadvali rasmiy manbaga asoslanganmi (admin belgilaydi) — aks holda "taxminiy" deb ko'rsatiladi */
+  rasmiy: boolean;
 }
 
 export const STANDART_SOZLAMA: ImtihonSozlama = {
@@ -83,6 +103,8 @@ export const STANDART_SOZLAMA: ImtihonSozlama = {
   piyodaEhtimol: 0.7,
   qizilEhtimol: 0.5,
   avariyaChiroqKerak: true,
+  mashinalar: { cobalt: true, gentra: true },
+  rasmiy: false,
 };
 
 /** Serverdan kelgan (qisman) sozlamani standart bilan birlashtirish — noto'g'ri qiymatlar e'tiborsiz */
@@ -111,5 +133,8 @@ export function sozlamaBirlashtir(s?: any): ImtihonSozlama {
   out.piyodaEhtimol = son(s.piyodaEhtimol, st.piyodaEhtimol, 0, 1);
   out.qizilEhtimol = son(s.qizilEhtimol, st.qizilEhtimol, 0, 1);
   if (typeof s.avariyaChiroqKerak === 'boolean') out.avariyaChiroqKerak = s.avariyaChiroqKerak;
+  if (s.mashinalar && typeof s.mashinalar === 'object') for (const [k, v] of Object.entries(s.mashinalar)) out.mashinalar[k] = v !== false;
+  if (!Object.values(out.mashinalar).some(Boolean)) out.mashinalar.cobalt = true; // hech bo'lmasa bittasi
+  out.rasmiy = s.rasmiy === true;
   return out;
 }

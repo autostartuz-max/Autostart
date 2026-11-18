@@ -37,7 +37,14 @@ export default function Simulyator() {
   useEffect(() => {
     let bekor = false;
     api.simSozlama()
-      .then((r: any) => { if (!bekor) { setSozlama(sozlamaBirlashtir(r?.sozlama)); setRasmiy(!!r?.rasmiy); } })
+      .then((r: any) => {
+        if (bekor) return;
+        const sz = sozlamaBirlashtir(r?.sozlama);
+        setSozlama(sz);
+        setRasmiy(sz.rasmiy);
+        // Admin o'chirgan avtomobil tanlangan bo'lsa — birinchi faoliga o'tamiz
+        setTanlovH((t) => (sz.mashinalar[t.mashinaId] === false ? { ...t, mashinaId: Object.keys(sz.mashinalar).find((k) => sz.mashinalar[k]) || 'cobalt' } : t));
+      })
       .catch(() => { if (!bekor) setSozlama(sozlamaBirlashtir()); });
     return () => { bekor = true; };
   }, []);

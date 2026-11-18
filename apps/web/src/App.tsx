@@ -45,6 +45,7 @@ import Lessons from './screens/Lessons';
 const AdminLessons = lazy(() => import('./screens/AdminLessons'));
 const AdminBelgilar = lazy(() => import('./screens/AdminBelgilar'));
 const AdminAksiyalar = lazy(() => import('./screens/AdminAksiyalar'));
+const AdminSimulyator = lazy(() => import('./screens/AdminSimulyator'));
 // 3D avtodrom simulyatori (faqat ilovada) — three.js bilan alohida bo'lak (faqat ochilganda yuklanadi)
 const Simulyator = lazy(() => import('./simulyator/Simulyator'));
 import DarajaTabrik from './ilova/DarajaTabrik';
@@ -172,6 +173,8 @@ export default function App() {
         {!mobilIlova() && <Route path="/belgilar/boshqaruv" element={<AdminBelgilar />} />}
         {/* Aloqa sahifasidagi aksiyalar — faqat admin, faqat saytda */}
         {!mobilIlova() && <Route path="/aksiyalar/boshqaruv" element={<AdminAksiyalar />} />}
+        {/* 3D simulyator sozlamalari va natijalari — faqat admin, faqat saytda (simulyatorning o'zi ilovada) */}
+        {!mobilIlova() && <Route path="/simulyator/boshqaruv" element={<AdminSimulyator />} />}
         <Route path="/amaliy" element={<Lessons />} />
         {/* 3D simulyator FAQAT ilovada (2026-11-18 saytdan olib tashlandi). Saytda
             /simulyator manzili "*" qoidasiga tushib, bosh sahifaga qaytadi. */}

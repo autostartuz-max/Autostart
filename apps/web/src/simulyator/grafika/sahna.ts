@@ -44,7 +44,7 @@ export class Grafika {
     this.sifat = sifat;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: sifat > 0, powerPreference: 'high-performance' });
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.9;
+    this.renderer.toneMappingExposure = 0.8;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = sifat > 0;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;

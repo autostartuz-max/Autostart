@@ -53,11 +53,33 @@ export function atrofModel(m: Maydon, sifat: number, soya: boolean): AtrofModel 
     joylar.push({ p, tur: rnd() < 0.45 ? 0 : 1, k: 0.75 + rnd() * 0.6 });
   }
   const tana = G(new THREE.CylinderGeometry(0.14, 0.2, 1, 7));
-  const qaragay = G(new THREE.ConeGeometry(1.5, 1, 9));
-  const bargli = G(new THREE.IcosahedronGeometry(1, 1));
+  // Toj: silliq, notekis (shovqin) shakl; pastki qismi to'qroq (soya) — vertex rang
+  const tojlash = (g: THREE.BufferGeometry, kuch: number, urug: number) => {
+    const pos = g.attributes.position as THREE.BufferAttribute;
+    const r = tasodif(urug);
+    const tolqin = Array.from({ length: 6 }, () => [r() * 6, r() * 6, r() * 6, 0.5 + r() * 1.5] as const);
+    const rang: number[] = [];
+    let minY = Infinity, maxY = -Infinity;
+    for (let i = 0; i < pos.count; i++) { minY = Math.min(minY, pos.getY(i)); maxY = Math.max(maxY, pos.getY(i)); }
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+      let n = 0;
+      for (const [a, b, c, f] of tolqin) n += Math.sin(x * f * 3 + a) * Math.sin(y * f * 3 + b) * Math.sin(z * f * 3 + c);
+      const k = 1 + (n / tolqin.length) * kuch;
+      pos.setXYZ(i, x * k, y * (1 + (k - 1) * 0.5), z * k);
+      const t = (y - minY) / (maxY - minY || 1);
+      const v = 0.45 + 0.55 * t;
+      rang.push(v, v, v);
+    }
+    g.setAttribute('color', new THREE.Float32BufferAttribute(rang, 3));
+    g.computeVertexNormals();
+    return g;
+  };
+  const qaragay = G(tojlash(new THREE.ConeGeometry(1.5, 1, 14, 4), 0.35, 7));
+  const bargli = G(tojlash(new THREE.IcosahedronGeometry(1, 3), 0.55, 11));
   const tanaM = M(new THREE.MeshStandardMaterial({ color: 0x5b4330, roughness: 0.95 }));
-  const qaragayM = M(new THREE.MeshStandardMaterial({ color: 0x2e5a34, roughness: 0.9, flatShading: true }));
-  const bargliM = M(new THREE.MeshStandardMaterial({ color: 0x4f7f35, roughness: 0.9, flatShading: true }));
+  const qaragayM = M(new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: 0.95, envMapIntensity: 0.35 }));
+  const bargliM = M(new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: 0.95, envMapIntensity: 0.35 }));
   const tanalar = new THREE.InstancedMesh(tana, tanaM, joylar.length);
   const qList = joylar.filter((j) => j.tur === 0), bList = joylar.filter((j) => j.tur === 1);
   const qaragaylar = new THREE.InstancedMesh(qaragay, qaragayM, qList.length * 2);
@@ -74,7 +96,7 @@ export function atrofModel(m: Maydon, sifat: number, soya: boolean): AtrofModel 
     qaragaylar.setMatrixAt(i * 2, mm);
     mm.compose(P(j.p, y0 + 4.6 * j.k), q, s.set(j.k * 0.75, 3.0 * j.k, j.k * 0.75));
     qaragaylar.setMatrixAt(i * 2 + 1, mm);
-    rang.setHSL(0.33 + rnd() * 0.04, 0.35 + rnd() * 0.15, 0.22 + rnd() * 0.08);
+    rang.setHSL(0.31 + rnd() * 0.04, 0.38 + rnd() * 0.12, 0.13 + rnd() * 0.05);
     qaragaylar.setColorAt(i * 2, rang); qaragaylar.setColorAt(i * 2 + 1, rang);
   });
   bList.forEach((j, i) => {
@@ -83,7 +105,7 @@ export function atrofModel(m: Maydon, sifat: number, soya: boolean): AtrofModel 
     barglilar.setMatrixAt(i * 2, mm);
     mm.compose(P({ x: j.p.x + (rnd() - 0.5) * 1.4 * j.k, y: j.p.y + (rnd() - 0.5) * 1.4 * j.k }, y0 + 2.6 * j.k), q, s.set(1.4 * j.k, 1.3 * j.k, 1.4 * j.k));
     barglilar.setMatrixAt(i * 2 + 1, mm);
-    rang.setHSL(0.24 + rnd() * 0.06, 0.4 + rnd() * 0.15, 0.3 + rnd() * 0.08);
+    rang.setHSL(0.22 + rnd() * 0.07, 0.42 + rnd() * 0.14, 0.18 + rnd() * 0.06);
     barglilar.setColorAt(i * 2, rang); barglilar.setColorAt(i * 2 + 1, rang);
   });
   for (const o of [tanalar, qaragaylar, barglilar]) { o.castShadow = soya; o.receiveShadow = false; g.add(o); }

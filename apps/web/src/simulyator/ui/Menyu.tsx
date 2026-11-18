@@ -1,10 +1,10 @@
 import { MASHINALAR } from '../mashinalar';
-import { MASHQ_NOMI } from '../dunyo/avtodrom';
+import { MASHQ_NOMI } from '../imtihon/qoidalar';
 import type { MashqKodi } from '../dunyo/turlar';
 import type { ImtihonSozlama } from '../imtihon/qoidalar';
 import { ArrowLeft, Play, Volume2, VolumeX } from 'lucide-react';
 
-export const RANGLAR = ['#f2f3f5', '#b9bec5', '#1c1f24', '#1f3a66', '#9c1f24'];
+export const RANGLAR = ['#e9ebee', '#b9bec5', '#1c1f24', '#1f3a66', '#9c1f24'];
 
 /** Rasmiy tartib (Toshkent imtihon markazi) — mashq rejimi ro'yxati uchun */
 export const MASHQ_ROYXAT: { indeks: number; kod: MashqKodi; nom: string }[] = [
@@ -46,7 +46,7 @@ export function Menyu({ t, setT, sozlama, onBoshla, onChiq, rasmiy }: {
           <section>
             <h2>Avtomobil</h2>
             <div className="sim-mashinalar">
-              {MASHINALAR.map((m) => (
+              {MASHINALAR.filter((m) => !sozlama || sozlama.mashinalar[m.id] !== false).map((m) => (
                 <button key={m.id} className={'sim-karta' + (t.mashinaId === m.id ? ' tanlangan' : '')} onClick={() => q({ mashinaId: m.id })}>
                   <b>{m.nom}</b>
                   <span>{m.uzunlik.toFixed(2)} × {m.eni.toFixed(2)} m · {m.massa} kg</span>

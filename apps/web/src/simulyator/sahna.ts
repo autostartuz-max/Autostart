@@ -33,7 +33,7 @@ const FIZIKA_QADAM = 1 / 120;
 const SARIQ_CHIZIQ = 0.3; // bordyurdan sariq chiziqgacha (chizma: 0,3 m)
 const CHIZIQ_ENI = 0.1;
 
-const fayl = (nom: string) => `${(import.meta as any).env?.BASE_URL || '/'}simulyator/${nom}`;
+const fayl = (nom: string) => `${(import.meta as any).env?.BASE_URL || '/'}sim-teksturalar/${nom}`;
 
 export class Dvigatel {
   readonly maydon: Maydon;

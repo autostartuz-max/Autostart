@@ -9,6 +9,7 @@ import { maydonModel, type MaydonModel } from './maydonModel';
 import { atrofModel, type AtrofModel } from './atrof';
 import { mashinaModel, type MashinaModel } from './mashinaModel';
 import { odamModel, type OdamModel } from './odam';
+import { osmonYukla, OSMON_QUYOSH } from './aktivlar';
 
 export type KameraRejim = 'orqa' | 'salon' | 'old' | 'tepa';
 export const KAMERALAR: KameraRejim[] = ['orqa', 'salon', 'old', 'tepa'];
@@ -39,6 +40,9 @@ export class Grafika {
   private kadrlar: number[] = [];
   private olcham: ResizeObserver;
   private tmp = new THREE.Vector3();
+  private osmon: Sky;
+  /** Osmon (HDRI) va modellar yuklanib bo'lgach bajariladi (xato bo'lsa ham) */
+  readonly tayyor: Promise<void>;
 
   constructor(private canvas: HTMLCanvasElement, readonly m: Maydon, readonly d: FizikDunyo, readonly turi: MashinaTuri, rang: string, sifat: Sifat) {
     this.sifat = sifat;
@@ -57,9 +61,11 @@ export class Grafika {
     osmon.scale.setScalar(2000);
     const u = osmon.material.uniforms;
     u.turbidity.value = 4.5; u.rayleigh.value = 1.3; u.mieCoefficient.value = 0.004; u.mieDirectionalG.value = 0.8;
-    this.quyoshYon = new THREE.Vector3().setFromSphericalCoords(1, THREE.MathUtils.degToRad(90 - 38), THREE.MathUtils.degToRad(150));
+    // Quyosh — osmon rasmidagi (HDRI) quyosh bilan bir yo'nalishda, soyalar to'g'ri tushsin
+    this.quyoshYon = OSMON_QUYOSH.clone();
     u.sunPosition.value.copy(this.quyoshYon);
     this.sahna.add(osmon);
+    this.osmon = osmon;
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     const muhit = new THREE.Scene();
     const o2 = new Sky(); o2.scale.setScalar(2000);
@@ -68,8 +74,9 @@ export class Grafika {
     muhit.add(o2);
     this.sahna.environment = pmrem.fromScene(muhit).texture;
     pmrem.dispose();
-    this.sahna.fog = new THREE.Fog(0xc8d6e2, 160, 900);
-    this.sahna.add(new THREE.HemisphereLight(0xdbe9ff, 0x5f6e44, 0.55));
+    this.sahna.fog = new THREE.Fog(0xb9c6d2, 220, 1100);
+    const yarimshar = new THREE.HemisphereLight(0xdbe9ff, 0x5f6e44, 0.55);
+    this.sahna.add(yarimshar);
     this.quyosh = new THREE.DirectionalLight(0xfff1dc, 2.4);
     this.quyosh.castShadow = soya;
     const ms = sifat === 2 ? 2048 : 1024;
@@ -91,6 +98,19 @@ export class Grafika {
     this.odamM = odamModel(soya);
     this.odamM.guruh.visible = false;
     this.sahna.add(this.odamM.guruh);
+
+    // Haqiqiy osmon (HDRI): fon + atrof yorug'ligi. Yuklanguncha protsedural osmon turadi.
+    const osmonTayyor = osmonYukla().then((tx) => {
+      const pm = new THREE.PMREMGenerator(this.renderer);
+      this.sahna.environment?.dispose();
+      this.sahna.environment = pm.fromEquirectangular(tx).texture;
+      pm.dispose();
+      this.sahna.background = tx;
+      this.sahna.environmentIntensity = 0.75;
+      this.sahna.remove(this.osmon);
+      yarimshar.intensity = 0.15;
+    });
+    this.tayyor = Promise.all([osmonTayyor, this.atrofM.tayyor]).then(() => undefined, (e) => { console.warn('sim aktivlar:', e); });
 
     this.olcham = new ResizeObserver(() => this.olchamlash());
     this.olcham.observe(canvas.parentElement || canvas);

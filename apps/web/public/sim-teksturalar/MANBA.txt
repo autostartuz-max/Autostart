@@ -1,3 +1,14 @@
-Teksturalar: ambientCG.com (CC0 1.0 — erkin foydalanish, muallifni ko'rsatish shart emas)
-  asfalt-*.jpg — Asphalt026C
-  ot-*.jpg     — Grass004
+Teksturalar va modellar manbalari (barchasi CC0 1.0 — erkin foydalanish, muallifni ko'rsatish shart emas)
+
+ambientCG.com
+  ot-*.jpg       — Grass004
+
+Poly Haven (polyhaven.com), 1k, o'lchami kichraytirilgan:
+  asfalt2-*.jpg  — asphalt_02
+  yer-*.jpg      — sparse_grass
+  beton-*.jpg    — brushed_concrete
+  shagal-*.jpg   — gravel
+  ../sim-osmon/osmon-2k.hdr — kloofendal_48d_partly_cloudy_puresky (HDRI, 2k)
+  ../sim-modellar/*.glb     — street_lamp_01, modular_chainlink_fence, concrete_road_barrier,
+                              security_camera_01, shrub_02, large_iron_gate,
+                              modular_street_seating (glTF-Transform: meshopt, soddalashtirilgan)

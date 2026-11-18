@@ -58,10 +58,11 @@ function zich(h: V[], qadam: number): V[] {
 
 /** Bordyurlar: asfalt chegarasi bo'ylab oq-qora (1 m) bo'laklar, ichki yon yuza va ust */
 function bordyurGeom(halqalar: V[][]) {
-  const pos: number[] = [], rang: number[] = [];
-  const oq = new THREE.Color(0xe9e9e6), qora = new THREE.Color(0x1d1d1f);
-  const quad = (a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, d: THREE.Vector3, r: THREE.Color) => {
-    for (const p of [a, b, c, a, c, d]) { pos.push(p.x, p.y, p.z); rang.push(r.r, r.g, r.b); }
+  const pos: number[] = [], rang: number[] = [], uv: number[] = [];
+  const oq = new THREE.Color(0xe9e9e6), qora = new THREE.Color(0x2a2a2c);
+  const quad = (a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, d: THREE.Vector3, r: THREE.Color, s0: number, s1: number, v0: number, v1: number) => {
+    const t = [[s0, v0], [s0, v1], [s1, v1], [s0, v0], [s1, v1], [s1, v0]];
+    [a, b, c, a, c, d].forEach((p, k) => { pos.push(p.x, p.y, p.z); rang.push(r.r, r.g, r.b); uv.push(t[k][0], t[k][1]); });
   };
   for (const h0 of halqalar) {
     const h = zich(h0, 0.5);
@@ -71,19 +72,31 @@ function bordyurGeom(halqalar: V[][]) {
       const j = (i + 1) % h.length;
       const l = masofa(h[i], h[j]);
       const r = Math.floor((s + l / 2) / 1.0) % 2 ? qora : oq;
-      s += l;
+      const s0 = s; s += l;
       // ust yuza
-      quad(P(h[i], BORDYUR_BALAND), P(tash[i], BORDYUR_BALAND), P(tash[j], BORDYUR_BALAND), P(h[j], BORDYUR_BALAND), r);
+      quad(P(h[i], BORDYUR_BALAND), P(tash[i], BORDYUR_BALAND), P(tash[j], BORDYUR_BALAND), P(h[j], BORDYUR_BALAND), r, s0, s, 0, BORDYUR_ENI);
       // asfalt tomondagi yon yuza
-      quad(P(h[i], 0), P(h[i], BORDYUR_BALAND), P(h[j], BORDYUR_BALAND), P(h[j], 0), r);
+      quad(P(h[i], 0), P(h[i], BORDYUR_BALAND), P(h[j], BORDYUR_BALAND), P(h[j], 0), r, s0, s, 0.2, 0.2 + BORDYUR_BALAND);
     }
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('color', new THREE.Float32BufferAttribute(rang, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   g.computeVertexNormals();
   return g;
 }
+
+/** PBR tekstura to'plami: rang, normal, g'adir-budurlik, AO (public/sim-teksturalar/<nom>-*.jpg) */
+function pbr(nom: string, takror: number, aniz: number, ao = true) {
+  return {
+    map: teksturaYukla(simFayl(`${nom}-rang.jpg`), takror, true, aniz),
+    normalMap: teksturaYukla(simFayl(`${nom}-normal.jpg`), takror, false, aniz),
+    roughnessMap: teksturaYukla(simFayl(`${nom}-gadir.jpg`), takror, false, aniz),
+    ...(ao ? { aoMap: teksturaYukla(simFayl(`${nom}-ao.jpg`), takror, false, aniz) } : {}),
+  };
+}
+const pbrTozala = (o: Record<string, any>) => () => { for (const k of ['map', 'normalMap', 'roughnessMap', 'aoMap']) o[k]?.dispose(); };
 
 export function maydonModel(m: Maydon, d: FizikDunyo, aniz: number, soya: boolean): MaydonModel {
   const guruh = new THREE.Group();
@@ -92,28 +105,35 @@ export function maydonModel(m: Maydon, d: FizikDunyo, aniz: number, soya: boolea
   const geo = <T extends THREE.BufferGeometry>(x: T) => { tozalash.push(() => x.dispose()); return x; };
   const qosh = (o: THREE.Object3D, qabul = true, tashla = false) => { o.receiveShadow = qabul && soya; o.castShadow = tashla && soya; guruh.add(o); return o; };
 
-  // ── O't: katta maydon minus asfalt
-  const r = m.ramka, Q = 260;
-  const otPoly = ayirma([{ x: r.minX - Q, y: r.minY - Q }, { x: r.maxX + Q, y: r.minY - Q }, { x: r.maxX + Q, y: r.maxY + Q }, { x: r.minX - Q, y: r.maxY + Q }], m.asfalt);
-  const otMat = mat(new THREE.MeshStandardMaterial({
-    map: teksturaYukla(simFayl('ot-rang.jpg'), 0.25, true, aniz),
-    normalMap: teksturaYukla(simFayl('ot-normal.jpg'), 0.25, false, aniz),
-    roughness: 0.96, color: 0xbfd09a,
+  // ── Yer: panjara ichida — maysa (orollar), tashqarida — quruq yer (siyrak o't va tuproq), ufqqacha
+  const r = m.ramka, Q = 1600;
+  const ramkaPoly = [{ x: r.minX, y: r.minY }, { x: r.maxX, y: r.minY }, { x: r.maxX, y: r.maxY }, { x: r.minX, y: r.maxY }];
+  const ichkiPoly = ayirma(ramkaPoly, m.asfalt);
+  const tashqiPoly = ayirma([{ x: r.minX - Q, y: r.minY - Q }, { x: r.maxX + Q, y: r.minY - Q }, { x: r.maxX + Q, y: r.maxY + Q }, { x: r.minX - Q, y: r.maxY + Q }], [[ramkaPoly]]);
+  const maysaMat = mat(new THREE.MeshStandardMaterial({
+    map: teksturaYukla(simFayl('ot-rang.jpg'), 0.3, true, aniz),
+    normalMap: teksturaYukla(simFayl('ot-normal.jpg'), 0.3, false, aniz),
+    roughness: 0.97, color: 0xc4cf9f,
   }));
-  for (const poly of otPoly) {
-    const g = geo(new THREE.ShapeGeometry(shakl(poly), 1));
-    g.rotateX(-Math.PI / 2);
-    const o = new THREE.Mesh(g, otMat);
-    o.position.y = OT_BALAND;
-    qosh(o);
+  const yerT = pbr('yer', 0.22, aniz);
+  tozalash.push(pbrTozala(yerT));
+  const yerMat = mat(new THREE.MeshStandardMaterial({ ...yerT, roughness: 1, color: 0xc8c6a8, normalScale: new THREE.Vector2(0.8, 0.8) }));
+  for (const [polylar, material] of [[ichkiPoly, maysaMat], [tashqiPoly, yerMat]] as const) {
+    for (const poly of polylar) {
+      const g = geo(new THREE.ShapeGeometry(shakl(poly), 1));
+      g.rotateX(-Math.PI / 2);
+      const o = new THREE.Mesh(g, material);
+      o.position.y = OT_BALAND;
+      qosh(o);
+    }
   }
 
   // ── Asfalt
+  const asfaltT = pbr('asfalt2', 0.33, aniz);
+  tozalash.push(pbrTozala(asfaltT));
   const asfaltMat = mat(new THREE.MeshStandardMaterial({
-    map: teksturaYukla(simFayl('asfalt-rang.jpg'), 0.25, true, aniz),
-    normalMap: teksturaYukla(simFayl('asfalt-normal.jpg'), 0.25, false, aniz),
-    normalScale: new THREE.Vector2(0.6, 0.6),
-    roughness: 0.93, color: 0x8d8a85, envMapIntensity: 0.3,
+    ...asfaltT, normalScale: new THREE.Vector2(0.9, 0.9),
+    roughness: 1, color: 0xa8a6a2, envMapIntensity: 0.6,
   }));
   for (const poly of m.asfalt) {
     const g = geo(new THREE.ShapeGeometry(shakl(poly), 1));
@@ -122,7 +142,9 @@ export function maydonModel(m: Maydon, d: FizikDunyo, aniz: number, soya: boolea
   }
 
   // ── Bordyurlar
-  qosh(new THREE.Mesh(geo(bordyurGeom(m.chegaralar)), mat(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8 }))), true, true);
+  const betonT = pbr('beton', 1, aniz);
+  tozalash.push(pbrTozala(betonT));
+  qosh(new THREE.Mesh(geo(bordyurGeom(m.chegaralar)), mat(new THREE.MeshStandardMaterial({ ...betonT, vertexColors: true, roughness: 1 }))), true, true);
 
   // ── Bo'yoqlar (estakada ustidagilari ham sirtga mos balandlikda)
   const h = (p: V) => d.balandlik(p) + BOYOQ_Y + (d.balandlik(p) > 0 ? 0.03 : 0);
@@ -162,10 +184,14 @@ export function maydonModel(m: Maydon, d: FizikDunyo, aniz: number, soya: boolea
   }
 
   // ── Estakada: beton ko'tarilish va shaxmat rangli to'siqlar
-  for (const e of m.estakadalar) guruh.add(estakadaModel(e, mat, geo, soya));
+  const estT = pbr('beton', 1, aniz);
+  tozalash.push(pbrTozala(estT));
+  for (const e of m.estakadalar) guruh.add(estakadaModel(e, mat, geo, soya, estT));
 
   // ── Temir yo'l
-  for (const t of m.temirYollar) guruh.add(temirYolModel(t, mat, geo, soya));
+  const shagalT = pbr('shagal', 1.2, aniz);
+  tozalash.push(pbrTozala(shagalT));
+  for (const t of m.temirYollar) guruh.add(temirYolModel(t, mat, geo, soya, shagalT));
 
   // ── Belgilar
   const ustun = geo(new THREE.CylinderGeometry(0.035, 0.035, 1, 8));
@@ -247,7 +273,7 @@ type Mat = <T extends THREE.Material>(x: T) => T;
 type Geo = <T extends THREE.BufferGeometry>(x: T) => T;
 
 /** Estakada: beton massiv (yuqori sirt profil bo'yicha), ikki tomonda shaxmat rangli to'siqlar */
-function estakadaModel(e: Maydon['estakadalar'][number], mat: Mat, geo: Geo, soya: boolean) {
+function estakadaModel(e: Maydon['estakadalar'][number], mat: Mat, geo: Geo, soya: boolean, tx: Record<string, THREE.Texture>) {
   const g = new THREE.Group();
   const L = 2 * e.qiya + e.tepa;
   const hF = (f: number) => (f < e.qiya ? f * e.qiyalik : f < e.qiya + e.tepa ? e.balandlik : (L - f) * e.qiyalik);
@@ -267,7 +293,7 @@ function estakadaModel(e: Maydon['estakadalar'][number], mat: Mat, geo: Geo, soy
   sg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   sg.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   sg.computeVertexNormals();
-  const yuza = new THREE.Mesh(geo(sg), mat(new THREE.MeshStandardMaterial({ color: 0xa9a6a0, roughness: 0.9 })));
+  const yuza = new THREE.Mesh(geo(sg), mat(new THREE.MeshStandardMaterial({ ...tx, color: 0xc9c5bd, roughness: 1 })));
   yuza.receiveShadow = soya;
   // To'siqlar: tashqi va ichki yon, ust — 0,5 m bo'laklar oq/qora
   const tp: number[] = [], tr: number[] = [];
@@ -303,7 +329,7 @@ function estakadaModel(e: Maydon['estakadalar'][number], mat: Mat, geo: Geo, soy
 }
 
 /** Temir yo'l: relslar, shpallar, kesishmada rezina qoplama. Yo'l relslarga perpendikulyar, eni ~4 m. */
-function temirYolModel(t: Maydon['temirYollar'][number], mat: Mat, geo: Geo, soya: boolean) {
+function temirYolModel(t: Maydon['temirYollar'][number], mat: Mat, geo: Geo, soya: boolean, tx: Record<string, THREE.Texture>) {
   const g = new THREE.Group();
   const yarim = t.uzunlik / 2;
   const ox = Math.cos(t.th), oy = Math.sin(t.th);
@@ -311,7 +337,7 @@ function temirYolModel(t: Maydon['temirYollar'][number], mat: Mat, geo: Geo, soy
   const fi = Math.atan2(Math.cos(t.th), -Math.sin(t.th)); // lokal +Z → relslar yo'nalishi
   const yolYarim = 2.3;                                    // yo'l (relslar bo'ylab) yarim eni + zaxira
   // Ballast (shag'al) va shpallar — yo'ldan tashqarida
-  const ballast = mat(new THREE.MeshStandardMaterial({ color: 0x7c7268, roughness: 1 }));
+  const ballast = mat(new THREE.MeshStandardMaterial({ ...tx, color: 0xb8b0a6, roughness: 1 }));
   for (const [f0, f1] of [[-yarim, -yolYarim], [yolYarim, yarim]] as const) {
     const o = new THREE.Mesh(geo(new THREE.BoxGeometry(3.0, 0.2, f1 - f0)), ballast);
     o.position.copy(P(nuqta((f0 + f1) / 2, 0), 0.1)); o.rotation.y = fi;

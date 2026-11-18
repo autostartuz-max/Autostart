@@ -1,0 +1,3 @@
+Teksturalar: ambientCG.com (CC0 1.0 — erkin foydalanish, muallifni ko'rsatish shart emas)
+  asfalt-*.jpg — Asphalt026C
+  ot-*.jpg     — Grass004

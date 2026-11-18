@@ -45,6 +45,8 @@ import Lessons from './screens/Lessons';
 const AdminLessons = lazy(() => import('./screens/AdminLessons'));
 const AdminBelgilar = lazy(() => import('./screens/AdminBelgilar'));
 const AdminAksiyalar = lazy(() => import('./screens/AdminAksiyalar'));
+// 3D avtodrom simulyatori — three.js bilan alohida bo'lak (faqat ochilganda yuklanadi)
+const Simulyator = lazy(() => import('./simulyator/Simulyator'));
 import DarajaTabrik from './ilova/DarajaTabrik';
 
 export default function App() {
@@ -171,6 +173,7 @@ export default function App() {
         {/* Aloqa sahifasidagi aksiyalar — faqat admin, faqat saytda */}
         {!mobilIlova() && <Route path="/aksiyalar/boshqaruv" element={<AdminAksiyalar />} />}
         <Route path="/amaliy" element={<Lessons />} />
+        <Route path="/simulyator" element={<Simulyator />} />
         {!mobilIlova() && <Route path="/amaliy/boshqaruv" element={<AdminLessons />} />}
         <Route path="/profil" element={<Profile />} />
         {!mobilIlova() && <Route path="/savollar" element={<AdminQuestions />} />}

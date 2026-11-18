@@ -6,7 +6,7 @@ import { mobilIlova } from '../native';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, MessageCircle, Moon,
-  ClipboardList, Shuffle, ShieldCheck, ScrollText, TicketPercent, BadgePercent,
+  ClipboardList, Shuffle, ShieldCheck, ScrollText, TicketPercent, BadgePercent, Car,
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -109,6 +109,9 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         <div className="db-sec">O‘rganish</div>
         <button className={'db-navi' + (active === '/amaliy' ? ' active' : '')} onClick={() => go('/amaliy')}>
           <Video size={18} /> <span>Amaliy mashg‘ulotlar</span>
+        </button>
+        <button className={'db-navi' + (active === '/simulyator' ? ' active' : '')} onClick={() => go('/simulyator')}>
+          <Car size={18} /> <span>3D avtodrom</span>
         </button>
         {!MENU_MINIMAL && <>
           {navi(ORGANISH.filter((o) => o.to !== '/amaliy'))}

@@ -21,6 +21,8 @@ export default function OrganishIlova() {
         <IlovaKarta tur="test" sarlavha="Mavzular" ikonka={<Papka />} onClick={() => nav('/mavzular')} />
         <IlovaKarta tur="test" sarlavha="Yo‘l belgilari" ikonka={<YolBelgisi />} onClick={() => nav('/belgilar')} />
         <IlovaKarta tur="test" sarlavha="Avtodrom" ikonka={<Mashina />} onClick={() => nav('/amaliy')} />
+        {/* 3D simulyator: avtodrom mashqlari — rul, pedallar, xatolar */}
+        <IlovaKarta tur="test" sarlavha="3D simulyator" ikonka={<Mashina />} onClick={() => nav('/simulyator')} />
       </div>
     </Ekran>
   );

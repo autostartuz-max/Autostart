@@ -96,7 +96,7 @@ export function atrofModel(m: Maydon, sifat: number, soya: boolean): AtrofModel 
     qaragaylar.setMatrixAt(i * 2, mm);
     mm.compose(P(j.p, y0 + 4.6 * j.k), q, s.set(j.k * 0.75, 3.0 * j.k, j.k * 0.75));
     qaragaylar.setMatrixAt(i * 2 + 1, mm);
-    rang.setHSL(0.31 + rnd() * 0.04, 0.38 + rnd() * 0.12, 0.13 + rnd() * 0.05);
+    rang.setHSL(0.31 + rnd() * 0.04, 0.36 + rnd() * 0.12, 0.2 + rnd() * 0.06, THREE.SRGBColorSpace);
     qaragaylar.setColorAt(i * 2, rang); qaragaylar.setColorAt(i * 2 + 1, rang);
   });
   bList.forEach((j, i) => {
@@ -105,7 +105,7 @@ export function atrofModel(m: Maydon, sifat: number, soya: boolean): AtrofModel 
     barglilar.setMatrixAt(i * 2, mm);
     mm.compose(P({ x: j.p.x + (rnd() - 0.5) * 1.4 * j.k, y: j.p.y + (rnd() - 0.5) * 1.4 * j.k }, y0 + 2.6 * j.k), q, s.set(1.4 * j.k, 1.3 * j.k, 1.4 * j.k));
     barglilar.setMatrixAt(i * 2 + 1, mm);
-    rang.setHSL(0.22 + rnd() * 0.07, 0.42 + rnd() * 0.14, 0.18 + rnd() * 0.06);
+    rang.setHSL(0.22 + rnd() * 0.07, 0.42 + rnd() * 0.14, 0.27 + rnd() * 0.07, THREE.SRGBColorSpace);
     barglilar.setColorAt(i * 2, rang); barglilar.setColorAt(i * 2 + 1, rang);
   });
   for (const o of [tanalar, qaragaylar, barglilar]) { o.castShadow = soya; o.receiveShadow = false; g.add(o); }

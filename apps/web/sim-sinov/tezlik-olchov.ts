@@ -1,0 +1,23 @@
+// Fizika va hakam qadamlarining tezligini o'lchash
+import { avtodromQur } from '../src/simulyator/dunyo/avtodrom';
+import { FizikDunyo } from '../src/simulyator/fizika/dunyo';
+import { Mashina } from '../src/simulyator/fizika/mashina';
+import { Hakam } from '../src/simulyator/imtihon/hakam';
+import { sozlamaBirlashtir } from '../src/simulyator/imtihon/qoidalar';
+import { mashinaTop } from '../src/simulyator/mashinalar';
+const t = mashinaTop('cobalt'); const sz = sozlamaBirlashtir();
+let t0 = performance.now();
+const m = avtodromQur({ B: t.eni, D: t.uzunlik, K: t.koleya, S: t.orqaOsilma, qiyalik: 0.14 });
+console.log('maydon', (performance.now() - t0).toFixed(1), 'ms');
+t0 = performance.now(); const d = new FizikDunyo(m); console.log('fizikDunyo', (performance.now() - t0).toFixed(1), 'ms');
+const mash = new Mashina(t, m.boshlash.p, m.boshlash.th);
+const hk = new Hakam(m, sz, { tur: 'imtihon' }, mash);
+const k = { gaz: 0.2, tormoz: 0, rul: 0, rulUshlangan: true, uzatma: '1' as const, qolTormoz: false };
+const pnl = { kamar: true, chapChiroq: true, ongChiroq: false, avariyaChiroq: false, faralar: false };
+const N = 3000;
+t0 = performance.now(); for (let i = 0; i < N; i++) mash.qadam(1 / 120, k, d); const tf = performance.now() - t0;
+const g = mash.gildiraklar();
+t0 = performance.now(); for (let i = 0; i < N * 12; i++) d.boyoqda(g[i % 4]); const tb = performance.now() - t0;
+t0 = performance.now(); for (let i = 0; i < N; i++) d.tegadimi(mash.kuzov()); const tt = performance.now() - t0;
+t0 = performance.now(); for (let i = 0; i < N; i++) hk.qadam(1 / 120, mash, k, pnl, [], d); const th = performance.now() - t0;
+console.log(`bir qadam: fizika ${(tf / N * 1000).toFixed(1)} µs | boyoqda x12 ${(tb / N * 1000).toFixed(1)} µs | tegadimi ${(tt / N * 1000).toFixed(1)} µs | hakam ${(th / N * 1000).toFixed(1)} µs`);

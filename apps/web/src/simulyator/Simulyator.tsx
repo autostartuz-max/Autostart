@@ -1,109 +1,53 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, RotateCcw, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pause, Play, RotateCcw, Camera, ChevronLeft, ChevronRight, TriangleAlert, Power, Home, Volume2, VolumeX } from 'lucide-react';
 import { useOrqaga } from '../orqaga';
 import { mobilIlova } from '../native';
-import { Dvigatel, type Boshqaruv, type HudMalumot } from './sahna';
-import type { Jarima, Natija } from './imtihon';
-import { MASHINA, YIQILISH_BALLI, type Uzatma } from './sozlamalar';
-import type { Maydon } from './yol';
+import { api } from '../api';
+import { Dvigatel, type Hud } from './dvigatel';
+import { mashinaTop, rulChegara, type Uzatma } from './mashinalar';
+import { sozlamaBirlashtir, type ImtihonSozlama } from './imtihon/qoidalar';
+import type { Jarima, Natija as NatijaT } from './imtihon/hakam';
+import { KAMERALAR, type KameraRejim, type Sifat } from './grafika/sahna';
+import { Rul, Pedal, KamarBelgi, FaraBelgi } from './ui/Boshqaruv';
+import { Xarita } from './ui/Xarita';
+import { Menyu, RANGLAR, MASHQ_ROYXAT, type MenyuTanlov } from './ui/Menyu';
+import { Natija } from './ui/Natija';
 import './simulyator.css';
 
 const UZATMALAR: Uzatma[] = ['R', 'N', '1', '2'];
-
+const KAMERA_NOMI: Record<KameraRejim, string> = { orqa: 'Orqadan', salon: 'Salondan', old: 'Old kamera', tepa: 'Tepadan' };
 const vaqtMatn = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const SAQLASH = 'sim_tanlov';
 
-/** Ekrandagi rul: barmoq bilan aylantiriladi (bir tomonga 1,5 aylanish) */
-function Rul({ b, rulRef }: { b: Boshqaruv; rulRef: React.RefObject<SVGSVGElement> }) {
-  const holat = useRef<{ burchak: number; id: number } | null>(null);
-  const burchak = (e: React.PointerEvent) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    return (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI;
-  };
-  return (
-    <div
-      className="sim-rul"
-      onPointerDown={(e) => {
-        e.currentTarget.setPointerCapture(e.pointerId);
-        holat.current = { burchak: burchak(e), id: e.pointerId };
-        b.rulUshlangan = true;
-      }}
-      onPointerMove={(e) => {
-        const h = holat.current;
-        if (!h || h.id !== e.pointerId) return;
-        const a = burchak(e);
-        let d = a - h.burchak;
-        if (d > 180) d -= 360;
-        if (d < -180) d += 360;
-        h.burchak = a;
-        b.rul = Math.max(-MASHINA.rulAylanish, Math.min(MASHINA.rulAylanish, b.rul + d));
-      }}
-      onPointerUp={() => { holat.current = null; b.rulUshlangan = false; }}
-      onPointerCancel={() => { holat.current = null; b.rulUshlangan = false; }}
-    >
-      <svg ref={rulRef} viewBox="0 0 200 200" aria-label="Rul">
-        <circle cx="100" cy="100" r="88" fill="none" stroke="#1d232b" strokeWidth="20" />
-        <circle cx="100" cy="100" r="88" fill="none" stroke="#3a434f" strokeWidth="3" strokeDasharray="4 7" />
-        <path d="M100 100 L 18 112 M100 100 L 182 112 M100 100 L 100 186" stroke="#1d232b" strokeWidth="18" strokeLinecap="round" />
-        <circle cx="100" cy="100" r="30" fill="#262d36" stroke="#10141a" strokeWidth="4" />
-        <circle cx="100" cy="100" r="9" fill="#ffd600" />
-        <rect x="94" y="8" width="12" height="14" rx="3" fill="#ffd600" />
-      </svg>
-    </div>
-  );
-}
-
-function Pedal({ nom, onBos, sinf }: { nom: string; onBos: (v: number) => void; sinf: string }) {
-  return (
-    <button
-      type="button"
-      className={'sim-pedal ' + sinf}
-      onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); e.currentTarget.classList.add('bosildi'); onBos(1); }}
-      onPointerUp={(e) => { e.currentTarget.classList.remove('bosildi'); onBos(0); }}
-      onPointerCancel={(e) => { e.currentTarget.classList.remove('bosildi'); onBos(0); }}
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      <span className="sim-pedal-chiziq" /><span className="sim-pedal-chiziq" /><span className="sim-pedal-chiziq" />
-      <b>{nom}</b>
-    </button>
-  );
-}
-
-/** Xarita: yo'lak va mashina, tepadan */
-function xaritaChiz(cv: HTMLCanvasElement, maydon: Maydon) {
-  const n = maydon.namunalar;
-  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
-  for (const p of n) { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minZ = Math.min(minZ, p.z); maxZ = Math.max(maxZ, p.z); }
-  const chet = 6, w = cv.width, h = cv.height;
-  const k = Math.min(w / (maxX - minX + chet * 2), h / (maxZ - minZ + chet * 2));
-  const ox = (w - (maxX - minX) * k) / 2, oz = (h - (maxZ - minZ) * k) / 2;
-  // Tepadan qaraganda: +Z — yuqoriga, +X — chapga
-  const t = (x: number, z: number) => [w - (ox + (x - minX) * k), h - (oz + (z - minZ) * k)] as const;
-  return { t, k };
+function boshlangichTanlov(): MenyuTanlov {
+  const st: MenyuTanlov = { mashinaId: 'cobalt', rang: RANGLAR[0], rejim: 'imtihon', mashq: 0, sifat: 'avto', ovoz: true };
+  try { return { ...st, ...JSON.parse(localStorage.getItem(SAQLASH) || '{}') }; } catch { return st; }
 }
 
 export default function Simulyator() {
   const orqaga = useOrqaga('/');
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const xaritaRef = useRef<HTMLCanvasElement>(null);
-  const rulRef = useRef<SVGSVGElement>(null);
-  const dv = useRef<Dvigatel | null>(null);
-  const hudRef = useRef<{ tezlik?: HTMLElement | null; vaqt?: HTMLElement | null; ball?: HTMLElement | null; bosqich?: HTMLElement | null; korsatma?: HTMLElement | null; chap?: HTMLElement | null; ong?: HTMLElement | null }>({});
-  const [b] = useState<Boshqaruv>(() => ({ gaz: 0, tormoz: 0, rul: 0, rulUshlangan: false, uzatma: 'N', qolTormoz: true, kamar: false, chapChiroq: false, ongChiroq: false }));
-  const [, yangila] = useState(0); // tugmalar holati (kamar, uzatma…) o'zgarganda qayta chizish
-  const [xabarlar, setXabarlar] = useState<(Jarima & { id: number })[]>([]);
-  const [natija, setNatija] = useState<Natija | null>(null);
-  const [xato, setXato] = useState('');
-  const qayta = () => yangila((x) => x + 1);
+  const [ekran, setEkran] = useState<'menyu' | 'oyin'>('menyu');
+  const [tanlov, setTanlovH] = useState<MenyuTanlov>(boshlangichTanlov);
+  const [sozlama, setSozlama] = useState<ImtihonSozlama | null>(null);
+  const [rasmiy, setRasmiy] = useState(false);
+  const [tik, setTik] = useState(() => typeof window !== 'undefined' && window.innerHeight > window.innerWidth);
+  const setTanlov = (t: MenyuTanlov) => { setTanlovH(t); try { localStorage.setItem(SAQLASH, JSON.stringify(t)); } catch { /* */ } };
 
-  // Ilovada: ekran gorizontal, holat paneli yashirin; chiqishda qaytariladi
+  // Admin sozlamalari (bo'lmasa — standart)
+  useEffect(() => {
+    let bekor = false;
+    api.simSozlama()
+      .then((r: any) => { if (!bekor) { setSozlama(sozlamaBirlashtir(r?.sozlama)); setRasmiy(!!r?.rasmiy); } })
+      .catch(() => { if (!bekor) setSozlama(sozlamaBirlashtir()); });
+    return () => { bekor = true; };
+  }, []);
+
+  // Ilovada: ekran gorizontal, holat paneli yashirin
   useEffect(() => {
     if (!mobilIlova()) return;
     let bekor = false;
     (async () => {
-      try {
-        const { ScreenOrientation } = await import('@capacitor/screen-orientation');
-        if (!bekor) await ScreenOrientation.lock({ orientation: 'landscape' });
-      } catch { /* plagin yo'q (brauzerdagi ilova ko'rinishi) */ }
+      try { const { ScreenOrientation } = await import('@capacitor/screen-orientation'); if (!bekor) await ScreenOrientation.lock({ orientation: 'landscape' }); } catch { /* */ }
       try { const { StatusBar } = await import('@capacitor/status-bar'); if (!bekor) await StatusBar.hide(); } catch { /* */ }
     })();
     return () => {
@@ -112,214 +56,272 @@ export default function Simulyator() {
       import('@capacitor/status-bar').then(({ StatusBar }) => StatusBar.show()).catch(() => {});
     };
   }, []);
-
-  // Telefonning "orqaga" tugmasi — simulyatordan chiqish
   useEffect(() => {
+    const f = () => setTik(window.innerHeight > window.innerWidth);
+    window.addEventListener('resize', f);
+    return () => window.removeEventListener('resize', f);
+  }, []);
+  // Telefonning "orqaga" tugmasi menyuda — chiqish (o'yinda — Oyin o'zi ushlaydi)
+  useEffect(() => {
+    if (ekran !== 'menyu') return;
     const ch = (e: Event) => { e.preventDefault(); orqaga(); };
     window.addEventListener('ilova:orqaga', ch);
     return () => window.removeEventListener('ilova:orqaga', ch);
-  }, [orqaga]);
-
-  // 3D sahna
-  useEffect(() => {
-    const cv = canvasRef.current;
-    if (!cv) return;
-    let id = 0;
-    let xarita: ReturnType<typeof xaritaChiz> | null = null;
-    let xaritaFon: ImageData | null = null;
-    try {
-      dv.current = new Dvigatel(cv, b, {
-        onHud: (h: HudMalumot) => {
-          const r = hudRef.current;
-          if (r.tezlik) r.tezlik.textContent = String(Math.round(h.tezlik));
-          if (r.vaqt) r.vaqt.textContent = vaqtMatn(h.vaqt);
-          if (r.ball) { r.ball.textContent = String(h.jami); r.ball.classList.toggle('xavf', h.jami >= YIQILISH_BALLI / 2); }
-          if (r.bosqich && r.bosqich.textContent !== h.bosqich) r.bosqich.textContent = h.bosqich;
-          if (r.korsatma && r.korsatma.textContent !== h.korsatma) r.korsatma.textContent = h.korsatma;
-          r.chap?.classList.toggle('yonik', b.chapChiroq && h.chiroqYonadi);
-          r.ong?.classList.toggle('yonik', b.ongChiroq && h.chiroqYonadi);
-          if (rulRef.current) rulRef.current.style.transform = `rotate(${h.rul}deg)`;
-          // Xarita
-          const x = xaritaRef.current;
-          if (x && dv.current) {
-            const c = x.getContext('2d')!;
-            if (!xarita) {
-              xarita = xaritaChiz(x, dv.current.maydon);
-              c.clearRect(0, 0, x.width, x.height);
-              c.lineCap = 'round'; c.lineJoin = 'round';
-              const n = dv.current.maydon.namunalar;
-              c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = Math.max(4, n[0].eni * xarita.k);
-              c.beginPath(); n.forEach((p, i) => { const [a, bb] = xarita!.t(p.x, p.z); if (i) c.lineTo(a, bb); else c.moveTo(a, bb); }); c.stroke();
-              c.strokeStyle = '#3d4652'; c.lineWidth = Math.max(2, n[0].eni * xarita.k - 3);
-              c.beginPath(); n.forEach((p, i) => { const [a, bb] = xarita!.t(p.x, p.z); if (i) c.lineTo(a, bb); else c.moveTo(a, bb); }); c.stroke();
-              xaritaFon = c.getImageData(0, 0, x.width, x.height);
-            }
-            if (xaritaFon) c.putImageData(xaritaFon, 0, 0);
-            const [px, pz] = xarita.t(h.x + Math.sin(h.yaw) * 1.3, h.z + Math.cos(h.yaw) * 1.3);
-            c.save(); c.translate(px, pz); c.rotate(-h.yaw); // xaritada +X chapda: yaw oshsa (chapga burilish) — o'q chapga og'adi
-            c.fillStyle = '#ffd600'; c.strokeStyle = '#111'; c.lineWidth = 1.5;
-            c.beginPath(); c.moveTo(0, -7); c.lineTo(5, 6); c.lineTo(-5, 6); c.closePath(); c.fill(); c.stroke();
-            c.restore();
-          }
-        },
-        onJarima: (j) => {
-          const xid = ++id;
-          setXabarlar((l) => [...l.slice(-2), { ...j, id: xid }]);
-          setTimeout(() => setXabarlar((l) => l.filter((x) => x.id !== xid)), 3200);
-          try { navigator.vibrate?.(120); } catch { /* */ }
-        },
-        onTugadi: (n) => setTimeout(() => setNatija(n), 700),
-      });
-    } catch (e: any) {
-      setXato('Bu qurilmada 3D grafika (WebGL) ishlamadi. Brauzer yoki telefon dasturini yangilab ko‘ring.');
-      console.error('[simulyator]', e);
-    }
-    return () => { dv.current?.dispose(); dv.current = null; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Klaviatura (kompyuterda)
-  useEffect(() => {
-    const bosilgan = new Set<string>();
-    let kad = 0;
-    let oxirgi = performance.now();
-    const rulTsikl = (t: number) => {
-      const dt = Math.min(0.05, (t - oxirgi) / 1000);
-      oxirgi = t;
-      const chap = bosilgan.has('ArrowLeft') || bosilgan.has('KeyA');
-      const ong = bosilgan.has('ArrowRight') || bosilgan.has('KeyD');
-      if (chap !== ong) {
-        b.rulUshlangan = true;
-        b.rul = Math.max(-MASHINA.rulAylanish, Math.min(MASHINA.rulAylanish, b.rul + (ong ? 1 : -1) * 520 * dt));
-      } else if (bosilgan.size && (bosilgan.has('ArrowLeft') || bosilgan.has('ArrowRight') || bosilgan.has('KeyA') || bosilgan.has('KeyD'))) {
-        b.rulUshlangan = true;
-      }
-      kad = requestAnimationFrame(rulTsikl);
-    };
-    kad = requestAnimationFrame(rulTsikl);
-    const bos = (e: KeyboardEvent) => {
-      if (e.repeat && !['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) return;
-      bosilgan.add(e.code);
-      switch (e.code) {
-        case 'ArrowUp': case 'KeyW': b.gaz = 1; break;
-        case 'ArrowDown': case 'KeyS': b.tormoz = 1; break;
-        case 'Space': b.qolTormoz = !b.qolTormoz; qayta(); break;
-        case 'KeyR': b.uzatma = 'R'; qayta(); break;
-        case 'KeyN': case 'Digit0': b.uzatma = 'N'; qayta(); break;
-        case 'Digit1': b.uzatma = '1'; qayta(); break;
-        case 'Digit2': b.uzatma = '2'; qayta(); break;
-        case 'KeyB': b.kamar = !b.kamar; qayta(); break;
-        case 'KeyQ': b.chapChiroq = !b.chapChiroq; b.ongChiroq = false; qayta(); break;
-        case 'KeyE': b.ongChiroq = !b.ongChiroq; b.chapChiroq = false; qayta(); break;
-        case 'KeyC': dv.current?.kameraAlmashtir(); break;
-        default: return;
-      }
-      e.preventDefault();
-    };
-    const qoy = (e: KeyboardEvent) => {
-      bosilgan.delete(e.code);
-      if (e.code === 'ArrowUp' || e.code === 'KeyW') b.gaz = 0;
-      if (e.code === 'ArrowDown' || e.code === 'KeyS') b.tormoz = 0;
-      if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) b.rulUshlangan = false;
-    };
-    window.addEventListener('keydown', bos);
-    window.addEventListener('keyup', qoy);
-    return () => { cancelAnimationFrame(kad); window.removeEventListener('keydown', bos); window.removeEventListener('keyup', qoy); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const boshidan = () => { setNatija(null); setXabarlar([]); dv.current?.qaytaBoshlash(); qayta(); };
-  const tegish = navigator.maxTouchPoints > 0;
+  }, [ekran, orqaga]);
 
   return (
     <div className="sim">
-      <canvas ref={canvasRef} className="sim-canvas" />
+      {ekran === 'menyu' || !sozlama ? (
+        <Menyu t={tanlov} setT={setTanlov} sozlama={sozlama} rasmiy={rasmiy} onChiq={orqaga} onBoshla={() => sozlama && setEkran('oyin')} />
+      ) : (
+        <Oyin tanlov={tanlov} sozlama={sozlama} onMenyu={() => setEkran('menyu')} onChiq={orqaga} />
+      )}
+      {tik && mobilIlova() && <div className="sim-burish">Telefonni yotqizing</div>}
+    </div>
+  );
+}
 
-      {xato && <div className="sim-xato">{xato}<button type="button" onClick={orqaga}>Orqaga</button></div>}
+type XabarT = { id: number; matn: string; ball?: number; tur: 'xato' | 'yaxshi' | 'ogoh' };
+
+function Oyin({ tanlov, sozlama, onMenyu, onChiq }: { tanlov: MenyuTanlov; sozlama: ImtihonSozlama; onMenyu: () => void; onChiq: () => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rulRef = useRef<SVGSVGElement>(null);
+  const dvRef = useRef<Dvigatel | null>(null);
+  const [hud, setHud] = useState<Hud | null>(null);
+  const [xabarlar, setXabarlar] = useState<XabarT[]>([]);
+  const [natija, setNatija] = useState<NatijaT | null>(null);
+  const [pauza, setPauza] = useState(false);
+  const [kamera, setKamera] = useState<KameraRejim>('orqa');
+  const [ovoz, setOvoz] = useState(tanlov.ovoz);
+  const [xato, setXato] = useState('');
+  const [, qayta] = useState(0);
+  const yangila = () => qayta((x) => x + 1);
+  const mashina = mashinaTop(tanlov.mashinaId);
+  const chegaraRul = rulChegara(mashina);
+  const rejim = tanlov.rejim === 'mashq' ? { tur: 'mashq' as const, qadam: tanlov.mashq } : { tur: 'imtihon' as const };
+
+  const xabar = (matn: string, tur: XabarT['tur'], ball?: number) => {
+    const id = Math.random();
+    setXabarlar((l) => [...l.slice(-2), { id, matn, ball, tur }]);
+    setTimeout(() => setXabarlar((l) => l.filter((x) => x.id !== id)), tur === 'xato' ? 3600 : 2600);
+  };
+
+  useEffect(() => {
+    const cv = canvasRef.current;
+    if (!cv) return;
+    const mobil = navigator.maxTouchPoints > 0 && Math.min(screen.width, screen.height) < 900;
+    const sifat: Sifat = tanlov.sifat === 'avto' ? (mobil ? 1 : 2) : tanlov.sifat;
+    try {
+      const dv = new Dvigatel(cv, { mashina, rang: tanlov.rang, rejim, sozlama, sifat, ovoz: tanlov.ovoz }, {
+        onHud: setHud,
+        onJarima: (j: Jarima) => { xabar(j.nom + (j.izoh ? ` — ${j.izoh}` : ''), 'xato', j.ball); try { navigator.vibrate?.(140); } catch { /* */ } },
+        onXabar: (m, tur) => xabar(m, tur),
+        onTugadi: (n) => {
+          setTimeout(() => setNatija(n), 900);
+          const q = rejim.tur === 'mashq' ? dv.maydon.marshrut[rejim.qadam] : null;
+          api.simNatija({
+            rejim: rejim.tur, mashq: q?.kod ?? null, mashina: mashina.id, jami: n.jami, otdi: n.otdi, vaqt: Math.round(n.vaqt),
+            bajarildi: n.bajarildi.length, jamiQadam: n.jamiQadam, sabab: n.sabab,
+            xatolar: n.jarimalar.map((j) => ({ kod: j.kod, nom: j.nom, ball: j.ball, mashq: j.mashq, izoh: j.izoh || null })),
+          }).catch(() => { /* internet yo'q — saqlanmaydi */ });
+        },
+      });
+      dvRef.current = dv;
+      dv.ovoz.boshla();
+      yangila();
+    } catch (e) {
+      console.error('[simulyator]', e);
+      setXato('Bu qurilmada 3D grafika (WebGL) ishlamadi. Brauzer yoki ilovani yangilab ko‘ring.');
+    }
+    // Rul rasmi har kadrda (silliq)
+    let kadr = 0;
+    const rulChiz = () => {
+      const d = dvRef.current;
+      if (d && rulRef.current) rulRef.current.style.transform = `rotate(${d.k.rul}deg)`;
+      kadr = requestAnimationFrame(rulChiz);
+    };
+    kadr = requestAnimationFrame(rulChiz);
+    return () => { cancelAnimationFrame(kadr); dvRef.current?.dispose(); dvRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const dv = dvRef.current;
+  const k = dv?.k, pnl = dv?.pnl;
+  const pauzaQoy = (p: boolean) => { dvRef.current?.pauza(p); setPauza(p); };
+  const qaytaBoshla = () => { dvRef.current?.qaytaBoshlash(); setNatija(null); setPauza(false); yangila(); };
+  const kameraAlmash = () => { const d = dvRef.current; if (!d) return; d.grafika.kameraAlmashtir(); setKamera(d.grafika.kameraRejim); };
+  const uzatmaQoy = (u: Uzatma) => { if (k) { k.uzatma = u; yangila(); } };
+  const signal = (t: 'chap' | 'ong') => {
+    if (!pnl) return;
+    if (t === 'chap') { pnl.chapChiroq = !pnl.chapChiroq; pnl.ongChiroq = false; } else { pnl.ongChiroq = !pnl.ongChiroq; pnl.chapChiroq = false; }
+    yangila();
+  };
+
+  // Telefonning "orqaga" tugmasi: o'yinda — pauza, natijada — menyu
+  useEffect(() => {
+    const ch = (e: Event) => { e.preventDefault(); if (natija) onMenyu(); else pauzaQoy(!pauza); };
+    window.addEventListener('ilova:orqaga', ch);
+    return () => window.removeEventListener('ilova:orqaga', ch);
+  });
+
+  // Klaviatura (kompyuterda): bosib turilganda gaz/tormoz/rul silliq o'zgaradi
+  useEffect(() => {
+    const bos = new Set<string>();
+    let kadr = 0, oxirgi = performance.now();
+    let kRul = false, kGaz = false, kTormoz = false;
+    const tsikl = (t: number) => {
+      const dt = Math.min(0.05, (t - oxirgi) / 1000);
+      oxirgi = t;
+      const d = dvRef.current;
+      if (d) {
+        const kk = d.k;
+        const chap = bos.has('ArrowLeft') || bos.has('KeyA'), ong = bos.has('ArrowRight') || bos.has('KeyD');
+        if (chap !== ong) { kk.rulUshlangan = true; kk.rul = Math.max(-chegaraRul, Math.min(chegaraRul, kk.rul + (ong ? 1 : -1) * 420 * dt)); }
+        else if (kRul) { kk.rulUshlangan = false; kRul = false; }
+        if (bos.has('ArrowUp') || bos.has('KeyW')) kk.gaz = Math.min(bos.has('ShiftLeft') || bos.has('ShiftRight') ? 1 : 0.55, kk.gaz + dt * 1.6);
+        else if (kGaz) { kk.gaz = Math.max(0, kk.gaz - dt * 4); if (kk.gaz === 0) kGaz = false; }
+        if (bos.has('ArrowDown') || bos.has('KeyS')) kk.tormoz = Math.min(1, kk.tormoz + dt * 3);
+        else if (kTormoz) { kk.tormoz = Math.max(0, kk.tormoz - dt * 6); if (kk.tormoz === 0) kTormoz = false; }
+      }
+      kadr = requestAnimationFrame(tsikl);
+    };
+    const harakat = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'ShiftLeft', 'ShiftRight'];
+    const keyDown = (e: KeyboardEvent) => {
+      const d = dvRef.current;
+      if (!d) return;
+      if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
+      if (harakat.includes(e.code)) {
+        bos.add(e.code);
+        if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) kRul = true;
+        if (['ArrowUp', 'KeyW'].includes(e.code)) kGaz = true;
+        if (['ArrowDown', 'KeyS'].includes(e.code)) kTormoz = true;
+        return;
+      }
+      if (e.repeat) return;
+      const kk = d.k, p = d.pnl;
+      switch (e.code) {
+        case 'Space': kk.qolTormoz = !kk.qolTormoz; break;
+        case 'KeyR': kk.uzatma = 'R'; break;
+        case 'KeyN': case 'Digit0': kk.uzatma = 'N'; break;
+        case 'Digit1': kk.uzatma = '1'; break;
+        case 'Digit2': kk.uzatma = '2'; break;
+        case 'KeyB': p.kamar = !p.kamar; break;
+        case 'KeyQ': p.chapChiroq = !p.chapChiroq; p.ongChiroq = false; break;
+        case 'KeyE': p.ongChiroq = !p.ongChiroq; p.chapChiroq = false; break;
+        case 'KeyH': p.avariyaChiroq = !p.avariyaChiroq; break;
+        case 'KeyL': p.faralar = !p.faralar; break;
+        case 'KeyC': d.grafika.kameraAlmashtir(); setKamera(d.grafika.kameraRejim); break;
+        case 'KeyP': case 'Escape': setPauza((x) => { d.pauza(!x); return !x; }); break;
+        case 'Enter': if (!d.mashina.ishlayapti) d.yurgiz(); break;
+        default: return;
+      }
+      yangila();
+    };
+    const keyUp = (e: KeyboardEvent) => { bos.delete(e.code); };
+    const blur = () => bos.clear();
+    window.addEventListener('keydown', keyDown);
+    window.addEventListener('keyup', keyUp);
+    window.addEventListener('blur', blur);
+    kadr = requestAnimationFrame(tsikl);
+    return () => { cancelAnimationFrame(kadr); window.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp); window.removeEventListener('blur', blur); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const h = hud;
+  const ballFoiz = h ? Math.min(1, h.jami / Math.max(1, h.chegara)) : 0;
+  const ortiq = !!h && h.tezlik > h.tezlikChegara + 0.5;
+  const mashqNomi = rejim.tur === 'mashq' ? MASHQ_ROYXAT.find((m) => m.indeks === rejim.qadam)?.nom : null;
+  return (
+    <div className="sim-oyin">
+      <canvas ref={canvasRef} className="sim-canvas" />
+      {xato && <div className="sim-xato">{xato}<button onClick={onChiq}>Chiqish</button></div>}
 
       {/* Tepa panel */}
       <div className="sim-tepa">
-        <button type="button" className="sim-tugma" onClick={orqaga} aria-label="Chiqish"><X /></button>
-        <div className="sim-panel">
-          <div><b ref={(e) => { hudRef.current.ball = e; }}>0</b><span>/ {YIQILISH_BALLI} ball</span></div>
-          <div><b ref={(e) => { hudRef.current.vaqt = e; }}>0:00</b><span>vaqt</span></div>
-          <div className="sim-panel-bosqich"><b ref={(e) => { hudRef.current.bosqich = e; }}>Harakatni boshlash (Start)</b><span>mashq</span></div>
+        <button className="sim-tugma-yumaloq" onClick={() => pauzaQoy(true)} aria-label="Pauza"><Pause size={20} /></button>
+        <div className="sim-statlar">
+          <div className={'sim-stat' + (ballFoiz >= 0.5 ? ' xavf' : '')}><b>{h?.jami ?? 0}<small>/{h?.chegara ?? sozlama.otishChegarasi}</small></b><span>Jarima ball</span></div>
+          <div className="sim-stat"><b>{vaqtMatn(h?.vaqt ?? 0)}</b><span>Vaqt</span></div>
+          <div className="sim-stat"><b>{h?.bajarildi ?? 0}<small>/{h?.jamiQadam ?? 0}</small></b><span>Marshrut</span></div>
+          <div className={'sim-stat' + ((h?.xatolar ?? 0) > 0 ? ' ogoh' : '')}><b>{h?.xatolar ?? 0}</b><span>Xatolar</span></div>
         </div>
-        <button type="button" className="sim-tugma" onClick={() => dv.current?.kameraAlmashtir()} aria-label="Kamerani almashtirish" title="Kamera (C)"><Camera /></button>
-        <button type="button" className="sim-tugma" onClick={boshidan} aria-label="Qaytadan boshlash" title="Qaytadan"><RotateCcw /></button>
-        <canvas ref={xaritaRef} className="sim-xarita" width={150} height={110} />
+        <Xarita maydon={dv?.maydon ?? null} holat={h ? { x: h.x, y: h.y, th: h.th, oldinda: h.oldinda } : null} />
+      </div>
+      <div className="sim-banner">
+        <div className="sim-banner-mashq">{mashqNomi || h?.qadam || ''}</div>
+        {h?.korsatma && <div className="sim-banner-korsatma">{h.korsatma}</div>}
       </div>
 
-      <div className="sim-korsatma" ref={(e) => { hudRef.current.korsatma = e; }} />
-
-      {/* Xato xabarlari */}
+      {/* Xabarlar */}
       <div className="sim-xabarlar">
         {xabarlar.map((x) => (
-          <div className="sim-xabar" key={x.id}><b>+{x.ball}</b> {x.nom}</div>
+          <div key={x.id} className={'sim-xabar ' + x.tur}>{x.ball ? <b>+{x.ball}</b> : null}{x.matn}</div>
         ))}
       </div>
 
-      {/* Chap: spidometr, kamar, ko'rsatkichlar, uzatmalar, pedallar */}
+      {/* Chap tomon: tezlik, kamar, qo'l tormozi, uzatma */}
       <div className="sim-chap">
-        <div className="sim-spidometr">
-          <b ref={(e) => { hudRef.current.tezlik = e; }}>0</b>
+        <div className={'sim-spidometr' + (ortiq ? ' oshdi' : '')}>
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" className="iz" />
+            <circle cx="60" cy="60" r="52" className="tola" style={{ strokeDasharray: `${Math.min(1, (h?.tezlik ?? 0) / 60) * 245} 400` }} />
+          </svg>
+          <b>{Math.round(h?.tezlik ?? 0)}</b>
           <span>km/soat</span>
+          <i className="sim-chegara" title="Tezlik chegarasi">{h?.tezlikChegara ?? 20}</i>
+          <div className="sim-ayl"><div style={{ width: `${Math.min(100, ((h?.ayl ?? 0) / 6200) * 100)}%` }} /></div>
         </div>
-        <div className="sim-qator">
-          <button type="button" className={'sim-kichik' + (b.kamar ? ' yoq' : ' ogoh')} onClick={() => { b.kamar = !b.kamar; qayta(); }} title="Kamar (B)">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.6" fill="currentColor" /><path d="M7 21v-8a5 5 0 0 1 10 0v8" fill="none" stroke="currentColor" strokeWidth="2.2" /><path d="M8 9l8 10" stroke="currentColor" strokeWidth="2.6" /></svg>
-            <span>Kamar</span>
+        <div className="sim-qatorlar">
+          <button className={'sim-tugma kamar' + (pnl?.kamar ? ' yoniq' : ' ogoh')} onClick={() => { if (pnl) { pnl.kamar = !pnl.kamar; yangila(); } }}>
+            <KamarBelgi /> <span>{pnl?.kamar ? 'Kamar' : 'Kamar!'}</span>
           </button>
-          <button type="button" className={'sim-kichik' + (b.qolTormoz ? ' qizil' : '')} onClick={() => { b.qolTormoz = !b.qolTormoz; qayta(); }} title="Qo‘l tormozi (Probel)">
-            <b className="sim-p">P</b>
-            <span>Qo‘l tormozi</span>
+          <button className={'sim-tugma qol' + (k?.qolTormoz ? ' tortilgan' : '')} onClick={() => { if (k) { k.qolTormoz = !k.qolTormoz; yangila(); } }}>
+            <b>(P)</b> <span>Qo‘l tormozi</span>
           </button>
-          <button type="button" ref={(e) => { hudRef.current.chap = e; }} className={'sim-chiroq' + (b.chapChiroq ? ' on' : '')} onClick={() => { b.chapChiroq = !b.chapChiroq; b.ongChiroq = false; qayta(); }} aria-label="Chap burilish ko‘rsatkichi" title="Chapga (Q)"><ChevronLeft /></button>
-          <button type="button" ref={(e) => { hudRef.current.ong = e; }} className={'sim-chiroq' + (b.ongChiroq ? ' on' : '')} onClick={() => { b.ongChiroq = !b.ongChiroq; b.chapChiroq = false; qayta(); }} aria-label="O‘ng burilish ko‘rsatkichi" title="O‘ngga (E)"><ChevronRight /></button>
         </div>
-        <div className="sim-uzatmalar" role="radiogroup" aria-label="Uzatma">
+        <div className="sim-uzatma" role="radiogroup" aria-label="Uzatma">
           {UZATMALAR.map((u) => (
-            <button type="button" key={u} role="radio" aria-checked={b.uzatma === u} className={b.uzatma === u ? 'on' : ''} onClick={() => { b.uzatma = u; qayta(); }}>{u}</button>
+            <button key={u} role="radio" aria-checked={k?.uzatma === u} className={k?.uzatma === u ? 'tanlangan' : ''} onClick={() => uzatmaQoy(u)}>{u}</button>
           ))}
         </div>
       </div>
-
       <div className="sim-pedallar">
-        <Pedal nom="Tormoz" sinf="tormoz" onBos={(v) => { b.tormoz = v; }} />
-        <Pedal nom="Gaz" sinf="gaz" onBos={(v) => { b.gaz = v; }} />
+        <Pedal nom="Tormoz" sinf="tormoz" onBos={(v) => { if (k) k.tormoz = v; }} />
+        <Pedal nom="Gaz" sinf="gaz" onBos={(v) => { if (k) k.gaz = v; }} />
       </div>
 
-      <Rul b={b} rulRef={rulRef} />
-
-      {!tegish && (
-        <div className="sim-klaviatura">
-          <b>Klaviatura:</b> ↑ gaz · ↓ tormoz · ← → rul · 1 / 2 / R / N uzatma · Probel — qo‘l tormozi · B — kamar · Q / E — ko‘rsatkich · C — kamera
+      {/* O'ng tomon: kamera, ko'rsatkichlar, fara, rul */}
+      <div className="sim-ong">
+        <button className="sim-tugma" onClick={kameraAlmash}><Camera size={18} /> <span>{KAMERA_NOMI[kamera]}</span></button>
+        <div className="sim-signal-qator">
+          <button className={'sim-tugma signal' + (pnl?.chapChiroq ? ' yoniq' : '') + (pnl?.chapChiroq && h?.miltilla ? ' milt' : '')} onClick={() => signal('chap')} aria-label="Chap ko‘rsatkich"><ChevronLeft size={26} /></button>
+          <button className={'sim-tugma avariya' + (pnl?.avariyaChiroq ? ' yoniq' : '') + (pnl?.avariyaChiroq && h?.miltilla ? ' milt' : '')} onClick={() => { if (pnl) { pnl.avariyaChiroq = !pnl.avariyaChiroq; yangila(); } }} aria-label="Avariya chirog‘i"><TriangleAlert size={20} /></button>
+          <button className={'sim-tugma signal' + (pnl?.ongChiroq ? ' yoniq' : '') + (pnl?.ongChiroq && h?.miltilla ? ' milt' : '')} onClick={() => signal('ong')} aria-label="O‘ng ko‘rsatkich"><ChevronRight size={26} /></button>
         </div>
+        <button className={'sim-tugma fara' + (pnl?.faralar ? ' yoniq' : '')} onClick={() => { if (pnl) { pnl.faralar = !pnl.faralar; yangila(); } }} aria-label="Faralar"><FaraBelgi /> <span>Fara</span></button>
+      </div>
+      {k && <Rul k={k} chegara={chegaraRul} rulRef={rulRef} />}
+
+      {h && !h.ishlayapti && !natija && (
+        <button className="sim-yurgiz" onClick={() => { dvRef.current?.yurgiz(); yangila(); }}><Power size={22} /> O‘t oldirish</button>
       )}
 
-      {tegish && <div className="sim-yotqiz">Telefonni yotqizing ↻</div>}
-
-      {natija && (
-        <div className="sim-natija-fon">
-          <div className="sim-natija">
-            <div className={'sim-natija-sarlavha' + (natija.otdi ? ' otdi' : ' yiqildi')}>{natija.otdi ? 'Mashq bajarildi!' : 'Mashq bajarilmadi'}</div>
-            <div className="sim-natija-raqamlar">
-              <div><b>{natija.jami}</b><span>jarima balli</span></div>
-              <div><b>{vaqtMatn(natija.vaqt)}</b><span>vaqt</span></div>
-              <div><b>{natija.jarimalar.length}</b><span>xato</span></div>
-            </div>
-            {natija.jarimalar.length > 0 ? (
-              <ul className="sim-natija-royxat">
-                {natija.jarimalar.map((j, i) => <li key={i}><span>{j.nom}</span><b>+{j.ball}</b></li>)}
-              </ul>
-            ) : <p className="sim-natija-bosh">Xatosiz — zo‘r!</p>}
-            <div className="sim-natija-tugmalar">
-              <button type="button" className="sim-natija-asosiy" onClick={boshidan}><RotateCcw size={18} /> Qayta urinish</button>
-              <button type="button" onClick={orqaga}>Chiqish</button>
-            </div>
+      {/* Pauza */}
+      {pauza && !natija && (
+        <div className="sim-pauza-fon">
+          <div className="sim-pauza">
+            <h2>Pauza</h2>
+            <button className="asosiy" onClick={() => pauzaQoy(false)}><Play size={18} /> Davom etish</button>
+            <button onClick={qaytaBoshla}><RotateCcw size={18} /> Qaytadan boshlash</button>
+            <button onClick={kameraAlmash}><Camera size={18} /> Kamera: {KAMERA_NOMI[kamera]}</button>
+            <button onClick={() => { const y = !ovoz; setOvoz(y); dvRef.current?.ovoz.ovozQoy(y); }}>{ovoz ? <Volume2 size={18} /> : <VolumeX size={18} />} Ovoz: {ovoz ? 'yoqilgan' : 'o‘chirilgan'}</button>
+            <button onClick={onMenyu}><Home size={18} /> Menyuga qaytish</button>
+            <div className="sim-pauza-kameralar">{KAMERALAR.map((c) => <span key={c} className={c === kamera ? 'faol' : ''}>{KAMERA_NOMI[c]}</span>)}</div>
           </div>
         </div>
       )}
+
+      {natija && <Natija n={natija} chegara={sozlama.otishChegarasi} onQayta={qaytaBoshla} onMenyu={onMenyu} onChiq={onChiq} />}
     </div>
   );
 }

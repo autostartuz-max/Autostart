@@ -334,6 +334,11 @@ export const oktagon = {
 };
 
 export const api = {
+  /** 3D simulyator: admin belgilagan sozlamalar (jarimalar, vaqt, mashqlar) */
+  simSozlama: () => req('/sim/sozlama'),
+  /** 3D simulyator: imtihon/mashq natijasini saqlash */
+  simNatija: (n: any) => req('/sim/natija', { method: 'POST', body: JSON.stringify(n) }, false),
+  simNatijalarim: () => req('/sim/natijalarim', {}, false),
   authTelegram: (initData: string) =>
     req('/auth/telegram', { method: 'POST', body: JSON.stringify({ initData }) }),
   // promo — do'stining promokodi (ilova); bo'sh bo'lsa yuborilmaydi
@@ -592,6 +597,10 @@ export const adminApi = {
   createTopic: (name: string): Promise<any> => areq('/admin/topics', { method: 'POST', body: JSON.stringify({ name }) }),
   /** Shablonlar soni: kamida 63, yangi shablonga savol qo'shilsa ko'payadi */
   shablonSoni: (): Promise<{ soni: number }> => areq('/admin/shablonlar'),
+  /** 3D simulyator sozlamalari va natijalari */
+  simSozlama: (): Promise<any> => areq('/admin/sim/sozlama'),
+  simSozlamaSaqla: (data: any): Promise<any> => areq('/admin/sim/sozlama', { method: 'PUT', body: JSON.stringify(data) }),
+  simNatijalar: (sahifa = 1): Promise<{ jami: number; natijalar: any[] }> => areq('/admin/sim/natijalar?sahifa=' + sahifa),
   translate: (text: string, to = 'ru'): Promise<{ text: string }> =>
     areq('/admin/translate?to=' + to + '&text=' + encodeURIComponent(text)),
   extractQuestion: (file: File): Promise<{ textLat: string; options: string[]; shablon: number | null; tartib: number | null; correctIndex: number | null; izoh: string; topicId: number | null }> =>

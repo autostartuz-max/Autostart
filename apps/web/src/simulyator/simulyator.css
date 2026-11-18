@@ -1,170 +1,262 @@
-/* Avtodrom simulyatori — butun ekran, gorizontal. Sayt va ilova uchun bir xil. */
+/* 3D avtodrom simulyatori — butun ekran, gorizontal; sensorli va klaviatura boshqaruvi */
 .sim {
-  --sim-panel: rgba(14, 18, 24, .62);
-  --sim-panel2: rgba(30, 36, 46, .78);
-  --sim-chiziq: rgba(255, 255, 255, .14);
-  --sim-sariq: #ffd600;
-  position: fixed; inset: 0; z-index: 50; overflow: hidden; background: #9fc3e3;
-  color: #fff; font-family: inherit; user-select: none; -webkit-user-select: none; touch-action: none;
-  -webkit-tap-highlight-color: transparent;
+  --sim-panel: rgba(12, 15, 20, .58);
+  --sim-panel-q: rgba(12, 15, 20, .78);
+  --sim-chiziq: rgba(255, 255, 255, .12);
+  --sim-sariq: #ffd21f;
+  --sim-qizil: #ff4d4f;
+  --sim-yashil: #2bd576;
+  position: fixed; inset: 0; z-index: 50;
+  background: #0b0e12; color: #fff;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  touch-action: none; overflow: hidden;
 }
-.sim-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .sim button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.sim svg { display: block; }
+.sim-oyin { position: absolute; inset: 0; }
+.sim-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-/* ---- Tepa panel ---- */
+/* ── Umumiy tugmalar */
+.sim-tugma-yumaloq {
+  width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--sim-chiziq);
+  background: var(--sim-panel); backdrop-filter: blur(8px); display: grid; place-items: center; flex: none;
+}
+.sim-tugma-yumaloq.yoniq { background: rgba(255, 210, 31, .2); border-color: var(--sim-sariq); color: var(--sim-sariq); }
+.sim-tugma {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 42px; padding: 0 12px; border-radius: 12px;
+  border: 1px solid var(--sim-chiziq); background: var(--sim-panel); backdrop-filter: blur(8px);
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.sim-tugma:active { transform: scale(.96); }
+
+/* ── Tepa panel */
 .sim-tepa {
-  position: absolute; top: max(10px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left));
-  right: max(12px, env(safe-area-inset-right)); display: flex; align-items: flex-start; gap: 8px; pointer-events: none;
+  position: absolute; top: max(8px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right));
+  display: flex; align-items: flex-start; gap: 10px; pointer-events: none;
 }
 .sim-tepa > * { pointer-events: auto; }
-.sim-tugma {
-  width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--sim-chiziq);
-  background: var(--sim-panel); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
+.sim-statlar {
+  display: flex; background: var(--sim-panel); border: 1px solid var(--sim-chiziq); border-radius: 14px;
+  backdrop-filter: blur(8px); overflow: hidden;
 }
-.sim-tugma svg { width: 22px; height: 22px; }
-.sim-tugma:active { transform: scale(.94); }
-.sim-panel {
-  display: flex; align-items: stretch; border-radius: 22px; background: var(--sim-panel); border: 1px solid var(--sim-chiziq);
-  backdrop-filter: blur(6px); overflow: hidden; min-width: 0;
-}
-.sim-panel > div { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 14px; min-width: 0; }
-.sim-panel > div + div { border-left: 1px solid var(--sim-chiziq); }
-.sim-panel b { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.15; }
-.sim-panel b.xavf { color: #ff6b6b; }
-.sim-panel span { font-size: 10px; letter-spacing: .6px; text-transform: uppercase; opacity: .72; white-space: nowrap; }
-.sim-panel-bosqich b { font-size: 13px; max-width: 34vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sim-stat { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px 12px; min-width: 64px; border-left: 1px solid var(--sim-chiziq); }
+.sim-stat:first-child { border-left: 0; }
+.sim-stat b { font-size: 17px; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.sim-stat b small { font-size: 11px; opacity: .65; font-weight: 600; }
+.sim-stat span { font-size: 10px; opacity: .7; text-transform: uppercase; letter-spacing: .04em; }
+.sim-stat.xavf b { color: var(--sim-qizil); }
+.sim-stat.ogoh b { color: #ffb020; }
 .sim-xarita {
-  margin-left: auto; width: 150px; height: 110px; border-radius: 14px; background: rgba(28, 46, 30, .72);
-  border: 1px solid var(--sim-chiziq); backdrop-filter: blur(6px);
+  margin-left: auto; width: 150px; height: 104px; border-radius: 14px; border: 1px solid var(--sim-chiziq);
+  background: rgba(46, 70, 40, .82); display: block;
 }
 
-.sim-korsatma {
-  position: absolute; top: calc(max(10px, env(safe-area-inset-top)) + 54px); left: 50%; transform: translateX(-50%);
-  max-width: min(560px, 60vw); padding: 7px 14px; border-radius: 12px; background: var(--sim-panel);
-  font-size: 13px; line-height: 1.35; text-align: center; pointer-events: none;
+/* ── Mashq nomi va ko'rsatma */
+.sim-banner {
+  position: absolute; top: max(62px, calc(env(safe-area-inset-top) + 54px)); left: 50%; transform: translateX(-50%);
+  max-width: min(560px, 62vw); text-align: center; pointer-events: none;
 }
-.sim-korsatma:empty { display: none; }
+.sim-banner-mashq {
+  display: inline-block; padding: 4px 12px; border-radius: 999px; background: rgba(255, 210, 31, .95); color: #111;
+  font-weight: 800; font-size: 12.5px; letter-spacing: .01em;
+}
+.sim-banner-korsatma {
+  margin-top: 6px; padding: 7px 12px; border-radius: 12px; background: var(--sim-panel-q); border: 1px solid var(--sim-chiziq);
+  font-size: 13.5px; line-height: 1.3; backdrop-filter: blur(8px);
+}
 
-/* ---- Xato xabarlari ---- */
-.sim-xabarlar { position: absolute; top: 34%; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+/* ── Xabarlar (jarima / muvaffaqiyat) */
+.sim-xabarlar { position: absolute; top: 46%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: min(520px, 70vw); }
 .sim-xabar {
-  padding: 9px 16px; border-radius: 14px; background: rgba(170, 24, 24, .9); font-size: 14.5px; font-weight: 700;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .3); animation: sim-xabar .25s ease-out;
+  padding: 9px 14px; border-radius: 12px; font-weight: 700; font-size: 14px; text-align: center;
+  animation: simXabar .25s ease-out; box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
 }
-.sim-xabar b { color: #ffe07a; margin-right: 6px; }
-@keyframes sim-xabar { from { opacity: 0; transform: translateY(-8px) scale(.96); } }
+.sim-xabar b { margin-right: 8px; padding: 1px 7px; border-radius: 7px; background: rgba(0, 0, 0, .25); }
+.sim-xabar.xato { background: rgba(214, 40, 40, .94); }
+.sim-xabar.yaxshi { background: rgba(28, 160, 90, .94); }
+.sim-xabar.ogoh { background: rgba(255, 176, 32, .96); color: #111; font-size: 20px; letter-spacing: .04em; }
+@keyframes simXabar { from { transform: translateY(8px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
 
-/* ---- Chap ustun: spidometr, kamar, ko'rsatkichlar, uzatmalar ---- */
+/* ── Chap tomon */
 .sim-chap {
-  position: absolute; left: max(12px, env(safe-area-inset-left)); top: calc(max(10px, env(safe-area-inset-top)) + 56px);
+  position: absolute; left: max(10px, env(safe-area-inset-left)); top: 132px;
   display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
 }
 .sim-spidometr {
-  width: 86px; height: 86px; border-radius: 50%; background: var(--sim-panel); border: 3px solid rgba(255, 214, 0, .55);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(6px);
+  position: relative; width: 112px; height: 112px; border-radius: 50%; background: var(--sim-panel-q);
+  border: 1px solid var(--sim-chiziq); display: flex; flex-direction: column; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
 }
-.sim-spidometr b { font-size: 28px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
-.sim-spidometr span { font-size: 10px; opacity: .75; margin-top: 2px; }
-.sim-qator { display: flex; gap: 8px; }
-.sim-kichik {
-  height: 42px; padding: 0 10px; border-radius: 12px; border: 1px solid var(--sim-chiziq); background: var(--sim-panel);
-  display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; backdrop-filter: blur(6px);
+.sim-spidometr svg { position: absolute; inset: 0; transform: rotate(135deg); }
+.sim-spidometr circle { fill: none; stroke-width: 7; stroke-linecap: round; }
+.sim-spidometr .iz { stroke: rgba(255, 255, 255, .1); stroke-dasharray: 245 400; }
+.sim-spidometr .tola { stroke: var(--sim-sariq); transition: stroke-dasharray .12s linear; }
+.sim-spidometr.oshdi .tola { stroke: var(--sim-qizil); }
+.sim-spidometr > b { font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; position: relative; }
+.sim-spidometr > span { font-size: 10px; opacity: .65; position: relative; }
+.sim-chegara {
+  position: absolute; right: -8px; top: -6px; width: 30px; height: 30px; border-radius: 50%; background: #fff;
+  border: 4px solid #d7191c; color: #111; font-style: normal; font-weight: 800; font-size: 12px; display: grid; place-items: center;
 }
-.sim-kichik svg { width: 20px; height: 20px; }
-.sim-kichik.ogoh { color: #ff8a65; }
-.sim-kichik.yoq { color: #5eea8f; border-color: rgba(94, 234, 143, .5); }
-.sim-kichik.qizil { color: #ff6b6b; border-color: rgba(255, 107, 107, .55); }
-.sim-p { width: 22px; height: 22px; border-radius: 50%; border: 2px solid currentColor; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
-.sim-chiroq {
-  width: 52px; height: 42px; border-radius: 12px; border: 1px solid var(--sim-chiziq); background: var(--sim-panel);
-  display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, .55); backdrop-filter: blur(6px);
-}
-.sim-chiroq svg { width: 26px; height: 26px; }
-.sim-chiroq.on { color: #8ff0a4; border-color: rgba(94, 234, 143, .55); }
-.sim-chiroq.yonik { color: #5eea8f; background: rgba(40, 140, 70, .5); }
-.sim-uzatmalar { display: flex; gap: 5px; padding: 5px; border-radius: 14px; background: var(--sim-panel); border: 1px solid var(--sim-chiziq); backdrop-filter: blur(6px); }
-.sim-uzatmalar button {
-  width: 38px; height: 38px; border-radius: 10px; border: none; background: rgba(255, 255, 255, .08);
-  font-size: 17px; font-weight: 900;
-}
-.sim-uzatmalar button.on { background: var(--sim-sariq); color: #141414; }
+.sim-ayl { position: absolute; bottom: 16px; width: 54px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+.sim-ayl div { height: 100%; background: linear-gradient(90deg, #2bd576, #ffd21f 70%, #ff4d4f); }
+.sim-qatorlar { display: flex; gap: 6px; }
+.sim-tugma.kamar.ogoh { border-color: rgba(255, 77, 79, .7); color: #ff8c8d; }
+.sim-tugma.kamar.yoniq { border-color: rgba(43, 213, 118, .7); color: var(--sim-yashil); }
+.sim-tugma.qol b { font-size: 12px; }
+.sim-tugma.qol.tortilgan { background: rgba(214, 40, 40, .85); border-color: #ff6b6b; }
+.sim-uzatma { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--sim-panel); border: 1px solid var(--sim-chiziq); backdrop-filter: blur(8px); }
+.sim-uzatma button { width: 44px; height: 40px; border-radius: 10px; border: 0; background: rgba(255, 255, 255, .06); font-weight: 800; font-size: 16px; }
+.sim-uzatma button.tanlangan { background: var(--sim-sariq); color: #111; }
 
-/* ---- Pedallar ---- */
+/* ── Pedallar */
 .sim-pedallar {
-  position: absolute; left: max(14px, env(safe-area-inset-left)); bottom: max(14px, env(safe-area-inset-bottom));
-  display: flex; align-items: flex-end; gap: 14px;
+  position: absolute; left: max(14px, env(safe-area-inset-left)); bottom: max(12px, env(safe-area-inset-bottom));
+  display: flex; gap: 12px; align-items: flex-end;
 }
 .sim-pedal {
-  width: 76px; height: 112px; border-radius: 16px; border: 2px solid rgba(255, 255, 255, .22);
-  background: linear-gradient(180deg, rgba(58, 66, 78, .92), rgba(32, 37, 45, .92));
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
-  box-shadow: 0 6px 0 rgba(0, 0, 0, .35); touch-action: none; transition: transform .06s, box-shadow .06s;
+  --bosim: 0;
+  position: relative; width: 82px; height: 118px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, .16);
+  background: linear-gradient(180deg, #2b3139, #171b21); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .08);
+  transition: transform .05s;
 }
-.sim-pedal.gaz { height: 132px; width: 70px; }
-.sim-pedal-chiziq { width: 60%; height: 4px; border-radius: 3px; background: rgba(255, 255, 255, .28); }
-.sim-pedal b { font-size: 11px; font-weight: 800; letter-spacing: .4px; opacity: .85; margin-top: 4px; }
-.sim-pedal.bosildi { transform: translateY(5px) scale(.97); box-shadow: 0 1px 0 rgba(0, 0, 0, .35); }
-.sim-pedal.tormoz.bosildi { border-color: #ff6b6b; }
-.sim-pedal.gaz.bosildi { border-color: #5eea8f; }
+.sim-pedal.gaz { height: 134px; width: 74px; }
+.sim-pedal.bosildi { transform: perspective(300px) rotateX(calc(var(--bosim) * 14deg)) scale(.97); }
+.sim-pedal.tormoz.bosildi { background: linear-gradient(180deg, #5a1d1d, #2a1111); }
+.sim-pedal.gaz.bosildi { background: linear-gradient(180deg, #1f4a33, #11261a); }
+.sim-pedal-iz { width: 56%; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .18); }
+.sim-pedal b { position: absolute; bottom: 7px; font-size: 11px; opacity: .8; }
 
-/* ---- Rul ---- */
+/* ── O'ng tomon */
+.sim-ong {
+  position: absolute; right: max(12px, env(safe-area-inset-right)); top: 126px;
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+}
+.sim-signal-qator { display: flex; gap: 6px; }
+.sim-tugma.signal { width: 52px; padding: 0; }
+.sim-tugma.signal.yoniq { border-color: var(--sim-yashil); color: var(--sim-yashil); }
+.sim-tugma.signal.milt { background: rgba(43, 213, 118, .35); }
+.sim-tugma.avariya { width: 46px; padding: 0; color: #ff8c8d; }
+.sim-tugma.avariya.yoniq { border-color: var(--sim-qizil); }
+.sim-tugma.avariya.milt { background: rgba(214, 40, 40, .55); color: #fff; }
+.sim-tugma.fara.yoniq { border-color: #8fd3ff; color: #8fd3ff; }
 .sim-rul {
-  position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom));
-  width: min(210px, 46vh); height: min(210px, 46vh); touch-action: none; cursor: grab;
+  position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom));
+  width: 184px; height: 184px; touch-action: none;
 }
-.sim-rul svg { width: 100%; height: 100%; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .4)); will-change: transform; }
-.sim-rul:active { cursor: grabbing; }
+.sim-rul svg { width: 100%; height: 100%; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .45)); will-change: transform; }
 
-/* ---- Klaviatura yordami (kompyuter) ---- */
-.sim-klaviatura {
-  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); max-width: 48vw; padding: 7px 12px; border-radius: 10px;
-  background: var(--sim-panel); font-size: 11.5px; line-height: 1.45; text-align: center; opacity: .85; pointer-events: none;
+.sim-yurgiz {
+  position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px; padding: 14px 22px; border-radius: 16px; border: 0;
+  background: var(--sim-qizil); font-weight: 800; font-size: 16px; box-shadow: 0 10px 30px rgba(214, 40, 40, .5);
+  animation: simPuls 1s ease-in-out infinite;
 }
+@keyframes simPuls { 50% { transform: translateX(-50%) scale(1.05); } }
 
-/* ---- Telefon tik turganda ---- */
-.sim-yotqiz { display: none; }
-@media (orientation: portrait) {
-  .sim-yotqiz {
-    display: flex; position: absolute; inset: 0; z-index: 5; align-items: center; justify-content: center; text-align: center;
-    background: rgba(10, 14, 20, .92); font-size: 20px; font-weight: 800; padding: 30px;
-  }
+/* ── Pauza va natija */
+.sim-pauza-fon, .sim-natija-fon {
+  position: absolute; inset: 0; background: rgba(5, 8, 12, .62); backdrop-filter: blur(6px);
+  display: grid; place-items: center; padding: 12px; z-index: 5;
 }
-
-/* ---- Natija ---- */
-.sim-natija-fon { position: absolute; inset: 0; z-index: 6; background: rgba(6, 9, 13, .6); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.sim-pauza {
+  width: min(360px, 100%); display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 20px;
+  background: rgba(20, 24, 30, .96); border: 1px solid var(--sim-chiziq);
+}
+.sim-pauza h2 { margin: 0 0 4px; font-size: 20px; text-align: center; }
+.sim-pauza button, .sim-natija-tugmalar button {
+  display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 12px;
+  border: 1px solid var(--sim-chiziq); background: rgba(255, 255, 255, .06); font-weight: 700;
+}
+.sim-pauza button.asosiy, .sim-natija-tugmalar button.asosiy { background: var(--sim-sariq); color: #111; border-color: transparent; }
+.sim-pauza-kameralar { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; font-size: 11px; opacity: .7; }
+.sim-pauza-kameralar span.faol { color: var(--sim-sariq); opacity: 1; }
 .sim-natija {
-  width: min(460px, 100%); max-height: 100%; overflow-y: auto; border-radius: 20px; background: #161c24; border: 1px solid var(--sim-chiziq);
-  padding: 18px 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); animation: sim-xabar .3s ease-out;
+  width: min(640px, 100%); max-height: 100%; display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; border-radius: 22px;
+  background: rgba(20, 24, 30, .97); border: 1px solid var(--sim-chiziq); overflow: hidden;
 }
-.sim-natija-sarlavha { font-size: 22px; font-weight: 900; text-align: center; }
-.sim-natija-sarlavha.otdi { color: #5eea8f; }
-.sim-natija-sarlavha.yiqildi { color: #ff6b6b; }
-.sim-natija-raqamlar { display: flex; justify-content: center; gap: 10px; margin: 14px 0; }
-.sim-natija-raqamlar div { flex: 1; text-align: center; padding: 8px; border-radius: 12px; background: rgba(255, 255, 255, .06); }
-.sim-natija-raqamlar b { display: block; font-size: 22px; font-weight: 900; }
-.sim-natija-raqamlar span { font-size: 11px; opacity: .7; }
-.sim-natija-royxat { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.sim-natija-royxat li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 10px; background: rgba(255, 107, 107, .1); font-size: 13.5px; }
-.sim-natija-royxat b { color: #ff8a8a; }
-.sim-natija-bosh { text-align: center; margin: 6px 0; opacity: .8; }
-.sim-natija-tugmalar { display: flex; gap: 10px; margin-top: 16px; }
-.sim-natija-tugmalar button { flex: 1; height: 46px; border-radius: 12px; border: 1px solid var(--sim-chiziq); background: rgba(255, 255, 255, .08); font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; }
-.sim-natija-tugmalar .sim-natija-asosiy { background: var(--sim-sariq); color: #141414; border: none; }
+.sim-natija-bosh { text-align: center; }
+.sim-natija-holat { font-size: 34px; font-weight: 900; letter-spacing: .06em; }
+.sim-natija.otdi .sim-natija-holat { color: var(--sim-yashil); }
+.sim-natija.otmadi .sim-natija-holat { color: var(--sim-qizil); }
+.sim-natija-sabab { font-size: 13px; opacity: .75; }
+.sim-natija-raqamlar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.sim-natija-raqamlar div { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; border-radius: 12px; background: rgba(255, 255, 255, .05); }
+.sim-natija-raqamlar b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.sim-natija-raqamlar b.xavf { color: var(--sim-qizil); }
+.sim-natija-raqamlar span { font-size: 10.5px; opacity: .65; text-align: center; }
+.sim-natija-royxat { overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 4px; touch-action: pan-y; }
+.sim-natija-qator { display: grid; grid-template-columns: 44px 1fr auto; gap: 8px; align-items: center; padding: 7px 9px; border-radius: 10px; background: rgba(255, 255, 255, .04); font-size: 13px; }
+.sim-natija-qator .vaqt { opacity: .6; font-variant-numeric: tabular-nums; }
+.sim-natija-qator .nom { display: flex; flex-direction: column; }
+.sim-natija-qator .nom small { opacity: .65; font-size: 11.5px; }
+.sim-natija-qator .nom small.mashq { opacity: .45; }
+.sim-natija-qator .ball { font-weight: 800; color: #ff8c8d; }
+.sim-natija-toza { padding: 14px; text-align: center; border-radius: 12px; background: rgba(43, 213, 118, .1); color: var(--sim-yashil); font-weight: 700; }
+.sim-natija-tugmalar { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 8px; }
 
-.sim-xato {
-  position: absolute; inset: 0; z-index: 7; display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center;
-  background: #10151c; padding: 24px; text-align: center; font-size: 15px;
+/* ── Menyu */
+.sim-menyu {
+  position: absolute; inset: 0; overflow-y: auto; touch-action: pan-y;
+  background: radial-gradient(120% 120% at 80% 0%, #1d2a3a 0%, #0b0e12 55%);
+  padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
 }
-.sim-xato button { padding: 10px 20px; border-radius: 10px; border: none; background: var(--sim-sariq); color: #111; font-weight: 800; }
+.sim-menyu-ich { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; min-height: 100%; }
+.sim-menyu-bosh { display: flex; align-items: center; gap: 12px; }
+.sim-menyu-bosh h1 { margin: 0; font-size: 22px; font-weight: 900; }
+.sim-menyu-bosh p { margin: 2px 0 0; font-size: 12.5px; opacity: .65; }
+.sim-menyu-tana { display: grid; grid-template-columns: 1fr 1.25fr; gap: 14px; }
+.sim-menyu section { background: rgba(255, 255, 255, .04); border: 1px solid var(--sim-chiziq); border-radius: 18px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.sim-menyu h2 { margin: 2px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; opacity: .6; }
+.sim-mashinalar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sim-karta { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--sim-chiziq); background: rgba(255, 255, 255, .04); text-align: left; }
+.sim-karta b { font-size: 15px; }
+.sim-karta span { font-size: 11.5px; opacity: .6; }
+.sim-karta.tanlangan { border-color: var(--sim-sariq); background: rgba(255, 210, 31, .1); }
+.sim-ranglar { display: flex; gap: 8px; }
+.sim-rang { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .25); }
+.sim-rang.tanlangan { border-color: var(--sim-sariq); box-shadow: 0 0 0 3px rgba(255, 210, 31, .3); }
+.sim-qator { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; }
+.sim-segment { display: flex; gap: 3px; padding: 3px; border-radius: 12px; background: rgba(255, 255, 255, .06); }
+.sim-segment button { padding: 7px 11px; border-radius: 9px; border: 0; background: transparent; font-size: 13px; font-weight: 600; opacity: .75; }
+.sim-segment button.tanlangan { background: var(--sim-sariq); color: #111; opacity: 1; }
+.sim-segment.keng button { flex: 1; }
+.sim-mashqlar { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.sim-mashqlar button { text-align: left; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--sim-chiziq); background: rgba(255, 255, 255, .03); font-size: 12.5px; line-height: 1.25; }
+.sim-mashqlar button.tanlangan { border-color: var(--sim-sariq); background: rgba(255, 210, 31, .12); }
+.sim-izoh { font-size: 12.5px; line-height: 1.45; opacity: .8; padding: 8px 10px; border-radius: 12px; background: rgba(255, 255, 255, .04); }
+.sim-izoh.kichik { font-size: 11.5px; opacity: .6; }
+.sim-boshla {
+  align-self: center; display: flex; align-items: center; gap: 8px; padding: 13px 38px; border-radius: 16px; border: 0;
+  background: var(--sim-sariq); color: #111; font-weight: 900; font-size: 17px; box-shadow: 0 10px 30px rgba(255, 210, 31, .25); margin-bottom: 6px;
+}
 
-/* Past ekran (telefon gorizontal) — ixchamroq */
+.sim-xato { position: absolute; inset: 0; display: grid; place-content: center; gap: 12px; text-align: center; padding: 24px; background: #0b0e12; z-index: 9; }
+.sim-xato button { padding: 10px 18px; border-radius: 12px; border: 0; background: var(--sim-sariq); color: #111; font-weight: 800; }
+.sim-burish { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; background: #0b0e12; font-size: 18px; font-weight: 700; }
+
+/* ── Past ekranlar (telefon gorizontal) */
 @media (max-height: 420px) {
-  .sim-spidometr { width: 70px; height: 70px; }
-  .sim-spidometr b { font-size: 23px; }
-  .sim-pedal { width: 64px; height: 92px; }
-  .sim-pedal.gaz { width: 60px; height: 110px; }
-  .sim-chap { gap: 6px; }
-  .sim-kichik span { display: none; }
-  .sim-xarita { width: 120px; height: 88px; }
+  .sim-stat { padding: 3px 9px; min-width: 54px; }
+  .sim-stat b { font-size: 15px; }
+  .sim-stat span { font-size: 9px; }
+  .sim-xarita { width: 128px; height: 84px; }
+  .sim-banner { top: 52px; }
+  .sim-banner-korsatma { font-size: 12px; padding: 5px 10px; }
+  .sim-chap { top: 96px; gap: 6px; }
+  .sim-spidometr { width: 86px; height: 86px; }
+  .sim-spidometr > b { font-size: 26px; }
+  .sim-tugma { min-height: 36px; padding: 0 9px; font-size: 12px; }
+  .sim-uzatma button { width: 38px; height: 34px; font-size: 14px; }
+  .sim-ong { top: 100px; gap: 6px; }
+  .sim-tugma.signal { width: 46px; }
+  .sim-pedal { width: 70px; height: 96px; }
+  .sim-pedal.gaz { width: 64px; height: 110px; }
+  .sim-rul { width: 150px; height: 150px; }
+  .sim-menyu-tana { grid-template-columns: 1fr 1.2fr; }
+}
+@media (max-width: 700px) and (min-height: 421px) {
+  .sim-menyu-tana { grid-template-columns: 1fr; }
 }

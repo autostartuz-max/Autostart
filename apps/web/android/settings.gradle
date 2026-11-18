@@ -3,3 +3,26 @@ include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
 
 apply from: 'capacitor.settings.gradle'
+
+// --- Unity 3D avtodrom simulyatori ("Unity as a Library") ---
+// Yo'l local.properties dagi "unity.kutubxona" dan olinadi: avtodrom-unity loyihasining eksporti
+// (Avtodrom.Tahrir.Yiguvchi.AndroidKutubxona → Builds/AndroidKutubxona/unityLibrary).
+// Yo'l yo'q bo'lsa ilova Unity'siz yig'iladi — "3D simulyator" kartasi eski three.js simulyatorini ochadi.
+def unityXossalar = new Properties()
+def lokalXossalar = file('local.properties')
+if (lokalXossalar.exists()) lokalXossalar.withInputStream { unityXossalar.load(it) }
+def unityKutubxona = unityXossalar.getProperty('unity.kutubxona')
+if (unityKutubxona && new File(unityKutubxona, 'build.gradle').exists()) {
+    include ':unityLibrary'
+    project(':unityLibrary').projectDir = new File(unityKutubxona)
+    // unityLibrary o'z sozlamalarini (unity.* — SDK/NDK yo'llari, versiyalar) eksport ildizidagi
+    // gradle.properties dan o'qiydi; ularni shu loyihaning barcha modullariga uzatamiz.
+    def unityGradleXossalar = new File(new File(unityKutubxona).parentFile, 'gradle.properties')
+    if (unityGradleXossalar.exists()) {
+        def ux = new Properties()
+        unityGradleXossalar.withInputStream { ux.load(it) }
+        gradle.beforeProject { p ->
+            ux.each { k, v -> if (k.toString().startsWith('unity') && !p.hasProperty(k.toString())) p.ext.set(k.toString(), v) }
+        }
+    }
+}

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Unity simulyatori (unityLibrary) Android 8.0+ talab qiladi, ilova esa 6.0+ da ishlaydi.
+         Simulyator eski telefonda ochilmaydi: AvtodromPlugin versiyani tekshiradi. -->
+    <uses-sdk tools:overrideLibrary="com.unity3d.player" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

@@ -1,8 +1,17 @@
 package uz.autostart.app;
 
+import android.os.Bundle;
+
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    // Ilovaning o'z plaginlari super.onCreate dan OLDIN ro'yxatga olinadi (Capacitor talabi).
+    registerPlugin(AvtodromPlugin.class);
+    super.onCreate(savedInstanceState);
+  }
+
   /**
    * Ilova o'z o'lchamini O'ZI belgilaydi.
    *

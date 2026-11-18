@@ -35,6 +35,20 @@ android {
             }
         }
     }
+    // Unity simulyatori ulangan bo'lsa: uning ma'lumot fayllari APK ichida siqilmasin (Unity ularni to'g'ridan-to'g'ri o'qiydi)
+    if (findProject(':unityLibrary') != null) {
+        androidResources {
+            noCompress.addAll(['.unity3d', '.ress', '.resource', '.obb', '.bundle', '.unityexp'])
+        }
+        // Unity'ning NDK si: APK dagi .so fayllardan debug belgilarini olib tashlash uchun (APK kichrayadi)
+        ndkPath project.findProperty('unity.androidNdkPath')
+        // Unity o'z kutubxonalarini (libunity.so, libil2cpp.so) o'rnatishda ochilgan holda kutadi
+        packaging {
+            jniLibs {
+                useLegacyPackaging true
+            }
+        }
+    }
     buildTypes {
         release {
             if (kalitFayli.exists()) signingConfig signingConfigs.release
@@ -60,6 +74,10 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+    // Unity 3D avtodrom simulyatori — faqat settings.gradle uni ulagan bo'lsa (local.properties: unity.kutubxona)
+    if (findProject(':unityLibrary') != null) {
+        implementation project(':unityLibrary')
+    }
 }
 
 apply from: 'capacitor.build.gradle'

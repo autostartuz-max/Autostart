@@ -5,8 +5,26 @@
  * funksiya darrov qaytadi. Shuning uchun bitta kod bazasi ham saytda, ham
  * App Store/Play Market ilovasida ishlayveradi.
  */
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { navbatniYubor } from './api';
+
+/** Android ilovadagi o'z plaginimiz (android/app/.../AvtodromPlugin.java) */
+const AvtodromPlagin = registerPlugin<{ ochish(): Promise<void> }>('Avtodrom');
+
+/**
+ * Unity'dagi 3D avtodrom simulyatorini ochadi (faqat Android ilovada).
+ * Ochilmasa (iOS, brauzer, Unity'siz yig'ish, 32-bitli telefon) false qaytaradi —
+ * shunda chaqiruvchi eski three.js simulyatorini ochadi.
+ */
+export async function unitySimulyatorniOch(): Promise<boolean> {
+  if (Capacitor.getPlatform() !== 'android') return false;
+  try {
+    await AvtodromPlagin.ochish();
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Faqat ishlab chiqishda (npm run dev): brauzerda ilova ko'rinishini sinash.

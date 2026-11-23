@@ -94,6 +94,8 @@ export default function TestPlayer() {
   const [answers, setAnswers] = useState<Record<number, Answered>>({});
   // Javoblarning eng so'nggi holati — fon jarayonlari shundan o'qiydi
   const answersRef = useRef<Record<number, Answered>>({});
+  // Saralash (yulduz/xatcho'p) so'rovi ketayotganda qayta bosish e'tiborsiz — tez ikki bosishda holat chalkashmasin
+  const saralashBand = useRef(false);
   // "Davom etish" joyi topildimi (birinchi javobsiz savol)
   const davomTopildi = useRef(false);
   // Tarix tiklanayotganda sessiya SAQLANMAYDI: aks holda savollar chiqishi
@@ -786,15 +788,20 @@ export default function TestPlayer() {
   const closeRule = () => setShowRule(false);
 
   const toggleBm = async () => {
+    if (saralashBand.current) return;
+    saralashBand.current = true;
+    const qid = q.id;
     try {
-      const r = await api.toggleBookmark(q.id);
+      const r = await api.toggleBookmark(qid);
       setBmarks((s) => {
         const n = new Set(s);
-        r.bookmarked ? n.add(q.id) : n.delete(q.id);
+        r.bookmarked ? n.add(qid) : n.delete(qid);
         return n;
       });
     } catch {
       /* ignore */
+    } finally {
+      saralashBand.current = false;
     }
   };
 

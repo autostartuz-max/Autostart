@@ -1098,14 +1098,24 @@ userRouter.post(
   ah(async (req, res) => {
     const userId = (req as any).userId as number;
     const questionId = Number(req.params.questionId);
+    if (!Number.isInteger(questionId) || questionId <= 0) return res.status(400).json({ error: 'Savol noto‘g‘ri' });
+    // Tez ikki marta bosilsa ikkala so'rov bir vaqtda keladi: avval ikkinchisi birinchi o'chirgan yozuvni
+    // yana o'chirmoqchi bo'lardi (P2025) yoki ikkalasi ham yaratardi (P2002) — 500 xato (2026-11-24).
+    // Endi ikkala holat ham xavfsiz: o'chirish — deleteMany, takroriy yaratish — natija baribir "saralangan".
     const existing = await prisma.bookmark.findUnique({
       where: { userId_questionId: { userId, questionId } },
+      select: { id: true },
     });
     if (existing) {
-      await prisma.bookmark.delete({ where: { id: existing.id } });
+      await prisma.bookmark.deleteMany({ where: { userId, questionId } });
       return res.json({ bookmarked: false });
     }
-    await prisma.bookmark.create({ data: { userId, questionId } });
+    try {
+      await prisma.bookmark.create({ data: { userId, questionId } });
+    } catch (e: any) {
+      if (e?.code === 'P2003') return res.status(404).json({ error: 'Savol topilmadi' });
+      if (e?.code !== 'P2002') throw e; // parallel so'rov allaqachon yaratgan
+    }
     res.json({ bookmarked: true });
   })
 );

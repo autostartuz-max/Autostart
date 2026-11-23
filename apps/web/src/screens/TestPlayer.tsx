@@ -922,22 +922,28 @@ export default function TestPlayer() {
 
     // IMTIHON QOIDASI: xatolar chegarasidan oshsa — test shu yerda tugaydi
     const xatolar = questions.filter((qq) => yangi[qq.id] && !yangi[qq.id].isCorrect).length;
-    const chegaradanOshdi = examMode && xatolar >= maxXato;
+    // Shablon (bilet) testlarida xatolar soni testni to'xtatmaydi (2026-11-24, foydalanuvchi talabi) —
+    // o'quvchi 20 ta savolning hammasini yechib chiqadi. Real imtihon va random testlarda qoida o'z kuchida.
+    const chegaradanOshdi = examMode && !shablon && xatolar >= maxXato;
 
     const last = idx >= questions.length - 1;
+    // Hamma savolga javob berildi — natija HAR DOIM chiqadi. Avval faqat oxirgi savoldan keyingi avtomatik
+    // o'tishda chiqardi: ilovada xato javobdan keyin avtomatik o'tish o'chiq bo'lgani uchun oxirgi savolga
+    // xato javob berilsa yoki savollar tartibsiz yechilsa natija umuman chiqmasdi (2026-11-24).
+    const hammasiYechildi = questions.every((qq) => yangi[qq.id]);
     clearNext();
     // Ilovada sozlamalar hisobga olinadi: to'g'ri/xato javobda avtomatik o'tish
     // va animatsiyasiz (kutmasdan) o'tish. Saytda avvalgidek — har doim 2 s.
     // Imtihonda xatolar chegarasi esa har qanday holatda testni tugatadi.
     const avto = !mobil || (r.isCorrect ? settings.autoNextCorrect : settings.autoNextWrong);
-    if (!avto && !chegaradanOshdi) return;
+    if (!avto && !chegaradanOshdi && !hammasiYechildi) return;
     const kutish = mobil && settings.noAnim ? 0 : 2000;
     nextRef.current = window.setTimeout(() => {
       nextRef.current = null;
       if (chegaradanOshdi) {
         setTugashSabab('xato');
         setFinished(true);
-      } else if (last) {
+      } else if (last || hammasiYechildi) {
         setFinished(true);
       } else {
         setIdx(idx + 1);
@@ -1444,7 +1450,7 @@ export default function TestPlayer() {
             <div className="rxulosa">
               {rTotal} ta savoldan <b>{rCorrect + rWrong}</b> tasiga javob berdingiz:
               <b className="ok"> {rCorrect} to‘g‘ri</b>, <b className="no">{rWrong} xato</b>.
-              {examMode && <> {rMaxWrong} ta xatoda imtihon to‘xtaydi.</>}
+              {examMode && !shablon && <> {rMaxWrong} ta xatoda imtihon to‘xtaydi.</>}
             </div>
             <div className="rgrid-label">Savollar</div>
             <div className="rgrid">

@@ -1,0 +1,49 @@
+/* ===== Ilova: ichki menyular och yashil (2026-11-24) =====
+   Foydalanuvchi: "barcha menularga kirgandagi ko'rinishni test oynasidagi tema ko'rinishiga keltir"
+   (namuna: Shablon testlar kabi to'q ko'k ichki ekranlar → test oynasidagi och yashil).
+   Faqat ilovada (html.cap). O'zgarmaydi: pastki menyudagi to'rtta asosiy ekran (Asosiy, Testlar,
+   O'rganish, Profil), kirish/ro'yxat oynasi, pastki oynalar (ie-sheet), Bellashuv va Tariflar sahifasi.
+   Ranglar mavzu sozlamasidan qat'i nazar — test oynasidagidek (theme.css: .cap .tp2).
+   Selektorlar ataylab kuchliroq (html.cap .db.db) — saytning yorug' mavzusi qoidalaridan ustun bo'lsin. */
+
+/* Umumiy o'zgaruvchilar (.app ichidagi oddiy sahifalar: Darslik va h.k.) */
+html.cap.cap { --bg: #d4f2db; --card: #ffffff; --card2: #f1faf3; --border: #c4e5cd; --text: #1f2d3d; --muted: #5b6b7c; }
+
+/* Sayt komponentlari ishlatadigan sahifalar: Mavzular, Xatolarim, Amaliy, Sozlamalar, Aloqa, Reyting... */
+html.cap .db.db {
+  --db-bg: #d4f2db; --db-side: #ffffff; --db-card: #ffffff; --db-card2: #f1faf3;
+  --db-border: #c4e5cd; --db-text: #1f2d3d; --db-muted: #5b6b7c; --db-dim: #8a99a8;
+  --db-green: #2f9e44; --db-yellow: #b98900; --db-red: #d63b30; --db-orange: #c55a00; --db-blue: #2f9e44;
+  --db-grid: rgba(15, 23, 42, .09);
+  background: var(--db-bg);
+}
+
+/* ---------- Shablon testlar (ie-*) ----------
+   Bellashuv ham ie-* ishlatadi (ie ok-ekran), lekin u o'z to'q "o'yin" uslubida qoladi — :not(.ok-ekran) */
+html.cap .ie:not(.ok-ekran), html.cap .ie:not(.ok-ekran) .ie-head { background: #d4f2db; color: #1f2d3d; }
+html.cap .ie:not(.ok-ekran) .ie-top, html.cap .ie:not(.ok-ekran) .ie-tabs-wrap { border-bottom-color: #b9e0c3; }
+html.cap .ie:not(.ok-ekran) .ie-back { background: #ffffff; border: 1px solid #bfe3c8; border-bottom: 3px solid #a9d6b5; color: #3b4b5c; }
+html.cap .ie:not(.ok-ekran) .ie-title { color: #1f2d3d; }
+html.cap .ie:not(.ok-ekran) .ie-tabs { background: #ffffff; box-shadow: inset 0 0 0 1px #c4e5cd; }
+html.cap .ie:not(.ok-ekran) .ie-tab { color: #5b6b7c; }
+html.cap .ie:not(.ok-ekran) .ie-tab.on { background: #2f9e44; border-color: #2f9e44; color: #ffffff; }
+html.cap .ie:not(.ok-ekran) .ie-tile { background: #ffffff; border: 1px solid #c4e5cd; border-bottom: 5px solid #a9d6b5; color: #1f2d3d; }
+html.cap .ie:not(.ok-ekran) .ie-empty { color: #5b6b7c; }
+
+/* ---------- Yo'l belgilari (ilv-bl) ---------- */
+html.cap .ilv.ilv-bl {
+  --ilv-fon: #d4f2db; --ilv-karta: #ffffff; --ilv-oq: #1f2d3d; --ilv-matn2: #5b6b7c;
+  background: #d4f2db; color: #1f2d3d;
+}
+html.cap .ilv.ilv-bl .ilv-bl-sarlavha { color: #1f2d3d; }
+html.cap .ilv.ilv-bl .ilv-bl-raqam { color: #1f7a34; }
+html.cap .ilv.ilv-bl .ilv-bl-toifa,
+html.cap .ilv.ilv-bl .ilv-bl-karta { border-color: #c4e5cd; box-shadow: 0 3px 0 #a9d6b5; }
+html.cap .ilv.ilv-bl .ilv-bl-orqaga { background: #ffffff; color: #3b4b5c; box-shadow: inset 0 0 0 1px #bfe3c8; }
+html.cap .ilv.ilv-bl .ilv-bl-qidiruv { background: #ffffff; box-shadow: inset 0 0 0 1px #c4e5cd; }
+
+/* ---------- Mayda tuzatishlar (to'q mavzu uchun qotirilgan ranglar) ---------- */
+/* Reytingdagi 1-3 o'rinlar: sariq och fonda o'qilmaydi — to'q oltinrang */
+html.cap .db.db .rt-rank.top { color: #b98900; }
+/* Mavzulardagi "Aralash yechish" tugmachasi: o'chiq holati to'q ko'k edi — kulrang-yashil */
+html.cap .db.db .mv-tog:not(.on) { background: #b7c9bd; }

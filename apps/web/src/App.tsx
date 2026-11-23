@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { api, setToken, hasToken, clearToken, tokenniTikla } from './api';
 import { initTelegram, getInitData, isTelegram } from './telegram';
 import Landing from './screens/Landing';
@@ -7,7 +7,8 @@ import Login from './screens/Login';
 import Register from './screens/Register';
 import Dashboard from './screens/Dashboard';
 import Home from './screens/Home';
-import { mobilIlova } from './native';
+import { mobilIlova, testEkrani } from './native';
+import './ilova/yashil-mavzu.css';
 import Shablon from './screens/Shablon';
 import ShablonIlova from './screens/ShablonIlova';
 import Oktagon from './screens/oktagon/Oktagon';
@@ -98,6 +99,15 @@ export default function App() {
       setChecking(false);
     })();
   }, []);
+
+  // Ilova: ichki menyular och yashil (ilova/yashil-mavzu.css) — telefonning tepa/pastki chiziqlari ham shu rangda
+  const loc = useLocation();
+  useEffect(() => {
+    if (!mobilIlova()) return;
+    if (!/^\/(shablon|mavzular|xatolarim|belgilar|amaliy|profil|aloqa|darslik|reyting|yechilgan|hujjat|random)(\/|$)/.test(loc.pathname)) return;
+    testEkrani(true);
+    return () => testEkrani(false);
+  }, [loc.pathname]);
 
   // Telefonning orqaga tugmasi: tarix bo'lmagan sahifada ilovadan chiqmasdan bosh sahifaga (native.ts)
   const nav = useNavigate();

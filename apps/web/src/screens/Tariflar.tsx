@@ -5,7 +5,7 @@ import AppSidebar from '../components/AppSidebar';
 import { mobilIlova, ilovaEkrani } from '../native';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
-  IMKONIYAT_DARAJA, TARIFLAR_ZAXIRA, TARIF_NOMI, TOLOV_KONTAKT_ZAXIRA, narxMatn, sanaMatn, useTarif, type Tarif, type TarifKod,
+  IMKONIYAT_DARAJA, TARIFLAR_ZAXIRA, TARIF_NOMI, TOLOV_KONTAKT_ZAXIRA, jamiNarx, narxMatn, sanaMatn, useTarif, type Tarif, type TarifKod,
 } from '../tarif/holat';
 import { TarifLogo } from '../tarif/Logolar';
 import { OquvMashinasi } from '../simulyator/ui/MashqRasmlari';
@@ -47,7 +47,7 @@ function SorovOynasi({ tarif, kontakt, onClose }: { tarif: Tarif; kontakt: Konta
         <h2>So‘rovingiz qabul qilindi!</h2>
         <div className="tf-oyna-tarif">
           <TarifLogo kod={tarif.kod} size={28} />
-          <span>{tarif.nom} — {narxMatn(tarif.narx)} / {tarif.oy} oy</span>
+          <span>{tarif.nom} — {narxMatn(jamiNarx(tarif))} / {tarif.oy} oy</span>
         </div>
         <p>
           To‘lovni amalga oshirish uchun call-markazimizga qo‘ng‘iroq qiling. Operatorimiz o‘zi ham siz bilan
@@ -201,12 +201,22 @@ export default function Tariflar() {
             <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn'} onClick={() => setTanlangan(x.kod)}>{x.oy} oy</span>
           ))}
         </div>
-        <div className="tf2-qator tf2-oxirgi" role="row">
-          <span className="tf2-nom" role="rowheader">Narxi, so‘m</span>
+        {/* Narx oylik; jami = oylik narx × oylar (2026-11-24) */}
+        <div className="tf2-qator" role="row">
+          <span className="tf2-nom" role="rowheader">Oylik narxi, so‘m</span>
           <span className="tf2-q tf2-matn" role="cell">0</span>
           {tariflar.map((x) => (
             <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn tf2-narx'} onClick={() => setTanlangan(x.kod)}>
               {narxMatn(x.narx).replace(' so‘m', '')}
+            </span>
+          ))}
+        </div>
+        <div className="tf2-qator tf2-oxirgi" role="row">
+          <span className="tf2-nom" role="rowheader">Jami, so‘m</span>
+          <span className="tf2-q tf2-matn" role="cell">0</span>
+          {tariflar.map((x) => (
+            <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn tf2-narx tf2-jami'} onClick={() => setTanlangan(x.kod)}>
+              {narxMatn(jamiNarx(x)).replace(' so‘m', '')}
             </span>
           ))}
         </div>
@@ -224,7 +234,7 @@ export default function Tariflar() {
         )}
         <button type="button" className="tf2-cta" disabled={yuborilmoqda != null} onClick={() => sotibOl(t)}>
           <b>{tugmaMatn}</b>
-          <span>{narxMatn(t.narx)} · {t.oy} oy</span>
+          <span>{t.oy} oy × {narxMatn(t.narx).replace(' so‘m', '')} = {narxMatn(jamiNarx(t))}</span>
         </button>
         <div className="tf2-tel">
           To‘lov call-markaz orqali —{' '}

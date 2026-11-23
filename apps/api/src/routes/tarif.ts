@@ -3,7 +3,7 @@ import { prisma } from '../prisma';
 import { requireUser } from '../auth';
 import { telegramgaYubor } from '../notify';
 import {
-  TARIFLAR, IMKONIYAT_DARAJA, TOLOV_KONTAKT, tarifTop, tarifDarajasi, mediaKalit, ilovaMatnlari, matnlarBirlashtir, STANDART_MATNLAR,
+  TARIFLAR, IMKONIYAT_DARAJA, TOLOV_KONTAKT, tarifTop, tarifDarajasi, mediaKalit, ilovaMatnlari, matnlarBirlashtir, STANDART_MATNLAR, jamiNarx,
 } from '../tarif';
 
 /** Tariflar: /api/tarif (foydalanuvchi), /api/admin/tarif (admin — index.ts da requireAdmin) */
@@ -54,7 +54,7 @@ tarifRouter.post(
       await prisma.tarifSorov.create({ data: { userId, tarif: t.kod } });
       const u = await prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, phone: true, email: true } });
       telegramgaYubor(
-        `\u{1F4B3} <b>Tarif so'rovi: ${esc(t.nom)}</b> — ${narxMatn(t.narx)}\n\n` +
+        `\u{1F4B3} <b>Tarif so'rovi: ${esc(t.nom)}</b> — ${narxMatn(jamiNarx(t))} (${t.oy} oy × ${narxMatn(t.narx)})\n\n` +
           `\u{1F464} ${esc(u?.firstName || '')} (ID ${userId})\n` +
           (u?.phone ? `\u{1F4DE} ${esc(u.phone)}\n` : '') + (u?.email ? `✉️ ${esc(u.email)}\n` : '') +
           '\nTo‘lovdan keyin: <a href="https://autostart.uz/tariflar/boshqaruv">admin panelda yoqing</a>'
@@ -98,7 +98,8 @@ tarifAdminRouter.post(
     const boshlandi = oxirgi ? oxirgi.tugaydi : new Date();
     const tugaydi = new Date(boshlandi);
     tugaydi.setMonth(tugaydi.getMonth() + oy);
-    const narx = Number.isFinite(Number(b.narx)) ? Math.max(0, Math.trunc(Number(b.narx))) : t.narx;
+    // To'langan summa: admin kiritgani, bo'lmasa oylik narx × oylar
+    const narx = b.narx != null && Number.isFinite(Number(b.narx)) ? Math.max(0, Math.trunc(Number(b.narx))) : jamiNarx(t, oy);
     const ob = await prisma.obuna.create({ data: { userId, tarif: t.kod, boshlandi, tugaydi, narx, izoh: String(b.izoh || '').slice(0, 300) } });
     if (b.sorovId) await prisma.tarifSorov.updateMany({ where: { id: Number(b.sorovId) }, data: { holat: 'bajarildi' } });
     else await prisma.tarifSorov.updateMany({ where: { userId, tarif: t.kod, holat: 'yangi' }, data: { holat: 'bajarildi' } });

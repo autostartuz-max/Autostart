@@ -6,7 +6,7 @@ import {
 } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
-import { TARIFLAR_ZAXIRA, TARIF_NOMI, narxMatn, sanaMatn, type Tarif, type TarifKod } from '../tarif/holat';
+import { TARIFLAR_ZAXIRA, TARIF_NOMI, jamiNarx, narxMatn, sanaMatn, type Tarif, type TarifKod } from '../tarif/holat';
 import { TarifLogo, TaqiqBelgisi } from '../tarif/Logolar';
 import '../dashboard.css';
 import './adminTarif.css';
@@ -85,7 +85,7 @@ export default function AdminTariflar() {
   // Tarif tanlanganda — standart muddat va narx
   useEffect(() => {
     const t = tariflar.find((x) => x.kod === tarifKod);
-    if (t) { setOy(t.oy); setNarx(t.narx); }
+    if (t) { setOy(t.oy); setNarx(jamiNarx(t)); } // narx oylik — jami = oylik × oy
   }, [tarifKod, tariflar]);
 
   // Foydalanuvchi qidiruvi (ism, telefon, pochta)
@@ -112,7 +112,7 @@ export default function AdminTariflar() {
 
   const sorovniYoq = (s: TarifSorovQator) => {
     const t = tariflar.find((x) => x.kod === s.tarif);
-    if (!window.confirm(`${s.user?.firstName || 'ID ' + s.userId} uchun ${TARIF_NOMI[s.tarif]} tarifi yoqilsinmi?\nTo‘lov (${narxMatn(t?.narx || 0)}) qabul qilinganiga ishonch hosil qiling.`)) return;
+    if (!window.confirm(`${s.user?.firstName || 'ID ' + s.userId} uchun ${TARIF_NOMI[s.tarif]} tarifi yoqilsinmi?\nTo‘lov (${narxMatn(t ? jamiNarx(t) : 0)}) qabul qilinganiga ishonch hosil qiling.`)) return;
     yoq({ userId: s.userId, tarif: s.tarif, sorovId: s.id }, s.user?.firstName || 'ID ' + s.userId);
   };
   const sorovHolat = async (s: TarifSorovQator, holat: 'yangi' | 'bekor') => {
@@ -265,7 +265,12 @@ export default function AdminTariflar() {
                   </div>
                   <div className="atf-qator">
                     <label className="atf-maydon"><span>Muddat (oy)</span>
-                      <input className="adm-inp" type="number" min={1} max={24} value={oy} onChange={(e) => setOy(Math.max(1, Math.min(24, Number(e.target.value) || 1)))} />
+                      <input className="adm-inp" type="number" min={1} max={24} value={oy} onChange={(e) => {
+                        const yangiOy = Math.max(1, Math.min(24, Number(e.target.value) || 1));
+                        setOy(yangiOy);
+                        const t = tariflar.find((x) => x.kod === tarifKod);
+                        if (t) setNarx(jamiNarx(t, yangiOy));
+                      }} />
                     </label>
                     <label className="atf-maydon"><span>To‘langan summa (so‘m)</span>
                       <input className="adm-inp" type="number" min={0} step={1000} value={narx} onChange={(e) => setNarx(Math.max(0, Number(e.target.value) || 0))} />

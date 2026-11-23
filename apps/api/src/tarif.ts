@@ -10,6 +10,10 @@ import { keshla } from './kesh';
 export type TarifKod = 'standart' | 'silver' | 'premium';
 export type Imkoniyat = 'audio' | 'belgilar' | 'video' | 'mavzu' | 'avtodrom';
 
+/**
+ * narx — OYLIK narx (so'm). Tarif oy oylik: jami = narx × oy (2026-11-24, foydalanuvchi: "1 oy uchun 59 000,
+ * 3 oyda 3 ga ko'paytiriladi"): Standart 3 × 59 000 = 177 000, Silver 3 × 99 000 = 297 000, Premium 6 × 119 000 = 714 000.
+ */
 export const TARIFLAR: { kod: TarifKod; nom: string; narx: number; oy: number; daraja: number; imkoniyatlar: string[] }[] = [
   {
     kod: 'standart', nom: 'Standart', narx: 59000, oy: 3, daraja: 1,
@@ -45,6 +49,9 @@ export const TARIFLAR: { kod: TarifKod; nom: string; narx: number; oy: number; d
 export const IMKONIYAT_DARAJA: Record<Imkoniyat, number> = { audio: 1, belgilar: 1, video: 2, mavzu: 3, avtodrom: 3 };
 
 export const tarifTop = (kod: string) => TARIFLAR.find((t) => t.kod === kod) || null;
+
+/** Tarifning jami narxi (oylik narx × oylar soni) */
+export const jamiNarx = (t: { narx: number; oy: number }, oy = t.oy) => t.narx * oy;
 
 /** To'lov uchun aloqa (Aloqa sahifasidagi call-markaz) */
 export const TOLOV_KONTAKT = { telefon: '78 555 07 17', tel: '+998785550717' };

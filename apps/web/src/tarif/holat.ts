@@ -13,6 +13,7 @@ export type Imkoniyat = 'audio' | 'belgilar' | 'video' | 'mavzu' | 'avtodrom';
 export interface Tarif {
   kod: TarifKod;
   nom: string;
+  /** OYLIK narx (so'm); jami = narx × oy */
   narx: number;
   oy: number;
   daraja: number;
@@ -147,6 +148,9 @@ export const TARIF_TAKLIF = 'tarif:taklif';
 export function tarifTaklif(imkoniyat: Imkoniyat) {
   try { window.dispatchEvent(new CustomEvent(TARIF_TAKLIF, { detail: { imkoniyat } })); } catch { /* ignore */ }
 }
+
+/** Tarifning jami narxi: oylik narx × oylar soni (Standart 3 × 59 000 = 177 000) */
+export const jamiNarx = (t: { narx: number; oy: number }, oy = t.oy) => t.narx * oy;
 
 /** 59000 → "59 000 so‘m" */
 export const narxMatn = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so‘m';

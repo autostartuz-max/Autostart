@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, X } from 'lucide-react';
 import { TarifLogo } from './Logolar';
 import {
-  IMKONIYAT_NOMI, IMKONIYAT_TARIF, TARIFLAR_ZAXIRA, TARIF_TAKLIF, narxMatn, type Imkoniyat,
+  IMKONIYAT_NOMI, IMKONIYAT_TARIF, TARIFLAR_ZAXIRA, TARIF_TAKLIF, jamiNarx, narxMatn, type Imkoniyat,
 } from './holat';
 import './tarif.css';
 
@@ -51,7 +51,8 @@ export default function TarifTaklif() {
             <li key={m}><Check aria-hidden="true" /><span>{m}</span></li>
           ))}
         </ul>
-        <div className="tf-narx"><b>{narxMatn(t.narx)}</b><span>/ {t.oy} oy</span></div>
+        <div className="tf-narx"><b>{narxMatn(t.narx)}</b><span>/ oyiga</span></div>
+        <div className="tf-jami">{t.oy} oylik tarif: {t.oy} × {narxMatn(t.narx).replace(' so‘m', '')} = <b>{narxMatn(jamiNarx(t))}</b></div>
         <button type="button" className="tf-tugma" onClick={() => { yop(); nav('/tariflar'); }}>Tariflarni ko‘rish</button>
         <button type="button" className="tf-oyna-keyin" onClick={yop}>Keyinroq</button>
       </div>

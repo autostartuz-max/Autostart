@@ -1,7 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '../prisma';
 import { requireUser } from '../auth';
-import { BALL, KUNLIK_IMTIHON, ballQosh, bugungiSoni, daraja, kun, promoKodi, sharhKorildi, streak } from '../ball';
+import { BALL, KUNLIK_IMTIHON, ballQosh, bugungiSoni, daraja, kun, promoKodi, sharhKorildi, streak, togriYechilgan, DARAJALAR } from '../ball';
+import { nashrSavollari } from './user';
 
 /** Daraja tizimi: ball, daraja, promokod (/api/ball) */
 export const ballRouter = Router();
@@ -47,12 +48,19 @@ ballRouter.get(
       guruh.set(k, g);
     }
 
+    // Pilot sharti (2000 coin + barcha savolga to'g'ri javob) — faqat 2000 dan oshganda hisoblanadi
+    let pilot: { togri: number; jami: number } | null = null;
+    if (u.ball >= DARAJALAR[DARAJALAR.length - 1].dan) {
+      const idlar = (await nashrSavollari()).map((q) => q.id);
+      pilot = { togri: await togriYechilgan(men, idlar), jami: idlar.length };
+    }
     res.json({
       id: u.id,
       ism: u.firstName,
       qoshilgan: u.createdAt,
       ball: u.ball,
-      daraja: daraja(u.ball),
+      daraja: daraja(u.ball, !pilot || pilot.togri >= pilot.jami),
+      pilot,
       streak: kunlar,
       oxirgi7: yetti._sum.miqdor ?? 0,
       orin: u.ball > 0 ? orinOldi + 1 : null,
@@ -73,6 +81,8 @@ ballRouter.post(
   '/imtihon',
   ah(async (req, res) => {
     const men = (req as any).userId as number;
+    // 2026-11: haqiqiy imtihonda coin berilmaydi (o'quvchini chalg'itmaslik uchun) — eski ilovalar uchun endpoint qoladi
+    if (!req.body?.majburiy) return res.json({ ok: false, sabab: 'Imtihonda coin berilmaydi', ball: 0 });
     const idlar = [...new Set((Array.isArray(req.body?.savollar) ? req.body.savollar : []).map(Number).filter((x: number) => x > 0))] as number[];
     if (idlar.length < 20) return res.json({ ok: false });
     const javoblar = await prisma.userAnswer.findMany({

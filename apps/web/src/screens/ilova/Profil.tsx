@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { CalendarDays, ChevronRight, Settings, Share2, Trophy, Zap } from 'lucide-react';
+import { CalendarDays, ChevronRight, Crown, MapPin, Pencil, Settings, Share2, Trophy, Zap } from 'lucide-react';
 import { api, oxirgiJavob, type BallMen } from '../../api';
+import ImtihonSanasi, { qolganKun, sanaKaliti, sanaNuqtali } from '../../components/ImtihonSanasi';
+import ToifaTanlash from '../../toifa/ToifaTanlash';
+import { ToifaIkonka, toifaTop } from '../../toifa/toifalar';
+import HududTanlash from '../../hudud/HududTanlash';
+import DarajaLogo from '../../ilova/DarajaLogo';
+import { TarifLogo } from '../../tarif/Logolar';
+import { sanaMatn, useTarif } from '../../tarif/holat';
 import Ekran from '../../ilova/komponentlar/Ekran';
 import TepaQator from '../../ilova/komponentlar/TepaQator';
 // Ekran sarlavhasi va asosiy karta bo'laklari (qiya chiziqlar, progress) — Bosh sahifa/Testlar bilan bitta manba
@@ -18,7 +25,10 @@ import '../../ilova/profil.css';
 
 // api.me() javobining kerakli qismi (types.ts dagi Me da createdAt va streak yo'q)
 interface MeQisqa {
-  user: { id: number; firstName: string; createdAt?: string };
+  user: {
+    id: number; firstName: string; createdAt?: string;
+    category?: string; examDate?: string | null; viloyat?: string | null; tuman?: string | null;
+  };
   stats?: { streak?: number };
 }
 
@@ -28,7 +38,6 @@ const QIYMATLAR: [keyof BallMen['qiymatlar'], string, boolean?][] = [
   ['faollik', 'Kunlik faollik (kunning birinchi javobi)'],
   ['seriya', '15 kun uzluksiz faollik'],
   ['shablon', 'Shablonni yiqilmasdan tugatish (3 tadan kam xato)'],
-  ['imtihon', 'Real imtihondan o‘tish'],
   ['sharh', 'Testlar video sharhlarini ko‘rish (har 20 talik shablon)'],
   ['nazariy', 'Nazariy video darsliklarni ko‘rish (har mashg‘ulot)', true],
   ['video', 'Avtodromda amaliy mashg‘ulotlarni kuzatish (har bir video)'],
@@ -70,6 +79,15 @@ export default function ProfilIlova() {
   // Ball kelmadi: 'tarmoq' — qayta urinish tugmasi; 'yoq' — server eski (404), daraja qismi jimgina yo'q
   const [ballXato, setBallXato] = useState<'' | 'tarmoq' | 'yoq'>('');
   const [xabar, setXabar] = useState('');
+  // Profil oynalari: imtihon sanasi, toifa, hudud
+  const [oyna, setOyna] = useState<'' | 'sana' | 'toifa' | 'hudud'>('');
+  const tarif = useTarif();
+  // Saqlangandan keyin: javobdagi foydalanuvchini qo'yamiz va /me ni yangilaymiz (Bosh sahifa ham shundan oladi)
+  const saqla = async (data: Record<string, unknown>) => {
+    const r = await api.updateMe(data);
+    setMe((m) => (m ? { ...m, user: { ...m.user, ...(r?.user || data) } } : m));
+    api.me().then(setMe).catch(() => {});
+  };
   // Ilova versiyasi — telefonda qaysi build o'rnatilganini bilish uchun
   const [versiya, setVersiya] = useState('');
 
@@ -119,6 +137,14 @@ export default function ProfilIlova() {
   const ulush = !ball || !d ? 0 : !keyingi || oraliq <= 0 ? 1 : Math.min(1, Math.max(0, (ball.ball - d.dan) / oraliq));
   const qoldi = ball && keyingi ? Math.max(0, keyingi.dan - ball.ball) : 0;
   const taklifBall = ball?.qiymatlar?.taklif;
+  // Pilot sharti: 2000 coin yig'ilgan, lekin hali hamma savolga to'g'ri javob berilmagan
+  const pilotKutmoqda = !!ball?.pilot && d?.nom !== 'Pilot';
+  const pilotUlush = ball?.pilot?.jami ? Math.min(1, ball.pilot.togri / ball.pilot.jami) : 0;
+
+  const toifa = toifaTop(me?.user.category) ? me!.user.category! : null;
+  const sana = sanaKaliti(me?.user.examDate);
+  const qoldiKun = sana ? qolganKun(sana) : -1;
+  const hudud = me?.user.tuman || me?.user.viloyat || '';
 
   return (
     <Ekran faol="profil">
@@ -144,11 +170,38 @@ export default function ProfilIlova() {
               </span>
             )}
           </div>
+          {ball && d && <DarajaLogo nom={d.nom} size={58} className="ilv-pr-logo" />}
         </div>
+        {me && (
+          <div className="ilv-pr-chiplar">
+            <button type="button" className="ilv-pr-chip" onClick={() => setOyna('toifa')} aria-label={toifa ? `Toifa ${toifa}. O‘zgartirish` : 'Toifani tanlash'}>
+              {toifa ? <><ToifaIkonka kod={toifa} className="ilv-pr-chip-tk" /><b>{toifa}</b> toifa</> : 'Toifani tanlang'}
+            </button>
+            <button type="button" className="ilv-pr-chip" onClick={() => setOyna('sana')}>
+              <CalendarDays aria-hidden="true" />
+              {sana && qoldiKun >= 0 ? `${sanaNuqtali(sana)} · ${qoldiKun === 0 ? 'bugun' : qoldiKun + ' kun'}` : 'Sanani o‘zgartirish'}
+              <Pencil aria-hidden="true" className="ilv-pr-chip-qalam" />
+            </button>
+            <button type="button" className="ilv-pr-chip" onClick={() => setOyna('hudud')}>
+              <MapPin aria-hidden="true" />
+              {hudud || 'Hududni tanlang'}
+            </button>
+          </div>
+        )}
         {ball && d && (
           <>
             <div className="ilv-asosiy-sarlavha">{d.nom}</div>
             <div className="ilv-pr-keyingi">{keyingi ? `Keyingi daraja: ${keyingi.nom}` : 'Eng yuqori daraja'}</div>
+            {pilotKutmoqda && ball.pilot ? (
+              <div className="ilv-pr-past">
+                <div className="ilv-asosiy-sonlar">
+                  <span>Hamma savolga to‘g‘ri javob: {raqam(ball.pilot.togri)} / {raqam(ball.pilot.jami)}</span>
+                </div>
+                <div className="ilv-asosiy-progress" role="progressbar" aria-label="Pilot darajasigacha" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pilotUlush * 100)}>
+                  <span className="ilv-asosiy-tola" style={{ width: `${pilotUlush * 100}%` }} />
+                </div>
+              </div>
+            ) : (
             <div className="ilv-pr-past">
               <div className="ilv-asosiy-sonlar">
                 <span>{keyingi ? `${raqam(ball.ball)} / ${raqam(keyingi.dan)} coin` : `${raqam(ball.ball)} coin`}</span>
@@ -165,9 +218,20 @@ export default function ProfilIlova() {
                 <span className="ilv-asosiy-tola" style={{ width: `${ulush * 100}%` }} />
               </div>
             </div>
+            )}
           </>
         )}
       </section>
+
+      {/* Joriy tarif va tariflar sahifasi */}
+      <button type="button" className="ilv-pr-tarif" onClick={() => nav('/tariflar')}>
+        {tarif.joriy ? <TarifLogo kod={tarif.joriy.kod} size={40} /> : <span className="ilv-pr-tarif-ik"><Crown aria-hidden="true" /></span>}
+        <span className="ilv-pr-tarif-t">
+          <b>{tarif.joriy ? `${tarif.joriy.nom} tarifi` : tarif.daraja >= 3 ? 'Barcha imkoniyatlar ochiq' : 'Tariflar'}</b>
+          <small>{tarif.joriy ? `${sanaMatn(tarif.joriy.tugaydi)} gacha` : tarif.daraja >= 3 ? 'Xodim hisobi' : 'Audio sharh, video darslar va avtodrom mashg‘ulotlari'}</small>
+        </span>
+        <ChevronRight aria-hidden="true" />
+      </button>
 
       {/* Oxirgi ma'lumot bor bo'lsa xato ko'rsatilmaydi — o'sha ko'rinib turadi */}
       {ballXato === 'tarmoq' && !ball && (
@@ -233,6 +297,17 @@ export default function ProfilIlova() {
 
       {/* Sozlamalar (til, ko'rinish, hisob) — tepadagi tishli g'ildirak tugmasida */}
       {versiya && <div className="ilv-pr-versiya">Versiya {versiya}</div>}
+
+      {oyna === 'sana' && <ImtihonSanasi joriy={sana} onClose={() => setOyna('')} onSaqla={(x) => saqla({ examDate: x })} />}
+      {oyna === 'toifa' && <ToifaTanlash joriy={toifa} onClose={() => setOyna('')} onSaqla={(k) => saqla({ category: k })} />}
+      {oyna === 'hudud' && (
+        <HududTanlash
+          viloyat={me?.user.viloyat ?? null}
+          tuman={me?.user.tuman ?? null}
+          onClose={() => setOyna('')}
+          onSaqla={(v, t) => saqla({ viloyat: v, tuman: t })}
+        />
+      )}
     </Ekran>
   );
 }

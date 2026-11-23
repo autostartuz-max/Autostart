@@ -1,0 +1,21 @@
+/* Hudud tanlash oynasi (HududTanlash.tsx) — ie-sheet uslubida */
+.hd-oyna .ie-sh-sub { margin-bottom: 14px; }
+.hd-orqaga { display: inline-flex; align-items: center; gap: 4px; margin: -4px 0 10px; padding: 6px 10px 6px 4px; border: 0;
+  border-radius: 10px; background: rgba(255, 255, 255, .06); color: #cfd8e5; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.hd-orqaga svg { width: 18px; height: 18px; }
+.hd-qidiruv { display: flex; align-items: center; gap: 8px; height: 46px; margin-bottom: 10px; padding: 0 12px; border-radius: 14px;
+  background: #1d2a3d; border: 1px solid #334155; }
+.hd-qidiruv svg { flex: none; width: 18px; height: 18px; color: #94a4be; }
+.hd-qidiruv input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: none; color: #fff; font: inherit; font-size: 15px; font-weight: 700; }
+.hd-qidiruv input::placeholder { color: #6b7c93; }
+.hd-royxat { display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow-y: auto; padding-bottom: 4px; }
+.hd-qator { display: flex; align-items: center; gap: 8px; min-height: 50px; padding: 8px 12px 8px 14px; box-sizing: border-box; border-radius: 14px;
+  background: #1d2a3d; border: 1px solid #2b3a4d; color: #fff; font: inherit; font-size: 15px; font-weight: 700; text-align: left; cursor: pointer; }
+.hd-qator > span { flex: 1; min-width: 0; }
+.hd-qator small { flex: none; color: #94a4be; font-size: 12.5px; font-weight: 700; }
+.hd-qator svg { flex: none; width: 18px; height: 18px; color: #6b7c93; }
+.hd-qator.joriy { border-color: #62d321; }
+.hd-qator.joriy svg { color: #62d321; }
+.hd-qator:active:not(:disabled) { transform: translateY(1px); }
+.hd-qator:disabled { opacity: .7; cursor: default; }
+.hd-yoq { padding: 18px 0; text-align: center; color: #94a4be; font-size: 14px; font-weight: 700; }

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
-import { Menu, ChevronLeft, Play, Video, Clock } from 'lucide-react';
-import { api, lessonVideoUrl, lessonPosterUrl, canManageQuestions, hasAdmin, type Lesson } from '../api';
+import { Menu, ChevronLeft, Play, Video, Clock, Lock } from 'lucide-react';
+import { api, lessonVideoUrl, lessonPosterUrl, canManageQuestions, hasAdmin, tarifniYangila, type Lesson } from '../api';
+import { tarifTaklif, useTarif, IMKONIYAT_DARAJA } from '../tarif/holat';
+import '../tarif/tarif.css';
 import { TOIFALAR, TOIFA_IZOH, hajm, sana } from '../lessons';
 import AppSidebar from '../components/AppSidebar';
 import { mobilIlova } from '../native';
@@ -28,6 +30,16 @@ export default function Lessons() {
   const [err, setErr] = useState('');
   // Ilovada admin paneli yo'q — "Video joylash" tugmasi ham ko'rinmaydi
   const admin = !mobilIlova() && (canManageQuestions() || hasAdmin());
+  // Avtodrom amaliy mashg'ulotlari — Premium tarifda; har toifaning birinchi darsi namuna (server ham shunday tekshiradi)
+  const tarif = useTarif();
+  const premium = tarif.daraja >= IMKONIYAT_DARAJA.avtodrom;
+  useEffect(() => { tarifniYangila(); }, []);
+  const namuna = useMemo(() => {
+    const idlar = new Set<number>();
+    const toifalar = new Set<string>();
+    for (const l of list) if (!toifalar.has(l.category)) { toifalar.add(l.category); idlar.add(l.id); }
+    return idlar;
+  }, [list]);
 
   useEffect(() => {
     // Hamma darsni bir marta olamiz va toifani brauzerda filtrlaymiz —
@@ -55,9 +67,11 @@ export default function Lessons() {
   // Bo'sh toifalar ham ko'rsatiladi (0 bilan) — talaba o'z toifasini topa olsin
   const chiplar = TOIFALAR.filter((t) => counts[t] || t === toifa);
 
-  const karta = (l: Lesson) => (
+  const karta = (l: Lesson) => {
+    const yopiq = !premium && !namuna.has(l.id);
+    return (
     <article className="am-card" key={l.id}>
-      {ochilgan === l.id ? (
+      {ochilgan === l.id && !yopiq ? (
         <video
           className="am-video"
           src={lessonVideoUrl(l.id)}
@@ -73,12 +87,14 @@ export default function Lessons() {
           onEnded={() => api.ballVideo(l.id).catch(() => {})}
         />
       ) : (
-        <button className="am-poster" onClick={() => setOchilgan(l.id)} aria-label={l.title + ' — ko‘rish'}>
+        <button className="am-poster" onClick={() => (yopiq ? tarifTaklif('avtodrom') : setOchilgan(l.id))} aria-label={l.title + (yopiq ? ' — Premium tarifida' : ' — ko‘rish')}>
           {/* Muqova — kichik rasm; video faqat bosilganda yuklanadi (4K asl faylning kadri sekin ochilardi) */}
           <img className="am-poster-v" src={lessonPosterUrl(l.id)} alt="" loading="lazy" decoding="async"
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
-          <span className="am-play"><Play size={26} fill="currentColor" /></span>
+          <span className="am-play">{yopiq ? <Lock size={24} /> : <Play size={26} fill="currentColor" />}</span>
           <span className="am-badge">{l.category}</span>
+          {yopiq && <span className="tf-qulf am-qulf"><Lock aria-hidden="true" /> Premium</span>}
+          {!premium && namuna.has(l.id) && <span className="tf-qulf am-qulf am-namuna">Bepul namuna</span>}
         </button>
       )}
       <div className="am-body">
@@ -90,7 +106,8 @@ export default function Lessons() {
         </div>
       </div>
     </article>
-  );
+    );
+  };
 
   return (
     <div className="db">

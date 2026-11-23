@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, Search, X } from 'lucide-react';
+import { ChevronLeft, Lock, Search, X } from 'lucide-react';
 import { useOrqaga } from '../../orqaga';
 import { ilovaEkrani } from '../../native';
 import PastkiOyna from '../../components/PastkiOyna';
 import {
   TOIFALAR, belgiRasmUrl, guruhRaqami, guruhi, raqamKorinadi, useBelgilar, type BelgiQator,
 } from '../../belgilar/katalog';
+import { tarifTaklif, useTarif, IMKONIYAT_DARAJA } from '../../tarif/holat';
 import '../../ilova/tema.css';
+import '../../tarif/tarif.css';
 import '../../ilova/belgilar.css';
 
 const norm = (s: string) => s.toLowerCase().replace(/[ʻʼ'`’‘]/g, "'");
@@ -51,6 +53,10 @@ export default function BelgilarIlova() {
   const [qidiruv, setQidiruv] = useState('');
   const [ochiq, setOchiq] = useState<BelgiQator | null>(null);
   const belgilar = useBelgilar();
+  // Yo'l belgilari va qidiruv — Standart tarifdan; birinchi toifa namuna sifatida hammaga ochiq
+  const tarif = useTarif();
+  const tarifOchiq = tarif.daraja >= IMKONIYAT_DARAJA.belgilar;
+  const yopiq = (n: number) => !tarifOchiq && n !== TOIFALAR[0]?.n;
 
   // Telefonning tepa/pastki chizig'i ham ekran rangida (Bosh sahifa va boshqa yangi ekranlardagidek)
   useEffect(() => {
@@ -77,7 +83,13 @@ export default function BelgilarIlova() {
         <h1 className={'ilv-bl-sarlavha' + (toifa ? ' kichik' : '')}>{toifa ? toifa.nom : 'Yo‘l belgilari'}</h1>
       </header>
 
-      {toifa ? (
+      {toifa && yopiq(toifa.n) ? (
+        <div className="ilv-bl-yopiq">
+          <Lock aria-hidden="true" />
+          <p>Bu bo‘lim <b>Standart</b> tarifida. Birinchi bo‘lim — “{TOIFALAR[0]?.nom}” bepul.</p>
+          <button type="button" className="tf-tugma" onClick={() => tarifTaklif('belgilar')}>Tariflarni ko‘rish</button>
+        </div>
+      ) : toifa ? (
         <>
           {toifa.tavsif && <p className="ilv-bl-toifa-tavsif">{toifa.tavsif.split('\n')[0]}</p>}
           <BelgiKartalari royxat={toifaBelgilari} onOch={setOchiq} />
@@ -89,7 +101,9 @@ export default function BelgilarIlova() {
             <input
               type="search"
               value={qidiruv}
-              onChange={(e) => setQidiruv(e.target.value)}
+              // Qidiruv — Standart tarifda
+              onFocus={(e) => { if (!tarifOchiq) { e.currentTarget.blur(); tarifTaklif('belgilar'); } }}
+              onChange={(e) => setQidiruv(tarifOchiq ? e.target.value : '')}
               placeholder="Belgi nomi yoki raqami"
               aria-label="Belgini qidirish"
             />
@@ -111,7 +125,13 @@ export default function BelgilarIlova() {
                 const bb = belgilar.filter((b) => b.toifa === t.n);
                 const namuna = bb.find((b) => b.rasm);
                 return (
-                  <button key={t.n} type="button" className="ilv-bl-toifa" onClick={() => nav(`/belgilar?toifa=${t.n}`)}>
+                  <button
+                    key={t.n}
+                    type="button"
+                    className={'ilv-bl-toifa' + (yopiq(t.n) ? ' yopiq' : '')}
+                    onClick={() => (yopiq(t.n) ? tarifTaklif('belgilar') : nav(`/belgilar?toifa=${t.n}`))}
+                  >
+                    {yopiq(t.n) && <span className="tf-qulf ilv-bl-qulf"><Lock aria-hidden="true" /> Standart</span>}
                     <span className="ilv-bl-toifa-rasm">{namuna && <Rasm rasm={namuna.rasm} raqam={namuna.raqam} />}</span>
                     <span className="ilv-bl-toifa-nom">{t.nom}</span>
                     <span className="ilv-bl-toifa-son">{bb.length} ta</span>

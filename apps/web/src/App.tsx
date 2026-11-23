@@ -46,6 +46,10 @@ const AdminLessons = lazy(() => import('./screens/AdminLessons'));
 const AdminBelgilar = lazy(() => import('./screens/AdminBelgilar'));
 const AdminAksiyalar = lazy(() => import('./screens/AdminAksiyalar'));
 const AdminSimulyator = lazy(() => import('./screens/AdminSimulyator'));
+const AdminTariflar = lazy(() => import('./screens/AdminTariflar'));
+import Tariflar from './screens/Tariflar';
+import TarifTaklif from './tarif/TarifTaklif';
+import KunlikOyna from './ilova/KunlikOyna';
 // 3D avtodrom simulyatori (faqat ilovada) — three.js bilan alohida bo'lak (faqat ochilganda yuklanadi)
 const Simulyator = lazy(() => import('./simulyator/Simulyator'));
 import DarajaTabrik from './ilova/DarajaTabrik';
@@ -147,6 +151,10 @@ export default function App() {
     <div className="app">
       {/* Yangi darajaga chiqqanda tabrik (faqat ilovada) */}
       {mobilIlova() && <DarajaTabrik />}
+      {/* "Bu imkoniyat tarifda" oynasi — tarifTaklif() bilan istalgan joydan ochiladi (ilova va sayt) */}
+      <TarifTaklif />
+      {/* Bosh sahifada kuniga bitta: bayram tabrigi / "kun o'tkazib yubordingiz" / tarif reklamasi */}
+      <KunlikOyna />
       <Suspense fallback={<div className="splash"><div className="spinner" /><div>Yuklanmoqda…</div></div>}>
       <Routes>
         {/* Mobil ilovada telefon uchun yasalgan bosh sahifa (plitkalar),
@@ -175,6 +183,9 @@ export default function App() {
         {!mobilIlova() && <Route path="/aksiyalar/boshqaruv" element={<AdminAksiyalar />} />}
         {/* 3D simulyator sozlamalari va natijalari — faqat admin, faqat saytda (simulyatorning o'zi ilovada) */}
         {!mobilIlova() && <Route path="/simulyator/boshqaruv" element={<AdminSimulyator />} />}
+        {/* Tariflar: ilova va saytda bitta sahifa; boshqaruv (so'rovlar, yoqish, matnlar) — faqat admin, faqat saytda */}
+        <Route path="/tariflar" element={<Tariflar />} />
+        {!mobilIlova() && <Route path="/tariflar/boshqaruv" element={<AdminTariflar />} />}
         <Route path="/amaliy" element={<Lessons />} />
         {/* 3D simulyator FAQAT ilovada (2026-11-18 saytdan olib tashlandi). Saytda
             /simulyator manzili "*" qoidasiga tushib, bosh sahifaga qaytadi. */}

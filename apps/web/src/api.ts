@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { DARAJA_OSHDI, darajaIndeksi } from './ilova/darajalar';
+import { tarifniYoz, tarifniTozala, kalitli, kalitEskirdimi, type Tarif, type TarifKod, type TarifHolat } from './tarif/holat';
 
 const API = (import.meta as any).env?.VITE_API || '/api';
 
@@ -46,6 +47,7 @@ export function clearToken() {
   tokenniZaxirala('');
   localStorage.removeItem(ROLE_KEY);
   oxirginiTozala(); // boshqa foydalanuvchi kirsa, avvalgisining raqamlari ko'rinmasin
+  tarifniTozala(); // ... va tarifi ham
   try { localStorage.removeItem('yhq_daraja'); } catch { /* ignore */ }
   notifyAdminChanged();
 }
@@ -268,7 +270,9 @@ export interface BallMen {
   ism: string;
   qoshilgan: string;
   ball: number;
-  daraja: { nom: string; dan: number; keyingi: { nom: string; dan: number } | null };
+  daraja: { nom: string; dan: number; keyingi: { nom: string; dan: number } | null; pilotShart?: boolean };
+  /** 2000 coindan keyin: Pilot uchun nechta savolga to'g'ri javob berilgan (jami — nashr qilingan savollar) */
+  pilot?: { togri: number; jami: number } | null;
   streak: number;
   oxirgi7: number;
   orin: number | null;
@@ -363,8 +367,20 @@ export const api = {
     const r = await req('/me');
     rememberRole(r?.user?.role);
     oxirgiYoz('me', r);
+    tarifniYoz(r?.tarif); // joriy tarif va media kaliti (audio/video uchun)
     return r;
   },
+  /** Tariflar: ro'yxat, joriy tarif, media kaliti, kutilayotgan so'rov va to'lov uchun telefon */
+  tarif: async (): Promise<TarifJavob> => {
+    const r = await req('/tarif', {}, false);
+    tarifniYoz(r);
+    return r;
+  },
+  /** "Sotib olish": so'rov qoldiriladi — call-markaz bog'lanadi, to'lovdan keyin admin yoqadi */
+  tarifSorov: (tarif: TarifKod): Promise<{ ok: boolean; kontakt: { telefon: string; tel: string } }> =>
+    req('/tarif/sorov', { method: 'POST', body: JSON.stringify({ tarif }) }),
+  /** Bayram tabriklari, xavfsizlik eslatmalari, reklama va "o'tkazib yubordingiz" matni (admin tahrirlaydi) */
+  matnlar: (): Promise<IlovaMatnlar> => req('/tarif/matnlar'),
   updateMe: (data: any) => req('/me', { method: 'PATCH', body: JSON.stringify(data) }),
   /** Sessiyani uzaytirish — yangi token (ilova har ochilganda) */
   refresh: (): Promise<{ token: string }> => req('/auth/refresh', { method: 'POST' }),
@@ -381,7 +397,10 @@ export const api = {
   tickets: () => req('/tickets'),
   questions: (params: Record<string, string>) =>
     req('/questions?' + new URLSearchParams(params).toString()),
-  answer: async (asl: { questionId: number; chosen: number[]; timeMs: number }) => {
+  /** imtihon: true — haqiqiy imtihon rejimi (coin berilmaydi). Javobda coin — shu javob uchun berilgan coin */
+  answer: async (asl: { questionId: number; chosen: number[]; timeMs: number; imtihon?: boolean }): Promise<{
+    isCorrect: boolean; correctOptionIds: number[]; coin?: number; offline?: boolean;
+  }> => {
     // Ilovadan kelgan javob belgilanadi; saytda so'rov avvalgidek
     const body = ilovaManbasi() ? { ...asl, manba: 'ilova' } : asl;
     try {
@@ -455,8 +474,39 @@ export function mediaUrl(u?: string | null): string | undefined {
   return API.replace(/\/api\/?$/, '') + (u.startsWith('/') ? u : '/' + u);
 }
 
+// Amaliy mashg'ulot videosi Premium tarifda (har toifaning birinchisi namuna) — kalit bilan
 export const lessonVideoUrl = (id: number) =>
-  `${API}/lessons/${id}/video` + (ilovaIchida ? '?mobil=1' : '');
+  kalitli(`${API}/lessons/${id}/video` + (ilovaIchida ? '?mobil=1' : ''));
+/** Savolning audio sharhi (Standart tarifdan; 1-bilet namuna) — kalit bilan */
+export const savolAudioUrl = (id: number) => mediaUrl(kalitli(`/api/questions/${id}/audio`))!;
+/** Savolning video darsi (Silver tarifdan; 1-bilet namuna) — kalit bilan */
+export const savolVideoUrl = (u: string) => mediaUrl(kalitli(u))!;
+
+/** Media kaliti eskirgan bo'lsa (6 soatdan oshgan) — fonda yangilanadi (u 24 soat amal qiladi) */
+export function tarifniYangila() {
+  if (!token || !kalitEskirdimi()) return;
+  api.tarif().catch(() => { /* keyingi safar */ });
+}
+
+/* ---------- Tariflar ---------- */
+export interface TarifJavob extends TarifHolat {
+  tariflar: Tarif[];
+  imkoniyatDaraja: Record<string, number>;
+  sorov: { tarif: TarifKod; createdAt: string } | null;
+  kontakt: { telefon: string; tel: string };
+}
+export interface Bayram { sana: string; nom: string; matn: string }
+export interface IlovaMatnlar {
+  bayramlar: Bayram[];
+  eslatmalar: { matn: string; taqiq?: boolean }[];
+  /** {tarif} — har kuni almashadigan tarif nomi */
+  reklama: string;
+  /** {kun} — "bir", "ikki" ... */
+  otkazish: string;
+}
+export interface TarifShaxs { id: number; firstName: string; phone: string | null; email: string | null }
+export interface TarifSorovQator { id: number; userId: number; tarif: TarifKod; holat: 'yangi' | 'bajarildi' | 'bekor'; createdAt: string; user: TarifShaxs | null }
+export interface ObunaQator { id: number; userId: number; tarif: TarifKod; boshlandi: string; tugaydi: string; narx: number; izoh: string; createdAt: string; user: TarifShaxs | null }
 /** Dars muqovasi — ro'yxatlarda videoning o'rniga kichik rasm (4K video yuklanmaydi) */
 export const lessonPosterUrl = (id: number) => `${API}/lessons/${id}/poster`;
 
@@ -601,6 +651,17 @@ export const adminApi = {
   simSozlama: (): Promise<any> => areq('/admin/sim/sozlama'),
   simSozlamaSaqla: (data: any): Promise<any> => areq('/admin/sim/sozlama', { method: 'PUT', body: JSON.stringify(data) }),
   simNatijalar: (sahifa = 1): Promise<{ jami: number; natijalar: any[] }> => areq('/admin/sim/natijalar?sahifa=' + sahifa),
+  /* ---- Tariflar: to'lov qo'lda — foydalanuvchi so'rov qoldiradi, admin to'lovni olib yoqadi ---- */
+  tarif: (): Promise<{ tariflar: Tarif[]; sorovlar: TarifSorovQator[]; obunalar: ObunaQator[]; faol: Record<string, number> }> =>
+    areq('/admin/tarif'),
+  tarifYoq: (d: { userId: number; tarif: TarifKod; oy?: number; narx?: number; izoh?: string; sorovId?: number }): Promise<ObunaQator> =>
+    areq('/admin/tarif/yoq', { method: 'POST', body: JSON.stringify(d) }),
+  obunaBekor: (id: number) => areq('/admin/tarif/obuna/' + id + '/bekor', { method: 'POST' }),
+  sorovHolat: (id: number, holat: 'yangi' | 'bajarildi' | 'bekor') =>
+    areq('/admin/tarif/sorov/' + id, { method: 'POST', body: JSON.stringify({ holat }) }),
+  ilovaMatnlar: (): Promise<{ matnlar: IlovaMatnlar; standart: IlovaMatnlar; yangilangan: string | null }> => areq('/admin/tarif/matnlar'),
+  ilovaMatnlarSaqla: (matnlar: IlovaMatnlar): Promise<{ matnlar: IlovaMatnlar; yangilangan: string | null }> =>
+    areq('/admin/tarif/matnlar', { method: 'PUT', body: JSON.stringify({ matnlar }) }),
   translate: (text: string, to = 'ru'): Promise<{ text: string }> =>
     areq('/admin/translate?to=' + to + '&text=' + encodeURIComponent(text)),
   extractQuestion: (file: File): Promise<{ textLat: string; options: string[]; shablon: number | null; tartib: number | null; correctIndex: number | null; izoh: string; topicId: number | null }> =>

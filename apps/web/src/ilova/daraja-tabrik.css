@@ -88,3 +88,8 @@
   .dt-nur, .dt-yol i, .dt-emoji { animation: none; }
   .dt-qahramon, .dt-matn { animation-duration: .01s; animation-delay: 0s; }
 }
+
+/* Daraja logotipi tabrik matni ustida */
+.dt-logo { display: block; margin: 0 auto 10px; animation: dt-logo .6s 1.1s cubic-bezier(.2, .9, .3, 1.4) both; }
+@keyframes dt-logo { from { transform: scale(.3) rotate(-25deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .dt-logo { animation: none; } }

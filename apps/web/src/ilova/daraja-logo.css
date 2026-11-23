@@ -1,0 +1,5 @@
+/* Daraja logotipi (DarajaLogo.tsx) */
+.dl { position: relative; display: inline-block; flex: none; line-height: 1; }
+.dl > svg { position: absolute; inset: 0; display: block; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .3)); }
+.dl-belgi { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%); line-height: 1;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; }

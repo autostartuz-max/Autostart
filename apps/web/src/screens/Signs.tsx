@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import { canManageQuestions, hasAdmin } from '../api';
+import { tarifTaklif, useTarif, IMKONIYAT_DARAJA } from '../tarif/holat';
 import { TOIFALAR, belgiRasmUrl, guruhRaqami, useBelgilar, type BelgiQator } from '../belgilar/katalog';
 
 /** Bir xil nomli ketma-ket belgilar (1.4.1 — 1.4.6) — bitta qator */
@@ -23,6 +24,9 @@ export default function Signs() {
   const orqaga = useOrqaga();
   const belgilar = useBelgilar();
   const admin = canManageQuestions() || hasAdmin();
+  // Yo'l belgilari — Standart tarifdan; birinchi bo'lim namuna sifatida hammaga ochiq
+  const tarif = useTarif();
+  const ochiq = tarif.daraja >= IMKONIYAT_DARAJA.belgilar;
   return (
     <div>
       <button className="back" onClick={orqaga}>← {orqagaYozuvi()}</button>
@@ -32,9 +36,14 @@ export default function Signs() {
           <button className="back" style={{ margin: 0 }} onClick={() => nav('/belgilar/boshqaruv')}>✎ Boshqarish</button>
         )}
       </div>
-      {TOIFALAR.map((t) => (
+      {TOIFALAR.map((t, ti) => (
         <section key={t.n}>
           <div className="h2" style={{ fontSize: 17, marginTop: 18 }}>{t.n}. {t.nom}</div>
+          {!ochiq && ti > 0 ? (
+            <button className="back" style={{ margin: '4px 0 0' }} onClick={() => tarifTaklif('belgilar')}>
+              🔒 Bu bo‘lim Standart tarifida — tariflarni ko‘rish
+            </button>
+          ) : (
           <div className="list">
             {guruhla(belgilar.filter((b) => b.toifa === t.n)).map((gr) => {
               const b = gr[0];
@@ -51,6 +60,7 @@ export default function Signs() {
               );
             })}
           </div>
+          )}
         </section>
       ))}
     </div>

@@ -3,6 +3,7 @@ import { MASHQ_NOMI } from '../imtihon/qoidalar';
 import type { MashqKodi } from '../dunyo/turlar';
 import type { ImtihonSozlama } from '../imtihon/qoidalar';
 import { ArrowLeft, Play, Volume2, VolumeX } from 'lucide-react';
+import { MashqRasm, OquvMashinasi } from './MashqRasmlari';
 
 export const RANGLAR = ['#e9ebee', '#b9bec5', '#1c1f24', '#1f3a66', '#9c1f24'];
 
@@ -37,6 +38,7 @@ export function Menyu({ t, setT, sozlama, onBoshla, onChiq, rasmiy }: {
       <div className="sim-menyu-ich">
         <div className="sim-menyu-bosh">
           <button className="sim-tugma-yumaloq" onClick={onChiq} aria-label="Chiqish"><ArrowLeft size={20} /></button>
+          <OquvMashinasi className="sim-menyu-mashina" />
           <div>
             <h1>3D Avtodrom</h1>
             <p>Amaliy imtihon simulyatori · “B” toifa · 3494-son qaror maydonchasi</p>
@@ -91,7 +93,10 @@ export function Menyu({ t, setT, sozlama, onBoshla, onChiq, rasmiy }: {
             ) : (
               <div className="sim-mashqlar">
                 {MASHQ_ROYXAT.filter((m) => faolMashq(m.kod)).map((m) => (
-                  <button key={m.indeks} className={t.mashq === m.indeks ? 'tanlangan' : ''} onClick={() => q({ mashq: m.indeks })}>{m.nom}</button>
+                  <button key={m.indeks} className={t.mashq === m.indeks ? 'tanlangan' : ''} onClick={() => q({ mashq: m.indeks })}>
+                    <MashqRasm kod={m.kod} indeks={m.indeks} />
+                    <span>{m.nom}</span>
+                  </button>
                 ))}
               </div>
             )}

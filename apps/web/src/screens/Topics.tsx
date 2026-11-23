@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTarif } from '../tarif/holat';
 import { useNavigate } from 'react-router-dom';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import { Menu, Search, Bell, ShieldCheck, ChevronLeft } from 'lucide-react';
@@ -12,6 +13,7 @@ export default function Topics() {
   const nav = useNavigate();
   const orqaga = useOrqaga();
   const [open, setOpen] = useState(false);
+  const tarif = useTarif();
   const [items, setItems] = useState<Catalog[]>([]);
   const [shuffle, setShuffle] = useState(false);
   const [name, setName] = useState('Foydalanuvchi');
@@ -40,7 +42,7 @@ export default function Topics() {
             <div className="db-chip"><Bell size={17} /><span className="nb">3</span></div>
             <div className="db-userchip">
               <span className="db-uava"><ShieldCheck size={18} /></span>
-              <span className="db-uname"><b>{name}</b><span>Pro</span></span>
+              <span className="db-uname"><b>{name}</b><span>{tarif.joriy ? tarif.joriy.nom : tarif.daraja >= 3 ? 'Xodim' : 'Bepul'}</span></span>
             </div>
           </div>
         </header>

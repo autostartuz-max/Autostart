@@ -1,0 +1,24 @@
+/* Haydovchilik toifalari: transport rasmlari va tanlash to'ri (toifalar.tsx, ToifaTanlash.tsx) */
+.tk-ikonka { display: block; width: 64px; height: 40px; fill: currentColor; }
+.tk-ikonka .tk-oyna { fill: var(--tk-fon, #1d2a3d); }
+.tk-ikonka .tk-chiziq { fill: none; stroke: var(--tk-fon, #1d2a3d); }
+.tk-ikonka .tk-gildirak { fill: currentColor; stroke: var(--tk-fon, #1d2a3d); stroke-width: 2.2; }
+
+.tk-tor { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+.tk-katak { --tk-fon: #1d2a3d; position: relative; display: grid; grid-template-columns: 64px 1fr; grid-template-rows: auto auto;
+  column-gap: 10px; align-items: center; min-height: 72px; padding: 10px 12px; box-sizing: border-box; text-align: left;
+  border-radius: 18px; background: #1d2a3d; border: 1px solid #334155; border-bottom: 4px solid #324155;
+  color: #dbe3ee; font: inherit; cursor: pointer; }
+.tk-katak .tk-ikonka { grid-row: 1 / span 2; color: #c9d4e3; }
+.tk-katak b { align-self: end; font-size: 21px; font-weight: 900; line-height: 1; color: #ffffff; }
+.tk-katak > span:last-child { align-self: start; margin-top: 3px; font-size: 12.5px; font-weight: 700; line-height: 1.2; color: #94a4be; }
+.tk-katak:active { transform: translateY(2px); }
+.tk-katak.tanlangan { border-color: #62d321; background: #1f3226; --tk-fon: #1f3226; }
+.tk-katak.tanlangan .tk-ikonka, .tk-katak.tanlangan b { color: #7be03a; }
+.tk-belgi { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 50%; background: #62d321;
+  color: #0f1d08; display: flex; align-items: center; justify-content: center; }
+.tk-belgi svg { width: 14px; height: 14px; stroke-width: 3; }
+@media (max-width: 360px) {
+  .tk-katak { grid-template-columns: 50px 1fr; padding: 8px 10px; }
+  .tk-katak .tk-ikonka { width: 50px; height: 32px; }
+}

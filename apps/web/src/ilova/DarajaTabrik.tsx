@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { DARAJALAR, DARAJA_OSHDI, darajaIndeksi } from './darajalar';
 import { Tanga } from '../screens/ilova/Profil';
+import DarajaLogo from './DarajaLogo';
 import './daraja-tabrik.css';
 
 /** Sochiladigan tangalar soni */
@@ -76,10 +77,18 @@ export default function DarajaTabrik() {
         </div>
 
         <div className="dt-matn">
+          <DarajaLogo nom={d.nom} size={84} className="dt-logo" />
           <div className="dt-tabrik">Tabriklaymiz!</div>
-          <div className="dt-daraja">Siz <b>{d.nom.toUpperCase()}</b> darajasiga chiqdingiz</div>
+          {/* Matnlar 2026-11 hujjatidan: "Tabriklaymiz sizning darajangiz velosipedchi. To'xtab qolmang…" */}
+          <div className="dt-daraja">
+            {d.nom === 'Pilot' ? <>Siz <b>eng zo‘risiz!</b></> : <>Sizning darajangiz — <b>{d.nom.toUpperCase()}</b></>}
+          </div>
           <div className="dt-shior">{d.shior}</div>
-          {keyingi && <div className="dt-keyingi">Keyingi daraja: {keyingi.nom} — {keyingi.dan} coin</div>}
+          {keyingi && (
+            <div className="dt-keyingi">
+              Keyingi daraja: {keyingi.nom} — {keyingi.dan} coin{keyingi.nom === 'Pilot' ? ' va barcha savollarga to‘g‘ri javob' : ''}
+            </div>
+          )}
           <button type="button" className="dt-tugma" onClick={() => setNom(null)}>Davom etish</button>
         </div>
       </div>

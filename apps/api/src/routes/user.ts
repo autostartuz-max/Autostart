@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma';
 import { raqamliSavolIdlari } from '../raqamli';
 import { BALL, ballQosh, faollik, shablonTekshir } from '../ball';
+import { kalitDarajasi, IMKONIYAT_DARAJA, tarifDarajasi, mediaKalit } from '../tarif';
 import { BOT_TOKEN, DEV_AUTH } from '../env';
 import { verifyTelegramInitData, signUserToken, requireUser, optionalUserId } from '../auth';
 import { shifrla } from '../passwordVault';
@@ -257,10 +258,17 @@ userRouter.get(
 userRouter.get(
   '/questions/:id/audio',
   ah(async (req, res) => {
-    const a = await prisma.questionAudio.findUnique({ where: { questionId: Number(req.params.id) } });
+    const id = Number(req.params.id);
+    const [a, q] = await Promise.all([
+      prisma.questionAudio.findUnique({ where: { questionId: id } }),
+      prisma.question.findUnique({ where: { id }, select: { shablon: true } }),
+    ]);
     if (!a) return res.status(404).json({ error: 'Ovoz yoʻq' });
+    // Audio sharh — Standart tarifdan (1-bilet namunasi hammaga ochiq)
+    if (q?.shablon !== 1 && kalitDarajasi(req.query.k) < IMKONIYAT_DARAJA.audio)
+      return res.status(403).json({ error: 'Audio sharh Standart tarifida', tarif: 'standart' });
     res.setHeader('Content-Type', a.mime || 'audio/mpeg');
-    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.setHeader('Cache-Control', 'private, max-age=86400');
     res.send(Buffer.from(a.data));
   })
 );
@@ -269,11 +277,14 @@ userRouter.get(
 userRouter.get(
   '/questions/:id/video',
   ah(async (req, res) => {
-    const q = await prisma.question.findUnique({ where: { id: Number(req.params.id) }, select: { videoFile: true } });
+    const q = await prisma.question.findUnique({ where: { id: Number(req.params.id) }, select: { videoFile: true, shablon: true } });
     if (!q?.videoFile) return res.status(404).json({ error: 'Video yoʻq' });
+    // Video dars — Silver tarifdan (1-bilet namunasi hammaga ochiq)
+    if (q.shablon !== 1 && kalitDarajasi(req.query.k) < IMKONIYAT_DARAJA.video)
+      return res.status(403).json({ error: 'Video darslar Silver tarifida', tarif: 'silver' });
     const fayl = savolVideoYoli(q.videoFile);
     if (!fs.existsSync(fayl)) return res.status(404).json({ error: 'Video fayli topilmadi' });
-    res.sendFile(fayl, { acceptRanges: true, headers: { 'Cache-Control': 'public, max-age=604800' } }, (err) => {
+    res.sendFile(fayl, { acceptRanges: true, headers: { 'Cache-Control': 'private, max-age=604800' } }, (err) => {
       if (err && !res.headersSent) res.status(404).json({ error: 'Videoni o‘qib bo‘lmadi' });
     });
   })
@@ -343,6 +354,14 @@ userRouter.get(
     const solvedQuestions = oxirgiJavob;
     const mistakes = oxirgiJavob.filter((a) => !a.isCorrect).length;
     const kunSet = new Set(kunlar.map((k) => kunKaliti(k.answeredAt)));
+    // O'tkazib yuborilgan kunlar: oxirgi faol kundan bugungacha (bugun hali javob bo'lmasa)
+    let otkazilgan = 0;
+    if (kunlar.length && !kunSet.has(kunKaliti(new Date()))) {
+      const oxirgiKun = new Date(kunKaliti(kunlar[0].answeredAt) + 'T00:00:00');
+      const bugun = new Date(kunKaliti(new Date()) + 'T00:00:00');
+      otkazilgan = Math.max(0, Math.round((bugun.getTime() - oxirgiKun.getTime()) / 86400_000) - 1);
+    }
+    const tarifH = await tarifDarajasi(userId);
     let streak = 0;
     const d = new Date();
     // Bugun hali yechmagan bo'lsa, ketma-ketlik kechadan boshlanadi
@@ -365,6 +384,12 @@ userRouter.get(
         totalQuestions,
         accuracy: total ? Math.round((correct / total) * 100) : 0,
       },
+      otkazilgan,
+      tarif: {
+        daraja: tarifH.daraja,
+        joriy: tarifH.joriy ? { kod: tarifH.joriy.kod, nom: tarifH.joriy.nom, tugaydi: tarifH.joriy.tugaydi } : null,
+        kalit: mediaKalit(userId, tarifH.daraja),
+      },
     });
   })
 );
@@ -377,13 +402,21 @@ userRouter.patch(
     // XAVFSIZLIK: faqat shu uchta maydon qabul qilinadi. `role` bu yerga
     // HECH QACHON qo'shilmasin — aks holda istalgan foydalanuvchi o'zini
     // admin qilib olardi. Role faqat /admin/users/:id/role orqali o'zgaradi.
-    const { alphabet, category, lang } = req.body || {};
+    const { alphabet, category, lang, examDate, viloyat, tuman } = req.body || {};
+    // Imtihon sanasi: "YYYY-MM-DD" yoki null (o'chirish)
+    let sana: Date | null | undefined;
+    if (examDate === null || examDate === '') sana = null;
+    else if (typeof examDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(examDate)) sana = new Date(examDate + 'T09:00:00+05:00');
+    const qisqa = (x: unknown) => (typeof x === 'string' ? x.trim().slice(0, 80) || null : x === null ? null : undefined);
     const user = await prisma.user.update({
       where: { id: userId },
       data: {
         ...(alphabet ? { alphabet } : {}),
-        ...(category ? { category } : {}),
+        ...(typeof category === 'string' && /^[A-Z0-9]{1,4}$/.test(category) ? { category } : {}),
         ...(lang ? { lang } : {}),
+        ...(sana !== undefined ? { examDate: sana } : {}),
+        ...(qisqa(viloyat) !== undefined ? { viloyat: qisqa(viloyat) } : {}),
+        ...(qisqa(tuman) !== undefined ? { tuman: qisqa(tuman) } : {}),
       },
     });
     res.json({ user: safeUser(user) });
@@ -639,15 +672,20 @@ userRouter.post(
       data: { userId, questionId, isCorrect, chosen: JSON.stringify(chosen), timeMs, source },
     });
 
-    // Daraja tizimi: kunning birinchi javobi +5, savolga birinchi to'g'ri javob +1,
-    // shablon yiqilmasdan tugasa +20. Fonda — javobni kechiktirmaydi, xatosi javobga ta'sir qilmaydi.
+    // Daraja tizimi: savolga birinchi to'g'ri javob +1 coin (qayta yechsa — berilmaydi).
+    // Haqiqiy imtihonda coin berilmaydi (o'quvchini chalg'itmaslik uchun) — ilova `imtihon: true` yuboradi.
+    const imtihon = req.body?.imtihon === true;
+    let coin = 0;
+    if (isCorrect && !imtihon) {
+      try { if (await ballQosh(userId, 'javob', BALL.javob, `javob:${questionId}`)) coin = BALL.javob; } catch (e: any) { console.error('[ball]', e?.message || e); }
+    }
+    // Kunning birinchi javobi +5, shablon yiqilmasdan tugasa +20 — fonda
     void (async () => {
       await faollik(userId);
-      if (isCorrect) await ballQosh(userId, 'javob', BALL.javob, `javob:${questionId}`);
-      if (question.shablon) await shablonTekshir(userId, question.shablon);
+      if (question.shablon && !imtihon) await shablonTekshir(userId, question.shablon);
     })().catch((e) => console.error('[ball]', e?.message || e));
 
-    res.json({ isCorrect, correctOptionIds: correctIds });
+    res.json({ isCorrect, correctOptionIds: correctIds, coin });
   })
 );
 
@@ -1292,6 +1330,11 @@ userRouter.get(
   ah(async (req, res) => {
     const l = await prisma.lesson.findUnique({ where: { id: Number(req.params.id) } });
     if (!l || l.status !== 'published') return res.status(404).json({ error: 'Video yo‘q' });
+    // Avtodrom amaliy mashg'ulotlari — Premium tarifda; har toifaning birinchi darsi namuna
+    if (kalitDarajasi(req.query.k) < IMKONIYAT_DARAJA.avtodrom) {
+      const birinchi = await prisma.lesson.findFirst({ where: { status: 'published', category: l.category }, orderBy: [{ order: 'asc' }, { id: 'desc' }], select: { id: true } });
+      if (birinchi?.id !== l.id) return res.status(403).json({ error: 'Amaliy mashg‘ulotlar Premium tarifida', tarif: 'premium' });
+    }
 
     // Sayt ham, ilova ham siqilgan 720p nusxani oladi (asl 4K — 20–30 Mbit/s, sekin ochilardi).
     // Nusxa hali tayyor bo'lmasa asl fayl ketadi — video baribir ochiladi. `?asl=1` — asl fayl.
@@ -1302,7 +1345,7 @@ userRouter.get(
       fayl,
       {
         acceptRanges: true,
-        headers: { 'Content-Type': mobil ? 'video/mp4' : (l.mime || 'video/mp4'), 'Cache-Control': 'public, max-age=604800' },
+        headers: { 'Content-Type': mobil ? 'video/mp4' : (l.mime || 'video/mp4'), 'Cache-Control': 'private, max-age=604800' },
       },
       (err) => {
         // Foydalanuvchi videoni yopsa uzilish normal holat — faqat haqiqiy

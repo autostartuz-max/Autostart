@@ -6,7 +6,7 @@ import { mobilIlova } from '../native';
 import {
   Home, FileText, BookOpen, CircleAlert, HeartCrack, Heart, TriangleAlert, SignpostBig,
   Video, Info, ChartBar, TrendingUp, Trophy, Settings, MessageCircle, Moon,
-  ClipboardList, Shuffle, ShieldCheck, ScrollText, TicketPercent, BadgePercent, Car,
+  ClipboardList, Shuffle, ShieldCheck, ScrollText, TicketPercent, BadgePercent, Car, BadgeCheck, Crown,
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -110,6 +110,10 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
         <button className={'db-navi' + (active === '/amaliy' ? ' active' : '')} onClick={() => go('/amaliy')}>
           <Video size={18} /> <span>Amaliy mashg‘ulotlar</span>
         </button>
+        {/* Tariflar: Standart, Silver, Premium — sotib olish so'rovi */}
+        <button className={'db-navi db-navi-tarif' + (active === '/tariflar' ? ' active' : '')} onClick={() => go('/tariflar')}>
+          <Crown size={18} /> <span>Tariflar</span>
+        </button>
         {!MENU_MINIMAL && <>
           {navi(ORGANISH.filter((o) => o.to !== '/amaliy'))}
           <div className="db-sec">Statistika</div>
@@ -132,6 +136,9 @@ export default function AppSidebar({ active, open = false, onClose, wrong = 0 }:
             </button>
             <button className={'db-navi' + (active === '/simulyator/boshqaruv' ? ' active' : '')} onClick={() => go('/simulyator/boshqaruv')}>
               <Car size={18} /> <span>3D simulyator</span>
+            </button>
+            <button className={'db-navi' + (active === '/tariflar/boshqaruv' ? ' active' : '')} onClick={() => go('/tariflar/boshqaruv')}>
+              <BadgeCheck size={18} /> <span>Tariflar boshqaruvi</span>
             </button>
             <button className={'db-navi' + (active === '/xabarlar' ? ' active' : '')} onClick={() => go('/xabarlar')}>
               <MessageCircle size={18} /> <span>Xabarlar</span>

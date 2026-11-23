@@ -20,6 +20,8 @@ export interface Question {
   isNumeric: boolean;
   isTricky: boolean;
   hasAudio?: boolean;
+  /** Shablon (bilet) raqami; 1-bilet — tarifsiz ham audio/video namunasi ochiq */
+  shablon?: number | null;
   options: Option[];
   topic?: { id: number; name: string } | null;
   ticket?: { id: number; name: string } | null;
@@ -51,6 +53,8 @@ export interface Me {
     alphabet: string;
     category: string;
     examDate?: string | null;
+    viloyat?: string | null;
+    tuman?: string | null;
   };
   stats: {
     answered: number;
@@ -63,4 +67,7 @@ export interface Me {
     /** Oxirgi javobi xato bo'lgan savollar soni ("Xatolarni tuzatish" ro'yxati) */
     mistakes?: number;
   };
+  /** Oxirgi faol kundan beri o'tkazib yuborilgan kunlar (bugun javob bo'lsa 0) */
+  otkazilgan?: number;
+  tarif?: { daraja: number; joriy: { kod: 'standart' | 'silver' | 'premium'; nom: string; tugaydi: string } | null; kalit: string };
 }

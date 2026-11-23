@@ -3,12 +3,19 @@ import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap,
   CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare,
-  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark, Trash2, TriangleAlert, Languages,
+  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark, Trash2, TriangleAlert, Languages, MapPin, Pencil, Crown,
 } from 'lucide-react';
 import { api, clearToken, ROLE_LABEL, type Role } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import LangTheme from '../components/LangTheme';
 import { mobilIlova } from '../native';
+import ImtihonSanasi, { qolganKun, sanaKaliti, sanaNuqtali } from '../components/ImtihonSanasi';
+import ToifaTanlash from '../toifa/ToifaTanlash';
+import { ToifaIkonka, toifaTop } from '../toifa/toifalar';
+import HududTanlash from '../hudud/HududTanlash';
+import { hududMatn } from '../hudud/hududlar';
+import { sanaMatn, useTarif } from '../tarif/holat';
+import { useNavigate } from 'react-router-dom';
 import '../dashboard.css';
 
 const roleOf = (r?: string): Role => (r === 'owner' || r === 'admin' ? r : 'user');
@@ -33,13 +40,22 @@ export default function Profile() {
   const [parol, setParol] = useState('');
   const [ochirXato, setOchirXato] = useState('');
   const [ochirilmoqda, setOchirilmoqda] = useState(false);
+  // Toifa, imtihon sanasi va hudud — foydalanuvchi o'zi tanlaydi (2026-11)
+  const [oyna, setOyna] = useState<'' | 'sana' | 'toifa' | 'hudud'>('');
+  const tarif = useTarif();
+  const nav = useNavigate();
+  const saqla = async (data: Record<string, unknown>) => {
+    const r = await api.updateMe(data);
+    setMe((m: any) => (m ? { ...m, user: { ...m.user, ...(r?.user || data) } } : m));
+    api.me().then(setMe).catch(() => {});
+  };
 
   useEffect(() => {
     api.me().then(setMe).catch(() => {});
   }, []);
 
-  // Sahifa faqat KO'RISH uchun: alifbo, toifa va rolni foydalanuvchi
-  // o'zgartira olmaydi — ularni Owner admin panelidan qo'yadi.
+  // Alifbo va rolni foydalanuvchi o'zgartira olmaydi (Owner admin panelidan qo'yadi).
+  // Toifa, imtihon sanasi va hududni o'zi tanlaydi (pastdagi oynalar).
   async function akkauntniOchir() {
     setOchirXato('');
     setOchirilmoqda(true);
@@ -58,6 +74,9 @@ export default function Profile() {
   const s = me?.stats;
   const r = roleOf(u?.role);
   const Ic = ROLE_IC[r];
+  const toifa = toifaTop(u?.category) ? u.category : null;
+  const sanaK = sanaKaliti(u?.examDate);
+  const qoldi = sanaK ? qolganKun(sanaK) : -1;
 
   return (
     <div className="db">
@@ -111,16 +130,41 @@ export default function Profile() {
                     { Ic: User, k: 'Ism', v: u.firstName || '—' },
                     { Ic: Mail, k: 'Pochta', v: u.email || '—' },
                     { Ic: Phone, k: 'Telefon', v: u.phone || '—' },
-                    { Ic: Bookmark, k: 'Toifa', v: u.category || '—' },
+                    {
+                      Ic: Bookmark, k: 'Toifa', tahrir: 'toifa' as const,
+                      v: toifa ? <span className="ud-toifa"><ToifaIkonka kod={toifa} /> <b>{toifa}</b> — {toifaTop(toifa)?.nom}</span> : 'Tanlanmagan',
+                    },
+                    {
+                      Ic: CalendarCheck, k: 'Imtihon sanasi', tahrir: 'sana' as const,
+                      v: sanaK ? `${sanaNuqtali(sanaK)}${qoldi > 0 ? ` (${qoldi} kun qoldi)` : qoldi === 0 ? ' (bugun)' : ''}` : sana(u.examDate),
+                    },
+                    { Ic: MapPin, k: 'Hudud', tahrir: 'hudud' as const, v: hududMatn(u.viloyat, u.tuman) || 'Tanlanmagan' },
                     { Ic: CalendarDays, k: 'Ro‘yxatdan o‘tgan', v: sanaVaqt(u.createdAt) },
-                    { Ic: CalendarCheck, k: 'Imtihon sanasi', v: sana(u.examDate) },
                     { Ic: FileText, k: 'Saqlangan savollar', v: (s.bookmarks ?? 0) + ' ta' },
                   ].map((x) => (
                     <div className="ud-row" key={x.k}>
                       <span className="ud-k"><x.Ic size={16} /> {x.k}</span>
-                      <span className="ud-v">{x.v}</span>
+                      {'tahrir' in x && x.tahrir ? (
+                        <button type="button" className="ud-v ud-tahrir" onClick={() => setOyna(x.tahrir!)} title="O‘zgartirish">
+                          {x.v} <Pencil size={13} />
+                        </button>
+                      ) : (
+                        <span className="ud-v">{x.v}</span>
+                      )}
                     </div>
                   ))}
+                </div>
+              </div>
+
+              <div className="ud-card">
+                <div className="ud-card-h"><Crown size={16} /> Tarif</div>
+                <div className="ud-grid">
+                  <div className="ud-row">
+                    <span className="ud-k">Joriy tarif</span>
+                    <button type="button" className="ud-v ud-tahrir" onClick={() => nav('/tariflar')}>
+                      {tarif.joriy ? `${tarif.joriy.nom} — ${sanaMatn(tarif.joriy.tugaydi)} gacha` : tarif.daraja >= 3 ? 'Xodim — hammasi ochiq' : 'Bepul (faqat testlar) — tariflarni ko‘rish'}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -180,6 +224,11 @@ export default function Profile() {
           )}
         </div>
       </div>
+      {oyna === 'sana' && <ImtihonSanasi joriy={sanaK} onClose={() => setOyna('')} onSaqla={(x) => saqla({ examDate: x })} />}
+      {oyna === 'toifa' && <ToifaTanlash joriy={toifa} onClose={() => setOyna('')} onSaqla={(k) => saqla({ category: k })} />}
+      {oyna === 'hudud' && (
+        <HududTanlash viloyat={u?.viloyat ?? null} tuman={u?.tuman ?? null} onClose={() => setOyna('')} onSaqla={(v, t) => saqla({ viloyat: v, tuman: t })} />
+      )}
     </div>
   );
 }

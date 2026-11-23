@@ -8,12 +8,15 @@ import {
 } from 'lucide-react';
 import { api, clearToken, forgetAdmin, isOwner, ROLE_LABEL, type RatingRow, type DailyStat, type OnlineRow } from '../api';
 import AppSidebar from '../components/AppSidebar';
+import Eslatmalar from '../ilova/Eslatmalar';
+import { useTarif } from '../tarif/holat';
 import '../dashboard.css';
 
 export default function Dashboard() {
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const [umenu, setUmenu] = useState(false);
+  const tarif = useTarif();
   const [me, setMe] = useState<any>(null);
   // Reyting — haqiqiy foydalanuvchilar (avval bu yerda qo'lda yozilgan ismlar turardi)
   const [reyting, setReyting] = useState<RatingRow[]>([]);
@@ -156,7 +159,7 @@ export default function Dashboard() {
                   Owner uchun admin ko'rinishi, qolganlar uchun o'z profili. */}
               <div className="db-userchip" onClick={() => nav(ozSahifa)} title="Mening sahifam">
                 <span className="db-uava"><ShieldCheck size={18} /></span>
-                <span className="db-uname"><b>{name}</b><span>Pro</span></span>
+                <span className="db-uname"><b>{name}</b><span>{tarif.joriy ? tarif.joriy.nom : tarif.daraja >= 3 ? 'Xodim' : 'Bepul'}</span></span>
               </div>
               <button className="db-uarrow" onClick={() => setUmenu((v) => !v)} title="Menyu">
                 <ChevronDown size={16} />
@@ -209,6 +212,9 @@ export default function Dashboard() {
               {spark(kunList.map((d) => (d.answered > 0 ? 1 : 0)), 're')}
             </div>
           </div>
+
+          {/* Xavfsizlik eslatmalari — har kuni bittasi */}
+          <Eslatmalar tur="sayt" />
 
           {/* 3 panel */}
           <div className="db-grid3">

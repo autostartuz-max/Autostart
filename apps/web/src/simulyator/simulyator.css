@@ -273,3 +273,13 @@
 @media (max-width: 700px) and (min-height: 421px) {
   .sim-menyu-tana { grid-template-columns: 1fr; }
 }
+
+/* Mashqlar menyusi: multfilm uslubidagi rasmlar (ui/MashqRasmlari.tsx) */
+.sim-menyu-mashina { flex: none; width: 78px; height: 55px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .35)); }
+.sim-mashqlar button { display: flex; align-items: center; gap: 9px; }
+.sim-mashq-rasm { flex: none; width: 54px; height: 40px; display: block; }
+.sim-mashqlar button.tanlangan .sim-mashq-rasm { filter: drop-shadow(0 0 6px rgba(255, 210, 31, .55)); }
+@media (max-height: 420px) {
+  .sim-menyu-mashina { width: 60px; height: 42px; }
+  .sim-mashq-rasm { width: 44px; height: 33px; }
+}

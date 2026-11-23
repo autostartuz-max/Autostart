@@ -1,0 +1,47 @@
+/* Kunlik oyna (KunlikOyna.tsx) — tf-oyna (tarif.css) asosida */
+.ko-matn { white-space: pre-line; }
+.ko-belgi { width: 76px; height: 76px; margin: 2px auto 12px; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 107, 107, .16); color: #ff8a8a; }
+.ko-belgi svg { width: 40px; height: 40px; }
+.ko-bayram-belgi { position: relative; width: 96px; height: 96px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; }
+.ko-bayram-belgi span { position: relative; z-index: 1; font-size: 58px; line-height: 1; animation: ko-sakra 1.4s ease-in-out infinite;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; }
+.ko-bayram-belgi i { position: absolute; left: 50%; top: 50%; width: 8px; height: 12px; border-radius: 2px;
+  background: hsl(calc(var(--i) * 30), 90%, 60%); opacity: 0;
+  transform: rotate(calc(var(--i) * 30deg)) translateY(-8px);
+  animation: ko-konfetti 1.6s calc(var(--i) * .05s) ease-out infinite; }
+@keyframes ko-sakra { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-6px) rotate(6deg); } }
+@keyframes ko-konfetti {
+  0% { opacity: 0; transform: rotate(calc(var(--i) * 30deg)) translateY(-8px); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(calc(var(--i) * 30deg)) translateY(-52px) rotate(180deg); }
+}
+@media (prefers-reduced-motion: reduce) { .ko-bayram-belgi span, .ko-bayram-belgi i { animation: none; } }
+
+/* ---------- Xavfsizlik eslatmalari kartasi (Eslatmalar.tsx) ---------- */
+.esl { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 6px;
+  align-items: center; padding: 14px 14px 10px; border-radius: 20px; }
+.esl-belgi { grid-row: 1 / span 2; align-self: start; }
+.esl-t b { display: block; margin-bottom: 3px; font-size: 13px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; }
+.esl-t p { margin: 0; font-size: 14.5px; font-weight: 600; line-height: 1.42; }
+.esl-ik { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.esl-ik svg { width: 28px; height: 28px; }
+.esl-nav { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 12.5px; font-weight: 700; }
+.esl-nav button { width: 36px; height: 36px; border: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: none; color: inherit; cursor: pointer; }
+.esl-nav button svg { width: 20px; height: 20px; }
+
+/* Ilova (to'q karta, sariq urg'u) */
+.ilv .esl-ilova { background: var(--ilv-karta); color: var(--ilv-oq); border: 1px solid rgba(228, 35, 39, .25); }
+.ilv .esl-ilova .esl-t b { color: #ff8a8a; }
+.ilv .esl-ilova .esl-ik { background: rgba(255, 238, 0, .12); color: var(--ilv-sariq); }
+.ilv .esl-ilova .esl-nav { color: var(--ilv-matn2); }
+:root[data-theme="light"] .ilv .esl-ilova { box-shadow: var(--ilv-soya); }
+:root[data-theme="light"] .ilv .esl-ilova .esl-ik { color: var(--ilv-oltin); }
+:root[data-theme="light"] .ilv .esl-ilova .esl-t b { color: var(--ilv-qizil); }
+
+/* Sayt (dashboard paneli) */
+.esl-sayt { margin: 0 0 18px; background: var(--db-card); border: 1px solid var(--db-border); color: var(--db-text); }
+.esl-sayt .esl-t b { color: #ef4444; }
+.esl-sayt .esl-ik { background: rgba(255, 214, 0, .14); color: var(--db-yellow, #ffd600); }
+.esl-sayt .esl-nav { color: var(--db-muted); }

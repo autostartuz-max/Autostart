@@ -1195,3 +1195,11 @@
 .th-bar i { animation: th-tol .9s cubic-bezier(.22, .8, .3, 1) both; }
 @keyframes th-tol { from { width: 0; } }
 @media (prefers-reduced-motion: reduce) { .th-bar i { animation: none; } }
+
+/* Profil: o'zgartiriladigan qatorlar (toifa, imtihon sanasi, hudud, tarif) */
+.ud-v.ud-tahrir { display: inline-flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding: 0; border: 0; background: none;
+  font: inherit; font-size: 13.5px; font-weight: 600; color: var(--db-text); text-align: left; cursor: pointer; }
+.ud-v.ud-tahrir svg { flex: none; opacity: .55; }
+.ud-v.ud-tahrir:hover svg { opacity: 1; color: var(--db-yellow, #ffd600); }
+.ud-toifa { --tk-fon: var(--db-card, #181c28); display: inline-flex; align-items: center; gap: 6px; }
+.ud-toifa .tk-ikonka { width: 34px; height: 21px; color: var(--db-text); }

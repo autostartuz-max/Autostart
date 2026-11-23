@@ -122,6 +122,9 @@ model User {
   alphabet         String            @default("lat") // lat | cyr
   category         String            @default("B")
   examDate         DateTime?
+  // Hudud (profilda tanlanadi): viloyat va tuman/shahar nomi
+  viloyat          String?
+  tuman            String?
   createdAt        DateTime          @default(now())
   // Oxirgi faollik vaqti — "hozir nechta odam ishlayapti" ni hisoblash uchun.
   // Har so'rovda emas, daqiqada bir marta yangilanadi (ortiqcha yozuvning oldini olish).
@@ -142,6 +145,8 @@ model User {
   commentReports   CommentReport[]
   sharhlar         SharhKorish[]
   simNatijalar     SimNatija[]
+  obunalar         Obuna[]
+  tarifSorovlari   TarifSorov[]
 }
 
 model UserAnswer {
@@ -405,4 +410,40 @@ model SimNatija {
 
   @@index([userId, createdAt])
   @@index([createdAt])
+}
+
+/// Tarif obunasi (Standart / Silver / Premium). To'lov hozircha qo'lda: admin yoqadi.
+/// Faol tarif — tugaydi > hozir bo'lgan eng yuqori daraja.
+model Obuna {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tarif     String   // standart | silver | premium
+  boshlandi DateTime @default(now())
+  tugaydi   DateTime
+  narx      Int      @default(0)
+  izoh      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([userId, tugaydi])
+}
+
+/// "Sotib olish" bosilganda — admin ko'radi, to'lovdan keyin tarifni yoqadi
+model TarifSorov {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tarif     String
+  holat     String   @default("yangi") // yangi | bajarildi | bekor
+  createdAt DateTime @default(now())
+
+  @@index([holat, createdAt])
+  @@index([userId])
+}
+
+/// Ilova matnlari (bitta yozuv, id=1): bayram tabriklari, eslatmalar, reklama — JSON. Admin tahrirlaydi.
+model IlovaSozlama {
+  id        Int      @id @default(1)
+  data      Json
+  updatedAt DateTime @updatedAt
 }

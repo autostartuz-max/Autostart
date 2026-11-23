@@ -237,3 +237,59 @@
   background: var(--ilv-toq); color: var(--ilv-sariq);
 }
 .ilv .ilv-pr-royxat li.tez-orada .ilv-pr-royxat-coin { opacity: .55; }
+
+/* ---------- Ism ostida: toifa, imtihon sanasi, hudud (bosilsa tanlash oynasi) ---------- */
+.ilv .ilv-pr-kim-t { flex: 1 1 auto; }
+.ilv .ilv-pr-logo { margin-left: auto; }
+.ilv .ilv-pr-chiplar { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+.ilv .ilv-pr-chip {
+  --tk-fon: #4a4744;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .1);
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.ilv .ilv-pr-chip b { color: var(--ilv-sariq); font-weight: 800; }
+.ilv .ilv-pr-chip svg { flex: none; width: 15px; height: 15px; color: var(--ilv-sariq); }
+.ilv .ilv-pr-chip .ilv-pr-chip-qalam { width: 12px; height: 12px; color: #d4d2cf; }
+.ilv .ilv-pr-chip .ilv-pr-chip-tk { width: 30px; height: 19px; color: #ffffff; --tk-fon: #4a4744; }
+.ilv .ilv-pr-chip:active { transform: scale(.96); }
+
+/* ---------- Joriy tarif qatori ---------- */
+.ilv .ilv-pr-tarif {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 238, 0, .22);
+  border-radius: 20px;
+  background: var(--ilv-karta);
+  color: var(--ilv-oq);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ilv .ilv-pr-tarif-ik { flex: none; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 238, 0, .14); color: var(--ilv-sariq); }
+.ilv .ilv-pr-tarif-ik svg { width: 22px; height: 22px; }
+.ilv .ilv-pr-tarif-t { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.ilv .ilv-pr-tarif-t b { font-size: 16px; font-weight: 800; }
+.ilv .ilv-pr-tarif-t small { color: var(--ilv-matn2); font-size: 12.5px; font-weight: 600; line-height: 1.3; }
+.ilv .ilv-pr-tarif > svg:last-child { flex: none; width: 20px; height: 20px; color: var(--ilv-matn2); }
+.ilv .ilv-pr-tarif:active { transform: scale(.99); }
+:root[data-theme="light"] .ilv .ilv-pr-tarif { box-shadow: var(--ilv-soya); }
+:root[data-theme="light"] .ilv .ilv-pr-tarif-ik { color: var(--ilv-oltin); }

@@ -1,0 +1,21 @@
+/* Test natijasi: "Siz N coinga ega bo'ldingiz" va tushayotgan tangalar (TestPlayer) */
+.rcoin { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 2px 0 14px; padding: 14px 14px; border-radius: 16px; font-size: 16px; font-weight: 700; line-height: 1.3;
+  background: linear-gradient(135deg, rgba(255, 210, 63, .24), rgba(255, 210, 63, .07));
+  border: 1px solid rgba(232, 174, 0, .5); }
+.rcoin b { color: #e8ae00; font-size: 21px; }
+.rcoin-ik { position: relative; z-index: 1; flex: none; width: 32px; height: 32px; animation: rcoin-aylan 1.1s ease-in-out infinite alternate; }
+.rcoin > span:last-child { position: relative; z-index: 1; }
+.rcoin-yomgir { position: absolute; inset: 0; pointer-events: none; }
+.rcoin-yomgir > span { position: absolute; top: -22px; opacity: 0; animation: rcoin-tush 1.7s ease-in 1 forwards; }
+.rcoin-yomgir svg { display: block; width: 100%; height: 100%; }
+@keyframes rcoin-tush {
+  0% { transform: translateY(0) rotate(0); opacity: 0; }
+  12% { opacity: .95; }
+  100% { transform: translateY(96px) rotate(300deg); opacity: 0; }
+}
+@keyframes rcoin-aylan { from { transform: rotateY(0) scale(1); } to { transform: rotateY(180deg) scale(1.08); } }
+@media (prefers-reduced-motion: reduce) {
+  .rcoin-ik, .rcoin-yomgir > span { animation: none; }
+  .rcoin-yomgir { display: none; }
+}

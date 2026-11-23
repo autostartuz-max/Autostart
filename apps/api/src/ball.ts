@@ -38,11 +38,25 @@ export const SERIYA_KUN = 15;
 export const KUNLIK_OKTAGON = 20;
 export const KUNLIK_IMTIHON = 3;
 
-export function daraja(ball: number) {
+/**
+ * Daraja. Pilot — 2000 coin VA barcha savolga kamida bir marta to'g'ri javob (2026-11 hujjat:
+ * "pilot qachonki o'quvchi testlarni 100% yechganda beriladi"). hammasiTogri berilmasa — faqat coin.
+ */
+export function daraja(ball: number, hammasiTogri = true) {
   let i = 0;
   while (i + 1 < DARAJALAR.length && ball >= DARAJALAR[i + 1].dan) i++;
+  if (DARAJALAR[i].nom === 'Pilot' && !hammasiTogri) i--;
   const keyingi = DARAJALAR[i + 1] || null;
-  return { nom: DARAJALAR[i].nom, dan: DARAJALAR[i].dan, keyingi };
+  return { nom: DARAJALAR[i].nom, dan: DARAJALAR[i].dan, keyingi, pilotShart: !hammasiTogri && ball >= DARAJALAR[DARAJALAR.length - 1].dan };
+}
+
+/** Nashr qilingan savollardan nechtasiga kamida bir marta to'g'ri javob berilgan (SQL agregatsiya) */
+export async function togriYechilgan(userId: number, savolIdlar: number[]) {
+  if (!savolIdlar.length) return 0;
+  const r = await prisma.$queryRaw<{ n: number }[]>`
+    SELECT COUNT(DISTINCT "questionId")::int AS n FROM "UserAnswer"
+    WHERE "userId" = ${userId} AND "isCorrect" = true AND "questionId" = ANY(${savolIdlar})`;
+  return r[0]?.n ?? 0;
 }
 
 /** Toshkent vaqti bo'yicha sana (UTC+5): "2026-11-03" */

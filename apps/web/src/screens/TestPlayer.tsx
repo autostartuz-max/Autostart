@@ -5,7 +5,10 @@ import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
   Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap, Eye, Clapperboard, MessageCircle, Send, Trash2, Ban,
 } from 'lucide-react';
-import { api, mediaUrl, type CommentRow } from '../api';
+import { api, mediaUrl, savolAudioUrl, savolVideoUrl, tarifniYangila, type CommentRow } from '../api';
+import { ruxsat, tarifTaklif } from '../tarif/holat';
+import { Tanga } from './ilova/Profil';
+import './testCoin.css';
 import { haptic, getTelegram } from '../telegram';
 import { latToCyr } from '../translit';
 import { mobilIlova } from '../native';
@@ -56,6 +59,8 @@ function stableShuffle<T extends { id: number }>(arr: T[], seed: number): T[] {
 const TOLQIN = [38, 62, 80, 55, 30, 22, 34, 48, 26, 40, 70, 92, 64, 44, 58, 86, 100, 72, 46, 30,
   52, 78, 60, 36, 24, 42, 66, 88, 74, 50, 32, 56, 82, 68, 40, 28, 46, 72, 90, 58];
 const FS_LABEL: Record<string, string> = { sm: 'Kichik', md: "O'rtacha", lg: 'Katta' };
+// Natijadagi "coin yomg'iri": tangalar joyi, kechikishi va o'lchami (har safar bir xil — qotib qolmasin)
+const COIN_YOMGIR = Array.from({ length: 14 }, (_, i) => ({ x: (i * 37 + 7) % 96, k: ((i * 53) % 10) / 10, o: 14 + ((i * 29) % 9) }));
 const FF_LABEL: Record<string, string> = { soft: 'Yumshoq', classic: 'Klassik' };
 
 // Transliteratsiya bitta joyda (translit.ts) — avval shu yerda nusxasi bor edi va
@@ -72,6 +77,8 @@ export default function TestPlayer() {
   const shablon = sp.get('shablon') || undefined;
   const limit = sp.get('limit') || undefined;
   const examMode = sp.get('exam') === '1' || mode === 'exam' || mode === '50' || mode === '100';
+  // Haqiqiy imtihon (shablon/bilet emas): coin berilmaydi — o'quvchi faqat imtihonga e'tibor bersin (2026-11 hujjat)
+  const haqiqiyImtihon = examMode && !shablon;
   // Random test: barcha shablonlardan aralash N ta savol (20/50/100/200)
   const randomMode = mode === 'random';
   // Imtihon me'yori: 20 savolga 25 daqiqa (1.25 daq/savol). Shablon/imtihon uchun
@@ -155,16 +162,10 @@ export default function TestPlayer() {
     }
   };
 
-  // Daraja tizimi: real imtihondan (shablon emas) o'tildi — +30 ball. Server javoblarni
-  // o'zi qayta tekshiradi va kuniga 3 martagacha beradi
-  const imtihonYuborildi = useRef(false);
-  useEffect(() => {
-    if (!finished || imtihonYuborildi.current || !questions || mode !== 'exam' || shablon || tugashSabab) return;
-    const javoblar = questions.map((q) => answers[q.id]).filter(Boolean);
-    if (javoblar.length < questions.length || javoblar.filter((a) => !a.isCorrect).length >= 3) return;
-    imtihonYuborildi.current = true;
-    api.ballImtihon(questions.map((q) => q.id)).catch(() => {});
-  }, [finished, questions, answers, mode, shablon, tugashSabab]);
+  // Shu testda yig'ilgan coinlar (savolga birinchi to'g'ri javob — +1). Natijada "Siz N coinga ega bo'ldingiz"
+  const [coinJami, setCoinJami] = useState(0);
+  // Audio/video kaliti eskirgan bo'lsa — fonda yangilanadi
+  useEffect(() => { tarifniYangila(); }, []);
 
   // ---- Ovozli pleyer ----
   const voiceRef = useRef<HTMLAudioElement | null>(null);
@@ -676,6 +677,7 @@ export default function TestPlayer() {
   const retry = () => {
     setFinished(false);
     setTugashSabab('');
+    setCoinJami(0);
     setIdx(0);
     setAnswers({});
     setLearned(new Set());
@@ -723,7 +725,8 @@ export default function TestPlayer() {
     haptic();
     const timeMs = Date.now() - startRef.current;
     try {
-      const r = await api.answer({ questionId: q.id, chosen: [optId], timeMs });
+      const r = await api.answer({ questionId: q.id, chosen: [optId], timeMs, imtihon: haqiqiyImtihon });
+      if (r.coin) setCoinJami((c) => c + r.coin!);
       haptic(r.isCorrect ? 'success' : 'error');
       setAnswers((a) => ({ ...a, [q.id]: { chosen: [optId], isCorrect: r.isCorrect } }));
       // Sozlamaga qarab keyingi savolga avtomatik o'tish
@@ -747,11 +750,24 @@ export default function TestPlayer() {
     return (correct ? `To‘g‘ri javob: ${correct.textLat}. ` : '') + explainText();
   };
 
-  // Tushuncha — javobni OVOZ bilan tushuntiradi (admin ovozi bo'lsa u, bo'lmasa TTS)
+  // Tushuncha — javobni OVOZ bilan tushuntiradi (admin ovozi bo'lsa u, bo'lmasa TTS).
+  // Audio sharh — Standart tarifdan; 1-bilet savollari namuna sifatida hammaga ochiq.
   const learn = () => {
+    if (!ruxsat('audio') && q.shablon !== 1) {
+      tarifTaklif('audio');
+      return;
+    }
     if (!answered) setLearned((s) => new Set(s).add(q.id));
-    if (q.hasAudio) playUrl(mediaUrl(`/api/questions/${q.id}/audio`)!, spokenExplain());
+    if (q.hasAudio) playUrl(savolAudioUrl(q.id), spokenExplain());
     else playVoice(spokenExplain());
+  };
+  // Video dars — Silver tarifdan; 1-bilet namuna. Video yo'q savolda oyna "hali qo'shilmagan" deydi
+  const videoniOch = () => {
+    if (q.videoUrl && !ruxsat('video') && q.shablon !== 1) {
+      tarifTaklif('video');
+      return;
+    }
+    setShowVideo(true);
   };
 
   const closeRule = () => setShowRule(false);
@@ -874,7 +890,8 @@ export default function TestPlayer() {
     const timeMs = Date.now() - startRef.current;
     let r: { isCorrect: boolean };
     try {
-      r = await api.answer({ questionId: q.id, chosen: [optId], timeMs });
+      r = await api.answer({ questionId: q.id, chosen: [optId], timeMs, imtihon: haqiqiyImtihon });
+      if ((r as any).coin) setCoinJami((c) => c + (r as any).coin);
     } catch {
       setSel(null); // yuborilmadi — qayta tanlash mumkin
       return;
@@ -1128,7 +1145,7 @@ export default function TestPlayer() {
               <button className="tpm-fab-i" aria-label="Qoida" onClick={() => setShowRule(true)}>
                 <Info size={19} /> <span className="tpm-yozuv">Qoida</span>
               </button>
-              <button className="tpm-fab-i" aria-label="Video" onClick={() => setShowVideo(true)}>
+              <button className="tpm-fab-i" aria-label="Video" onClick={videoniOch}>
                 <Clapperboard size={19} /> <span className="tpm-yozuv">Video</span>
               </button>
               {showPlayer ? (
@@ -1160,7 +1177,7 @@ export default function TestPlayer() {
             <div className="grip" />
             <div className="tpm-video-q">{tx(q.textLat, q.textCyr, (q as any).textRus)}</div>
             {q.videoUrl ? (
-              <VideoTushuncha key={q.id} src={mediaUrl(q.videoUrl)!} onTugadi={() => { api.ballSharh(q.id).catch(() => {}); }} />
+              <VideoTushuncha key={q.id} src={savolVideoUrl(q.videoUrl)} onTugadi={() => { api.ballSharh(q.id).catch(() => {}); }} />
             ) : (
               <>
                 {q.imageUrl && <img className="tpm-video-img" src={mediaUrl(q.imageUrl)} alt="" />}
@@ -1331,6 +1348,18 @@ export default function TestPlayer() {
             )}
             {tugashSabab === 'toxtatildi' && (
               <div className="rsabab">Test to‘xtatildi — shu paytgacha bo‘lgan natija</div>
+            )}
+            {/* Shu testda yig'ilgan coinlar (haqiqiy imtihonda coin yo'q) */}
+            {!haqiqiyImtihon && coinJami > 0 && (
+              <div className="rcoin" role="status">
+                <span className="rcoin-yomgir" aria-hidden="true">
+                  {COIN_YOMGIR.map((c, i) => (
+                    <span key={i} style={{ left: c.x + '%', animationDelay: c.k + 's', width: c.o, height: c.o }}><Tanga /></span>
+                  ))}
+                </span>
+                <Tanga className="rcoin-ik" />
+                <span>Siz <b>{coinJami}</b> coinga ega bo‘ldingiz</span>
+              </div>
             )}
             <div className="ring-wrap">
               <svg viewBox="0 0 120 120" className="ring">

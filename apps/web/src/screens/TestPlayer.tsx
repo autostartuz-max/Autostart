@@ -78,8 +78,9 @@ export default function TestPlayer() {
   const shablon = sp.get('shablon') || undefined;
   const limit = sp.get('limit') || undefined;
   const examMode = sp.get('exam') === '1' || mode === 'exam' || mode === '50' || mode === '100';
-  // Haqiqiy imtihon (shablon/bilet emas): coin berilmaydi — o'quvchi faqat imtihonga e'tibor bersin (2026-11 hujjat)
-  const haqiqiyImtihon = examMode && !shablon;
+  // "Real imtihon" (mode=exam, shablon/bilet emas): coin berilmaydi — o'quvchi faqat imtihonga e'tibor bersin
+  // (2026-11 hujjat: "real imtihonda coin berilmaydi"). Random 50/100/200 talik va biletlarda coin beriladi.
+  const haqiqiyImtihon = mode === 'exam' && !shablon;
   // Random test: barcha shablonlardan aralash N ta savol (20/50/100/200)
   const randomMode = mode === 'random';
   // Imtihon me'yori: 20 savolga 25 daqiqa (1.25 daq/savol). Shablon/imtihon uchun
@@ -129,7 +130,7 @@ export default function TestPlayer() {
   const surish = useRef<{ x: number; y: number } | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
     // Raqamlar qatori o'zi yon tomonga suriladi — u yerdagi harakat savolni almashtirmasin
-    if ((e.target as HTMLElement).closest('.tpm-nums, .modal, .tp2-lightbox')) { surish.current = null; return; }
+    if ((e.target as HTMLElement).closest('.tpm-nums, .tpm-pastki, .tpm-fab, .modal, .tp2-lightbox')) { surish.current = null; return; }
     const t = e.touches[0];
     surish.current = { x: t.clientX, y: t.clientY };
   };

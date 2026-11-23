@@ -8,6 +8,7 @@ import ToifaTanlash from '../../toifa/ToifaTanlash';
 import { ToifaIkonka, toifaTop } from '../../toifa/toifalar';
 import HududTanlash from '../../hudud/HududTanlash';
 import DarajaLogo from '../../ilova/DarajaLogo';
+import CoinYoli from '../../ilova/CoinYoli';
 import { TarifLogo } from '../../tarif/Logolar';
 import { sanaMatn, useTarif } from '../../tarif/holat';
 import Ekran from '../../ilova/komponentlar/Ekran';
@@ -197,9 +198,8 @@ export default function ProfilIlova() {
                 <div className="ilv-asosiy-sonlar">
                   <span>Hamma savolga to‘g‘ri javob: {raqam(ball.pilot.togri)} / {raqam(ball.pilot.jami)}</span>
                 </div>
-                <div className="ilv-asosiy-progress" role="progressbar" aria-label="Pilot darajasigacha" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pilotUlush * 100)}>
-                  <span className="ilv-asosiy-tola" style={{ width: `${pilotUlush * 100}%` }} />
-                </div>
+                {/* Coin yo'li: joriy daraja transporti Pilot sari (hamma savolga to'g'ri javob ulushi) */}
+                <CoinYoli ulush={pilotUlush} nom={d.nom} keyingi="Pilot" izoh="Pilot darajasigacha" />
               </div>
             ) : (
             <div className="ilv-pr-past">
@@ -207,16 +207,13 @@ export default function ProfilIlova() {
                 <span>{keyingi ? `${raqam(ball.ball)} / ${raqam(keyingi.dan)} coin` : `${raqam(ball.ball)} coin`}</span>
                 {keyingi && <span>{raqam(qoldi)} coin qoldi</span>}
               </div>
-              <div
-                className="ilv-asosiy-progress"
-                role="progressbar"
-                aria-label={keyingi ? `${keyingi.nom} darajasigacha` : d.nom}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={Math.round(ulush * 100)}
-              >
-                <span className="ilv-asosiy-tola" style={{ width: `${ulush * 100}%` }} />
-              </div>
+              {/* Coin yo'li (2026-11-24): daraja transporti yo'l bo'ylab keyingi daraja sari yuradi */}
+              <CoinYoli
+                ulush={ulush}
+                nom={d.nom}
+                keyingi={keyingi?.nom ?? null}
+                izoh={keyingi ? `${keyingi.nom} darajasigacha` : d.nom}
+              />
             </div>
             )}
           </>

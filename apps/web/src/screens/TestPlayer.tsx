@@ -4,7 +4,7 @@ import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
   Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap, Eye, Clapperboard, MessageCircle, Send, Trash2, Ban,
-  Mic, Video as VideoKamera,
+  Mic, Video as VideoKamera, Star,
 } from 'lucide-react';
 import { api, mediaUrl, savolAudioUrl, savolVideoUrl, tarifniYangila, type CommentRow } from '../api';
 import { ruxsat, tarifTaklif } from '../tarif/holat';
@@ -12,7 +12,7 @@ import { Tanga } from './ilova/Profil';
 import './testCoin.css';
 import { haptic, getTelegram } from '../telegram';
 import { latToCyr } from '../translit';
-import { mobilIlova } from '../native';
+import { mobilIlova, testEkrani } from '../native';
 import { setLang, rusBor } from '../i18n';
 import VideoTushuncha from '../components/VideoTushuncha';
 import type { Question, Option } from '../types';
@@ -167,6 +167,12 @@ export default function TestPlayer() {
   const [coinJami, setCoinJami] = useState(0);
   // Audio/video kaliti eskirgan bo'lsa — fonda yangilanadi
   useEffect(() => { tarifniYangila(); }, []);
+  // Ilova: test oynasi och yashil — telefonning tepa/pastki chiziqlari ham shu rangda
+  useEffect(() => {
+    if (!mobilIlova()) return;
+    testEkrani(true);
+    return () => testEkrani(false);
+  }, []);
 
   // ---- Ovozli pleyer ----
   const voiceRef = useRef<HTMLAudioElement | null>(null);
@@ -718,6 +724,11 @@ export default function TestPlayer() {
   const shown = teskariSanoq
     ? Math.max(0, (jamiSoni || questions.length) * SAVOLGA_SONIYA - elapsed)
     : examMode ? seconds : elapsed;
+  // Berilgan vaqt chizig'i (ilova, 2026-11-24): qolgan vaqt ulushi — boshida yashil, yarmidan keyin
+  // sariq, tugayotganda (20% qolganda) qizil. Vaqt chegarasi yo'q rejimlarda (mavzu, saralangan) chiqmaydi.
+  const jamiVaqt = teskariSanoq ? (jamiSoni || questions.length) * SAVOLGA_SONIYA : examMode ? examSecondsFor(questions.length) : 0;
+  const qolganUlush = jamiVaqt ? Math.max(0, Math.min(1, shown / jamiVaqt)) : 0;
+  const vaqtRang = qolganUlush > 0.5 ? 'yashil' : qolganUlush > 0.2 ? 'sariq' : 'qizil';
   const mm = String(Math.floor(shown / 60)).padStart(2, '0');
   const ss = String(shown % 60).padStart(2, '0');
 
@@ -993,8 +1004,15 @@ export default function TestPlayer() {
         <div className="tpm-head">
           <header className="tpm-top">
             <button className="tpm-ic" onClick={exit} title="Chiqish"><ChevronLeft size={21} /></button>
-            <button className={'tpm-ic' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm} title="Saqlash">
-              <Bookmark size={19} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
+            {/* Saralangan — yulduz (2026-11-24, foydalanuvchi namunasi) */}
+            <button
+              className={'tpm-ic tpm-yulduz' + (bmarks.has(q.id) ? ' on' : '')}
+              onClick={toggleBm}
+              title="Saralanganlarga qo‘shish"
+              aria-label={bmarks.has(q.id) ? 'Saralanganlardan olib tashlash' : 'Saralanganlarga qo‘shish'}
+              aria-pressed={bmarks.has(q.id)}
+            >
+              <Star size={20} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
             </button>
             <button className="tpm-ic" onClick={share} title="Ulashish"><Share2 size={19} /></button>
             <span className="tpm-timer"><Clock size={18} /> {mm}:{ss}</span>
@@ -1003,18 +1021,26 @@ export default function TestPlayer() {
               <Flag size={19} />
             </button>
           </header>
+          {jamiVaqt > 0 && (
+            <div
+              className={'tpm-vaqt ' + vaqtRang}
+              role="progressbar"
+              aria-label="Qolgan vaqt"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(qolganUlush * 100)}
+            >
+              <span style={{ width: `${qolganUlush * 100}%` }} />
+            </div>
+          )}
           <div className="tpm-sep" />
-          {/* Savollar raqami — yuqorida, yon tomonga suriladi */}
-          <div className="tpm-nums">
-            {questions.map((qq, i) => (
-              <button key={qq.id} ref={i === idx ? curRef : null} className={circleClass(i)} onClick={() => setIdx(i)}>
-                {i + 1}
-              </button>
-            ))}
-          </div>
         </div>
       ) : (
       <header className="tp2-top">
+        {/* Chiqish — chap tomonda (2026-11-24; avval o'ngda "ESC" edi) */}
+        <button className="tp2-chiqish" onClick={exit} title="Testdan chiqish">
+          <ChevronLeft size={17} /> Chiqish
+        </button>
         <div className="tp2-brand">
           <img src="/mark.png" alt="" className="tp2-mark" />
           <span className="tp2-word"><b>AUTO</b><i>START</i></span>
@@ -1028,7 +1054,6 @@ export default function TestPlayer() {
           <button className={'tp2-ic2' + (bmarks.has(q.id) ? ' on' : '')} onClick={toggleBm} title="Saqlash">
             <Bookmark size={16} fill={bmarks.has(q.id) ? 'currentColor' : 'none'} />
           </button>
-          <button className="tp2-esc" onClick={exit} title="Chiqish">ESC</button>
         </div>
       </header>
       )}
@@ -1168,6 +1193,20 @@ export default function TestPlayer() {
             </>
           )}
         </div>
+      )}
+
+      {/* ===== Ilova: savol raqamlari — pastki yashil chiziqda (2026-11-24, ClickClickDrive namunasi),
+           yon tomonga suriladi; joriy savol o'rtaga keladi ===== */}
+      {mobil && (
+        <nav className="tpm-pastki" aria-label="Savollar">
+          <div className="tpm-nums">
+            {questions.map((qq, i) => (
+              <button key={qq.id} ref={i === idx ? curRef : null} className={circleClass(i)} onClick={() => setIdx(i)}>
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        </nav>
       )}
 
       {/* ===== Ilova: Video — savol mavzusi va video darsliklar ===== */}

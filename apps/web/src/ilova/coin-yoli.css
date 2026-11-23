@@ -1,0 +1,30 @@
+/* Coin yo'li (CoinYoli.tsx) — Profil daraja kartasida (doim to'q karta ustida) */
+.cy { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.cy-foiz { flex: none; min-width: 46px; padding: 6px 8px; border-radius: 999px; background: rgba(255, 255, 255, .12);
+  color: #ffffff; font-size: 13px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
+/* Yo'l: asfalt, o'rtada uzuq chiziq (harakat — chiziqlar orqaga suriladi), bosib o'tilgan qismi sariq */
+.cy-iz { --u: 0; --tr: 34px; position: relative; flex: 1; min-width: 0; height: 44px; }
+.cy-iz::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 14px; transform: translateY(-50%);
+  border-radius: 7px; background: #4a4744; box-shadow: inset 0 2px 3px rgba(0, 0, 0, .35); }
+.cy-chiziq { position: absolute; left: 6px; right: 6px; top: 50%; height: 2px; transform: translateY(-50%);
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .7) 0 8px, transparent 8px 16px);
+  background-size: 16px 2px; animation: cy-yol 0.6s linear infinite; }
+.cy-otilgan { position: absolute; left: 0; top: 50%; height: 14px; transform: translateY(-50%); border-radius: 7px;
+  width: calc(var(--tr) / 2 + (100% - var(--tr)) * var(--u)); background: rgba(255, 238, 0, .55);
+  transition: width .9s cubic-bezier(.3, .8, .3, 1); }
+/* Transport: yo'lning o'sha nuqtasida, o'ngga qaragan, biroz silkinib yuradi */
+.cy-transport { position: absolute; top: 50%; width: var(--tr); height: var(--tr); margin-top: calc(var(--tr) / -2 - 9px);
+  left: calc((100% - var(--tr)) * var(--u)); display: flex; align-items: center; justify-content: center;
+  transition: left .9s cubic-bezier(.3, .8, .3, 1); }
+.cy-belgi { display: block; font-size: 28px; line-height: 1; transform: scaleX(-1);
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .45)); animation: cy-silkin .45s ease-in-out infinite alternate; }
+.cy-maqsad { flex: none; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, .12); font-size: 24px; line-height: 1;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; }
+@keyframes cy-yol { from { background-position: 0 0; } to { background-position: -16px 0; } }
+@keyframes cy-silkin { from { transform: scaleX(-1) translateY(0) rotate(0deg); } to { transform: scaleX(-1) translateY(-2px) rotate(-2deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .cy-chiziq, .cy-belgi { animation: none; }
+  .cy-otilgan, .cy-transport { transition: none; }
+}

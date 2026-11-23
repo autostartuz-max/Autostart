@@ -5,7 +5,7 @@ import type { Me } from '../../types';
 import Ekran from '../../ilova/komponentlar/Ekran';
 import TepaQator, { QidiruvTugma } from '../../ilova/komponentlar/TepaQator';
 import IlovaKarta from '../../ilova/komponentlar/IlovaKarta';
-import { Bayroqcha, Hujjat, Panjara, Qatlamlar, SinganYurak, Undov } from '../../ilova/ikonkalar';
+import { Hujjat, Panjara, Qatlamlar, SinganYurak, Undov, Yulduz } from '../../ilova/ikonkalar';
 import '../../ilova/ekranlar.css';
 
 /**
@@ -33,7 +33,7 @@ export default function TestlarIlova() {
         <IlovaKarta
           tur="test"
           sarlavha="Saralangan"
-          ikonka={<Bayroqcha />}
+          ikonka={<Yulduz />}
           belgi={{ matn: saralangan, rang: 'yashil' }}
           onClick={() => nav('/test?mode=saved')}
         />

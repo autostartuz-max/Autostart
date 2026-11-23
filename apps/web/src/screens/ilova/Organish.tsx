@@ -2,8 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import Ekran from '../../ilova/komponentlar/Ekran';
 import TepaQator, { QidiruvTugma } from '../../ilova/komponentlar/TepaQator';
 import IlovaKarta from '../../ilova/komponentlar/IlovaKarta';
-import { Mashina, Papka, Shapka, YolBelgisi } from '../../ilova/ikonkalar';
-import { unitySimulyatorniOch } from '../../native';
+import { Kitoblar, Mashina, Papka, YolBelgisi } from '../../ilova/ikonkalar';
 import '../../ilova/ekranlar.css';
 
 /**
@@ -18,20 +17,11 @@ export default function OrganishIlova() {
       <h1 className="ilv-ekran-sarlavha">O‘rganish</h1>
       <div className="ilv-karta-tor">
         {/* Darslik — nazariy darslar (hali tayyor emas); amaliy videolar Avtodrom'da */}
-        <IlovaKarta tur="test" sarlavha="Darslik" ikonka={<Shapka />} onClick={() => nav('/darslik')} />
+        <IlovaKarta tur="test" sarlavha="Darslik" ikonka={<Kitoblar />} onClick={() => nav('/darslik')} />
         <IlovaKarta tur="test" sarlavha="Mavzular" ikonka={<Papka />} onClick={() => nav('/mavzular')} />
         <IlovaKarta tur="test" sarlavha="Yo‘l belgilari" ikonka={<YolBelgisi />} onClick={() => nav('/belgilar')} />
         <IlovaKarta tur="test" sarlavha="Avtodrom" ikonka={<Mashina />} onClick={() => nav('/amaliy')} />
-        {/* 3D simulyator: avtodrom mashqlari — rul, pedallar, xatolar (three.js) */}
-        <IlovaKarta tur="test" sarlavha="3D simulyator" ikonka={<Mashina />} onClick={() => nav('/simulyator')} />
-        {/* Yangi 3D simulyator (Unity, alohida oynada; faqat Android). Ochilmasa
-            (iOS, Unity'siz yig'ish, eski telefon) — three.js simulyatori */}
-        <IlovaKarta
-          tur="test"
-          sarlavha="3D simulyator (yangi)"
-          ikonka={<Mashina />}
-          onClick={async () => { if (!(await unitySimulyatorniOch())) nav('/simulyator'); }}
-        />
+        {/* 3D simulyator kartalari olib tashlandi (2026-11-24, foydalanuvchi talabi); /simulyator manzili qoldi */}
       </div>
     </Ekran>
   );

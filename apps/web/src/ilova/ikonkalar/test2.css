@@ -118,3 +118,39 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(-2deg); }
 }
+
+/* ---------- Darslik: javondagi kitoblar (3D, 2026-11-24) ---------- */
+.ilv .ilv-joy-kitoblar { position: absolute; right: 0; bottom: 0; width: 105px; height: 96px; pointer-events: none; }
+.ilv .ilv-joy-kitoblar > svg { display: block; overflow: visible; filter: drop-shadow(0 7px 5.5px rgba(0, 0, 0, .39)); }
+/* yashil kitob 1.5 s da 7pt ko'tarilib, biroz chapga og'adi (javondan olinayotgandek), keyin qaytadi */
+.ilv .ilv-kitob-kotar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation-name: ilv-kitob-kotar;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+@keyframes ilv-kitob-kotar {
+  from { transform: translateY(0) rotate(0deg); }
+  to { transform: translateY(-7px) rotate(-3deg); }
+}
+
+/* ---------- Saralangan: yulduz (2026-11-24) ---------- */
+.ilv .ilv-joy-yulduz { position: absolute; right: 0; bottom: 0; width: 82px; height: 84px; pointer-events: none; }
+.ilv .ilv-joy-yulduz > svg { display: block; overflow: visible; filter: drop-shadow(0 7px 5.5px rgba(0, 0, 0, .39)); }
+/* yulduz 1.5 s da biroz kattalashib, chapga-o'ngga tebranadi */
+.ilv .ilv-yulduz-tebran {
+  transform-box: fill-box;
+  transform-origin: 50% 55%;
+  animation-name: ilv-yulduz-tebran;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+@keyframes ilv-yulduz-tebran {
+  from { transform: rotate(-8deg) scale(1); }
+  to { transform: rotate(8deg) scale(1.07); }
+}

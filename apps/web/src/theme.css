@@ -378,7 +378,11 @@ button { font-family: inherit; cursor: pointer; }
 .ff-classic .ftext { font-family: Georgia, 'Times New Roman', serif; }
 
 /* Natijalar ekrani */
-.result-sheet { max-height: 90vh; overflow-y: auto; padding-bottom: 20px; }
+.result-sheet { max-height: 90vh; overflow-y: auto; padding-bottom: 0; }
+/* Savollar ko'p bo'lsa ham (200 talik) "Qayta" va "Yakunlash" doim ko'rinib tursin — oyna pastiga yopishadi */
+.result-sheet .rbtns { position: sticky; bottom: 0; z-index: 2; margin: 14px -22px 0;
+  padding: 12px 22px calc(16px + env(safe-area-inset-bottom)); background: #131c2b; border-top: 1px solid #26344c;
+  box-shadow: 0 -10px 18px -10px rgba(0, 0, 0, .55); }
 .rtitle { text-align: center; font-size: 20px; font-weight: 800; margin: 2px 0 18px; }
 .ring-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto 22px; }
 .ring { width: 160px; height: 160px; transform: rotate(-90deg); }
@@ -469,6 +473,10 @@ button { font-family: inherit; cursor: pointer; }
 .tp2-ic2.on { color: #f59e0b; }
 .tp2-esc { background: #e8edf3; border: 1px solid #cbd5e1; color: #b91c1c; font-weight: 800; font-size: 12px;
   border-radius: 7px; padding: 9px 12px; cursor: pointer; }
+/* Testdan chiqish — sarlavhaning chap tomonida */
+.tp2-chiqish { flex-shrink: 0; display: inline-flex; align-items: center; gap: 3px; background: #e8edf3; border: 1px solid #cbd5e1;
+  color: #b91c1c; font-weight: 800; font-size: 13px; border-radius: 7px; padding: 8px 12px 8px 7px; cursor: pointer; }
+.tp2-chiqish:hover { background: #fde8e8; border-color: #f5b5b5; }
 .tp2-qbar { margin: 14px 20px 0; background: #101f33; border: 1px solid #24344e; border-radius: 10px;
   padding: 14px 20px; font-size: calc(16px * var(--fs, 1)); font-weight: 700; text-align: center; color: #eaf1fb; }
 .tp2-tools { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 20px; }
@@ -569,38 +577,50 @@ button { font-family: inherit; cursor: pointer; }
    Oson Prava skrinshoti bilan BIR TELEFONDA olingan Autostart skrinshotiga
    solishtirib o'lchangan (telefon kengligi ~360px): tugmalar 36x39, raqam
    kataklari 41x38, variantlar 45px, "O'rganish" 38px. Saytga tegmaydi — hammasi `html.cap` yoki faqat
-   ilovada chiziladigan `tpm-*` sinflari ichida. Shrift — Nunito (ilova ichida). */
-.cap .tp2 { overflow-x: hidden; background: #141f25; color: #fff;
+   ilovada chiziladigan `tpm-*` sinflari ichida. Shrift — Nunito (ilova ichida).
+   2026-11-24: ranglar och yashil (foydalanuvchi namunasi — ClickClickDrive): fon #d4f2db, oq kataklar,
+   to'q matn; tepada berilgan vaqt chizig'i (.tpm-vaqt). O'lchamlar o'zgarmagan. */
+.cap .tp2 { overflow-x: hidden; background: #d4f2db; color: #1f2d3d;
   font-family: 'Nunito', system-ui, -apple-system, Roboto, sans-serif; }
 /* .tp2 ustunli flex — sig'maganda bolalarini siqardi va raqamlar qatori qirqilardi */
 .cap .tp2 > * { flex-shrink: 0; }
 
 /* Yuqori qism (tugmalar + raqamlar) — savol skroll qilinsa ham joyida turadi */
-.tpm-head { position: sticky; top: 0; z-index: 20; background: #141f25; }
+.tpm-head { position: sticky; top: 0; z-index: 20; background: #d4f2db; }
 .tpm-top { display: flex; align-items: center; gap: 4px; padding: calc(9px + env(safe-area-inset-top)) 12px 0; }
-.tpm-ic { width: 36px; height: 39px; flex-shrink: 0; padding: 0; border-radius: 10px; background: #1a2636;
-  border: 1px solid #2a3746; border-bottom: 3px solid #283848; color: #96a2b2;
+.tpm-ic { width: 36px; height: 39px; flex-shrink: 0; padding: 0; border-radius: 10px; background: #ffffff;
+  border: 1px solid #bfe3c8; border-bottom: 3px solid #a9d6b5; color: #3b4b5c;
   display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
-.tpm-ic.on { color: #fbbf24; }
+.tpm-ic.on { color: #d49a00; }
+/* Saralangan — yulduz: to'q sariq hoshiya (namunadagidek), saralangan bo'lsa yulduz to'ladi */
+.tpm-ic.tpm-yulduz { border: 1.5px solid #f5b13d; border-bottom: 3px solid #e0961a; color: #f5a623; }
+.tpm-ic.tpm-yulduz.on { background: #fff4dc; color: #f59e0b; }
 .tpm-timer { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-  font-size: 15px; font-weight: 800; color: #aeb2b8; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.tpm-timer svg { color: #b89c46; }
-.tpm-sep { height: 1px; background: #1c2935; margin-top: 10px; }
+  font-size: 15px; font-weight: 800; color: #2c3a4b; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tpm-timer svg { color: #2f9e44; }
+.tpm-sep { height: 1px; background: #b9e0c3; margin-top: 10px; }
+/* Berilgan vaqt: qolgan ulush; boshida yashil, yarmidan sariq, oxirida qizil */
+.tpm-vaqt { height: 10px; margin: 10px 12px 0; border-radius: 6px; background: rgba(31, 45, 61, .1); overflow: hidden; }
+.tpm-vaqt > span { display: block; height: 100%; border-radius: inherit; transition: width 1s linear, background-color .6s ease; }
+.tpm-vaqt.yashil > span { background: #2fb24c; }
+.tpm-vaqt.sariq > span { background: #f2c200; }
+.tpm-vaqt.qizil > span { background: #e5484d; }
 
-.tpm-nums { display: flex; gap: 3px; overflow-x: auto; padding: 10px 12px 9px; scrollbar-width: none; }
+/* Savol raqamlari — pastda (2026-11-24, ClickClickDrive namunasi): yashil chiziq, oq kataklar; javob
+   berilgani yashil/qizil, joriy savol — qalin to'q hoshiya. Yon tomonga suriladi. */
+.tpm-pastki { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: #2f9e44;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); box-shadow: 0 -2px 10px rgba(0, 0, 0, .12); }
+.tpm-nums { display: flex; gap: 6px; overflow-x: auto; padding: 0 10px; scrollbar-width: none; }
 .tpm-nums::-webkit-scrollbar { display: none; }
-.tpm-nums .ic { flex: 0 0 41px; width: 41px; height: 38px; padding: 0; border-radius: 9px; background: #1d2a3d;
-  border: 1px solid #334052; color: #95a4be; font-size: 15px; font-weight: 700; font-family: inherit; }
-.tpm-nums .ic.ok { background: #22c55e; border-color: #22c55e; color: #fff; }
-.tpm-nums .ic.no { background: #ef4444; border-color: #ef4444; color: #fff; }
-.tpm-nums .ic.cur { background: #132e39; border: 2px solid #23aef1; color: #eaf7fd;
-  box-shadow: 0 0 0 1px #072438, inset 0 0 0 1px #07314a; }
-.tpm-nums .ic.cur.ok { background: #22c55e; }
-.tpm-nums .ic.cur.no { background: #ef4444; }
+.tpm-nums .ic { flex: 0 0 40px; width: 40px; height: 40px; padding: 0; border-radius: 4px; background: #ffffff;
+  border: 2px solid #ffffff; color: #1f2d3d; font-size: 16px; font-weight: 700; font-family: inherit; box-sizing: border-box; }
+.tpm-nums .ic.ok { background: #5cbf75; border-color: #ffffff; color: #fff; }
+.tpm-nums .ic.no { background: #e5484d; border-color: #ffffff; color: #fff; }
+.tpm-nums .ic.cur { border: 3px solid #1f2d3d; box-shadow: none; }
 
 /* Savol matni */
 .cap .tp2-qbar { background: none; border: none; margin: 0; padding: 13px 18px 0;
-  font-size: calc(16px * var(--fs, 1)); font-weight: 800; line-height: 1.3; text-align: center; color: #fff; }
+  font-size: calc(16px * var(--fs, 1)); font-weight: 800; line-height: 1.3; text-align: center; color: #1f2d3d; }
 
 /* Rasm — o'z nisbatida, kesilmaydi va cho'zilmaydi */
 .cap .tp2-body { flex-direction: column; align-items: stretch; padding: 20px 15px 0; gap: 15px; }
@@ -613,25 +633,25 @@ button { font-family: inherit; cursor: pointer; }
 
 /* Javob variantlari */
 .cap .tp2-opts { gap: 5px; }
-.cap .io { min-height: 45px; padding: 0; border-radius: 11px; background: #172331;
-  border: 1.5px solid #2a3949; border-bottom: 3px solid #334153; box-shadow: none; }
+.cap .io { min-height: 45px; padding: 0; border-radius: 11px; background: #ffffff;
+  border: 1.5px solid #c4e5cd; border-bottom: 3px solid #a9d6b5; box-shadow: none; }
 .cap .io-f { width: 30px; height: 30px; margin: 0 11px 0 9px; align-self: center; border-radius: 50%;
-  background: #263344; color: #92a2bb; font-size: 13px; font-weight: 800; }
+  background: #e6f6ea; color: #4a5a6b; font-size: 13px; font-weight: 800; }
 .cap .io-radio { display: none; }
-.cap .io-text { padding: 10px 12px 10px 0; color: #e5eef7; font-size: calc(14px * var(--fs, 1));
+.cap .io-text { padding: 10px 12px 10px 0; color: #1f2d3d; font-size: calc(14px * var(--fs, 1));
   font-weight: 700; line-height: 1.3; }
-.cap .io.sel { background: #2e2a10; border-color: #eab308; }
-.cap .io.sel .io-text { color: #fde68a; }
+.cap .io.sel { background: #fff4cc; border-color: #e0a800; }
+.cap .io.sel .io-text { color: #7a5a00; }
 /* Javob berilgach: to'g'ri — yashil hoshiya va ✓, xato — qizil hoshiya va ✕ */
-.cap .io.ok { background: rgba(34, 197, 94, .12); border-color: #4ade80; }
-.cap .io.ok .io-text { color: #4ade80; }
-.cap .io.ok .io-f { background: rgba(34, 197, 94, .25); color: #4ade80; }
-.cap .io.no { background: rgba(239, 68, 68, .14); border-color: #f87171; }
-.cap .io.no .io-text { color: #f87171; }
-.cap .io.no .io-f { background: rgba(239, 68, 68, .25); color: #f87171; }
+.cap .io.ok { background: #e3f8e8; border-color: #2fb24c; }
+.cap .io.ok .io-text { color: #17692f; }
+.cap .io.ok .io-f { background: #c8efd2; color: #17692f; }
+.cap .io.no { background: #fde8e8; border-color: #e5484d; }
+.cap .io.no .io-text { color: #b42318; }
+.cap .io.no .io-f { background: #f9cfcf; color: #b42318; }
 .cap .io.ok::after, .cap .io.no::after { flex-shrink: 0; margin-right: 16px; font-size: 20px; font-weight: 800; }
-.cap .io.ok::after { content: '✓'; color: #4ade80; }
-.cap .io.no::after { content: '✕'; color: #f87171; }
+.cap .io.ok::after { content: '✓'; color: #2fb24c; }
+.cap .io.no::after { content: '✕'; color: #e5484d; }
 
 /* Natijalar jadvali — QATORIGA 10 TA savol (mijoz talabi): o'nlik qatorda
    savol raqamini topish oson (281-290, 291-300...). Ilgari ustunlar soni
@@ -647,13 +667,13 @@ button { font-family: inherit; cursor: pointer; }
 .cap ::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
 /* Pastda "O'rganish" menyusi uchun joy — oxirgi variant uning ostida qolmasin */
-.cap .tp2-nav { margin-top: 0; padding: 0 0 calc(80px + env(safe-area-inset-bottom)); border: none; }
+.cap .tp2-nav { margin-top: 0; padding: 0 0 calc(136px + env(safe-area-inset-bottom)); border: none; }
 
 /* "O'rganish" menyusi — pastda chapdan bitta qator: avval "O'rganish"/"Yopish", ochilganda uning
    o'ng tomonida Qoida, Video, Ovoz. Javob variantlarini yopmaydi. Sig'masa (TestPlayer o'lchaydi):
    "Yopish" faqat ✕, pleyer ochiq bo'lsa Qoida/Video ham faqat belgi; baribir sig'masa yonga suriladi.
    Yopiq holatda faqat tugma kengligida (qolgan joyni bosish mumkin). */
-.tpm-fab { position: fixed; left: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40;
+.tpm-fab { position: fixed; left: 15px; bottom: calc(68px + env(safe-area-inset-bottom)); z-index: 40;
   display: flex; flex-direction: row; align-items: flex-end; gap: 8px; }
 .tpm-fab.open { right: 15px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
   padding-top: 4px; margin-top: -4px; }
@@ -664,8 +684,8 @@ button { font-family: inherit; cursor: pointer; }
 .tpm-fab.ixcham .tpm-fab-main,
 .tpm-fab.ixcham2 .tpm-fab-i:not(.tpm-fab-player) { width: 42px; padding: 0; justify-content: center; }
 .tpm-fab-main, .tpm-fab-i { display: inline-flex; align-items: center; gap: 7px; height: 38px;
-  padding: 0 11px; border-radius: 12px; background: #1d2a3d; border: 1px solid #445468;
-  border-bottom: 3px solid #34455a; color: #ccdae7; font-size: 14px; font-weight: 700;
+  padding: 0 11px; border-radius: 12px; background: #ffffff; border: 1px solid #bfe3c8;
+  border-bottom: 3px solid #a9d6b5; color: #2c3a4b; font-size: 14px; font-weight: 700;
   font-family: inherit; cursor: pointer; box-shadow: none; }
 .tpm-fab-i { animation: tpmIn .16s ease; }
 @keyframes tpmIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
@@ -674,10 +694,10 @@ button { font-family: inherit; cursor: pointer; }
    boshqa tugmalar bilan bir xil quti (175x43), oq ▶/⏸ va ingichka to'lqin */
 .tpm-fab-player { width: 152px; padding: 0 11px 0 12px; gap: 7px; }
 .tpm-pp { width: 22px; height: 22px; flex-shrink: 0; padding: 0; border: none; background: none;
-  color: #f1f5f9; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  color: #1f2d3d; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .tpm-wave { flex: 1; display: flex; align-items: center; justify-content: space-between; height: 28px; }
-.tpm-wave i { width: 2px; border-radius: 1px; background: #7d8a9c; }
-.tpm-wave i.on { background: #e8eef6; }
+.tpm-wave i { width: 2px; border-radius: 1px; background: #b4c2cf; }
+.tpm-wave i.on { background: #1f2d3d; }
 
 /* Video oynasi */
 .tpm-video { padding-bottom: calc(18px + env(safe-area-inset-bottom)); text-align: center; }
@@ -758,4 +778,4 @@ button { font-family: inherit; cursor: pointer; }
 
 /* "O'rganish" tugmasi faqat belgi bilan (yozuvsiz): yopiq — sariq qalpoqcha, ochiq — ✕ */
 .tpm-fab-main.tpm-belgili { width: 46px; padding: 0; justify-content: center; }
-.tpm-fab-main.tpm-belgili .tpm-qalpoq { color: #ffd21f; }
+.tpm-fab-main.tpm-belgili .tpm-qalpoq { color: #d49a00; }

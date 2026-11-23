@@ -13,3 +13,5 @@ export { default as Bayroqcha } from './Bayroqcha';
 export { default as Mashina } from './Mashina';
 export { default as Shapka } from './Shapka';
 export { default as SavolPufak } from './SavolPufak';
+export { default as Kitoblar } from './Kitoblar';
+export { default as Yulduz } from './Yulduz';

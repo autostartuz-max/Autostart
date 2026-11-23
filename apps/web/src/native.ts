@@ -51,20 +51,32 @@ export const mobilIlova = () => Capacitor.isNativePlatform() || ilovaSinovi();
 // (Bosh sahifa, Testlar, O'rganish, Profil — Ekran qobig'i) fonida #2B2A29, qolganlarida #0f1117.
 const ODDIY_BAR = '#0f1117';
 const ILV_BAR = '#2b2a29';
+// Test yechish oynasi och yashil (2026-11-24) — tizim chiziqlari ham shu rangda, belgilari to'q
+const TEST_BAR = '#d4f2db';
 let ilvEkranlar = 0;
+let testOynalar = 0;
 let barTaymer: ReturnType<typeof setTimeout> | undefined;
-const joriyBar = () => (ilvEkranlar > 0 ? ILV_BAR : ODDIY_BAR);
+const joriyBar = () => (testOynalar > 0 ? TEST_BAR : ilvEkranlar > 0 ? ILV_BAR : ODDIY_BAR);
 
 async function barRangi(color: string) {
   if (!Capacitor.isNativePlatform()) return;
   try {
-    const [{ EdgeToEdge }, { StatusBar }] = await Promise.all([
+    const [{ EdgeToEdge }, { StatusBar, Style }] = await Promise.all([
       import('@capawesome/capacitor-android-edge-to-edge-support'),
       import('@capacitor/status-bar'),
     ]);
     EdgeToEdge.setBackgroundColor({ color }).catch(() => {});
     StatusBar.setBackgroundColor({ color }).catch(() => {});
+    // Och fonda (test oynasi) soat va belgilar to'q, qolganlarida oq
+    StatusBar.setStyle({ style: color === TEST_BAR ? Style.Light : Style.Dark }).catch(() => {});
   } catch { /* plagin bu platformada yo'q */ }
+}
+
+/** Test yechish oynasi ochilganda true, yopilganda false — tizim chiziqlari och yashil */
+export function testEkrani(ochiq: boolean) {
+  testOynalar = Math.max(0, testOynalar + (ochiq ? 1 : -1));
+  clearTimeout(barTaymer);
+  barTaymer = setTimeout(() => { barRangi(joriyBar()); }, 30);
 }
 
 /** Ekran qobig'i ochilganda true, yopilganda false — tizim chiziqlari ekran rangiga moslanadi */

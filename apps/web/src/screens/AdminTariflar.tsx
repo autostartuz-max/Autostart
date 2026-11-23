@@ -9,7 +9,6 @@ import AdminLogin from './AdminLogin';
 import { TARIFLAR_ZAXIRA, TARIF_NOMI, narxMatn, sanaMatn, type Tarif, type TarifKod } from '../tarif/holat';
 import { TarifLogo, TaqiqBelgisi } from '../tarif/Logolar';
 import '../dashboard.css';
-import './adminSimulyator.css';
 import './adminTarif.css';
 
 type Bolim = 'sorovlar' | 'yoqish' | 'obunalar' | 'matnlar';
@@ -169,7 +168,7 @@ export default function AdminTariflar() {
                   {yangiSoni > 0 && <span className="adm-badge owner">{yangiSoni} ta yangi so‘rov</span>}
                 </div>
               </div>
-              <p className="asm-izoh">
+              <p className="atf-izoh">
                 To‘lov hozircha qo‘lda: foydalanuvchi “Sotib olish”ni bosadi, call-markaz to‘lovni qabul qiladi, siz bu yerda tarifni yoqasiz.
                 Faol tarif bo‘lsa, yangi muddat uning oxiridan qo‘shiladi.
               </p>
@@ -183,7 +182,7 @@ export default function AdminTariflar() {
                 ))}
               </div>
 
-              <div className="asm-tablar">
+              <div className="atf-tablar">
                 {BOLIMLAR.map((b) => (
                   <button key={b.id} className={bolim === b.id ? 'faol' : ''} onClick={() => setBolim(b.id)}>
                     {b.nom}{b.id === 'sorovlar' && yangiSoni > 0 ? ` (${yangiSoni})` : ''}
@@ -192,7 +191,7 @@ export default function AdminTariflar() {
               </div>
 
               {bolim === 'sorovlar' && (
-                <div className="asm-karta">
+                <div className="atf-karta">
                   <label className="atf-filtr">
                     <input type="checkbox" checked={faqatYangi} onChange={(e) => setFaqatYangi(e.target.checked)} /> Faqat yangilari
                   </label>
@@ -229,7 +228,7 @@ export default function AdminTariflar() {
               )}
 
               {bolim === 'yoqish' && (
-                <div className="asm-karta atf-forma">
+                <div className="atf-karta atf-forma">
                   <label className="atf-maydon">
                     <span>Foydalanuvchi</span>
                     {tanlangan ? (
@@ -282,7 +281,7 @@ export default function AdminTariflar() {
               )}
 
               {bolim === 'obunalar' && (
-                <div className="asm-karta">
+                <div className="atf-karta">
                   {obunalar.length === 0 ? (
                     <div className="adm-empty">Obunalar hali yo‘q</div>
                   ) : (
@@ -311,7 +310,7 @@ export default function AdminTariflar() {
               )}
 
               {bolim === 'matnlar' && matnlar && (
-                <div className="asm-karta atf-matnlar">
+                <div className="atf-karta atf-matnlar">
                   <div className="atf-matn-tugmalar">
                     <button className="adm-btn sec" disabled={!ozgardi || band} onClick={() => setMatnlar(JSON.parse(aslMatn))}><RotateCcw size={16} /> Bekor qilish</button>
                     {standart && <button className="adm-btn sec" disabled={band} onClick={() => window.confirm('Hamma matnlar standart holatga qaytarilsinmi? (Saqlash bosilgandan keyin kuchga kiradi)') && setMatnlar(standart)}>Standartga qaytarish</button>}
@@ -319,15 +318,15 @@ export default function AdminTariflar() {
                   </div>
 
                   <h3>“Kun o‘tkazib yubordingiz” xabari</h3>
-                  <p className="asm-izoh">{'{kun}'} — “bir”, “ikki” … “o‘n” (10 dan ko‘p bo‘lsa raqam). Foydalanuvchi bir kun yoki ko‘proq test yechmasa, ilova ochilganda chiqadi.</p>
+                  <p className="atf-izoh">{'{kun}'} — “bir”, “ikki” … “o‘n” (10 dan ko‘p bo‘lsa raqam). Foydalanuvchi bir kun yoki ko‘proq test yechmasa, ilova ochilganda chiqadi.</p>
                   <textarea className="adm-ta" rows={2} value={matnlar.otkazish} onChange={(e) => m({ otkazish: e.target.value })} />
 
                   <h3>Tarif reklamasi (tarifsiz foydalanuvchilarga, kuniga bir marta)</h3>
-                  <p className="asm-izoh">{'{tarif}'} — har kuni almashadi: Standart, Silver, Premium. Tarif sotib olgandan keyin chiqmaydi.</p>
+                  <p className="atf-izoh">{'{tarif}'} — har kuni almashadi: Standart, Silver, Premium. Tarif sotib olgandan keyin chiqmaydi.</p>
                   <textarea className="adm-ta" rows={3} value={matnlar.reklama} onChange={(e) => m({ reklama: e.target.value })} />
 
                   <h3>Bayram tabriklari</h3>
-                  <p className="asm-izoh">Sana: OO-KK (har yili, masalan 03-21) yoki YYYY-OO-KK (hayitlar — sanasi har yili o‘zgaradi). O‘sha kuni ilova ochilganda tabrik chiqadi.</p>
+                  <p className="atf-izoh">Sana: OO-KK (har yili, masalan 03-21) yoki YYYY-OO-KK (hayitlar — sanasi har yili o‘zgaradi). O‘sha kuni ilova ochilganda tabrik chiqadi.</p>
                   {matnlar.bayramlar.map((b, i) => (
                     <div key={i} className="atf-bayram">
                       <input className="adm-inp atf-sana" value={b.sana} placeholder="03-21" onChange={(e) => m({ bayramlar: matnlar.bayramlar.map((x, j) => (j === i ? { ...x, sana: e.target.value.trim() } : x)) })} />

@@ -1,4 +1,17 @@
-/* Tariflar boshqaruvi (AdminTariflar.tsx) — adminSimulyator.css dagi asm-karta/asm-tablar bilan */
+/* Tariflar boshqaruvi (AdminTariflar.tsx). Simulyator admin sahifasi bilan bir xil ko'rinish, lekin o'z
+   nusxasi: boshqa sahifaning CSS faylini import qilish Vite'da umumiy bo'lak yasab, fayl nomi harf
+   katta-kichikligi bilan farq qiladigan bo'lib qolardi (Windows'da APK yig'ishda "Duplicate resources"). */
+.atf-izoh { margin: 0 0 10px; font-size: 13.5px; opacity: .75; line-height: 1.45; }
+.atf-tablar { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+.atf-tablar button {
+  padding: 8px 14px; border-radius: 10px; border: 1px solid var(--db-line, rgba(255, 255, 255, .12));
+  background: var(--db-card, rgba(255, 255, 255, .04)); color: inherit; font-weight: 600; font-size: 13.5px; cursor: pointer;
+}
+.atf-tablar button.faol { background: #ffd21f; color: #111; border-color: transparent; }
+.atf-karta {
+  border: 1px solid var(--db-line, rgba(255, 255, 255, .12)); background: var(--db-card, rgba(255, 255, 255, .03));
+  border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px;
+}
 .atf-statlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 2px 0 12px; }
 .atf-stat { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px;
   background: var(--db-card); border: 1px solid var(--db-border); }

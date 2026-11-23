@@ -206,10 +206,3 @@
 .ilv .ilv-asosiy-sana svg { width: 13px; height: 13px; flex: none; }
 .ilv .ilv-asosiy-sana:active { transform: scale(.95); }
 .ilv .ilv-asosiy-sana:focus-visible { outline: 2px solid var(--ilv-sariq); outline-offset: 2px; }
-
-/* ---------- Bosh sahifa: "Tariflar" kartasi (butun qator) ---------- */
-.ilv .ilv-tarif-karta { grid-column: 1 / -1; border: 1px solid rgba(255, 198, 26, .28); }
-.ilv .ilv-tarif-karta-izoh { position: relative; z-index: 1; display: block; max-width: calc(100% - 96px); margin-top: 6px;
-  color: var(--ilv-matn2); font-size: 13px; font-weight: 600; line-height: 1.3; text-align: left; }
-.ilv .ilv-joy-tarif { position: absolute; right: 14px; bottom: 50%; transform: translateY(50%); pointer-events: none; }
-.ilv .ilv-joy-tarif > svg { display: block; filter: drop-shadow(0 6.75px 6.07px rgba(0, 0, 0, .45)); }

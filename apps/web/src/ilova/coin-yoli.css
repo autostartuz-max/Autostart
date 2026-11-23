@@ -28,3 +28,16 @@
   .cy-chiziq, .cy-belgi { animation: none; }
   .cy-otilgan, .cy-transport { transition: none; }
 }
+
+/* Bosh sahifa: coin yo'li kartasi — Test yechish kartasidek ikkala mavzuda ham to'q */
+.ilv .ilv-cy-karta { display: block; width: 100%; padding: 12px 14px 8px; border: 0; border-radius: 20px;
+  background: var(--ilv-asosiy-fon, linear-gradient(135deg, #454240, #1f1e1d)); color: #ffffff; font: inherit;
+  text-align: left; cursor: pointer; transition: transform .12s ease; }
+.ilv .ilv-cy-karta:active { transform: scale(.99); }
+.ilv .ilv-cy-karta:focus-visible { outline: 2px solid var(--ilv-sariq); outline-offset: 2px; }
+.ilv .ilv-cy-bosh { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.ilv .ilv-cy-bosh b { min-width: 0; overflow: hidden; color: var(--ilv-sariq, #ffee00); font-size: 15px; font-weight: 800;
+  white-space: nowrap; text-overflow: ellipsis; }
+.ilv .ilv-cy-bosh span { flex: none; color: #d4d2cf; font-size: 12.5px; font-weight: 700; }
+.ilv .ilv-cy-karta .cy { margin-top: 2px; }
+:root[data-theme="light"] .ilv .ilv-cy-karta { box-shadow: 0 4px 16px rgba(31, 30, 29, .18); }

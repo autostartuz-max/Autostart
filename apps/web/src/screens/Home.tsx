@@ -12,9 +12,7 @@ import { Papka, Qatlamlar, Royxat, SavolPufak, SinganYurak, Svetofor, YolBelgisi
 import PastkiOyna from '../components/PastkiOyna';
 import ImtihonSanasi, { qolganKun, sanaKaliti, sanaNuqtali } from '../components/ImtihonSanasi';
 import { Pencil } from 'lucide-react';
-import { TarifLogo } from '../tarif/Logolar';
-import { sanaMatn, useTarif } from '../tarif/holat';
-import Eslatmalar from '../ilova/Eslatmalar';
+import { CoinYoliKarta } from '../ilova/CoinYoli';
 import oktagon from '../ilova/rasmlar/oktagon.webp';
 import oktagonKadr from '../ilova/rasmlar/oktagon-kadr.webp';
 import '../ilova/ekranlar.css';
@@ -108,7 +106,6 @@ export default function Home() {
   const [soniOyna, setSoniOyna] = useState(false);
   // "Sanani o'zgartirish" — imtihon sanasi oynasi
   const [sanaOyna, setSanaOyna] = useState(false);
-  const tarif = useTarif();
   const sanaSaqla = async (sana: string) => {
     const r = await api.updateMe({ examDate: sana });
     setMe((m) => (m ? { ...m, user: { ...m.user, examDate: r?.user?.examDate ?? sana } } : m));
@@ -149,6 +146,8 @@ export default function Home() {
         sana={sana}
         onSana={() => setSanaOyna(true)}
       />
+      {/* Coin yo'li (2026-11-24): daraja transporti keyingi daraja sari yuradi; bosilsa Profil */}
+      {ball?.daraja && <CoinYoliKarta ball={ball} onClick={() => nav('/men')} />}
       <div className="ilv-stat-qator">
         <StatBlok son={togri} yozuv="To‘g‘ri" rang="togri" />
         <StatBlok son={xato} yozuv="Xato" rang="xato" />
@@ -175,18 +174,9 @@ export default function Home() {
         {/* Namunadagi 3 qatordan keyin: 50/100 talik (Testlar'dan ko'chdi) va savol yuborish */}
         <IlovaKarta sarlavha="50/100 talik" ikonka={<Royxat />} onClick={() => setSoniOyna(true)} />
         <IlovaKarta sarlavha={'Sizga\nsavol bor'} ikonka={<SavolPufak />} onClick={() => nav('/aloqa')} />
-        {/* Tariflar — butun qator: joriy tarif yoki sotib olish */}
-        <button type="button" className="ilv-karta ilv-karta-bosh ilv-tarif-karta" onClick={() => nav('/tariflar')}>
-          <span className="ilv-karta-sarlavha">{tarif.joriy ? `${tarif.joriy.nom} tarifi` : 'Tariflar'}</span>
-          <span className="ilv-tarif-karta-izoh">
-            {tarif.joriy ? `${sanaMatn(tarif.joriy.tugaydi)} gacha faol` : tarif.daraja >= 3 ? 'Xodim — hammasi ochiq' : 'Audio sharh, video darslar, avtodrom mashg‘ulotlari'}
-          </span>
-          <span className="ilv-joy-tarif" aria-hidden="true"><TarifLogo kod={tarif.joriy?.kod || 'premium'} size={76} /></span>
-        </button>
       </div>
-
-      {/* Xavfsizlik eslatmalari — har kuni bittasi */}
-      <Eslatmalar tur="ilova" />
+      {/* Tariflar kartasi va xavfsizlik eslatmalari bosh sahifadan olib tashlandi (2026-11-24, foydalanuvchi
+          talabi). Tariflar — Profilda, yopiq imkoniyat oynasida va kunlik reklamada. */}
 
       {sanaOyna && <ImtihonSanasi joriy={sana} onClose={() => setSanaOyna(false)} onSaqla={sanaSaqla} />}
 

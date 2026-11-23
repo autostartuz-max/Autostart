@@ -4,6 +4,7 @@ import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Bookmark, Share2, Clock, Settings, BarChart3, Info, Volume2,
   Play, Pause, X, SkipForward, Zap, Shuffle, Type, Globe, Flag, GraduationCap, Eye, Clapperboard, MessageCircle, Send, Trash2, Ban,
+  Mic, Video as VideoKamera,
 } from 'lucide-react';
 import { api, mediaUrl, savolAudioUrl, savolVideoUrl, tarifniYangila, type CommentRow } from '../api';
 import { ruxsat, tarifTaklif } from '../tarif/holat';
@@ -1128,7 +1129,7 @@ export default function TestPlayer() {
       {mobil && (
         <div ref={fabRef} className={'tpm-fab' + (fabOpen ? ' open' : '')}>
           <button
-            className="tpm-fab-main"
+            className="tpm-fab-main tpm-belgili"
             aria-label={fabOpen ? 'Yopish' : 'O‘rganish'}
             onClick={() => {
               // Menyu yopilsa ovoz ham to'xtaydi — pleyer menyuning ichida
@@ -1136,9 +1137,8 @@ export default function TestPlayer() {
               setFabOpen((v) => !v);
             }}
           >
-            {fabOpen
-              ? <><X size={19} /> <span className="tpm-yozuv">Yopish</span></>
-              : <><GraduationCap size={19} /> <span className="tpm-yozuv">O‘rganish</span></>}
+            {/* Yozuvsiz, faqat belgi (2026-11-24): qalpoqcha — pastki menyudagi "O'rganish" bo'limi belgisi */}
+            {fabOpen ? <X size={20} /> : <GraduationCap size={23} className="tpm-qalpoq" />}
           </button>
           {fabOpen && (
             <>
@@ -1146,7 +1146,7 @@ export default function TestPlayer() {
                 <Info size={19} /> <span className="tpm-yozuv">Qoida</span>
               </button>
               <button className="tpm-fab-i" aria-label="Video" onClick={videoniOch}>
-                <Clapperboard size={19} /> <span className="tpm-yozuv">Video</span>
+                <VideoKamera size={19} /> <span className="tpm-yozuv">Video</span>
               </button>
               {showPlayer ? (
                 <div className="tpm-fab-i tpm-fab-player">
@@ -1162,7 +1162,7 @@ export default function TestPlayer() {
                 </div>
               ) : (
                 <button className="tpm-fab-i" aria-label="Ovoz" onClick={learn}>
-                  <Play size={19} fill="currentColor" /> <span className="tpm-yozuv">Ovoz</span>
+                  <Mic size={19} /> <span className="tpm-yozuv">Ovoz</span>
                 </button>
               )}
             </>

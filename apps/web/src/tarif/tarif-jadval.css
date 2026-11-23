@@ -1,0 +1,102 @@
+/* ===== Tariflar sahifasi: solishtirish jadvali (Tariflar.tsx, 2026-11-24) =====
+   Foydalanuvchi namunasi bo'yicha: tepada to'q ko'k fon, da'vat matni va maskot (o'quv mashinasi)
+   bulut ustida; ostida oq fonda "Bepul" va tariflar ustunlari — tanlangan ustun och sariq bilan
+   ajratilgan; pastda bitta katta tugma. Ranglar mavzuga bog'liq emas (namunadagidek doim shu). */
+.tf2 {
+  --tf2-nav: #0f1c33;
+  --tf2-nav2: #1b2c52;
+  --tf2-matn: #25282d;
+  --tf2-xira: #8a909a;
+  --tf2-ajrat: #fff3bf;
+  --tf2-oltin: #c99a00;
+  --tf2-u: 60px; /* qiymat ustuni eni */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  color: var(--tf2-matn);
+  font-family: 'Exo 2', system-ui, -apple-system, Roboto, sans-serif;
+}
+
+/* Ilova: butun oyna, planshetda 520px */
+.tf-ilova.tf2-ilova { padding: 0; background: #ffffff; }
+.tf2-ilova .tf2 { max-width: 520px; min-height: 100%; margin: 0 auto; }
+/* Sayt: kontent ichida markazda, karta ko'rinishida */
+.db-content .tf2 { max-width: 720px; margin: 0 auto; border-radius: 24px; overflow: hidden; box-shadow: 0 12px 40px rgba(0, 0, 0, .28); }
+
+/* ---------- Tepa ---------- */
+.tf2-hero { position: relative; padding: calc(8px + env(safe-area-inset-top)) 18px 0; overflow: hidden; text-align: center; color: #ffffff;
+  background: radial-gradient(120% 90% at 50% 0%, var(--tf2-nav2) 0%, var(--tf2-nav) 70%); }
+.db-content .tf2-hero { padding-top: 14px; }
+.tf2-hero-tepa { display: flex; align-items: center; justify-content: space-between; min-height: 48px; }
+.tf2-yop { width: 44px; height: 44px; margin-left: -10px; border: 0; background: none; color: #ffffff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; }
+.tf2-yop svg { width: 28px; height: 28px; stroke-width: 2.4; }
+.tf2-brend { display: inline-block; padding: 4px 12px; border-radius: 9px; transform: skewX(-12deg);
+  background: linear-gradient(90deg, #ffee00, #ffb800); color: #1f1e1d; font-size: 14px; font-weight: 900; font-style: italic; letter-spacing: .6px; }
+.tf2-hero h1 { margin: 14px 4px 0; font-size: 23px; font-weight: 800; line-height: 1.32; }
+.tf2-hero h1 b { color: #3bd97f; }
+.tf2-joriy { display: inline-block; margin-top: 10px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, .1);
+  font-size: 13.5px; font-weight: 600; }
+.tf2-joriy b { color: #ffee00; }
+.tf2-maskot-joy { position: relative; z-index: 1; display: flex; justify-content: center; margin: 12px 0 -46px; }
+.tf2-maskot { width: 196px; height: 137px; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .35)); animation: tf2-sakra 2.4s ease-in-out infinite; }
+@keyframes tf2-sakra { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.tf2-bulut { position: relative; z-index: 2; display: block; width: calc(100% + 36px); height: 58px; margin: 0 -18px; color: #ffffff; }
+
+/* ---------- Jadval ---------- */
+.tf2-jadval { padding: 2px 14px 4px; background: #ffffff; }
+.tf2-qator { display: grid; grid-template-columns: minmax(0, 1fr) repeat(4, var(--tf2-u)); }
+.tf2-qator > * { display: flex; align-items: center; justify-content: center; min-height: 54px; }
+.tf2-nom { flex-direction: column; align-items: flex-start !important; justify-content: center; padding: 8px 8px 8px 2px;
+  color: #2b2e33; font-size: 14.5px; font-weight: 600; line-height: 1.3; }
+.tf2-nom small { margin-top: 2px; color: var(--tf2-xira); font-size: 11.5px; font-weight: 700; }
+.tf2-sarlavha > * { min-height: 74px; }
+.tf2-bepul { align-items: flex-end !important; padding-bottom: 12px; color: #3b3f46; font-size: 11px; font-weight: 800;
+  letter-spacing: .4px; text-transform: uppercase; }
+.tf2-tarif { flex-direction: column; gap: 3px; padding: 8px 0 6px; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+.tf2-tarif > span { color: #2b2e33; font-size: 10.5px; font-weight: 800; }
+.tf2-tarif em { color: #0a9c4b; font-size: 9.5px; font-style: normal; font-weight: 800; text-transform: uppercase; }
+.tf2-tarif:focus-visible { outline: 2px solid var(--tf2-oltin); outline-offset: -2px; border-radius: 14px; }
+/* Tanlangan ustun — butun balandlik bo'ylab och sariq, tepasi va pasti yumaloq */
+.tf2-qator > .tf2-q:not(:nth-child(2)) { cursor: pointer; }
+.tf2-q.tanlangan { background: var(--tf2-ajrat); }
+.tf2-sarlavha > .tf2-q.tanlangan { border-radius: 18px 18px 0 0; }
+.tf2-oxirgi > .tf2-q.tanlangan { border-radius: 0 0 18px 18px; }
+.tf2-bor { width: 21px; height: 21px; color: #2f333a; }
+.tf2-q.tanlangan .tf2-bor { color: var(--tf2-oltin); }
+.tf2-yoq { display: block; width: 16px; height: 3px; border-radius: 2px; background: #d3d6db; }
+.tf2-matn { color: #2b2e33; font-size: 13px; font-weight: 800; }
+.tf2-narx { font-size: 12.5px; letter-spacing: -.2px; }
+.tf2-q.tanlangan.tf2-matn { color: #6d5200; }
+.tf2-izoh { margin: 10px 2px 0; color: var(--tf2-xira); font-size: 12.5px; font-weight: 600; line-height: 1.4; text-align: center; }
+
+/* ---------- Pastki tugma ---------- */
+.tf2-pastki { position: sticky; bottom: 0; z-index: 3; margin-top: auto; padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), #ffffff 22%); }
+.tf2-cta { width: 100%; min-height: 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border: 0; border-radius: 18px; background: #ffee00; color: #1f1e1d; box-shadow: 0 5px 0 #c9bc00; font: inherit; cursor: pointer; }
+.tf2-cta b { font-size: 16px; font-weight: 900; letter-spacing: .3px; text-transform: uppercase; }
+.tf2-cta span { font-size: 13px; font-weight: 700; opacity: .78; }
+.tf2-cta:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 #c9bc00; }
+.tf2-cta:disabled { opacity: .7; cursor: default; }
+.tf2-tel { margin-top: 12px; color: var(--tf2-xira); font-size: 13px; font-weight: 600; text-align: center; }
+.tf2-tel a { color: #1f1e1d; font-weight: 800; text-decoration: none; white-space: nowrap; }
+.tf2-sorov { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 10px 12px; border-radius: 12px;
+  background: #fff7d1; color: #5a4500; font-size: 13px; font-weight: 700; line-height: 1.35; }
+.tf2-sorov svg { flex: none; width: 18px; height: 18px; }
+.tf2 .tf-xato { color: #b3261e; }
+
+@media (max-width: 380px) {
+  .tf2 { --tf2-u: 52px; }
+  .tf2-nom { font-size: 13.5px; }
+  .tf2-hero h1 { font-size: 21px; }
+  .tf2-cta b { font-size: 14.5px; }
+}
+@media (prefers-reduced-motion: reduce) { .tf2-maskot { animation: none; } }
+/* Saytda keng ekran: ustunlar kengroq, jadval chetlari kattaroq */
+@media (min-width: 900px) {
+  .db-content .tf2 { --tf2-u: 92px; }
+  .db-content .tf2-jadval { padding: 4px 28px 6px; }
+  .db-content .tf2-tarif > span { font-size: 12px; }
+}

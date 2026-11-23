@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Check, ChevronLeft, Clock, Lock, Menu, PhoneCall, ShieldCheck, X } from 'lucide-react';
+import { Check, ChevronLeft, Clock, Menu, PhoneCall, X } from 'lucide-react';
 import { api, type TarifJavob } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import { mobilIlova, ilovaEkrani } from '../native';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
-  TARIFLAR_ZAXIRA, TARIF_NOMI, TOLOV_KONTAKT_ZAXIRA, narxMatn, sanaMatn, useTarif, type Tarif, type TarifKod,
+  IMKONIYAT_DARAJA, TARIFLAR_ZAXIRA, TARIF_NOMI, TOLOV_KONTAKT_ZAXIRA, narxMatn, sanaMatn, useTarif, type Tarif, type TarifKod,
 } from '../tarif/holat';
 import { TarifLogo } from '../tarif/Logolar';
+import { OquvMashinasi } from '../simulyator/ui/MashqRasmlari';
 import '../dashboard.css';
 import '../tarif/tarif.css';
+import '../tarif/tarif-jadval.css';
 
 type Kontakt = { telefon: string; tel: string };
 
@@ -61,10 +63,16 @@ function SorovOynasi({ tarif, kontakt, onClose }: { tarif: Tarif; kontakt: Konta
   );
 }
 
+/** Jadvaldagi "yo'q" belgisi — kulrang chiziqcha (namunadagidek) */
+const Yoq = () => <span className="tf2-yoq" aria-label="yo‘q" />;
+const Bor = () => <Check className="tf2-bor" aria-label="bor" strokeWidth={3} />;
+
 /**
- * Tariflar (/tariflar) — ilova va saytda bitta sahifa: Standart, Silver, Premium. To'lov hozircha
- * qo'lda: "Sotib olish" so'rov qoldiradi (adminga Telegram xabari), call-markaz to'lovni qabul
- * qiladi, admin /tariflar/boshqaruv da yoqadi.
+ * Tariflar (/tariflar) — ilova va saytda bitta sahifa. 2026-11-24: tariflar bir-biridan afzal tomonlari
+ * bilan solishtirish jadvalida ko'rsatiladi (foydalanuvchi namunasi: tepada da'vat matni va maskot,
+ * ostida "Bepul" va tariflar ustunlari, tanlangan ustun ajratilgan, pastda bitta katta tugma).
+ * To'lov hozircha qo'lda: tugma so'rov qoldiradi (adminga Telegram xabari), call-markaz to'lovni
+ * qabul qiladi, admin /tariflar/boshqaruv da yoqadi.
  */
 export default function Tariflar() {
   const ilova = mobilIlova();
@@ -74,6 +82,7 @@ export default function Tariflar() {
   const [xato, setXato] = useState('');
   const [yuborilmoqda, setYuborilmoqda] = useState<TarifKod | null>(null);
   const [sorovOyna, setSorovOyna] = useState<Tarif | null>(null);
+  const [tanlangan, setTanlangan] = useState<TarifKod>('premium');
   const holat = useTarif();
   const tel = useTelefon();
 
@@ -86,19 +95,34 @@ export default function Tariflar() {
   const yukla = () => api.tarif().then((r) => { setJavob(r); setXato(''); }).catch(() => { /* zaxira ro'yxat ko'rinadi */ });
   useEffect(() => { yukla(); }, []);
 
-  const tariflar = javob?.tariflar?.length ? javob.tariflar : TARIFLAR_ZAXIRA;
+  const tariflar = [...(javob?.tariflar?.length ? javob.tariflar : TARIFLAR_ZAXIRA)].sort((a, b) => a.daraja - b.daraja);
   const kontakt: Kontakt = javob?.kontakt || TOLOV_KONTAKT_ZAXIRA;
   const joriy = javob ? javob.joriy : holat.joriy;
   const daraja = javob ? javob.daraja : holat.daraja;
   const sorov = javob?.sorov && javob.sorov.tarif !== joriy?.kod ? javob.sorov : null;
+  // Faol tarif bo'lsa — o'sha ustun tanlangan bo'lib ochiladi
+  useEffect(() => { if (joriy?.kod) setTanlangan(joriy.kod); }, [joriy?.kod]);
+  const t = tariflar.find((x) => x.kod === tanlangan) || tariflar[tariflar.length - 1];
+  const buJoriy = joriy?.kod === t.kod;
 
-  const sotibOl = async (t: Tarif) => {
+  // Qatorlar — server sozlamasidan (qaysi imkoniyat qaysi darajadan ochiladi)
+  const imk = { ...IMKONIYAT_DARAJA, ...(javob?.imkoniyatDaraja || {}) } as Record<string, number>;
+  const QATORLAR: { nom: string; izoh?: string; daraja: number }[] = [
+    { nom: 'Barcha testlar va biletlar', daraja: 0 },
+    { nom: 'Har bir testga audio sharh', daraja: imk.audio },
+    { nom: 'Yo‘l belgilari va qulay qidiruv', daraja: imk.belgilar },
+    { nom: 'Har bir testga video dars', daraja: imk.video },
+    { nom: 'Mavzular bo‘yicha video darslar', izoh: 'tez orada', daraja: imk.mavzu },
+    { nom: 'Avtodrom amaliy mashg‘ulotlari', izoh: 'A, B, BC, D, CE', daraja: imk.avtodrom },
+  ];
+
+  const sotibOl = async (x: Tarif) => {
     if (yuborilmoqda) return;
-    setYuborilmoqda(t.kod);
+    setYuborilmoqda(x.kod);
     setXato('');
     try {
-      await api.tarifSorov(t.kod);
-      setSorovOyna(t);
+      await api.tarifSorov(x.kod);
+      setSorovOyna(x);
       yukla();
     } catch (e: any) {
       setXato(e?.message || 'So‘rovni yuborib bo‘lmadi. Internetni tekshiring yoki qo‘ng‘iroq qiling.');
@@ -106,107 +130,113 @@ export default function Tariflar() {
     setYuborilmoqda(null);
   };
 
+  const ustun = (kod: TarifKod) => 'tf2-q' + (kod === tanlangan ? ' tanlangan' : '');
+  const tugmaMatn = yuborilmoqda ? 'Yuborilmoqda…' : buJoriy ? t.nom + ': muddatni uzaytirish' : t.nom + ' tarifini sotib olish';
+
   const ichi = (
-    <div className="tf">
-      <div className="tf-bosh">
-        {/* Ilovada sarlavha tepada, orqaga tugmasi yonida */}
-        {!ilova && <h1>Tariflar</h1>}
-        <p>Autostart bilan imtihonga tez va oson tayyorlaning</p>
-      </div>
-
-      {xato && <div className="tf-xato" role="alert">{xato}</div>}
-
-      <div className={'tf-holat' + (joriy ? ' faol' : '')}>
-        {joriy ? (
-          <>
-            <TarifLogo kod={joriy.kod} size={44} />
-            <div>
-              <b>Sizning tarifingiz: {joriy.nom}</b>
-              <span>{sanaMatn(joriy.tugaydi)} gacha amal qiladi</span>
-            </div>
-          </>
-        ) : daraja >= 3 ? (
-          <>
-            <span className="tf-holat-ik"><ShieldCheck aria-hidden="true" /></span>
-            <div>
-              <b>Xodim hisobi</b>
-              <span>Barcha imkoniyatlar siz uchun ochiq.</span>
-            </div>
-          </>
-        ) : (
-          <>
-            <span className="tf-holat-ik"><Lock aria-hidden="true" /></span>
-            <div>
-              <b>Hozir bepul foydalanyapsiz</b>
-              <span>Barcha testlar ochiq. Audio sharh, video darslar va boshqa imkoniyatlar — tariflarda (har bo‘limdan bittasi namuna sifatida bepul).</span>
-            </div>
-          </>
-        )}
-      </div>
-
-      {sorov && (
-        <div className="tf-sorov" role="status">
-          <Clock aria-hidden="true" />
-          <div>
-            <b>{TARIF_NOMI[sorov.tarif]} tarifiga so‘rovingiz qabul qilingan</b>
-            <span>
-              Operatorimiz siz bilan bog‘lanadi. Tezroq yoqish uchun qo‘ng‘iroq qiling:{' '}
-              <a href={'tel:' + kontakt.tel} onClick={(e) => tel.bos(e, kontakt.telefon)} className={tel.nusxa ? 'tf-nusxa' : undefined}>
-                {tel.nusxa ? 'nusxalandi' : kontakt.telefon}
-              </a>
-            </span>
-          </div>
+    <div className="tf2">
+      {/* ---------- Tepa: da'vat matni va maskot ---------- */}
+      <div className="tf2-hero">
+        <div className="tf2-hero-tepa">
+          {ilova ? (
+            <button type="button" className="tf2-yop" onClick={orqaga} aria-label="Yopish"><X aria-hidden="true" /></button>
+          ) : <span />}
+          <span className="tf2-brend" data-notr>AUTOSTART</span>
         </div>
-      )}
-
-      <div className="tf-royxat">
-        {tariflar.map((t) => {
-          const buJoriy = joriy?.kod === t.kod;
-          return (
-            <article key={t.kod} className={'tf-karta tf-' + t.kod + (buJoriy ? ' joriy' : '')}>
-              {buJoriy ? <span className="tf-joriy-belgi">Faol</span> : t.kod === 'premium' && <span className="tf-tavsiya">Eng foydali</span>}
-              <div className="tf-karta-bosh">
-                <TarifLogo kod={t.kod} size={58} />
-                <div>
-                  <h2>{t.nom}</h2>
-                  <span className="tf-muddat">{t.oy} oylik</span>
-                </div>
-              </div>
-              <div className="tf-narx"><b>{narxMatn(t.narx)}</b><span>/ {t.oy} oy</span></div>
-              <ul>
-                {t.imkoniyatlar.map((m) => (
-                  <li key={m}><Check aria-hidden="true" /><span>{m}</span></li>
-                ))}
-              </ul>
-              <button type="button" className="tf-tugma" disabled={yuborilmoqda != null} onClick={() => sotibOl(t)}>
-                {yuborilmoqda === t.kod ? 'Yuborilmoqda…' : buJoriy ? 'Muddatni uzaytirish' : 'Sotib olish'}
-              </button>
-            </article>
-          );
-        })}
+        {/* Da'vo foydalanuvchining o'z hujjatidan (2026-11): "1000 ga yaqin foydalanuvchilar … haydovchi bo'lishdi" */}
+        <h1>
+          <b>1000 ga yaqin</b> o‘quvchimiz tarif bilan natijaga tezroq erishib, haydovchi bo‘ldi!
+        </h1>
+        {joriy ? (
+          <div className="tf2-joriy">Sizning tarifingiz: <b>{joriy.nom}</b> — {sanaMatn(joriy.tugaydi)} gacha</div>
+        ) : daraja >= 3 ? (
+          <div className="tf2-joriy">Xodim hisobi — barcha imkoniyatlar ochiq</div>
+        ) : null}
+        <div className="tf2-maskot-joy">
+          <OquvMashinasi className="tf2-maskot" />
+        </div>
+        <svg className="tf2-bulut" viewBox="0 0 400 64" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 64V40C26 26 56 22 84 34 104 12 146 6 172 26 196 4 244 2 266 26 290 12 330 12 352 30 372 22 390 24 400 28V64Z" fill="currentColor" />
+        </svg>
       </div>
 
-      <p className="tf-izoh">
-        To‘lov call-markaz orqali: “Sotib olish”ni bosing yoki qo‘ng‘iroq qiling —{' '}
-        <a href={'tel:' + kontakt.tel} onClick={(e) => tel.bos(e, kontakt.telefon)}>{kontakt.telefon}</a>.
-        To‘lovdan keyin tarif darhol yoqiladi. Tarifsiz ham barcha testlar bepul.
-      </p>
+      {/* ---------- Solishtirish jadvali ---------- */}
+      <div className="tf2-jadval" role="table" aria-label="Tariflarni solishtirish">
+        <div className="tf2-qator tf2-sarlavha" role="row">
+          <span role="columnheader" />
+          <span className="tf2-bepul" role="columnheader">Bepul</span>
+          {tariflar.map((x) => (
+            <button
+              key={x.kod}
+              type="button"
+              role="columnheader"
+              className={ustun(x.kod) + ' tf2-tarif'}
+              aria-pressed={x.kod === tanlangan}
+              onClick={() => setTanlangan(x.kod)}
+            >
+              <TarifLogo kod={x.kod} size={28} />
+              <span>{x.nom}</span>
+              {joriy?.kod === x.kod && <em>faol</em>}
+            </button>
+          ))}
+        </div>
+        {QATORLAR.map((r) => (
+          <div key={r.nom} className="tf2-qator" role="row">
+            <span className="tf2-nom" role="rowheader">
+              {r.nom}
+              {r.izoh && <small>{r.izoh}</small>}
+            </span>
+            <span className="tf2-q" role="cell">{r.daraja <= 0 ? <Bor /> : <Yoq />}</span>
+            {tariflar.map((x) => (
+              <span key={x.kod} role="cell" className={ustun(x.kod)} onClick={() => setTanlangan(x.kod)}>
+                {x.daraja >= r.daraja ? <Bor /> : <Yoq />}
+              </span>
+            ))}
+          </div>
+        ))}
+        <div className="tf2-qator" role="row">
+          <span className="tf2-nom" role="rowheader">Foydalanish muddati</span>
+          <span className="tf2-q tf2-matn" role="cell">—</span>
+          {tariflar.map((x) => (
+            <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn'} onClick={() => setTanlangan(x.kod)}>{x.oy} oy</span>
+          ))}
+        </div>
+        <div className="tf2-qator tf2-oxirgi" role="row">
+          <span className="tf2-nom" role="rowheader">Narxi, so‘m</span>
+          <span className="tf2-q tf2-matn" role="cell">0</span>
+          {tariflar.map((x) => (
+            <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn tf2-narx'} onClick={() => setTanlangan(x.kod)}>
+              {narxMatn(x.narx).replace(' so‘m', '')}
+            </span>
+          ))}
+        </div>
+        <p className="tf2-izoh">Tarifsiz ham barcha testlar bepul; har bo‘limdan bittasi namuna sifatida ochiq.</p>
+      </div>
+
+      {/* ---------- Pastda: bitta katta tugma (tanlangan tarif) ---------- */}
+      <div className="tf2-pastki">
+        {xato && <div className="tf-xato" role="alert">{xato}</div>}
+        {sorov && (
+          <div className="tf2-sorov" role="status">
+            <Clock aria-hidden="true" />
+            <span>{TARIF_NOMI[sorov.tarif]} tarifiga so‘rovingiz qabul qilingan — operatorimiz bog‘lanadi</span>
+          </div>
+        )}
+        <button type="button" className="tf2-cta" disabled={yuborilmoqda != null} onClick={() => sotibOl(t)}>
+          <b>{tugmaMatn}</b>
+          <span>{narxMatn(t.narx)} · {t.oy} oy</span>
+        </button>
+        <div className="tf2-tel">
+          To‘lov call-markaz orqali —{' '}
+          <a href={'tel:' + kontakt.tel} onClick={(e) => tel.bos(e, kontakt.telefon)}>{tel.nusxa ? 'nusxalandi' : kontakt.telefon}</a>
+        </div>
+      </div>
 
       {sorovOyna && <SorovOynasi tarif={sorovOyna} kontakt={kontakt} onClose={() => setSorovOyna(null)} />}
     </div>
   );
 
-  if (ilova) {
-    return (
-      <div className="tf-ilova">
-        <header className="tf-tepa">
-          <button type="button" onClick={orqaga} aria-label="Orqaga"><ChevronLeft aria-hidden="true" /></button>
-          <h1>Tariflar</h1>
-        </header>
-        {ichi}
-      </div>
-    );
-  }
+  if (ilova) return <div className="tf-ilova tf2-ilova">{ichi}</div>;
 
   return (
     <div className="db">

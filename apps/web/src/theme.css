@@ -755,3 +755,7 @@ button { font-family: inherit; cursor: pointer; }
 /* Notch va pastki chiziq — ilovada `.app` o'rami ishlatiladi (`.db` emas) */
 .cap .app { padding-top: calc(14px + env(safe-area-inset-top));
   padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+
+/* "O'rganish" tugmasi faqat belgi bilan (yozuvsiz): yopiq — sariq qalpoqcha, ochiq — ✕ */
+.tpm-fab-main.tpm-belgili { width: 46px; padding: 0; justify-content: center; }
+.tpm-fab-main.tpm-belgili .tpm-qalpoq { color: #ffd21f; }

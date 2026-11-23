@@ -41,7 +41,8 @@ function Rekvizitlar() {
   );
 }
 
-function Maxfiylik(): ReactNode {
+/** Hujjat matnlari — /hujjat sahifasida va ilovadagi ro'yxatdan o'tish oynasida (RozilikOynasi) */
+export function Maxfiylik(): ReactNode {
   return (
     <>
       <p>
@@ -118,7 +119,7 @@ function Maxfiylik(): ReactNode {
   );
 }
 
-function Shartlar(): ReactNode {
+export function Shartlar(): ReactNode {
   return (
     <>
       <p>
@@ -177,7 +178,7 @@ function Shartlar(): ReactNode {
   );
 }
 
-function Oferta(): ReactNode {
+export function Oferta(): ReactNode {
   return (
     <>
       <p>

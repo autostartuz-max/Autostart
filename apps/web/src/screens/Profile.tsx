@@ -3,9 +3,9 @@ import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
   ChevronLeft, Menu, ShieldCheck, ClipboardList, GraduationCap,
   CircleCheck, CircleX, PieChart, CircleHelp, FileText, MessageSquare,
-  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark, Trash2, TriangleAlert, Languages, MapPin, Pencil, Crown,
+  User, Phone, Mail, CalendarDays, CalendarCheck, Bookmark, Trash2, TriangleAlert, Languages, MapPin, Pencil, Crown, LogOut,
 } from 'lucide-react';
-import { api, clearToken, ROLE_LABEL, type Role } from '../api';
+import { api, clearToken, hisobdanChiqish, ROLE_LABEL, type Role } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import LangTheme from '../components/LangTheme';
 import { mobilIlova } from '../native';
@@ -19,6 +19,13 @@ import { useNavigate } from 'react-router-dom';
 import '../dashboard.css';
 
 const roleOf = (r?: string): Role => (r === 'owner' || r === 'admin' ? r : 'user');
+
+/*
+ * Akkauntni o'chirish tugmasi ilovadan olib tashlandi (2026-11-23, foydalanuvchi talabi). DIQQAT: Play
+ * Market va App Store ilova ichida akkauntni o'chirish imkonini TALAB qiladi — do'konga yuklashdan oldin
+ * true qiling (kod va server DELETE /me tayyor).
+ */
+const AKKAUNT_OCHIRISH = false;
 const ROLE_IC: Record<Role, typeof ShieldCheck> = {
   owner: ShieldCheck, admin: ClipboardList, user: GraduationCap,
 };
@@ -40,6 +47,15 @@ export default function Profile() {
   const [parol, setParol] = useState('');
   const [ochirXato, setOchirXato] = useState('');
   const [ochirilmoqda, setOchirilmoqda] = useState(false);
+  // Ilova: hisobdan chiqish (ikki bosqichli — tasodifan bosilmasin)
+  const [chiqishSorov, setChiqishSorov] = useState(false);
+  const [chiqilmoqda, setChiqilmoqda] = useState(false);
+  const chiqish = async () => {
+    setChiqilmoqda(true);
+    await hisobdanChiqish();
+    // Butun holat tozalansin — ilova boshidan, kirish oynasi bilan ochiladi
+    window.location.replace('/');
+  };
   // Toifa, imtihon sanasi va hudud — foydalanuvchi o'zi tanlaydi (2026-11)
   const [oyna, setOyna] = useState<'' | 'sana' | 'toifa' | 'hudud'>('');
   const tarif = useTarif();
@@ -176,10 +192,33 @@ export default function Profile() {
                 </div>
               )}
 
-              {/* App Store va Play Market talabi: foydalanuvchi akkauntini
-                  ilovaning o'zida o'chira olishi kerak. Saytda ko'rinmaydi —
-                  u yerda hech narsa o'zgarmasligi kerak. */}
+              {/* Ilova: hisobdan chiqish. Saytda chiqish bosh sahifadagi foydalanuvchi menyusida */}
               {mobilIlova() && (
+                <div className="ud-card ud-chiqish-karta">
+                  <div className="ud-card-h"><LogOut size={16} /> Hisobdan chiqish</div>
+                  <p className="ud-danger-p">
+                    Natijalaringiz serverda saqlanib qoladi — qayta kirganingizda hammasi joyida bo‘ladi.
+                  </p>
+                  {!chiqishSorov ? (
+                    <button className="ud-chiqish" onClick={() => setChiqishSorov(true)}>
+                      <LogOut size={16} /> Chiqish
+                    </button>
+                  ) : (
+                    <div className="ud-del-row">
+                      <button className="ud-chiqish" disabled={chiqilmoqda} onClick={chiqish}>
+                        {chiqilmoqda ? 'Chiqilmoqda…' : 'Ha, chiqish'}
+                      </button>
+                      <button className="adm-btn sec" disabled={chiqilmoqda} onClick={() => setChiqishSorov(false)}>
+                        Bekor qilish
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* App Store va Play Market talabi: foydalanuvchi akkauntini ilovaning o'zida o'chira
+                  olishi kerak — hozircha yashirilgan (AKKAUNT_OCHIRISH, yuqorida). Saytda ko'rinmaydi. */}
+              {mobilIlova() && AKKAUNT_OCHIRISH && (
               <div className="ud-card ud-danger">
                 <div className="ud-card-h"><TriangleAlert size={16} /> Akkauntni o‘chirish</div>
                 <p className="ud-danger-p">

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { api, setToken } from '../api';
 import { mobilIlova } from '../native';
+import RozilikOynasi, { type HujjatKod } from '../components/RozilikOynasi';
 import '../auth.css';
 
 export default function Register({ onAuthed, onHome }: { onAuthed: () => void; onHome?: () => void }) {
@@ -16,6 +17,14 @@ export default function Register({ onAuthed, onHome }: { onAuthed: () => void; o
   const [err, setErr] = useState('');
   const [bad, setBad] = useState(''); // qaysi qator xato — o'sha ajratib ko'rsatiladi
   const [rozi, setRozi] = useState(false);
+  // Ilova: hujjatlar shu ekranning o'zida ochiladi (havola formadan chiqarib yubormasin) —
+  // maxfiylik siyosati o'qilib, "Tanishdim va roziman" bosilgandagina rozilik belgilanadi
+  const [hujjat, setHujjat] = useState<HujjatKod | null>(null);
+  const hujjatniOch = (k: HujjatKod) => (e: React.MouseEvent) => {
+    if (!mobil) return; // saytda havola yangi oynada ochiladi (avvalgidek)
+    e.preventDefault();
+    setHujjat(k);
+  };
   const [busy, setBusy] = useState(false);
   const inpClass = (f: string) => 'auth-inp' + (bad === f ? ' bad' : '');
 
@@ -37,7 +46,10 @@ export default function Register({ onAuthed, onHome }: { onAuthed: () => void; o
     }
     if (!password) { setBad('password'); return setErr('Parol kiriting'); }
     if (password.length < 4) { setBad('password'); return setErr('Parol kamida 4 ta belgidan iborat bo‘lsin'); }
-    if (!rozi) return setErr('Davom etish uchun shartlarga rozilik bildiring');
+    if (!rozi) {
+      if (mobil) setHujjat('maxfiylik');
+      return setErr('Davom etish uchun shartlarga rozilik bildiring');
+    }
 
     setBusy(true);
     try {
@@ -96,12 +108,17 @@ export default function Register({ onAuthed, onHome }: { onAuthed: () => void; o
           <input
             type="checkbox"
             checked={rozi}
-            onChange={(e) => { setRozi(e.target.checked); setBad(''); }}
+            onChange={(e) => {
+              // Ilovada belgilash — avval maxfiylik siyosatini o'qib tasdiqlash
+              if (mobil && e.target.checked) { setHujjat('maxfiylik'); return; }
+              setRozi(e.target.checked);
+              setBad('');
+            }}
           />
           <span>
-            Men <a href="/hujjat/maxfiylik" target="_blank" rel="noopener noreferrer">maxfiylik siyosati</a>,{' '}
-            <a href="/hujjat/shartlar" target="_blank" rel="noopener noreferrer">foydalanish shartlari</a> va{' '}
-            <a href="/hujjat/oferta" target="_blank" rel="noopener noreferrer">ommaviy oferta</a> bilan
+            Men <a href="/hujjat/maxfiylik" target="_blank" rel="noopener noreferrer" onClick={hujjatniOch('maxfiylik')}>maxfiylik siyosati</a>,{' '}
+            <a href="/hujjat/shartlar" target="_blank" rel="noopener noreferrer" onClick={hujjatniOch('shartlar')}>foydalanish shartlari</a> va{' '}
+            <a href="/hujjat/oferta" target="_blank" rel="noopener noreferrer" onClick={hujjatniOch('oferta')}>ommaviy oferta</a> bilan
             tanishdim va rozilik bildiraman. Xizmat yangiliklari va takliflari haqida xabar
             yuborilishiga roziman.
           </span>
@@ -118,6 +135,13 @@ export default function Register({ onAuthed, onHome }: { onAuthed: () => void; o
           <span className="auth-link" onClick={() => nav('/kirish')}>Kirish</span>
         </div>
       </form>
+      {hujjat && (
+        <RozilikOynasi
+          boshlangich={hujjat}
+          onClose={() => setHujjat(null)}
+          onRozi={() => { setRozi(true); setErr(''); }}
+        />
+      )}
     </div>
   );
 }

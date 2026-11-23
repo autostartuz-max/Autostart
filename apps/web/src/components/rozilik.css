@@ -1,0 +1,24 @@
+/* Ilova: ro'yxatdan o'tishda hujjatlarni o'qib tasdiqlash oynasi (RozilikOynasi.tsx) — ie-sheet uslubida */
+.ie-sheet.rz-oyna { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+.ie-sheet.rz-oyna .ie-sh-sub { margin-bottom: 14px; }
+.rz-tablar { display: flex; gap: 4px; padding: 4px; margin-bottom: 10px; border-radius: 14px; background: #121c27; overflow-x: auto; }
+.rz-tablar button { flex: 1 0 auto; min-height: 38px; padding: 0 10px; border: 0; border-radius: 10px; background: none;
+  color: #94a4be; font: inherit; font-size: 13px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.rz-tablar button.faol { background: #1d2a3d; color: #ffffff; box-shadow: inset 0 0 0 1px #334155; }
+.rz-doc { max-height: 46vh; overflow-y: auto; overscroll-behavior: contain; margin-bottom: 10px; padding: 12px 14px;
+  border-radius: 16px; background: #1d2a3d; border: 1px solid #334155; color: #c8d2e6; font-size: 14px; line-height: 1.65; }
+.rz-doc:focus-visible { outline: 2px solid #62d321; outline-offset: 2px; }
+.rz-doc .rz-sana { margin-bottom: 10px; color: #94a4be; font-size: 12px; font-weight: 700; }
+.rz-doc h3 { margin: 18px 0 8px; color: #ffffff; font-size: 15px; font-weight: 800; }
+.rz-doc p { margin: 0 0 10px; }
+.rz-doc ul { margin: 0 0 10px; padding-left: 18px; }
+.rz-doc li { margin-bottom: 6px; }
+.rz-doc b { color: #ffffff; }
+.rz-doc .lg-bosh { background: rgba(245, 158, 11, .18); color: #fbbf24; border-radius: 5px; padding: 1px 6px; font-weight: 700; font-size: 12.5px; }
+.rz-doc .lg-rek { margin-top: 18px; padding-top: 12px; border-top: 1px solid #334155; }
+.rz-doc .ud-card-h { color: #ffffff; font-weight: 800; margin-bottom: 8px; }
+.rz-doc dl { margin: 0; }
+.rz-doc dl > div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.rz-doc dt { color: #94a4be; }
+.rz-doc dd { margin: 0; text-align: right; }
+.rz-izoh { margin: 0 0 10px; color: #94a4be; font-size: 13px; font-weight: 700; text-align: center; }

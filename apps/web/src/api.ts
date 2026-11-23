@@ -17,10 +17,11 @@ export function setToken(t: string) {
  * SharedPreferences) saqlanadi: WebView xotirasi tozalansa ham ilova login
  * so'ramaydi. Saytda bu funksiyalar hech narsa qilmaydi.
  */
-function tokenniZaxirala(t: string) {
-  if (!Capacitor.isNativePlatform()) return;
-  import('@capacitor/preferences')
+function tokenniZaxirala(t: string): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return Promise.resolve();
+  return import('@capacitor/preferences')
     .then(({ Preferences }) => (t ? Preferences.set({ key: 'yhq_token', value: t }) : Preferences.remove({ key: 'yhq_token' })))
+    .then(() => {})
     .catch(() => {});
 }
 /** Ilova ochilganda: localStorage'da token bo'lmasa zaxiradan tiklaydi */
@@ -50,6 +51,18 @@ export function clearToken() {
   tarifniTozala(); // ... va tarifi ham
   try { localStorage.removeItem('yhq_daraja'); } catch { /* ignore */ }
   notifyAdminChanged();
+}
+
+/**
+ * Hisobdan chiqish (ilova "Chiqish" tugmasi): token, rol, admin tokeni tozalanadi. Ilovada token
+ * zaxirasi (Preferences) o'chishi KUTILADI — aks holda ilova qayta ochilganda eski token
+ * zaxiradan tiklanib (tokenniTikla), foydalanuvchi yana kirib qolardi.
+ */
+export async function hisobdanChiqish() {
+  clearToken();
+  forgetAdmin();
+  try { localStorage.removeItem('yhq_entered'); } catch { /* ignore */ }
+  await tokenniZaxirala('');
 }
 
 /**

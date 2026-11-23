@@ -8,7 +8,7 @@ import TepaQator, { KunChip } from '../ilova/komponentlar/TepaQator';
 import StatBlok from '../ilova/komponentlar/StatBlok';
 import IlovaKarta from '../ilova/komponentlar/IlovaKarta';
 import { useKorinish } from '../ilova/komponentlar/useKorinish';
-import { Chipta, Papka, Royxat, SavolPufak, SinganYurak, Svetofor, YolBelgisi } from '../ilova/ikonkalar';
+import { Papka, Qatlamlar, Royxat, SavolPufak, SinganYurak, Svetofor, YolBelgisi } from '../ilova/ikonkalar';
 import PastkiOyna from '../components/PastkiOyna';
 import ImtihonSanasi, { qolganKun, sanaKaliti, sanaNuqtali } from '../components/ImtihonSanasi';
 import { Pencil } from 'lucide-react';
@@ -161,7 +161,8 @@ export default function Home() {
           ikonka={<Svetofor />}
           onClick={() => nav(`/test?mode=exam&exam=1&lang=${testTili()}&shuffle=0`)}
         />
-        <IlovaKarta sarlavha="Biletlar" ikonka={<Chipta />} onClick={() => nav('/biletlar')} />
+        {/* "Biletlar" o'rnida — Testlar ekranidagi "Shablon testlar" (2026-11-23: alohida Biletlar ro'yxati kerak emas) */}
+        <IlovaKarta sarlavha="Shablon testlar" ikonka={<Qatlamlar />} onClick={() => nav('/shablon')} />
         <IlovaKarta sarlavha="Mavzular" ikonka={<Papka />} onClick={() => nav('/mavzular')} />
         <IlovaKarta sarlavha="Yo‘l belgilari" ikonka={<YolBelgisi />} onClick={() => nav('/belgilar')} />
         <IlovaKarta

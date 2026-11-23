@@ -173,7 +173,8 @@ export default function App() {
         {!mobilIlova() && <Route path="/xabarlar" element={<AdminMessages />} />}
         {!mobilIlova() && <Route path="/tahlil" element={<AdminAnalytics />} />}
         {!mobilIlova() && <Route path="/promokodlar" element={<AdminPromo />} />}
-        <Route path="/biletlar" element={<Tickets />} />
+        {/* Ilovada alohida "Biletlar" ro'yxati yo'q (2026-11-23) — shablon testlar ochiladi; saytda avvalgidek */}
+        <Route path="/biletlar" element={mobilIlova() ? <Navigate to="/shablon" replace /> : <Tickets />} />
         <Route path="/test" element={<TestPlayer />} />
         {/* Yo'l belgilari: ilovada yangi ko'rinish (toifalar, qidiruv), saytda ro'yxat — ma'lumot bitta katalogdan */}
         <Route path="/belgilar" element={mobilIlova() ? <BelgilarIlova /> : <Signs />} />

@@ -4,34 +4,44 @@
  * Bu qiymatlar uchala hujjatda (maxfiylik siyosati, foydalanish shartlari,
  * ommaviy oferta) avtomat ishlatiladi. Faqat shu faylni tahrirlang.
  *
- * To'ldirilmagan joylar saytda sariq rangda "[to'ldirilmagan]" bo'lib ko'rinadi —
- * shunda nima qolganini darrov ko'rasiz.
+ * Rekvizitlar jadvalida bo'sh qiymatli qatorlar ko'rsatilmaydi; matn ichidagi bo'sh joy
+ * (nom, telefon, pochta) saytda sariq "[to'ldirilmagan]" bo'lib ko'rinadi.
+ *
+ * 2026-11-24: tashkilot «IZDOSH ACADEMY» NTM ga almashtirildi (davlat ro'yxatidan o'tganlik guvohnomasi
+ * bo'yicha). Eski «Mingchinor avto ustoz» MCHJ ning bank rekvizitlari, IFUT va rahbari olib tashlandi —
+ * yangi tashkilotniki berilganda shu yerga yoziladi.
  */
 export const TASHKILOT = {
-  /** To'liq nomi */
-  nom: '«Mingchinor avto ustoz» MCHJ o‘quv korxonasi',
+  /** To'liq nomi (guvohnoma bo'yicha) */
+  nom: '«IZDOSH ACADEMY» nodavlat ta’lim muassasasi',
+  /** Qisqartirilgan nomi */
+  qisqaNom: '«IZDOSH ACADEMY» NTM',
+  /** Tashkiliy-huquqiy shakli */
+  shakl: 'Nodavlat ta’lim muassasasi',
   /** Soliq to'lovchining identifikatsiya raqami */
-  stir: '302 938 261',
-  /** Yuridik manzil */
-  manzil: 'Farg‘ona viloyati, Quva shahri, Yorqin ko‘chasi, 81-uy',
+  stir: '311 193 593',
+  /** Davlat ro'yxatidan o'tkazilgan sana, raqam va organ */
+  royxat: '26.03.2024, № 2419064 (Quva tumani Davlat xizmatlari markazi)',
+  /** Faoliyat yuritadigan manzil */
+  manzil: 'Farg‘ona viloyati, Quva tumani, Qaqir MFY, Begat ko‘chasi, 14-uy',
   /** Aloqa uchun pochta */
   pochta: 'autostart.uz@gmail.com',
   /** Aloqa uchun telefon */
   telefon: '+998 78 555 07 17',
-  /** Bank nomi */
-  bank: '«O‘zmilliybank» AJ, Quva filiali',
+  /** Bank nomi (yangi tashkilotniki hali berilmagan) */
+  bank: '',
   /** Hisob raqami (x/r) */
-  hisob: '20208000800314608002',
+  hisob: '',
   /** MFO */
-  mfo: '00450',
+  mfo: '',
   /** IFUT (faoliyat turi kodi) */
-  ifut: '85320',
-  /** Direktor F.I.Sh. */
-  rahbar: 'A.B.Alijonov',
+  ifut: '',
+  /** Rahbar F.I.Sh. */
+  rahbar: '',
   /** Sayt manzili */
   sayt: 'autostart.uz',
   /** Hujjat oxirgi yangilangan sana */
-  sana: '2026-yil 10-avgust',
+  sana: '2026-yil 24-noyabr',
 };
 
 /** Ma'lumotlar qancha saqlanadi (hujjatlarda ishlatiladi) */

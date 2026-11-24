@@ -21,21 +21,30 @@ const SARLAVHA: Record<Hujjat, { t: string; s: string; Ic: typeof ShieldCheck }>
   oferta: { t: 'Ommaviy oferta', s: 'Pullik obuna bo‘yicha shartnoma', Ic: ScrollText },
 };
 
+/** Rekvizitlar jadvali — qiymati bo'sh qatorlar ko'rsatilmaydi (legal.ts) */
 function Rekvizitlar() {
+  const qatorlar: [string, string][] = [
+    ['Tashkilot', T.nom],
+    ['Qisqa nomi', T.qisqaNom],
+    ['Tashkiliy-huquqiy shakli', T.shakl],
+    ['STIR', T.stir],
+    ['Davlat ro‘yxatidan o‘tgan', T.royxat],
+    ['IFUT', T.ifut],
+    ['Manzil', T.manzil],
+    ['Rahbar', T.rahbar],
+    ['Bank', T.bank],
+    ['Hisob raqami (x/r)', T.hisob],
+    ['MFO', T.mfo],
+    ['Telefon', T.telefon],
+    ['Pochta', T.pochta],
+  ];
   return (
     <div className="lg-rek">
       <div className="ud-card-h">Rekvizitlar</div>
       <dl className="ud-d-list">
-        <div><dt>Tashkilot</dt><dd><R v={T.nom} /></dd></div>
-        <div><dt>STIR</dt><dd><R v={T.stir} /></dd></div>
-        <div><dt>IFUT</dt><dd><R v={T.ifut} /></dd></div>
-        <div><dt>Manzil</dt><dd><R v={T.manzil} /></dd></div>
-        <div><dt>Rahbar</dt><dd><R v={T.rahbar} /></dd></div>
-        <div><dt>Bank</dt><dd><R v={T.bank} /></dd></div>
-        <div><dt>Hisob raqami (x/r)</dt><dd><R v={T.hisob} /></dd></div>
-        <div><dt>MFO</dt><dd><R v={T.mfo} /></dd></div>
-        <div><dt>Telefon</dt><dd><R v={T.telefon} /></dd></div>
-        <div><dt>Pochta</dt><dd><R v={T.pochta} /></dd></div>
+        {qatorlar.filter(([, v]) => v).map(([k, v]) => (
+          <div key={k}><dt>{k}</dt><dd><b>{v}</b></dd></div>
+        ))}
       </dl>
     </div>
   );
@@ -152,7 +161,7 @@ export function Shartlar(): ReactNode {
       <h3>4. Mualliflik huquqi</h3>
       <p>
         Saytdagi barcha materiallar — savollar, izohlar, rasmlar, dizayn va dastur kodi —
-        <R v={T.nom} /> ga tegishli. Yozma ruxsatsiz foydalanish taqiqlanadi.
+        <R v={T.nom} />ga tegishli. Yozma ruxsatsiz foydalanish taqiqlanadi.
       </p>
 
       <h3>5. Javobgarlik chegarasi</h3>
@@ -182,7 +191,7 @@ export function Oferta(): ReactNode {
   return (
     <>
       <p>
-        Ushbu hujjat <R v={T.nom} /> ning {T.sayt} saytida pullik obuna xizmatini taqdim etish
+        Ushbu hujjat <R v={T.nom} />ning {T.sayt} saytida pullik obuna xizmatini taqdim etish
         bo‘yicha <b>ommaviy oferta</b>sidir. To‘lovni amalga oshirish oferta shartlarini to‘liq
         qabul qilish (akseptlash) hisoblanadi.
       </p>

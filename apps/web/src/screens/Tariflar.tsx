@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronLeft, Clock, Menu, PhoneCall, Users, X } from 'lucide-react';
 import { api, type TarifJavob } from '../api';
 import AppSidebar from '../components/AppSidebar';
@@ -9,6 +9,7 @@ import {
   type Tarif, type TarifKod,
 } from '../tarif/holat';
 import { TarifLogo } from '../tarif/Logolar';
+import DostlarKarta from '../tarif/DostlarKarta';
 import { OquvMashinasi } from '../simulyator/ui/MashqRasmlari';
 import '../dashboard.css';
 import '../tarif/tarif.css';
@@ -95,6 +96,7 @@ export default function Tariflar() {
   // To'lov muddati: 1 oy (oylik narx) yoki 3 oy (chegirmali); Premiumda — "Do'stlar tarifi" (3 kishigacha)
   const [oy, setOy] = useState<1 | 3>(1);
   const [dostlar, setDostlar] = useState(false);
+  const tanlovRef = useRef<HTMLDivElement>(null);
   const holat = useTarif();
   const tel = useTelefon();
 
@@ -118,6 +120,13 @@ export default function Tariflar() {
   const buJoriy = joriy?.kod === t.kod;
   const dost = dostlar && !!t.dostlar; // Do'stlar tarifi faqat Premiumda
   const premiumD = tariflar.find((x) => x.dostlar); // jadvaldagi "Do'stlar tarifi" qatorlari uchun
+  // "Do'stlar" kartasidagi tugma: Premium + Do'stlar tarifi tanlanadi va muddat tanloviga suriladi
+  const dostlarniTanla = () => {
+    if (!premiumD) return;
+    setTanlangan(premiumD.kod);
+    setDostlar(true);
+    requestAnimationFrame(() => tanlovRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  };
 
   // Qatorlar — server sozlamasidan (qaysi imkoniyat qaysi darajadan ochiladi)
   const imk = { ...IMKONIYAT_DARAJA, ...(javob?.imkoniyatDaraja || {}) } as Record<string, number>;
@@ -174,6 +183,17 @@ export default function Tariflar() {
           <path d="M0 64V40C26 26 56 22 84 34 104 12 146 6 172 26 196 4 244 2 266 26 290 12 330 12 352 30 372 22 390 24 400 28V64Z" fill="currentColor" />
         </svg>
       </div>
+
+      {/* ---------- "Do'stlar" tarifi kartasi (namuna: oilaviy obuna reklamasi) ---------- */}
+      {premiumD?.dostlar && (
+        <DostlarKarta
+          odam={premiumD.dostlar.odam}
+          narx={premiumD.dostlar.narx}
+          narx3={premiumD.dostlar.narx3}
+          tanlangan={dost}
+          onTanla={dostlarniTanla}
+        />
+      )}
 
       {/* ---------- Solishtirish jadvali ---------- */}
       <div className="tf2-jadval" role="table" aria-label="Tariflarni solishtirish">
@@ -268,7 +288,7 @@ export default function Tariflar() {
       </div>
 
       {/* ---------- Jadval ostida: to'lov muddati va Do'stlar tarifi (oqimda — pastki tugma jadvalni yopmasin) ---------- */}
-      <div className="tf2-tanlov">
+      <div className="tf2-tanlov" ref={tanlovRef}>
         {/* To'lov muddati: 1 oy yoki 3 oy (chegirmali) */}
         <div className="tf2-davr" role="radiogroup" aria-label="To‘lov muddati">
           {([1, 3] as const).map((n) => {

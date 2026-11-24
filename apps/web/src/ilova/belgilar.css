@@ -76,7 +76,7 @@
 .bl-oyna .ilv-bl-tavsif-yoq { opacity: .7; }
 
 /* Belgi oynasi to'liq ekran (2026-11-24, foydalanuvchi: "oyna to'liq ochilishi kerak") — o'z ichida aylanadi */
-.ie-sheet.bl-toliq { top: 0; max-height: none; border-radius: 0; padding-top: 16px; }
+.ie-sheet.bl-toliq { top: 0; max-height: none; border-radius: 0; padding-top: 16px; touch-action: pan-y; }
 .ie-sheet.bl-toliq .ie-handle { display: none; }
 .ie-sheet.bl-toliq .ie-sh-title { padding: 0 44px; }
 
@@ -98,8 +98,9 @@
 .bl-oyna-hisob { text-align: center; margin: -4px 0 12px; font-size: 12.5px; font-weight: 700; opacity: .6; }
 @keyframes blOldinga { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: none; } }
 @keyframes blOrqaga { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: none; } }
-.bl-oyna-sahna .ilv-bl-oyna-rasmlar.oldinga { animation: blOldinga .22s ease; }
-.bl-oyna-sahna .ilv-bl-oyna-rasmlar.orqaga { animation: blOrqaga .22s ease; }
+/* Keyingi/oldingi belgi — butun kontent (rasm + tavsif) yon tomondan kiradi */
+.bl-oyna.oldinga { animation: blOldinga .22s ease; }
+.bl-oyna.orqaga { animation: blOrqaga .22s ease; }
 
 /* Yorug' mavzu */
 :root[data-theme="light"] .ilv .ilv-bl-karta,

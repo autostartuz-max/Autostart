@@ -75,7 +75,7 @@ export default function BelgilarIlova() {
   const [ochiqRoyxat, setOchiqRoyxat] = useState<BelgiQator[]>([]);
   const [yon, setYon] = useState<'oldinga' | 'orqaga' | null>(null);
   const sahnaRef = useRef<HTMLDivElement>(null);
-  const surish = useRef<{ x: number; y: number } | null>(null);
+  const kontentRef = useRef<HTMLDivElement>(null);
   const belgilar = useBelgilar();
   // Yo'l belgilari va qidiruv — Standart tarifdan; birinchi toifa namuna sifatida hammaga ochiq
   const tarif = useTarif();
@@ -126,6 +126,55 @@ export default function BelgilarIlova() {
     };
     window.addEventListener('keydown', k);
     return () => window.removeEventListener('keydown', k);
+  });
+
+  // Barmoq bilan surish — oynaning ISTALGAN joyida (sarlavha, rasm, tavsif, bo'sh joy). 2026-11-24 foydalanuvchi:
+  // "oynani hamma joyi ishlashi kerak" (avval faqat strelkalar qatori). Kontent barmoqqa ergashadi; 60 px dan
+  // ko'p surilsa — keyingi/oldingi belgi, aks holda joyiga qaytadi. Yo'nalish birinchi 8 px da aniqlanadi —
+  // vertikal aylantirish (uzun tavsif) xalaqit bermaydi. Chetdagi belgida — qarshilik bilan qaytadi.
+  useEffect(() => {
+    const k = kontentRef.current;
+    const varaq = k?.closest('.ie-sheet') as HTMLElement | null;
+    if (!k || !varaq) return;
+    let s: { x: number; y: number; yon: 'x' | 'y' | null } | null = null;
+    const bosh = (e: TouchEvent) => {
+      if (e.touches.length !== 1) { s = null; return; }
+      s = { x: e.touches[0].clientX, y: e.touches[0].clientY, yon: null };
+      k.style.transition = 'none';
+    };
+    const harakat = (e: TouchEvent) => {
+      if (!s) return;
+      const dx = e.touches[0].clientX - s.x;
+      const dy = e.touches[0].clientY - s.y;
+      if (!s.yon) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        s.yon = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      }
+      if (s.yon !== 'x') return;
+      const chetda = (dx > 0 && joriy <= 0) || (dx < 0 && joriy >= ketma.length - 1);
+      k.style.transform = `translateX(${Math.round(chetda ? dx * 0.25 : dx)}px)`;
+      k.style.opacity = String(1 - Math.min(0.35, Math.abs(dx) / 900));
+    };
+    const tugash = (e: TouchEvent) => {
+      if (!s) return;
+      const dx = e.changedTouches[0].clientX - s.x;
+      const yon = s.yon;
+      s = null;
+      k.style.transition = 'transform .2s ease, opacity .2s ease';
+      k.style.transform = '';
+      k.style.opacity = '';
+      if (yon === 'x' && Math.abs(dx) > 60) otish(dx < 0 ? 1 : -1);
+    };
+    varaq.addEventListener('touchstart', bosh, { passive: true });
+    varaq.addEventListener('touchmove', harakat, { passive: true });
+    varaq.addEventListener('touchend', tugash);
+    varaq.addEventListener('touchcancel', tugash);
+    return () => {
+      varaq.removeEventListener('touchstart', bosh);
+      varaq.removeEventListener('touchmove', harakat);
+      varaq.removeEventListener('touchend', tugash);
+      varaq.removeEventListener('touchcancel', tugash);
+    };
   });
 
   return (
@@ -204,30 +253,15 @@ export default function BelgilarIlova() {
           onClose={() => setOchiq(null)}
           className="bl-toliq"
         >
-          <div className="bl-oyna">
-            {/* Chap/o'ng strelka (yoki barmoq bilan surish) — oldingi/keyingi belgi */}
-            <div
-              ref={sahnaRef}
-              className="bl-oyna-sahna"
-              onTouchStart={(e) => { surish.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
-              onTouchEnd={(e) => {
-                const s = surish.current;
-                surish.current = null;
-                if (!s) return;
-                const dx = e.changedTouches[0].clientX - s.x;
-                const dy = e.changedTouches[0].clientY - s.y;
-                if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) otish(dx < 0 ? 1 : -1);
-              }}
-            >
+          <div ref={kontentRef} key={ochiq.toifa + '|' + ochiq.nom} className={'bl-oyna' + (yon ? ' ' + yon : '')}>
+            {/* Chap/o'ng strelka yoki oynaning istalgan joyida barmoq bilan surish — oldingi/keyingi belgi */}
+            <div ref={sahnaRef} className="bl-oyna-sahna">
               {ketma.length > 1 && (
                 <button type="button" className="bl-oyna-strelka chap" onClick={() => otish(-1)} disabled={joriy <= 0} aria-label="Oldingi belgi">
                   <ChevronLeft aria-hidden="true" />
                 </button>
               )}
-              <div
-                key={ochiq.toifa + '|' + ochiq.nom}
-                className={'ilv-bl-oyna-rasmlar' + (ochiqGuruh.length > 1 ? ' kop' : '') + (yon ? ' ' + yon : '')}
-              >
+              <div className={'ilv-bl-oyna-rasmlar' + (ochiqGuruh.length > 1 ? ' kop' : '')}>
                 {ochiqGuruh.map((b, i) => (
                   <figure key={kalit(b, i)} className={'ilv-bl-oyna-rasm' + (b.raqam === ochiq.raqam && b.id === ochiq.id ? ' tanlangan' : '')}>
                     <Rasm rasm={b.rasm} raqam={b.raqam} katta />

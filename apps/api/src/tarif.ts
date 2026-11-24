@@ -11,47 +11,70 @@ export type TarifKod = 'standart' | 'silver' | 'premium';
 export type Imkoniyat = 'audio' | 'belgilar' | 'video' | 'mavzu' | 'avtodrom';
 
 /**
- * narx — OYLIK narx (so'm). Tarif oy oylik: jami = narx × oy (2026-11-24, foydalanuvchi: "1 oy uchun 59 000,
- * 3 oyda 3 ga ko'paytiriladi"): Standart 3 × 59 000 = 177 000, Silver 3 × 99 000 = 297 000, Premium 6 × 119 000 = 714 000.
+ * Narxlar (2026-11-24, foydalanuvchi): foydalanish muddati 1 oy — oylik narx; pastda 3 oylik to'lov (chegirmali);
+ * 6 oylik tarif olib tashlandi. Premiumda "Do'stlar tarifi": 3 kishigacha, oyiga 299 000, 3 oyga 549 000.
+ *   narx  — 1 oylik narx (so'm), narx3 — 3 oylik to'lov (so'm).
+ *   oy    — ESKI ilovalar uchun (ular narx × oy ni ko'rsatadi): endi 1 — oylik narx chiqadi.
  */
-export const TARIFLAR: { kod: TarifKod; nom: string; narx: number; oy: number; daraja: number; imkoniyatlar: string[] }[] = [
+export interface TarifVariant { narx: number; narx3: number }
+export interface Tarif extends TarifVariant {
+  kod: TarifKod; nom: string; oy: number; daraja: number; imkoniyatlar: string[];
+  /** Do'stlar tarifi — bitta to'lov bilan bir necha kishi foydalanadi (faqat Premium) */
+  dostlar?: TarifVariant & { odam: number };
+}
+export const TARIFLAR: Tarif[] = [
   {
-    kod: 'standart', nom: 'Standart', narx: 59000, oy: 3, daraja: 1,
+    kod: 'standart', nom: 'Standart', narx: 59000, narx3: 112000, oy: 1, daraja: 1,
     imkoniyatlar: [
       'Har bir testga Autostart mutaxassislari tayyorlagan audio sharh',
       'Yo‘l belgilari va ularni qulay qidiruv orqali ma’lumotlardan, sharhlardan foydalanish',
-      'Ushbu tarifdan 3 oy muddatgacha foydalanish',
     ],
   },
   {
-    kod: 'silver', nom: 'Silver', narx: 99000, oy: 3, daraja: 2,
+    kod: 'silver', nom: 'Silver', narx: 99000, narx3: 155000, oy: 1, daraja: 2,
     imkoniyatlar: [
       'Har bir testga Autostart mutaxassislari tayyorlagan audio sharh',
       'Yo‘l belgilari va ularni qulay qidiruv orqali ma’lumotlardan, sharhlardan foydalanish',
       'Autostart tajribali ustozlari tomonidan har bir testga yozilgan video darslar',
-      'Ushbu tarifdan 3 oy muddatgacha foydalanish',
     ],
   },
   {
-    kod: 'premium', nom: 'Premium', narx: 119000, oy: 6, daraja: 3,
+    kod: 'premium', nom: 'Premium', narx: 119000, narx3: 199000, oy: 1, daraja: 3,
+    dostlar: { odam: 3, narx: 299000, narx3: 549000 },
     imkoniyatlar: [
       'Har bir testga Autostart mutaxassislari tayyorlagan audio sharh',
       'Yo‘l belgilari va ularni qulay qidiruv orqali ma’lumotlardan, sharhlardan foydalanish',
       'Autostart tajribali ustozlari tomonidan har bir testga yozilgan video darslar',
       'Ustozlarimiz zarur mavzularga tayyorlagan video darslar (tez orada)',
       'Autostart avtodromida mutaxassislar tomonidan tayyorlangan A, B, BC, D, CE toifalar uchun imtihon amaliy mashg‘ulotlari',
-      'Ushbu tarifdan 6 oy muddatgacha foydalanish',
+      '“Do‘stlar tarifi” — 3 kishigacha birga foydalanish',
     ],
   },
 ];
+
+/** Tanlangan variant narxi: 1 oy — narx, 3 oy — narx3 (chegirmali), boshqa muddat — oylik × oy */
+export function variantNarx(t: Tarif, oy: number, dostlar = false): number {
+  const v: TarifVariant = dostlar && t.dostlar ? t.dostlar : t;
+  return oy === 3 ? v.narx3 : oy === 1 ? v.narx : v.narx * oy;
+}
+
+/** So'rovda variant `tarif` maydoniga yoziladi: "premium:3:dostlar", "standart:1" (eski yozuvlar — "standart") */
+export const sorovKodi = (kod: TarifKod, oy: number, dostlar: boolean) => `${kod}:${oy}${dostlar ? ':dostlar' : ''}`;
+export function sorovTahlil(s: string): { kod: string; oy: number | null; dostlar: boolean } {
+  const [kod, oy, d] = String(s || '').split(':');
+  return { kod, oy: Number(oy) || null, dostlar: d === 'dostlar' };
+}
+
+/** "Premium — Do'stlar tarifi (3 kishigacha), 3 oy" */
+export function variantNomi(t: Tarif, oy: number | null, dostlar: boolean): string {
+  return t.nom + (dostlar && t.dostlar ? ` — Do‘stlar tarifi (${t.dostlar.odam} kishigacha)` : '') + (oy ? `, ${oy} oy` : '');
+}
 
 /** Har bir imkoniyat qaysi tarif darajasidan ochiladi */
 export const IMKONIYAT_DARAJA: Record<Imkoniyat, number> = { audio: 1, belgilar: 1, video: 2, mavzu: 3, avtodrom: 3 };
 
 export const tarifTop = (kod: string) => TARIFLAR.find((t) => t.kod === kod) || null;
 
-/** Tarifning jami narxi (oylik narx × oylar soni) */
-export const jamiNarx = (t: { narx: number; oy: number }, oy = t.oy) => t.narx * oy;
 
 /** To'lov uchun aloqa (Aloqa sahifasidagi call-markaz) */
 export const TOLOV_KONTAKT = { telefon: '78 555 07 17', tel: '+998785550717' };

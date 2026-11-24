@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Check, ChevronLeft, Clock, Menu, PhoneCall, X } from 'lucide-react';
+import { Check, ChevronLeft, Clock, Menu, PhoneCall, Users, X } from 'lucide-react';
 import { api, type TarifJavob } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import { mobilIlova, ilovaEkrani } from '../native';
 import { useOrqaga, orqagaYozuvi } from '../orqaga';
 import {
-  IMKONIYAT_DARAJA, TARIFLAR_ZAXIRA, TARIF_NOMI, TOLOV_KONTAKT_ZAXIRA, jamiNarx, narxMatn, sanaMatn, useTarif, type Tarif, type TarifKod,
+  IMKONIYAT_DARAJA, TARIFLAR_ZAXIRA, TOLOV_KONTAKT_ZAXIRA, narxMatn, sanaMatn, tarifToldir, useTarif, variantNarx, variantNomi,
+  type Tarif, type TarifKod,
 } from '../tarif/holat';
 import { TarifLogo } from '../tarif/Logolar';
 import { OquvMashinasi } from '../simulyator/ui/MashqRasmlari';
@@ -32,7 +33,9 @@ function useTelefon() {
 }
 
 /** "Sotib olish" bosilgandan keyin: so'rov qabul qilindi, to'lov uchun call-markaz */
-function SorovOynasi({ tarif, kontakt, onClose }: { tarif: Tarif; kontakt: Kontakt; onClose: () => void }) {
+function SorovOynasi({ tarif, oy, dostlar, kontakt, onClose }: {
+  tarif: Tarif; oy: 1 | 3; dostlar: boolean; kontakt: Kontakt; onClose: () => void;
+}) {
   const tel = useTelefon();
   useEffect(() => {
     const orqaga = (e: Event) => { e.preventDefault(); onClose(); };
@@ -47,12 +50,18 @@ function SorovOynasi({ tarif, kontakt, onClose }: { tarif: Tarif; kontakt: Konta
         <h2>So‘rovingiz qabul qilindi!</h2>
         <div className="tf-oyna-tarif">
           <TarifLogo kod={tarif.kod} size={28} />
-          <span>{tarif.nom} — {narxMatn(jamiNarx(tarif))} / {tarif.oy} oy</span>
+          <span>{variantNomi(tarif, oy, dostlar)} — {narxMatn(variantNarx(tarif, oy, dostlar))}</span>
         </div>
         <p>
           To‘lovni amalga oshirish uchun call-markazimizga qo‘ng‘iroq qiling. Operatorimiz o‘zi ham siz bilan
           bog‘lanadi. To‘lovdan so‘ng tarifingiz darhol yoqiladi.
         </p>
+        {dostlar && tarif.dostlar && (
+          <p className="tf-dost-izoh">
+            <Users aria-hidden="true" />
+            <span>Operatorga do‘stlaringizning ro‘yxatdan o‘tgan telefon raqamlarini ayting (yana {tarif.dostlar.odam - 1} kishigacha) — ularga ham Premium yoqiladi.</span>
+          </p>
+        )}
         <a className="tf-tugma tf-qongiroq" href={'tel:' + kontakt.tel} onClick={(e) => tel.bos(e, kontakt.telefon)}>
           <PhoneCall aria-hidden="true" />
           <span className={tel.nusxa ? 'tf-nusxa' : undefined}>{tel.nusxa ? 'Raqam nusxalandi' : kontakt.telefon}</span>
@@ -81,8 +90,11 @@ export default function Tariflar() {
   const [javob, setJavob] = useState<TarifJavob | null>(null);
   const [xato, setXato] = useState('');
   const [yuborilmoqda, setYuborilmoqda] = useState<TarifKod | null>(null);
-  const [sorovOyna, setSorovOyna] = useState<Tarif | null>(null);
+  const [sorovOyna, setSorovOyna] = useState<{ tarif: Tarif; oy: 1 | 3; dostlar: boolean } | null>(null);
   const [tanlangan, setTanlangan] = useState<TarifKod>('premium');
+  // To'lov muddati: 1 oy (oylik narx) yoki 3 oy (chegirmali); Premiumda — "Do'stlar tarifi" (3 kishigacha)
+  const [oy, setOy] = useState<1 | 3>(1);
+  const [dostlar, setDostlar] = useState(false);
   const holat = useTarif();
   const tel = useTelefon();
 
@@ -95,7 +107,7 @@ export default function Tariflar() {
   const yukla = () => api.tarif().then((r) => { setJavob(r); setXato(''); }).catch(() => { /* zaxira ro'yxat ko'rinadi */ });
   useEffect(() => { yukla(); }, []);
 
-  const tariflar = [...(javob?.tariflar?.length ? javob.tariflar : TARIFLAR_ZAXIRA)].sort((a, b) => a.daraja - b.daraja);
+  const tariflar = (javob?.tariflar?.length ? javob.tariflar : TARIFLAR_ZAXIRA).map(tarifToldir).sort((a, b) => a.daraja - b.daraja);
   const kontakt: Kontakt = javob?.kontakt || TOLOV_KONTAKT_ZAXIRA;
   const joriy = javob ? javob.joriy : holat.joriy;
   const daraja = javob ? javob.daraja : holat.daraja;
@@ -104,6 +116,8 @@ export default function Tariflar() {
   useEffect(() => { if (joriy?.kod) setTanlangan(joriy.kod); }, [joriy?.kod]);
   const t = tariflar.find((x) => x.kod === tanlangan) || tariflar[tariflar.length - 1];
   const buJoriy = joriy?.kod === t.kod;
+  const dost = dostlar && !!t.dostlar; // Do'stlar tarifi faqat Premiumda
+  const premiumD = tariflar.find((x) => x.dostlar); // jadvaldagi "Do'stlar tarifi" qatorlari uchun
 
   // Qatorlar — server sozlamasidan (qaysi imkoniyat qaysi darajadan ochiladi)
   const imk = { ...IMKONIYAT_DARAJA, ...(javob?.imkoniyatDaraja || {}) } as Record<string, number>;
@@ -120,9 +134,10 @@ export default function Tariflar() {
     if (yuborilmoqda) return;
     setYuborilmoqda(x.kod);
     setXato('');
+    const d = dostlar && !!x.dostlar;
     try {
-      await api.tarifSorov(x.kod);
-      setSorovOyna(x);
+      await api.tarifSorov(x.kod, oy, d);
+      setSorovOyna({ tarif: x, oy, dostlar: d });
       yukla();
     } catch (e: any) {
       setXato(e?.message || 'So‘rovni yuborib bo‘lmadi. Internetni tekshiring yoki qo‘ng‘iroq qiling.');
@@ -194,33 +209,90 @@ export default function Tariflar() {
             ))}
           </div>
         ))}
+        {/* 2026-11-24: foydalanish muddati 1 oy — oylik narx; ostida 3 oylik to'lov; 6 oylik yo'q;
+            Premiumda "Do'stlar tarifi" (3 kishigacha) */}
         <div className="tf2-qator" role="row">
           <span className="tf2-nom" role="rowheader">Foydalanish muddati</span>
           <span className="tf2-q tf2-matn" role="cell">—</span>
           {tariflar.map((x) => (
-            <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn'} onClick={() => setTanlangan(x.kod)}>{x.oy} oy</span>
+            <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn'} onClick={() => setTanlangan(x.kod)}>1 oy</span>
           ))}
         </div>
-        {/* Narx oylik; jami = oylik narx × oylar (2026-11-24) */}
         <div className="tf2-qator" role="row">
           <span className="tf2-nom" role="rowheader">Oylik narxi, so‘m</span>
           <span className="tf2-q tf2-matn" role="cell">0</span>
           {tariflar.map((x) => (
-            <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn tf2-narx'} onClick={() => setTanlangan(x.kod)}>
+            <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn tf2-narx tf2-jami'} onClick={() => setTanlangan(x.kod)}>
               {narxMatn(x.narx).replace(' so‘m', '')}
             </span>
           ))}
         </div>
-        <div className="tf2-qator tf2-oxirgi" role="row">
-          <span className="tf2-nom" role="rowheader">Jami, so‘m</span>
+        <div className={'tf2-qator' + (premiumD ? '' : ' tf2-oxirgi')} role="row">
+          <span className="tf2-nom" role="rowheader">3 oylik to‘lov, so‘m</span>
           <span className="tf2-q tf2-matn" role="cell">0</span>
           {tariflar.map((x) => (
-            <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn tf2-narx tf2-jami'} onClick={() => setTanlangan(x.kod)}>
-              {narxMatn(jamiNarx(x)).replace(' so‘m', '')}
+            <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn tf2-narx'} onClick={() => setTanlangan(x.kod)}>
+              {narxMatn(x.narx3).replace(' so‘m', '')}
             </span>
           ))}
         </div>
+        {premiumD?.dostlar && (
+          <>
+            <div className="tf2-qator" role="row">
+              <span className="tf2-nom" role="rowheader">
+                Do‘stlar tarifi, oylik
+                <small>{premiumD.dostlar.odam} kishigacha</small>
+              </span>
+              <span className="tf2-q" role="cell"><Yoq /></span>
+              {tariflar.map((x) => (
+                <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn tf2-narx'} onClick={() => setTanlangan(x.kod)}>
+                  {x.dostlar ? narxMatn(x.dostlar.narx).replace(' so‘m', '') : <Yoq />}
+                </span>
+              ))}
+            </div>
+            <div className="tf2-qator tf2-oxirgi" role="row">
+              <span className="tf2-nom" role="rowheader">
+                Do‘stlar tarifi, 3 oylik
+                <small>{premiumD.dostlar.odam} kishigacha</small>
+              </span>
+              <span className="tf2-q" role="cell"><Yoq /></span>
+              {tariflar.map((x) => (
+                <span key={x.kod} role="cell" className={ustun(x.kod) + ' tf2-matn tf2-narx'} onClick={() => setTanlangan(x.kod)}>
+                  {x.dostlar ? narxMatn(x.dostlar.narx3).replace(' so‘m', '') : <Yoq />}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
         <p className="tf2-izoh">Tarifsiz ham barcha testlar bepul; har bo‘limdan bittasi namuna sifatida ochiq.</p>
+      </div>
+
+      {/* ---------- Jadval ostida: to'lov muddati va Do'stlar tarifi (oqimda — pastki tugma jadvalni yopmasin) ---------- */}
+      <div className="tf2-tanlov">
+        {/* To'lov muddati: 1 oy yoki 3 oy (chegirmali) */}
+        <div className="tf2-davr" role="radiogroup" aria-label="To‘lov muddati">
+          {([1, 3] as const).map((n) => {
+            const summa = variantNarx(t, n, dost);
+            const tejash = n === 3 ? variantNarx(t, 1, dost) * 3 - summa : 0;
+            return (
+              <button key={n} type="button" role="radio" aria-checked={oy === n} className={'tf2-davr-b' + (oy === n ? ' faol' : '')} onClick={() => setOy(n)}>
+                <b>{n} oy</b>
+                <span>{narxMatn(summa)}</span>
+                {tejash > 0 && <em>{narxMatn(tejash)} tejaysiz</em>}
+              </button>
+            );
+          })}
+        </div>
+        {t.dostlar && (
+          <button type="button" className={'tf2-dost' + (dostlar ? ' faol' : '')} aria-pressed={dostlar} onClick={() => setDostlar((v) => !v)}>
+            <span className="tf2-dost-belgi"><Users aria-hidden="true" /></span>
+            <span className="tf2-dost-matn">
+              <b>Do‘stlar tarifi</b>
+              <small>{t.dostlar.odam} kishigacha Premium — oyiga {narxMatn(t.dostlar.narx)}</small>
+            </span>
+            <span className="tf2-dost-kalit" aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       {/* ---------- Pastda: bitta katta tugma (tanlangan tarif) ---------- */}
@@ -229,12 +301,15 @@ export default function Tariflar() {
         {sorov && (
           <div className="tf2-sorov" role="status">
             <Clock aria-hidden="true" />
-            <span>{TARIF_NOMI[sorov.tarif]} tarifiga so‘rovingiz qabul qilingan — operatorimiz bog‘lanadi</span>
+            <span>
+              {variantNomi(tariflar.find((x) => x.kod === sorov.tarif) || { nom: sorov.tarif, dostlar: undefined }, sorov.oy, sorov.dostlar)}
+              {' '}— so‘rovingiz qabul qilingan, operatorimiz bog‘lanadi
+            </span>
           </div>
         )}
         <button type="button" className="tf2-cta" disabled={yuborilmoqda != null} onClick={() => sotibOl(t)}>
           <b>{tugmaMatn}</b>
-          <span>{t.oy} oy × {narxMatn(t.narx).replace(' so‘m', '')} = {narxMatn(jamiNarx(t))}</span>
+          <span>{dost && t.dostlar ? `Do‘stlar tarifi (${t.dostlar.odam} kishi), ` : ''}{oy} oy — {narxMatn(variantNarx(t, oy, dost))}</span>
         </button>
         <div className="tf2-tel">
           To‘lov call-markaz orqali —{' '}
@@ -242,7 +317,7 @@ export default function Tariflar() {
         </div>
       </div>
 
-      {sorovOyna && <SorovOynasi tarif={sorovOyna} kontakt={kontakt} onClose={() => setSorovOyna(null)} />}
+      {sorovOyna && <SorovOynasi tarif={sorovOyna.tarif} oy={sorovOyna.oy} dostlar={sorovOyna.dostlar} kontakt={kontakt} onClose={() => setSorovOyna(null)} />}
     </div>
   );
 

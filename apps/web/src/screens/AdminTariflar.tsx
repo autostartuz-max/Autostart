@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Menu, BadgeCheck, Plus, Trash2, Save, RotateCcw, Search } from 'lucide-react';
+import { Menu, BadgeCheck, Plus, Trash2, Save, RotateCcw, Search, Users, X } from 'lucide-react';
 import {
   adminApi, hasAdmin, canManageQuestions, ensureAdminAuto, clearAdmin,
-  type IlovaMatnlar, type ObunaQator, type TarifSorovQator, type AdminUserRow,
+  type IlovaMatnlar, type ObunaQator, type TarifSorovQator,
 } from '../api';
 import AppSidebar from '../components/AppSidebar';
 import AdminLogin from './AdminLogin';
-import { TARIFLAR_ZAXIRA, TARIF_NOMI, jamiNarx, narxMatn, sanaMatn, type Tarif, type TarifKod } from '../tarif/holat';
+import {
+  TARIFLAR_ZAXIRA, TARIF_NOMI, narxMatn, sanaMatn, tarifToldir, variantNarx, variantNomi, type Tarif, type TarifKod,
+} from '../tarif/holat';
 import { TarifLogo, TaqiqBelgisi } from '../tarif/Logolar';
 import '../dashboard.css';
 import './adminTarif.css';
@@ -22,6 +24,42 @@ const HOLAT_NOMI: Record<string, string> = { yangi: 'Yangi', bajarildi: 'Yoqildi
 const vaqt = (s: string) => new Date(s).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const shaxs = (u: { firstName: string; phone: string | null; email: string | null } | null, id: number) =>
   u ? <><b>{u.firstName || 'Nomsiz'}</b><small>ID {id}{u.phone ? ' · ' + u.phone : ''}{u.email ? ' · ' + u.email : ''}</small></> : <><b>O‘chirilgan</b><small>ID {id}</small></>;
+
+type Tanlov = { id: number; nom: string };
+
+/** Foydalanuvchi qidiruvi (ism, telefon, pochta) — tanlanganda onTanla */
+function FoydalanuvchiQidiruv({ onTanla, placeholder, chiqarib }: { onTanla: (u: Tanlov) => void; placeholder: string; chiqarib?: number[] }) {
+  const [q, setQ] = useState('');
+  const [natija, setNatija] = useState<{ id: number; firstName: string; phone: string | null; email: string | null }[]>([]);
+  useEffect(() => {
+    const s = q.trim();
+    if (s.length < 2) { setNatija([]); return; }
+    // Tarif bo'limining o'z qidiruvi — Admin ham ishlata oladi (avval /admin/users edi, u faqat Owner'ga ochiq)
+    const t = setTimeout(() => {
+      adminApi.tarifFoydalanuvchilar(s).then((r) => setNatija(r.users || [])).catch(() => setNatija([]));
+    }, 300);
+    return () => clearTimeout(t);
+  }, [q]);
+  const korin = natija.filter((u) => !chiqarib?.includes(u.id));
+  return (
+    <>
+      <div className="atf-qidiruv">
+        <Search size={16} />
+        <input className="adm-inp" value={q} onChange={(e) => setQ(e.target.value)} placeholder={placeholder} />
+      </div>
+      {korin.length > 0 && (
+        <div className="atf-topilgan">
+          {korin.map((u) => (
+            <button key={u.id} onClick={() => { onTanla({ id: u.id, nom: u.firstName || 'ID ' + u.id }); setQ(''); setNatija([]); }}>
+              <b>{u.firstName || 'Nomsiz'}</b>
+              <small>ID {u.id}{u.phone ? ' · ' + u.phone : ''}{u.email ? ' · ' + u.email : ''}</small>
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
 
 /**
  * Tariflar boshqaruvi (Owner va Admin; faqat saytda). To'lov qo'lda: foydalanuvchi ilova/saytda
@@ -43,13 +81,15 @@ export default function AdminTariflar() {
   const [faqatYangi, setFaqatYangi] = useState(true);
 
   // Tarif yoqish formasi
-  const [qidiruv, setQidiruv] = useState('');
-  const [topilgan, setTopilgan] = useState<AdminUserRow[]>([]);
-  const [tanlangan, setTanlangan] = useState<{ id: number; nom: string } | null>(null);
+  const [tanlangan, setTanlangan] = useState<Tanlov | null>(null);
   const [tarifKod, setTarifKod] = useState<TarifKod>('standart');
-  const [oy, setOy] = useState(3);
+  const [oy, setOy] = useState(1);
   const [narx, setNarx] = useState(59000);
   const [izoh, setIzoh] = useState('');
+  // Do'stlar tarifi (Premium): to'lovchidan tashqari do'stlar; so'rovdan ochilgan bo'lsa — uning id si
+  const [dostlar, setDostlar] = useState(false);
+  const [dostRoyxat, setDostRoyxat] = useState<Tanlov[]>([]);
+  const [formSorovId, setFormSorovId] = useState<number | null>(null);
 
   // Ilova matnlari
   const [matnlar, setMatnlar] = useState<IlovaMatnlar | null>(null);
@@ -65,7 +105,7 @@ export default function AdminTariflar() {
 
   const yukla = () => {
     adminApi.tarif()
-      .then((r) => { setTariflar(r.tariflar?.length ? r.tariflar : TARIFLAR_ZAXIRA); setSorovlar(r.sorovlar || []); setObunalar(r.obunalar || []); setFaol(r.faol || {}); })
+      .then((r) => { setTariflar((r.tariflar?.length ? r.tariflar : TARIFLAR_ZAXIRA).map(tarifToldir)); setSorovlar(r.sorovlar || []); setObunalar(r.obunalar || []); setFaol(r.faol || {}); })
       .catch((e) => xato(e, 'Ma’lumotni yuklab bo‘lmadi'));
   };
   const matnYukla = () => {
@@ -82,28 +122,21 @@ export default function AdminTariflar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
 
-  // Tarif tanlanganda — standart muddat va narx
+  const formTarif = tariflar.find((x) => x.kod === tarifKod);
+  const formDost = dostlar && !!formTarif?.dostlar;
+  // Tarif, muddat yoki do'stlar o'zgarganda — standart summa (1 oy, 3 oy chegirmali, do'stlar)
   useEffect(() => {
-    const t = tariflar.find((x) => x.kod === tarifKod);
-    if (t) { setOy(t.oy); setNarx(jamiNarx(t)); } // narx oylik — jami = oylik × oy
-  }, [tarifKod, tariflar]);
+    if (formTarif) setNarx(variantNarx(formTarif, oy, formDost));
+  }, [formTarif, oy, formDost]);
+  // Do'stlar tarifi bo'lmagan tarifga o'tilsa — do'stlar ro'yxati tozalanadi
+  useEffect(() => { if (!formTarif?.dostlar) { setDostlar(false); setDostRoyxat([]); } }, [formTarif]);
 
-  // Foydalanuvchi qidiruvi (ism, telefon, pochta)
-  useEffect(() => {
-    const q = qidiruv.trim();
-    if (q.length < 2) { setTopilgan([]); return; }
-    const t = setTimeout(() => {
-      adminApi.users(q).then((r) => setTopilgan([...(r.staff || []), ...(r.users || [])].slice(0, 12))).catch(() => setTopilgan([]));
-    }, 300);
-    return () => clearTimeout(t);
-  }, [qidiruv]);
-
-  const yoq = async (d: { userId: number; tarif: TarifKod; oy?: number; narx?: number; izoh?: string; sorovId?: number }, nom: string) => {
+  const yoq = async (d: Parameters<typeof adminApi.tarifYoq>[0], nom: string) => {
     if (band) return;
     setBand(true); setErr('');
     try {
       const ob = await adminApi.tarifYoq(d);
-      xabar(`${nom}: ${TARIF_NOMI[d.tarif]} tarifi yoqildi — ${sanaMatn(ob.tugaydi)} gacha`);
+      xabar(`${nom}: ${TARIF_NOMI[d.tarif]} tarifi yoqildi — ${sanaMatn(ob.tugaydi)} gacha` + (ob.dostlarSoni ? ` (+${ob.dostlarSoni} do‘st)` : ''));
       yukla();
       return true;
     } catch (e) { xato(e, 'Tarifni yoqib bo‘lmadi'); return false; }
@@ -112,8 +145,22 @@ export default function AdminTariflar() {
 
   const sorovniYoq = (s: TarifSorovQator) => {
     const t = tariflar.find((x) => x.kod === s.tarif);
-    if (!window.confirm(`${s.user?.firstName || 'ID ' + s.userId} uchun ${TARIF_NOMI[s.tarif]} tarifi yoqilsinmi?\nTo‘lov (${narxMatn(t ? jamiNarx(t) : 0)}) qabul qilinganiga ishonch hosil qiling.`)) return;
-    yoq({ userId: s.userId, tarif: s.tarif, sorovId: s.id }, s.user?.firstName || 'ID ' + s.userId);
+    const nom = s.user?.firstName || 'ID ' + s.userId;
+    // Do'stlar tarifi: avval do'stlarni qo'shish kerak — forma shu so'rov bilan to'ldirib ochiladi
+    if (s.dostlar && t?.dostlar) {
+      setTanlangan({ id: s.userId, nom });
+      setTarifKod(s.tarif);
+      setOy(s.oy || 1);
+      setDostlar(true);
+      setDostRoyxat([]);
+      setFormSorovId(s.id);
+      setBolim('yoqish');
+      return;
+    }
+    const oySorov = s.oy || 1;
+    const summa = t ? variantNarx(t, oySorov) : 0;
+    if (!window.confirm(`${nom} uchun ${t ? variantNomi(t, oySorov) : TARIF_NOMI[s.tarif]} tarifi yoqilsinmi?\nTo‘lov (${narxMatn(summa)}) qabul qilinganiga ishonch hosil qiling.`)) return;
+    yoq({ userId: s.userId, tarif: s.tarif, oy: oySorov, sorovId: s.id }, nom);
   };
   const sorovHolat = async (s: TarifSorovQator, holat: 'yangi' | 'bekor') => {
     try { await adminApi.sorovHolat(s.id, holat); yukla(); } catch (e) { xato(e, 'Holatni o‘zgartirib bo‘lmadi'); }
@@ -124,9 +171,15 @@ export default function AdminTariflar() {
   };
   const qolda = async () => {
     if (!tanlangan) return setErr('Avval foydalanuvchini tanlang');
-    if (!window.confirm(`${tanlangan.nom} uchun ${TARIF_NOMI[tarifKod]} tarifi ${oy} oyga yoqilsinmi?`)) return;
-    const r = await yoq({ userId: tanlangan.id, tarif: tarifKod, oy, narx, izoh }, tanlangan.nom);
-    if (r) { setTanlangan(null); setQidiruv(''); setIzoh(''); }
+    const kimlar = formDost && dostRoyxat.length ? `\nDo‘stlar: ${dostRoyxat.map((d) => d.nom).join(', ')}` : '';
+    const nomi = formTarif ? variantNomi(formTarif, oy, formDost) : TARIF_NOMI[tarifKod] + `, ${oy} oy`;
+    if (!window.confirm(`${tanlangan.nom} uchun ${nomi} yoqilsinmi?\nSumma: ${narxMatn(narx)}${kimlar}`)) return;
+    const r = await yoq({
+      userId: tanlangan.id, tarif: tarifKod, oy, narx, izoh,
+      ...(formSorovId ? { sorovId: formSorovId } : {}),
+      ...(formDost ? { dostlar: true, dostlarId: dostRoyxat.map((d) => d.id) } : {}),
+    }, tanlangan.nom);
+    if (r) { setTanlangan(null); setIzoh(''); setDostlar(false); setDostRoyxat([]); setFormSorovId(null); }
   };
 
   const korinadiganSorov = useMemo(() => (faqatYangi ? sorovlar.filter((s) => s.holat === 'yangi') : sorovlar), [sorovlar, faqatYangi]);
@@ -202,16 +255,29 @@ export default function AdminTariflar() {
                       <table className="atf-jadval">
                         <thead><tr><th>Foydalanuvchi</th><th>Tarif</th><th>Sana</th><th>Holat</th><th /></tr></thead>
                         <tbody>
-                          {korinadiganSorov.map((s) => (
+                          {korinadiganSorov.map((s) => {
+                            const st = tariflar.find((x) => x.kod === s.tarif);
+                            return (
                             <tr key={s.id}>
                               <td className="atf-kim">{shaxs(s.user, s.userId)}</td>
-                              <td><span className="atf-tarif"><TarifLogo kod={s.tarif} size={22} />{TARIF_NOMI[s.tarif]}</span></td>
+                              <td>
+                                <span className="atf-tarif"><TarifLogo kod={s.tarif} size={22} />{TARIF_NOMI[s.tarif] || s.tarif}</span>
+                                {/* Variant: muddat, do'stlar va narx (eski so'rovlarda muddat yo'q) */}
+                                {st && s.oy && (
+                                  <small className="atf-variant">
+                                    {s.dostlar && <><Users size={12} /> Do‘stlar ({st.dostlar?.odam} kishi) · </>}
+                                    {s.oy} oy · {narxMatn(variantNarx(st, s.oy, !!s.dostlar))}
+                                  </small>
+                                )}
+                              </td>
                               <td>{vaqt(s.createdAt)}</td>
                               <td><span className={'atf-holat ' + s.holat}>{HOLAT_NOMI[s.holat] || s.holat}</span></td>
                               <td className="atf-amal">
                                 {s.holat === 'yangi' ? (
                                   <>
-                                    <button className="adm-btn primary" disabled={band} onClick={() => sorovniYoq(s)}>Yoqish</button>
+                                    <button className="adm-btn primary" disabled={band} onClick={() => sorovniYoq(s)}>
+                                      {s.dostlar ? 'Do‘stlarni qo‘shib yoqish' : 'Yoqish'}
+                                    </button>
                                     <button className="adm-mini danger" onClick={() => sorovHolat(s, 'bekor')}>Bekor</button>
                                   </>
                                 ) : s.holat === 'bekor' ? (
@@ -219,7 +285,8 @@ export default function AdminTariflar() {
                                 ) : null}
                               </td>
                             </tr>
-                          ))}
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -229,30 +296,23 @@ export default function AdminTariflar() {
 
               {bolim === 'yoqish' && (
                 <div className="atf-karta atf-forma">
-                  <label className="atf-maydon">
-                    <span>Foydalanuvchi</span>
+                  {formSorovId && (
+                    <p className="atf-izoh atf-sorovdan">
+                      So‘rov bo‘yicha: {formTarif ? variantNomi(formTarif, oy, formDost) : ''}. Do‘stlarni qo‘shing va “Tarifni yoqish”ni bosing.
+                      <button className="adm-mini" onClick={() => { setFormSorovId(null); setDostlar(false); setDostRoyxat([]); setTanlangan(null); }}>Bekor qilish</button>
+                    </p>
+                  )}
+                  <div className="atf-maydon">
+                    <span>{formDost ? 'To‘lovchi' : 'Foydalanuvchi'}</span>
                     {tanlangan ? (
                       <div className="atf-tanlangan">
                         <b>{tanlangan.nom}</b><small>ID {tanlangan.id}</small>
                         <button className="adm-mini" onClick={() => setTanlangan(null)}>O‘zgartirish</button>
                       </div>
                     ) : (
-                      <div className="atf-qidiruv">
-                        <Search size={16} />
-                        <input className="adm-inp" value={qidiruv} onChange={(e) => setQidiruv(e.target.value)} placeholder="Ism, telefon yoki pochta" />
-                      </div>
+                      <FoydalanuvchiQidiruv placeholder="Ism, telefon yoki pochta" onTanla={setTanlangan} chiqarib={dostRoyxat.map((d) => d.id)} />
                     )}
-                  </label>
-                  {!tanlangan && topilgan.length > 0 && (
-                    <div className="atf-topilgan">
-                      {topilgan.map((u) => (
-                        <button key={u.id} onClick={() => { setTanlangan({ id: u.id, nom: u.firstName || 'ID ' + u.id }); setTopilgan([]); }}>
-                          <b>{u.firstName || 'Nomsiz'}</b>
-                          <small>ID {u.id}{u.phone ? ' · ' + u.phone : ''}{u.email ? ' · ' + u.email : ''}</small>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  </div>
                   <div className="atf-maydon">
                     <span>Tarif</span>
                     <div className="atf-tariflar">
@@ -263,15 +323,42 @@ export default function AdminTariflar() {
                       ))}
                     </div>
                   </div>
+                  {formTarif?.dostlar && (
+                    <div className="atf-maydon">
+                      <label className="atf-filtr atf-dost-tanlov">
+                        <input type="checkbox" checked={dostlar} onChange={(e) => { setDostlar(e.target.checked); if (!e.target.checked) setDostRoyxat([]); }} />
+                        <Users size={16} /> Do‘stlar tarifi — {formTarif.dostlar.odam} kishigacha ({narxMatn(formTarif.dostlar.narx)} / oy, 3 oy — {narxMatn(formTarif.dostlar.narx3)})
+                      </label>
+                      {dostlar && (
+                        <div className="atf-dostlar">
+                          {dostRoyxat.map((d) => (
+                            <div key={d.id} className="atf-tanlangan">
+                              <b>{d.nom}</b><small>ID {d.id}</small>
+                              <button className="adm-mini" onClick={() => setDostRoyxat((r) => r.filter((x) => x.id !== d.id))} aria-label="Olib tashlash"><X size={14} /></button>
+                            </div>
+                          ))}
+                          {dostRoyxat.length < formTarif.dostlar.odam - 1 && (
+                            <FoydalanuvchiQidiruv
+                              placeholder={`Do‘st ${dostRoyxat.length + 1}: ism, telefon yoki pochta`}
+                              chiqarib={[...(tanlangan ? [tanlangan.id] : []), ...dostRoyxat.map((d) => d.id)]}
+                              onTanla={(u) => setDostRoyxat((r) => (r.some((x) => x.id === u.id) ? r : [...r, u]))}
+                            />
+                          )}
+                          <small className="atf-izoh">Har bir do‘stga ham shu muddatga Premium yoqiladi (summa to‘lovchida, do‘stlarda 0).</small>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="atf-qator">
-                    <label className="atf-maydon"><span>Muddat (oy)</span>
-                      <input className="adm-inp" type="number" min={1} max={24} value={oy} onChange={(e) => {
-                        const yangiOy = Math.max(1, Math.min(24, Number(e.target.value) || 1));
-                        setOy(yangiOy);
-                        const t = tariflar.find((x) => x.kod === tarifKod);
-                        if (t) setNarx(jamiNarx(t, yangiOy));
-                      }} />
-                    </label>
+                    <div className="atf-maydon"><span>Muddat</span>
+                      <div className="atf-muddat">
+                        {[1, 3].map((n) => (
+                          <button key={n} className={oy === n ? 'faol' : ''} onClick={() => setOy(n)}>{n} oy</button>
+                        ))}
+                        <input className="adm-inp" type="number" min={1} max={24} value={oy} aria-label="Boshqa muddat (oy)"
+                          onChange={(e) => setOy(Math.max(1, Math.min(24, Number(e.target.value) || 1)))} />
+                      </div>
+                    </div>
                     <label className="atf-maydon"><span>To‘langan summa (so‘m)</span>
                       <input className="adm-inp" type="number" min={0} step={1000} value={narx} onChange={(e) => setNarx(Math.max(0, Number(e.target.value) || 0))} />
                     </label>

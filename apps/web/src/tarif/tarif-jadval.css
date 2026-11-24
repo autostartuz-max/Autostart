@@ -88,6 +88,36 @@
 .tf2-sorov svg { flex: none; width: 18px; height: 18px; }
 .tf2 .tf-xato { color: #b3261e; }
 
+/* To'lov muddati: 1 oy / 3 oy (2026-11-24) — jadval ostida, oqimda */
+.tf2-tanlov { padding: 16px 14px 0; }
+.tf2-tanlov .tf2-dost { margin-bottom: 0; }
+.tf2-davr { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.tf2-davr-b { display: flex; flex-direction: column; align-items: center; gap: 1px; min-height: 58px; padding: 8px 6px;
+  border: 2px solid #e4e6ea; border-radius: 14px; background: #fff; color: var(--tf2-matn); font: inherit; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; }
+.tf2-davr-b b { font-size: 14px; font-weight: 900; }
+.tf2-davr-b span { font-size: 13px; font-weight: 800; color: #3a3d42; }
+.tf2-davr-b em { font-style: normal; font-size: 11px; font-weight: 800; color: #1f8f3a; }
+.tf2-davr-b.faol { border-color: var(--tf2-oltin); background: var(--tf2-ajrat); }
+.tf2-davr-b.faol span { color: #6d5200; }
+
+/* Do'stlar tarifi (faqat Premium): yoqib-o'chiriladigan qator */
+.tf2-dost { width: 100%; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 10px 12px;
+  border: 2px solid #e4e6ea; border-radius: 14px; background: #fff; color: var(--tf2-matn); font: inherit; text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; }
+.tf2-dost-belgi { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #eef1f6; color: #3b4656; }
+.tf2-dost-belgi svg { width: 20px; height: 20px; }
+.tf2-dost-matn { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tf2-dost-matn b { font-size: 14px; font-weight: 900; }
+.tf2-dost-matn small { font-size: 12px; font-weight: 700; color: var(--tf2-xira); }
+.tf2-dost-kalit { flex: none; position: relative; width: 44px; height: 26px; border-radius: 13px; background: #d5d9e0; transition: background .15s ease; }
+.tf2-dost-kalit::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .15s ease; }
+.tf2-dost.faol { border-color: var(--tf2-oltin); background: var(--tf2-ajrat); }
+.tf2-dost.faol .tf2-dost-belgi { background: #ffe066; color: #5a4500; }
+.tf2-dost.faol .tf2-dost-kalit { background: #2fb24c; }
+.tf2-dost.faol .tf2-dost-kalit::after { transform: translateX(18px); }
+
 @media (max-width: 380px) {
   .tf2 { --tf2-u: 52px; }
   .tf2-nom { font-size: 13.5px; }

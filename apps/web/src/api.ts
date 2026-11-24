@@ -390,8 +390,8 @@ export const api = {
     return r;
   },
   /** "Sotib olish": so'rov qoldiriladi — call-markaz bog'lanadi, to'lovdan keyin admin yoqadi */
-  tarifSorov: (tarif: TarifKod): Promise<{ ok: boolean; kontakt: { telefon: string; tel: string } }> =>
-    req('/tarif/sorov', { method: 'POST', body: JSON.stringify({ tarif }) }),
+  tarifSorov: (tarif: TarifKod, oy: 1 | 3 = 1, dostlar = false): Promise<{ ok: boolean; kontakt: { telefon: string; tel: string } }> =>
+    req('/tarif/sorov', { method: 'POST', body: JSON.stringify({ tarif, oy, dostlar }) }),
   /** Bayram tabriklari, xavfsizlik eslatmalari, reklama va "o'tkazib yubordingiz" matni (admin tahrirlaydi) */
   matnlar: (): Promise<IlovaMatnlar> => req('/tarif/matnlar'),
   updateMe: (data: any) => req('/me', { method: 'PATCH', body: JSON.stringify(data) }),
@@ -505,7 +505,8 @@ export function tarifniYangila() {
 export interface TarifJavob extends TarifHolat {
   tariflar: Tarif[];
   imkoniyatDaraja: Record<string, number>;
-  sorov: { tarif: TarifKod; createdAt: string } | null;
+  /** Kutilayotgan so'rov: tarif — kod, oy/dostlar — tanlangan variant (eski so'rovlarda oy = null) */
+  sorov: { tarif: TarifKod; oy?: number | null; dostlar?: boolean; createdAt: string } | null;
   kontakt: { telefon: string; tel: string };
 }
 export interface Bayram { sana: string; nom: string; matn: string }
@@ -518,7 +519,10 @@ export interface IlovaMatnlar {
   otkazish: string;
 }
 export interface TarifShaxs { id: number; firstName: string; phone: string | null; email: string | null }
-export interface TarifSorovQator { id: number; userId: number; tarif: TarifKod; holat: 'yangi' | 'bajarildi' | 'bekor'; createdAt: string; user: TarifShaxs | null }
+export interface TarifSorovQator {
+  id: number; userId: number; tarif: TarifKod; oy?: number | null; dostlar?: boolean;
+  holat: 'yangi' | 'bajarildi' | 'bekor'; createdAt: string; user: TarifShaxs | null;
+}
 export interface ObunaQator { id: number; userId: number; tarif: TarifKod; boshlandi: string; tugaydi: string; narx: number; izoh: string; createdAt: string; user: TarifShaxs | null }
 /** Dars muqovasi — ro'yxatlarda videoning o'rniga kichik rasm (4K video yuklanmaydi) */
 export const lessonPosterUrl = (id: number) => `${API}/lessons/${id}/poster`;
@@ -667,8 +671,15 @@ export const adminApi = {
   /* ---- Tariflar: to'lov qo'lda — foydalanuvchi so'rov qoldiradi, admin to'lovni olib yoqadi ---- */
   tarif: (): Promise<{ tariflar: Tarif[]; sorovlar: TarifSorovQator[]; obunalar: ObunaQator[]; faol: Record<string, number> }> =>
     areq('/admin/tarif'),
-  tarifYoq: (d: { userId: number; tarif: TarifKod; oy?: number; narx?: number; izoh?: string; sorovId?: number }): Promise<ObunaQator> =>
+  tarifYoq: (d: {
+    userId: number; tarif: TarifKod; oy?: number; narx?: number; izoh?: string; sorovId?: number;
+    /** Do'stlar tarifi (Premium): to'lovchidan tashqari 2 tagacha do'st */
+    dostlar?: boolean; dostlarId?: number[];
+  }): Promise<ObunaQator & { dostlarSoni?: number }> =>
     areq('/admin/tarif/yoq', { method: 'POST', body: JSON.stringify(d) }),
+  /** Tarif yoqish uchun foydalanuvchi qidiruvi (Admin ham ishlata oladi; /admin/users — faqat Owner) */
+  tarifFoydalanuvchilar: (q: string): Promise<{ users: { id: number; firstName: string; phone: string | null; email: string | null }[] }> =>
+    areq('/admin/tarif/foydalanuvchilar?q=' + encodeURIComponent(q)),
   obunaBekor: (id: number) => areq('/admin/tarif/obuna/' + id + '/bekor', { method: 'POST' }),
   sorovHolat: (id: number, holat: 'yangi' | 'bajarildi' | 'bekor') =>
     areq('/admin/tarif/sorov/' + id, { method: 'POST', body: JSON.stringify({ holat }) }),

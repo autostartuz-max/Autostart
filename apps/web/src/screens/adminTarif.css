@@ -54,6 +54,18 @@
   background: var(--db-card2); border: 1px solid var(--db-border); color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
 .atf-tariflar button.faol { border-color: var(--db-yellow); box-shadow: 0 0 0 1px var(--db-yellow) inset; }
 
+/* 2026-11-24: muddat (1 oy / 3 oy / boshqa), so'rov varianti, Do'stlar tarifi */
+.atf-variant { display: inline-flex; align-items: center; gap: 4px; margin-top: 3px; font-size: 12px; opacity: .75; white-space: nowrap; }
+.atf-muddat { display: flex; gap: 8px; }
+.atf-muddat button { padding: 8px 14px; border-radius: 12px; background: var(--db-card2); border: 1px solid var(--db-border);
+  color: inherit; font: inherit; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.atf-muddat button.faol { border-color: var(--db-yellow); box-shadow: 0 0 0 1px var(--db-yellow) inset; }
+.atf-muddat .adm-inp { width: 80px; }
+.atf-dost-tanlov { margin-bottom: 0; font-weight: 700; }
+.atf-dostlar { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; border: 1px dashed var(--db-border); }
+.atf-sorovdan { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px;
+  background: var(--db-card2); border: 1px solid var(--db-yellow); }
+
 .atf-matnlar h3 { margin: 18px 0 4px; font-size: 15px; }
 .atf-matnlar .adm-ta { width: 100%; box-sizing: border-box; }
 .atf-matn-tugmalar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }

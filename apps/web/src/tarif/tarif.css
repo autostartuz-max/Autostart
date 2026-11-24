@@ -105,6 +105,10 @@
 .tf-qongiroq svg { width: 20px; height: 20px; }
 .tf-oyna-tarif { display: inline-flex; align-items: center; gap: 8px; margin: 0 auto 12px; padding: 6px 12px 6px 8px; border-radius: 14px;
   background: rgba(255, 255, 255, .06); font-size: 14px; font-weight: 700; }
+/* So'rov oynasi: Do'stlar tarifi izohi (2026-11-24) */
+.tf-dost-izoh { display: flex; align-items: flex-start; gap: 8px; margin: -4px 0 14px; padding: 10px 12px; border-radius: 12px;
+  background: rgba(255, 238, 0, .12); font-size: 13.5px; font-weight: 600; line-height: 1.45; text-align: left; }
+.tf-dost-izoh svg { flex: none; width: 18px; height: 18px; margin-top: 1px; }
 @keyframes tf-paydo { from { opacity: 0; } to { opacity: 1; } }
 @keyframes tf-kotar { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .tf-oyna-fon, .tf-oyna { animation: none; } }

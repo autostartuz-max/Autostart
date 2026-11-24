@@ -10,14 +10,17 @@ import { useEffect, useState } from 'react';
 export type TarifKod = 'standart' | 'silver' | 'premium';
 export type Imkoniyat = 'audio' | 'belgilar' | 'video' | 'mavzu' | 'avtodrom';
 
-export interface Tarif {
+/** Narx varianti: narx — 1 oylik, narx3 — 3 oylik to'lov (chegirmali) */
+export interface TarifVariant { narx: number; narx3: number }
+export interface Tarif extends TarifVariant {
   kod: TarifKod;
   nom: string;
-  /** OYLIK narx (so'm); jami = narx × oy */
-  narx: number;
+  /** Eski ilovalar uchun (endi 1) */
   oy: number;
   daraja: number;
   imkoniyatlar: string[];
+  /** "Do'stlar tarifi" — bitta to'lov bilan bir necha kishi (faqat Premium) */
+  dostlar?: TarifVariant & { odam: number };
 }
 
 export interface TarifHolat {
@@ -42,34 +45,35 @@ export const IMKONIYAT_NOMI: Record<Imkoniyat, string> = {
 };
 export const TARIF_NOMI: Record<TarifKod, string> = { standart: 'Standart', silver: 'Silver', premium: 'Premium' };
 
-/** Server javobi kelguncha (yoki internet yo'q bo'lsa) ko'rsatiladigan ro'yxat — server bilan bir xil */
+/** Server javobi kelguncha (yoki internet yo'q bo'lsa) ko'rsatiladigan ro'yxat — server bilan bir xil (apps/api/src/tarif.ts).
+ *  2026-11-24: foydalanish muddati 1 oy (oylik narx), 3 oylik to'lov chegirmali, 6 oylik olib tashlandi,
+ *  Premiumda "Do'stlar tarifi" — 3 kishigacha. */
 export const TARIFLAR_ZAXIRA: Tarif[] = [
   {
-    kod: 'standart', nom: 'Standart', narx: 59000, oy: 3, daraja: 1,
+    kod: 'standart', nom: 'Standart', narx: 59000, narx3: 112000, oy: 1, daraja: 1,
     imkoniyatlar: [
       'Har bir testga Autostart mutaxassislari tayyorlagan audio sharh',
       'Yo‘l belgilari va ularni qulay qidiruv orqali ma’lumotlardan, sharhlardan foydalanish',
-      'Ushbu tarifdan 3 oy muddatgacha foydalanish',
     ],
   },
   {
-    kod: 'silver', nom: 'Silver', narx: 99000, oy: 3, daraja: 2,
+    kod: 'silver', nom: 'Silver', narx: 99000, narx3: 155000, oy: 1, daraja: 2,
     imkoniyatlar: [
       'Har bir testga Autostart mutaxassislari tayyorlagan audio sharh',
       'Yo‘l belgilari va ularni qulay qidiruv orqali ma’lumotlardan, sharhlardan foydalanish',
       'Autostart tajribali ustozlari tomonidan har bir testga yozilgan video darslar',
-      'Ushbu tarifdan 3 oy muddatgacha foydalanish',
     ],
   },
   {
-    kod: 'premium', nom: 'Premium', narx: 119000, oy: 6, daraja: 3,
+    kod: 'premium', nom: 'Premium', narx: 119000, narx3: 199000, oy: 1, daraja: 3,
+    dostlar: { odam: 3, narx: 299000, narx3: 549000 },
     imkoniyatlar: [
       'Har bir testga Autostart mutaxassislari tayyorlagan audio sharh',
       'Yo‘l belgilari va ularni qulay qidiruv orqali ma’lumotlardan, sharhlardan foydalanish',
       'Autostart tajribali ustozlari tomonidan har bir testga yozilgan video darslar',
       'Ustozlarimiz zarur mavzularga tayyorlagan video darslar (tez orada)',
       'Autostart avtodromida mutaxassislar tomonidan tayyorlangan A, B, BC, D, CE toifalar uchun imtihon amaliy mashg‘ulotlari',
-      'Ushbu tarifdan 6 oy muddatgacha foydalanish',
+      '“Do‘stlar tarifi” — 3 kishigacha birga foydalanish',
     ],
   },
 ];
@@ -149,8 +153,22 @@ export function tarifTaklif(imkoniyat: Imkoniyat) {
   try { window.dispatchEvent(new CustomEvent(TARIF_TAKLIF, { detail: { imkoniyat } })); } catch { /* ignore */ }
 }
 
-/** Tarifning jami narxi: oylik narx × oylar soni (Standart 3 × 59 000 = 177 000) */
-export const jamiNarx = (t: { narx: number; oy: number }, oy = t.oy) => t.narx * oy;
+/** Server javobi eski bo'lsa (narx3 yo'q) — zaxira ro'yxatdan to'ldiriladi */
+export function tarifToldir(t: Tarif): Tarif {
+  const z = TARIFLAR_ZAXIRA.find((x) => x.kod === t.kod);
+  return z ? { ...z, ...t, narx3: t.narx3 ?? z.narx3, dostlar: t.dostlar ?? z.dostlar } : t;
+}
+
+/** Variant narxi: 1 oy — narx, 3 oy — narx3 (chegirmali), boshqa muddat — oylik × oy. Server bilan bir xil. */
+export function variantNarx(t: Tarif, oy: number, dostlar = false): number {
+  const v: TarifVariant = dostlar && t.dostlar ? t.dostlar : t;
+  return oy === 3 ? v.narx3 : oy === 1 ? v.narx : v.narx * oy;
+}
+
+/** "Premium — Do'stlar tarifi (3 kishigacha), 3 oy" */
+export function variantNomi(t: Pick<Tarif, 'nom' | 'dostlar'>, oy?: number | null, dostlar?: boolean): string {
+  return t.nom + (dostlar && t.dostlar ? ` — Do‘stlar tarifi (${t.dostlar.odam} kishigacha)` : '') + (oy ? `, ${oy} oy` : '');
+}
 
 /** 59000 → "59 000 so‘m" */
 export const narxMatn = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so‘m';

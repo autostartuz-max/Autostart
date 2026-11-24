@@ -142,7 +142,7 @@ export default function ProfilIlova() {
   const pilotKutmoqda = !!ball?.pilot && d?.nom !== 'Pilot';
   const pilotUlush = ball?.pilot?.jami ? Math.min(1, ball.pilot.togri / ball.pilot.jami) : 0;
 
-  const toifa = toifaTop(me?.user.category) ? me!.user.category! : null;
+  const toifa = toifaTop(me?.user.category)?.kod ?? null; // eski (olib tashlangan) toifalar yangisiga o'giriladi
   const sana = sanaKaliti(me?.user.examDate);
   const qoldiKun = sana ? qolganKun(sana) : -1;
   const hudud = me?.user.tuman || me?.user.viloyat || '';

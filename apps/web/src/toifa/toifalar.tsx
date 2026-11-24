@@ -2,26 +2,29 @@ import type { ReactElement } from 'react';
 import './toifa.css';
 
 /**
- * Haydovchilik guvohnomasi toifalari (foydalanuvchi profilida tanlaydi). Tartib — namunadagi
- * to'rdagidek (2026-11 rasm): B, AM, A2, A1, A, C1, C, CE, D1, D. Rasmiy texnik chegaralar
- * yozilmaydi — faqat transport turi.
+ * Haydovchilik guvohnomasi toifalari (foydalanuvchi profilida tanlaydi). Rasmiy texnik chegaralar
+ * yozilmaydi — faqat transport turi. 2026-11-24: AM, A1, A2 va D1 olib tashlandi (foydalanuvchi:
+ * "shu belgilangan toifalar kerak emas") — qoldi: B, A, C1, C, CE, D.
  */
 export interface HaydovchiToifa { kod: string; nom: string }
 
 export const HAYDOVCHI_TOIFALARI: HaydovchiToifa[] = [
   { kod: 'B', nom: 'Yengil avtomobil' },
-  { kod: 'AM', nom: 'Moped' },
-  { kod: 'A2', nom: 'O‘rta motosikl' },
-  { kod: 'A1', nom: 'Yengil motosikl' },
   { kod: 'A', nom: 'Motosikl' },
   { kod: 'C1', nom: 'Kichik yuk avtomobili' },
   { kod: 'C', nom: 'Yuk avtomobili' },
   { kod: 'CE', nom: 'Tirkamali yuk avtomobili' },
-  { kod: 'D1', nom: 'Mikroavtobus' },
   { kod: 'D', nom: 'Avtobus' },
 ];
 
-export const toifaTop = (kod?: string | null) => HAYDOVCHI_TOIFALARI.find((t) => t.kod === kod) || null;
+/** Olib tashlangan toifani avval tanlaganlar — eng yaqiniga: mopedlar va motosikllar A ga, mikroavtobus D ga */
+const ESKI_TOIFA: Record<string, string> = { AM: 'A', A1: 'A', A2: 'A', D1: 'D' };
+
+/** Profildagi toifa (eski kodlar yangisiga o'giriladi); noma'lum bo'lsa — null */
+export const toifaTop = (kod?: string | null) => {
+  const k = kod ? ESKI_TOIFA[kod] || kod : kod;
+  return HAYDOVCHI_TOIFALARI.find((t) => t.kod === k) || null;
+};
 
 /** G'ildirak: korpusdan fon rangidagi chiziq bilan ajraladi (--tk-fon) */
 function Gildirak({ x, y = 33.4, r = 5.3 }: { x: number; y?: number; r?: number }) {

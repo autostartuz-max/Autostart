@@ -90,7 +90,7 @@ export default function Profile() {
   const s = me?.stats;
   const r = roleOf(u?.role);
   const Ic = ROLE_IC[r];
-  const toifa = toifaTop(u?.category) ? u.category : null;
+  const toifa = toifaTop(u?.category)?.kod ?? null; // eski (olib tashlangan) toifalar yangisiga o'giriladi
   const sanaK = sanaKaliti(u?.examDate);
   const qoldi = sanaK ? qolganKun(sanaK) : -1;
 

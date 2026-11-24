@@ -518,8 +518,10 @@ button { font-family: inherit; cursor: pointer; }
 .tp2-rule-ref { margin-top: 8px; font-size: 12px; color: #7f8ea8; }
 @keyframes tp2ruleIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 .tp2-imgcol { width: 46%; flex-shrink: 0; }
-.tp2-imgwrap { position: relative; border: 2px solid #56637a; border-radius: 8px; overflow: hidden; background: #000; aspect-ratio: 16 / 10; }
-.tp2-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* Rasm o'z nisbatida ko'rsatiladi (2026-11-24): oldin qat'iy 16:10 qora quti edi — nisbati boshqa rasmlar
+   tepa-pasti yoki yonida qora yo'l bilan chiqib, "qora fon qo'yilgan"dek ko'rinardi. Juda baland rasmlar 70vh bilan cheklanadi. */
+.tp2-imgwrap { position: relative; border: 2px solid #56637a; border-radius: 8px; overflow: hidden; background: transparent; }
+.tp2-img { width: 100%; height: auto; max-height: 70vh; object-fit: contain; display: block; }
 .tp2-imgf { position: absolute; top: 8px; right: 8px; background: rgba(20,30,48,.9); border: 1px solid #4a5a74;
   color: #eaf1fb; font-weight: 800; font-size: 13px; padding: 5px 13px; border-radius: 6px; cursor: pointer; z-index: 2; }
 .tp2-imgf:hover { background: #26344c; }

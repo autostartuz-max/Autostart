@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import '../ilova-ekran.css';
 
@@ -24,10 +24,27 @@ export default function PastkiOyna({ title, subtitle, onClose, children, ikonka,
     return () => window.removeEventListener('ilova:orqaga', orqaga);
   }, [onClose]);
 
+  // Oyna ochiq turganda orqadagi sahifa aylanmasin (2026-11-24: belgi oynasini aylantirganda ro'yxat aylanib
+  // ketardi). Oyna DOM'da sahifa ichida turadi — uning aylanadigan ota konteynerlari va sahifa qulflanadi.
+  const oynaRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Faqat ilovada (saytda aylantirish chizig'i yo'qolib, sahifa siljimasin)
+    if (!document.documentElement.classList.contains('cap')) return;
+    const qulf: { el: HTMLElement; avval: string }[] = [];
+    const qulfla = (el: HTMLElement) => { qulf.push({ el, avval: el.style.overflow }); el.style.overflow = 'hidden'; };
+    for (let el = oynaRef.current?.parentElement || null; el && el !== document.body; el = el.parentElement) {
+      const o = getComputedStyle(el).overflowY;
+      if ((o === 'auto' || o === 'scroll') && el.scrollHeight > el.clientHeight) qulfla(el);
+    }
+    qulfla(document.documentElement);
+    qulfla(document.body);
+    return () => { for (const q of qulf.reverse()) q.el.style.overflow = q.avval; };
+  }, []);
+
   return (
     <>
       <div className="ie-sheet-bg" onClick={onClose} />
-      <div className={'ie-sheet' + (className ? ' ' + className : '')} role="dialog" aria-modal="true" aria-label={title}>
+      <div ref={oynaRef} className={'ie-sheet' + (className ? ' ' + className : '')} role="dialog" aria-modal="true" aria-label={title}>
         <div className="ie-handle" />
         <button type="button" className="ie-sh-x" onClick={onClose} aria-label="Yopish"><X aria-hidden="true" /></button>
         {ikonka && <div className="ie-sh-ikonka" aria-hidden="true">{ikonka}</div>}

@@ -70,6 +70,11 @@ a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 
 .app { max-width: 520px; margin: 0 auto; padding: 14px 14px 24px; min-height: 100%; }
+/* Ilova: kirish va ro'yxatdan o'tish — to'liq ekran (2026-11-24): chekinish yo'q, orqa fon ham to'q
+   (ilovada --bg och yashil — yashil-mavzu.css; u kirish oynasi chetlarida ko'rinib qolardi). Saytga tegmaydi. */
+html.cap .app.app-kirish { max-width: none; padding: 0; }
+html.cap .app.app-kirish .auth-wrap { min-height: 100vh; min-height: 100dvh; }
+html.cap.kirish-ekran body { background: #0b1220; }
 
 /* Kompyuter (keng ekran) uchun — tor "mini-app" o'rniga kengroq layout */
 @media (min-width: 900px) {

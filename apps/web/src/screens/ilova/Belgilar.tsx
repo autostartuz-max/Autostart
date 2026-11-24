@@ -13,6 +13,25 @@ import '../../tarif/tarif.css';
 import '../../ilova/belgilar.css';
 
 const norm = (s: string) => s.toLowerCase().replace(/[ʻʼ'`’‘]/g, "'");
+
+/**
+ * Tavsifni xatboshilarga ajratish. Bazadagi ko'p tavsif hujjatdan qator-qator ko'chirilgan
+ * ("Bu belgi transport\nvositasining yo'lida …") — har qatorni alohida chiqarsak uzuq-yuluq ko'rinadi.
+ * Gap tugamagan qator keyingisi bilan qo'shiladi; bo'sh qator, gap oxiri (. ! ? :) dan keyin bosh harf
+ * yoki ro'yxat belgisi (-, •, 1)) — yangi xatboshi.
+ */
+function xatboshilar(matn: string): string[] {
+  const natija: string[] = [];
+  let joriy = '';
+  for (const q of matn.split('\n').map((x) => x.trim())) {
+    if (!q) { if (joriy) natija.push(joriy); joriy = ''; continue; }
+    const royxat = /^([-–—•*]|\d+[.)])\s/.test(q);
+    const yangi = !joriy || royxat || (/[.!?:;]["»”]?$/.test(joriy) && /^[A-ZА-ЯЁЎҚҒҲ0-9«"„]/.test(q));
+    if (yangi) { if (joriy) natija.push(joriy); joriy = q; } else joriy += ' ' + q;
+  }
+  if (joriy) natija.push(joriy);
+  return natija;
+}
 const kalit = (b: BelgiQator, i: number) => (b.id != null ? 'b' + b.id : `${b.toifa}:${b.raqam}:${i}`);
 
 /** Belgi rasmi; rasm yo'q (yoki yuklanmasa) — raqami yozilgan o'rinbosar */
@@ -183,6 +202,7 @@ export default function BelgilarIlova() {
           title={ochiq.nom}
           subtitle={guruhRaqami(ochiqGuruh) || TOIFALAR.find((t) => t.n === ochiq.toifa)?.nom}
           onClose={() => setOchiq(null)}
+          className="bl-toliq"
         >
           <div className="bl-oyna">
             {/* Chap/o'ng strelka (yoki barmoq bilan surish) — oldingi/keyingi belgi */}
@@ -223,7 +243,7 @@ export default function BelgilarIlova() {
             </div>
             {ketma.length > 1 && joriy >= 0 && <p className="bl-oyna-hisob">{joriy + 1} / {ketma.length}</p>}
             {ochiq.tavsif
-              ? ochiq.tavsif.split('\n').map((x, i) => <p key={i} className="ilv-bl-tavsif">{x}</p>)
+              ? xatboshilar(ochiq.tavsif).map((x, i) => <p key={i} className="ilv-bl-tavsif">{x}</p>)
               : <p className="ilv-bl-tavsif ilv-bl-tavsif-yoq">Qoidalarda alohida izoh berilmagan.</p>}
           </div>
         </PastkiOyna>

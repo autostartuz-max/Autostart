@@ -75,6 +75,11 @@
 .bl-oyna .ilv-bl-tavsif { margin: 0 0 8px; font-size: 15px; line-height: 1.5; color: inherit; }
 .bl-oyna .ilv-bl-tavsif-yoq { opacity: .7; }
 
+/* Belgi oynasi to'liq ekran (2026-11-24, foydalanuvchi: "oyna to'liq ochilishi kerak") — o'z ichida aylanadi */
+.ie-sheet.bl-toliq { top: 0; max-height: none; border-radius: 0; padding-top: 16px; }
+.ie-sheet.bl-toliq .ie-handle { display: none; }
+.ie-sheet.bl-toliq .ie-sh-title { padding: 0 44px; }
+
 /* Belgi oynasi: chap/o'ng strelkalar — oldingi/keyingi belgi (2026-11-24, namuna: dumaloq oq tugmalar) */
 .bl-oyna-sahna { position: relative; padding: 0 48px; min-height: 150px; display: flex; align-items: center; justify-content: center; }
 .bl-oyna-sahna .ilv-bl-oyna-rasmlar { flex: 1; min-width: 0; }

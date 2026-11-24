@@ -103,11 +103,18 @@ export default function App() {
   // Ilova: ichki menyular och yashil (ilova/yashil-mavzu.css) — telefonning tepa/pastki chiziqlari ham shu rangda
   const loc = useLocation();
   useEffect(() => {
-    if (!mobilIlova()) return;
+    if (!mobilIlova() || !authed) return; // kirish oynasi istalgan manzilda chiqadi — u yashil emas
     if (!/^\/(shablon|mavzular|xatolarim|belgilar|amaliy|profil|aloqa|darslik|reyting|yechilgan|hujjat|random)(\/|$)/.test(loc.pathname)) return;
     testEkrani(true);
     return () => testEkrani(false);
-  }, [loc.pathname]);
+  }, [loc.pathname, authed]);
+
+  // Kirish va ro'yxatdan o'tish oynasi to'liq ekran (2026-11-24): .app chekinishi va ilovadagi och yashil
+  // fon (yashil-mavzu.css → --bg) chetlarida ko'rinib qolmasin
+  const kirishEkrani = !authed && !/^\/(hujjat|aloqa)(\/|$)/.test(loc.pathname);
+  useEffect(() => {
+    document.documentElement.classList.toggle('kirish-ekran', kirishEkrani);
+  }, [kirishEkrani]);
 
   // Telefonning orqaga tugmasi: tarix bo'lmagan sahifada ilovadan chiqmasdan bosh sahifaga (native.ts)
   const nav = useNavigate();
@@ -145,7 +152,7 @@ export default function App() {
         />
       );
     return (
-      <div className="app">
+      <div className={'app' + (kirishEkrani ? ' app-kirish' : '')}>
         <Routes>
           <Route path="/royxat" element={<Register onAuthed={() => setAuthed(true)} onHome={boshSahifa} />} />
           {/* Huquqiy hujjatlar kirmasdan ham ochilishi kerak */}
